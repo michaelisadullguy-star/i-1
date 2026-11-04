@@ -1,0 +1,1 @@
+main in Pair(List(\NN), Pair(List(\NN), List(\NN))) := fpegcd(5, [-2, 6, -3], [-3, -7, 4])

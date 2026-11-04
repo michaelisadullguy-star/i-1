@@ -1,0 +1,1 @@
+main in Bool := iscoprime(1 - i, 3)

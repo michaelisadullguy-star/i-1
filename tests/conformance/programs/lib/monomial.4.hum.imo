@@ -1,0 +1,1 @@
+main in List(\QQ) := monomial(-5/2, 3)

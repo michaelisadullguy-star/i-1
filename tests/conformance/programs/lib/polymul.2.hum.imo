@@ -1,0 +1,1 @@
+main in List(\ZZ) := polymul([4, 9, -2], [-2, 6, -3])

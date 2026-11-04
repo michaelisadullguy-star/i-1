@@ -1,0 +1,1 @@
+main in Pair(\Z, List(Pair(\Z, \NN))) := gaussfactor(1 - i)

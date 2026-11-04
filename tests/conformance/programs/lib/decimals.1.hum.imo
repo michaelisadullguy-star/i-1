@@ -1,0 +1,1 @@
+main in List(Char) := decimals(3/4, 7)

@@ -1,0 +1,1 @@
+main in \ZZ := stirling1(12, 7)

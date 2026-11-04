@@ -1,0 +1,2 @@
+abs2(z) in \Q -> \Q := z * conj(z)
+v in \Q := abs2(3 + 4 * i)

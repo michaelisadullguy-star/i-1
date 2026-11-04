@@ -1,0 +1,3 @@
+-- one value, printed in each of the three notations:   python3 pymo/i1.py examples/point.hum.imo --out hum|spec|bin
+x in \Q := (1 + 2 * i) / (3 - i)
+main in List(\Q) := [x, conj(x), x * conj(x), 2 / 4]

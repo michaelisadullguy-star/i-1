@@ -1,0 +1,16 @@
+PASS  every statement of the library test program passes the class checker 
+PASS  integer division and remainder (floor convention), gcd, lcm, floor, ceil, round 
+PASS  powers (natural and negative exponents), factorial, binomial, integer square root 
+PASS  Gaussian gcd (normalised to Re > 0, Im ≥ 0) and Gaussian remainder with N(r) ≤ N(b)/2 
+PASS  abs, sgn, max, min, re, im, norm, canon 
+PASS  implies, iff, xor 
+PASS  lists and streams: take/seq, filter, foldr, reverse/upto, sort, nth, sumof, elem, concat 
+PASS  string equality, chr (a value outside Unicode gives U+FFFD) 
+PASS  digit-wise and, shifts (z·bⁿ and back), number of digits 
+PASS  sqrt: element n of √2 is ⌊√(2·4ⁿ)⌋/2ⁿ (within 2⁻ⁿ); √−4 = 2i, √(3 + 4i) = 2 + i exactly once n is large enough 
+PASS  log 2, atan 1 = π/4 (Euler's series), sinh + cosh = exp, tan, and exp of a lazy argument (exp √2) converge to the true values 
+PASS  derivative of x³ at 2 (central differences: exactly 12 + h²), integral of x² on [0, 1] (midpoint rule, error 1/(12 n²)) 
+PASS  linear algebra: det (with a pivot swap), solve, mmul with the identity, inverse 
+PASS  sets as characteristic functions: member, union, setminus, compl, setof, members 
+
+14/14 passed  (8.5s)

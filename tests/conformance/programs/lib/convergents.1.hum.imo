@@ -1,0 +1,1 @@
+main in List(\QQ) := convergents([-7, 4, 9])

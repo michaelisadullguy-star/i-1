@@ -1,0 +1,1 @@
+main in Stream(\Q) := asinh(2 - 1/3*i)

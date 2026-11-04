@@ -1,0 +1,13 @@
+-- types are decoding keys (docs/lib-codec.md): one binary string, several keys.
+--   python3 pymo/i1.py examples/decode.hum.imo        (about 40 seconds: the strings are numbers of hundreds of digits)
+-- `s` is the string 110101 (base i - 1).  A bare number decodes as a Gaussian integer; the ascription `(s in Z2)` makes it a pair of integers,
+-- a + b*i := (a, b); `fracz` reads that pair as the fraction a/b; `(s in String2)` reads it as a pair of strings.
+s in \Z := parsebits("110101")
+p in String2 := strpair("Hello, world!", "Welcome to i - 1!")
+main in List(String) := [
+  decode(s),
+  decode((s in Z2)),
+  decode(fracz((s in Z2))),
+  decode(pairz(3, 4) + pairz(1, -2)),
+  bits(gaussian(p)),
+  decode(p)]

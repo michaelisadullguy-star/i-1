@@ -1,0 +1,830 @@
+⍝ lib/complex.imo — spec notation — trusted prelude, part 14: functions of a complex variable: elementary functions with principal branches, special functions, constants
+⍝ Every function returns a lazy number with a modulus of convergence: element n is within 2⁻ⁿ of the value (|error| in ℂ),
+⍝ unless its description says otherwise.  Internally a number to be computed is a "regular stream" (element m within 2⁻ᵐ);
+⍝ approximants are exact ℚ[i] fractions kept short by truncation (below).  Branch cuts and principal values follow C99 / Python's
+⍝ cmath (a point on a cut gets the value of +0 imaginary part); at a pole, and for log 0, the value is 0.
+⍝ ---- digit strings as rulers: list lengths stand for numbers, so precision bookkeeping needs no arithmetic
+⍝ (dropl ρ ξ) drops as many elements from ξ as ρ has;  (le ξ η) is length ξ ≤ length η;  (excess ξ η) is ξ without its first
+⍝ length-η elements (empty if ξ is not longer)
+dropl_cx ∶ 𝔏 α → 𝔏 β → 𝔏 β
+dropl_cx ρ ξ ≔ (ρ (θ ι ↦ (dropl_cx ι (⌄ ξ))) ξ)
+le_cx ∶ 𝔏 α → 𝔏 β → 𝔹
+le_cx ξ η ≔ (ξ (θ ι ↦ (η (θ′ ι′ ↦ (le_cx ι ι′)) ⊥)) ⊤)
+excess_cx ∶ 𝔏 α → 𝔏 β → 𝔏 α
+excess_cx ξ η ≔ (η (θ ι ↦ (excess_cx (⌄ ξ) ι)) ξ)
+ruler_cx ∶ ℕ → 𝔏 𝔹
+ruler_cx ν ≔ (unary_cx (↓ᶻ ν))
+⍝ a natural number (digit string) as a ruler, by halving: n = 2k or 2k + 1 (even ⇔ last digit 0 for a real integer)
+unary_cx ∶ 𝔇 → 𝔏 𝔹
+unary_cx ξ ≔ ((∅ᶻ ξ) ⊥ ((⌃ ξ) (∷ ⊥ ((θ ↦ (⧺ θ θ)) (unary_cx (½ᶻ (⊟ᶻ ξ (◀ 1)))))) ((θ ↦ (⧺ θ θ)) (unary_cx (½ᶻ ξ)))))
+⍝ a ruler of 2m + c elements
+rul2_cx ∶ ℕ → ℕ → 𝔏 𝔹
+rul2_cx μ ν ≔ (ruler_cx (⊞ (⊠ 1100 μ) ν))
+⍝ ---- magnitudes from the top digits.  For a canonical digit string z of length L, magp z = (lo, hi) (lengths of two lists) with
+⍝ 2^lo ≤ |z|² ≤ 2^hi: with t the top min(L, 16) digits, n = |t|² and 2^(j−1) ≤ n < 2ʲ, z = t·b^d + r (d = L − 16, |r| < 2.415·2^(d/2),
+⍝ |t| ≥ 25.2 for 16 canonical digits) gives 2^(d+j−2) ≤ |z|² ≤ 2^(d+j+1); for L ≤ 16, 2^(j−1) ≤ |z|² < 2ʲ.  (lo, hi) = (0, 0) for z = 0.
+blz_cx ∶ 𝔇 → 𝔇 → 𝔏 𝔹 → 𝔏 𝔹
+blz_cx ν π λ ≔ ((⩾ᶻ ν π) (blz_cx ν (⊞ᶻ π π) (∷ ⊥ λ)) λ)
+⍝ the top 16 digits as a ruler
+rsix_cx ∶ 𝔏 𝔹
+rsix_cx ≔ (ruler_cx 100000000)
+magp_cx ∶ 𝔇 → 𝔓 (𝔏 𝔹) (𝔏 𝔹)
+magp_cx ζ ≔ ((∅ ζ) (⊗ ⊥ ⊥) ((δ ↦ ((τ ↦ ((ν ↦ ((∅ δ) (⊗ (⌄ ν) ν) (⊗ (⧺ δ (⌄ (⌄ ν))) (⧺ δ (∷ ⊥ ν))))) (blz_cx (⊠ᶻ τ (∗ᶻ τ)) (◀ 1) ⊥))) (dropl_cx δ ζ))) (dropl_cx rsix_cx ζ)))
+⍝ the cheap bounds used by the truncations: a canonical string of length L has 0.0958·2^(L/2) ≤ |z| < 2.415·2^(L/2), so
+⍝ 2^(L−7) ≤ |z|² ≤ 2^(L+3) (and |z|² ≥ 1 for z ≠ 0): mag z = (L − 7, L + 3) as rulers, without arithmetic
+mag_cx ∶ 𝔇 → 𝔓 (𝔏 𝔹) (𝔏 𝔹)
+mag_cx ζ ≔ ((∅ ζ) (⊗ ⊥ ⊥) (⊗ (⌄⁴ (⌄ (⌄ (⌄ ζ)))) (∷ ⊥ (∷ ⊥ (∷ ⊥ ζ)))))
+⍝ ---- truncation.  For x = p/q (canonical digit strings) dropping the s lowest digits of p and of q gives x′ = p′/q′ with
+⍝ |x − x′| ≤ 2⁻ᵐ when s ≤ lq − 2·max(m, 2) − 5 − max(0, hp − lq)  (2^lq ≤ |q|², |p|² ≤ 2^hp).  Proof: with p = p′bˢ + r₁, q = q′bˢ + r₂
+⍝ (|rᵢ| < 2.415·2^(s/2)), x − x′ = (r₁ − x′r₂)/q, so |x − x′| ≤ 1.12·2.415·2^(s/2)·(1 + |x|)/|q| ≤ 2^(2.44 + (s − lq + max(0, hp − lq))/2).
+⍝ A real denominator stays real: then s is a multiple of 4 (b⁴ = −4 is real) and the real parts of p′, q′ are kept (q = Re(q′)bˢ + Re r₂
+⍝ with |Re r₂| ≤ |r₂|: the same bound), so real numbers keep real numerators and denominators.  The ruler holds 2·max(m, 2) + 5 elements.
+dropn_cx ∶ 𝔏 α → 𝔇 → 𝔇 → 𝔓 𝔇 𝔇
+dropn_cx σ ξ η ≔ (σ (θ ι ↦ (dropn_cx ι (⌄ ξ) (⌄ η))) (⊗ ξ η))
+dropn4_cx ∶ 𝔏 α → 𝔇 → 𝔇 → 𝔓 𝔇 𝔇
+dropn4_cx σ ξ η ≔ ((∅ (⌄ (⌄ (⌄ σ)))) (⊗ ξ η) (dropn4_cx (⌄⁴ σ) (⌄⁴ ξ) (⌄⁴ η)))
+trp_cx ∶ 𝔏 𝔹 → 𝔇 → 𝔇 → ℚ[i]
+trp_cx ρ ξ η ≔ ((σ ↦ ((realᶻ η) ((π′ ↦ (⊗ ((realᶻ ξ) (ℜᶻ (◀ π′)) (◀ π′)) (ℜᶻ (▶ π′)))) (dropn4_cx σ ξ η)) (dropn_cx σ ξ η))) ((λ ↦ (dropl_cx (⧺ ρ (excess_cx (▶ (mag_cx ξ)) λ)) λ)) (◀ (mag_cx η))))
+tr_cx ∶ ℚ[i] → ℕ → ℚ[i]
+tr_cx ξ μ ≔ (trp_cx (rul2_cx (max μ 1100) 111010001) (⊡ (◀ ξ)) (⊡ (▶ ξ)))
+⍝ joint truncation of two fractions σ/ζ, τ/ζ with one denominator (hp the larger of the two numerators), passed on to a continuation κ σ′ τ′ ζ′
+dropj_cx ∶ 𝔏 α → 𝔇 → 𝔇 → 𝔇 → (𝔇 → 𝔇 → 𝔇 → β) → β
+dropj_cx ρ σ τ ζ κ ≔ (ρ (θ ι ↦ (dropj_cx ι (⌄ σ) (⌄ τ) (⌄ ζ) κ)) (κ σ τ ζ))
+dropj4_cx ∶ 𝔏 α → 𝔇 → 𝔇 → 𝔇 → (𝔇 → 𝔇 → 𝔇 → β) → β
+dropj4_cx ρ σ τ ζ κ ≔ ((∅ (⌄ (⌄ (⌄ ρ)))) (κ σ τ (ℜᶻ ζ)) (dropj4_cx (⌄⁴ ρ) (⌄⁴ σ) (⌄⁴ τ) (⌄⁴ ζ) κ))
+trj_cx ∶ 𝔏 𝔹 → 𝔇 → 𝔇 → 𝔇 → (𝔇 → 𝔇 → 𝔇 → β) → β
+trj_cx ρ σ τ ζ κ ≔ ((σ′ τ′ ζ′ ↦ ((ω ↦ ((realᶻ ζ′) (dropj4_cx ω σ′ τ′ ζ′ (σ″ τ″ ζ″ ↦ (κ ((realᶻ σ′) (ℜᶻ σ″) σ″) ((realᶻ τ′) (ℜᶻ τ″) τ″) ζ″))) (dropj_cx ω σ′ τ′ ζ′ κ))) ((λ υ₁ υ₂ ↦ (dropl_cx (⧺ ρ (excess_cx ((le_cx υ₁ υ₂) υ₂ υ₁) λ)) λ)) (◀ (mag_cx ζ′)) (▶ (mag_cx σ′)) (▶ (mag_cx τ′))))) (⊡ σ) (⊡ τ) (⊡ ζ))
+⍝ ---- regular streams: element m within 2⁻ᵐ.  Requests below 8 are served by element 8 (the bounds ub, lb of the streams look at the
+⍝ first elements, and every such look then shares one evaluation)
+nats_cx ∶ 𝔖 ℕ
+nats_cx ≔ (iterate (ν ↦ (⊞ ν 1)) 0)
+mk_cx ∶ (ℕ → ℚ[i]) → ℝ[i]
+mk_cx φ ≔ (⫶ φ nats_cx)
+⍝ the same for an expensive φ: element m is φ(8⌈m/8⌉), shared by the requests m = 8k − 7 … 8k (the leaves of an expression are
+⍝ requested at several nearby precisions; one evaluation serves them all)
+mkq_cx ∶ (ℕ → ℚ[i]) → ℝ[i]
+mkq_cx φ ≔ ((β ↦ (⫶ (μ ↦ (hd (drop (⌈ (÷ μ 111000000)) β))) nats_cx)) (⫶ (κ ↦ (φ (⊠ 111000000 κ))) nats_cx))
+at_cx ∶ ℝ[i] → ℕ → ℚ[i]
+at_cx ξ μ ≔ (hd (drop (max μ 111000000) ξ))
+⍝ bit length of a natural number: the least j with 2ʲ > n (blen n 1 0)
+blen_cx ∶ ℚ → ℚ → ℕ → ℕ
+blen_cx ξ ρ ν ≔ ((≻ ρ ξ) ν (blen_cx ξ (⊠ 1100 ρ) (⊞ ν 1)))
+⍝ ---- products of digit strings, the shorter factor walked digit by digit from the low end (each step adds the other factor once and
+⍝ emits one digit: len₁·len₂ digit additions), and fraction arithmetic built on it (qdiv for a non-zero divisor)
+mz_cx ∶ 𝔇 → 𝔇 → 𝔇
+lmul_cx ∶ 𝔇 → 𝔇 → 𝔇 → 𝔇
+lmul_cx ρ ξ η ≔ (η (δ η′ ↦ ((θ ↦ (∷ (⌃ θ) (lmul_cx (⌄ θ) ξ η′))) (δ (⊞ᶻ ρ ξ) ρ))) ρ)
+mz_cx ξ η ≔ ((le_cx ξ η) (lmul_cx ⊥ η ξ) (lmul_cx ⊥ ξ η))
+qmul_cx ∶ ℚ[i] → ℚ[i] → ℚ[i]
+qmul_cx ξ η ≔ (⊗ (mz_cx (◀ ξ) (◀ η)) (mz_cx (▶ ξ) (▶ η)))
+qadd_cx ∶ ℚ[i] → ℚ[i] → ℚ[i]
+qadd_cx ξ η ≔ (⊗ (⊞ᶻ (mz_cx (◀ ξ) (▶ η)) (mz_cx (◀ η) (▶ ξ))) (mz_cx (▶ ξ) (▶ η)))
+qsub_cx ∶ ℚ[i] → ℚ[i] → ℚ[i]
+qsub_cx ξ η ≔ (⊗ (⊟ᶻ (mz_cx (◀ ξ) (▶ η)) (mz_cx (◀ η) (▶ ξ))) (mz_cx (▶ ξ) (▶ η)))
+qdiv_cx ∶ ℚ[i] → ℚ[i] → ℚ[i]
+qdiv_cx ξ η ≔ (⊗ (mz_cx (◀ ξ) (▶ η)) (mz_cx (▶ ξ) (◀ η)))
+⍝ ---- series.  ser t₀ β₀ ρ ρ̂ m is Σₖ tₖ (tₖ = tₖ₋₁·ρ(k)) within 2⁻ᵐ, given |t₀| ≤ β₀, |ρ(k)| ≤ ρ̂(k) ≤ 1/2 (k ≥ 1).  The partial sum
+⍝ and the term share a denominator; each step multiplies by the (short) numerator and denominator of ρ(k) and truncates both at
+⍝ w = m + 6 + bitlength(m + 4 + ⌈β₀⌉) (error 2⁻ʷ each).  The sum stops after term n when the bound βₙ = β₀·ρ̂(1)⋯ρ̂(n) ≤ 2⁻ᵐ⁻³ (the tail
+⍝ is at most βₙ); n < 2^(w−m−6), so the error is ≤ 2n·2⁻ʷ + 2⁻ᵐ⁻³ + 2⁻ᵐ⁻¹ (final truncation) < 2⁻ᵐ.
+serl_cx ∶ (ℚ[i] → ℚ[i]) → (ℚ[i] → ℚ) → ℚ → 𝔏 𝔹 → 𝔇 → 𝔇 → 𝔇 → ℚ[i] → ℚ → ℚ[i]
+serl_cx ρ ϱ ε ψ σ τ ζ ν β ≔ ((leq_cx β ε) (⊗ σ ζ) ((ν′ ↦ ((χ ↦ ((θ ι ↦ (trj_cx ψ (⊞ᶻ (⊠ᶻ σ ι) θ) θ (⊠ᶻ ζ ι) (σ′ τ′ ζ′ ↦ (serl_cx ρ ϱ ε ψ σ′ τ′ ζ′ ν′ (⊠ β (ϱ ν′)))))) (⊠ᶻ τ (◀ χ)) (▶ χ))) (ρ ν′))) (⊞ ν 1)))
+ser_cx ∶ ℚ[i] → ℚ → (ℚ[i] → ℚ[i]) → (ℚ[i] → ℚ) → ℕ → ℚ[i]
+ser_cx ξ β ρ ϱ μ ≔ ((ψ ↦ (tr_cx (trj_cx ψ (◀ ξ) (◀ ξ) (▶ ξ) (σ τ ζ ↦ (serl_cx ρ ϱ (÷ 1 (^ 1100 (⊞ μ 1101))) ψ σ τ ζ 0 β))) (⊞ μ 1))) (rul2_cx (⊞ (⊞ μ 111011100) (blen_cx (⊞ (⊞ μ 111010000) (⌈ β)) 1 0)) 111010001))
+⍝ ---- comparisons of real fractions with real numerator and denominator (of any signs): two multiplications and a sign, no conjugate
+neg_cx ∶ 𝔇 → 𝔹
+neg_cx ξ ≔ ((⋚ʳ ξ) ⊤ ⊥ ⊥)
+leq_cx ∶ ℚ → ℚ → 𝔹
+leq_cx ξ η ≔ ((δ ↦ ((⊻ (neg_cx (▶ ξ)) (neg_cx (▶ η))) ((⋚ʳ δ) ⊤ ⊤ ⊥) ((⋚ʳ δ) ⊥ ⊤ ⊤))) (⊟ᶻ (mz_cx (◀ η) (▶ ξ)) (mz_cx (◀ ξ) (▶ η))))
+lt_cx ∶ ℚ → ℚ → 𝔹
+lt_cx ξ η ≔ (¬ (leq_cx η ξ))
+isneg_cx ∶ ℚ → 𝔹
+isneg_cx ξ ≔ (⊻ (neg_cx (◀ ξ)) (neg_cx (▶ ξ)))
+⍝ |x| written with a numerator and a denominator ≥ 0
+pos_cx ∶ ℚ → ℚ
+pos_cx ξ ≔ (⊗ ((neg_cx (◀ ξ)) (⊖ᶻ (◀ ξ)) (◀ ξ)) ((neg_cx (▶ ξ)) (⊖ᶻ (▶ ξ)) (▶ ξ)))
+⍝ ---- the logarithm of 2 and π (global streams: every element is computed once)
+⍝ ln 2 = 2·artanh(1/3) = Σ 2/((2k+1)·3^(2k+1))
+ln2_cx ∶ ℝ
+ln2_cx ≔ (mkq_cx (μ ↦ (ser_cx (÷ 1100 1101) (÷ 1100 1101) (ν ↦ (÷ (⊟ (⊠ 1100 ν) 1) (⊠ 111000001 (⊞ (⊠ 1100 ν) 1)))) (ν ↦ (÷ 1 111000001)) μ)))
+⍝ arctangent series Σ (−1)ᵏ u^(2k+1)/(2k+1), given |u| ≤ b and u² ≤ b² ≤ 1/2
+atser_cx ∶ ℚ → ℚ → ℚ → ℕ → ℚ
+atser_cx υ β ϱ μ ≔ ((ω ↦ (ser_cx υ β (ν ↦ (÷ (⊠ ω (⊟ (⊠ 1100 ν) 1)) (⊞ (⊠ 1100 ν) 1))) (ν ↦ ϱ) μ)) (⊖ (⊠ υ υ)))
+⍝ Machin: π = 16·atan(1/5) − 4·atan(1/239)
+pi_cx ∶ ℝ
+pi_cx ≔ (mkq_cx (μ ↦ (tr_cx (qsub_cx (⊠ (atser_cx (÷ 1 111010001) (÷ 1 111010001) (÷ 1 110011000001) (⊞ μ 111011100)) 100000000) (⊠ (atser_cx (÷ 1 10001110100011101) (÷ 1 10001110100011101) (÷ 1 100011100000111010000110000000001) (⊞ μ 111010000)) 111010000)) (⊞ μ 1))))
+⍝ ---- e^z for an exact z: halve j times until |z/2ʲ| ≤ 1/2, sum the series, square j times.  With R ≥ |Re z| and B = ⌈3R/2⌉ every
+⍝ intermediate e^(z/2ⁱ) lies between 2⁻ᴮ and 2ᴮ in modulus; working at W = max(m, 10) + 2B + j + 4 the relative error at most doubles
+⍝ per squaring, so the result is within 2⁻ᵐ⁻¹ before the final truncation.
+hb_cx ∶ ℚ → ℚ → ℕ → 𝔓 ℕ ℚ
+hb_cx η ρ ν ≔ ((leq_cx (⊠ 1100 η) ρ) (⊗ ν ρ) (hb_cx η (⊠ 1100 ρ) (⊞ ν 1)))
+sqj_cx ∶ ℚ[i] → ℕ → ℕ → ℚ[i]
+sqj_cx ξ ν μ ≔ ((≐ ν 0) ξ (sqj_cx (tr_cx (⊠ ξ ξ) μ) (⊟ ν 1) μ))
+expqz_cx ∶ ℚ[i] → ℕ → ℚ[i]
+expqz_cx ξ μ ≔ ((ϱ υ ↦ ((ρ₂ ↦ ((ω ↦ ((ρ₃ ↦ (tr_cx (sqj_cx (ser_cx 1 1 (ν ↦ (÷ ω ν)) (ν ↦ (÷ υ (⊠ (▶ ρ₂) ν))) ρ₃) (◀ ρ₂) ρ₃) (⊞ μ 1))) (⊞ (⊞ (max μ 111001100) (⊠ 1100 (⌈ (⊠ (÷ 1101 1100) ϱ)))) (⊞ (◀ ρ₂) 111010000)))) (÷ ξ (▶ ρ₂)))) (hb_cx υ 1 0))) (⌈ (abs (ℜ ξ))) (⌈ (⊞ (abs (ℜ ξ)) (abs (ℑ ξ)))))
+⍝ an approximant argument is first truncated at m + B + 3 (B = ⌈3/2·(|Re z| + 1)⌉: |e^w| ≤ 2ᴮ near z), then e^z′ at m + 1
+expq_cx ∶ ℚ[i] → ℕ → ℚ[i]
+expq_cx ξ μ ≔ (expqz_cx (tr_cx ξ (⊞ (⊞ μ (⌈ (⊠ (÷ 1101 1100) (⊞ (abs (ℜ ξ)) 1)))) 1101)) (⊞ μ 1))
+⍝ ---- log x for x > 0 (exact or an approximant; numerator and denominator real):  x = 2ᵏ·y with 2/3 ≤ y ≤ 4/3,
+⍝ log y = 2·artanh u, u = (y − 1)/(y + 1), |u| ≤ 1/5;  the scaling works on the digits of p and q (y = p/q, u = (p − q)/(p + q)).
+⍝ u is truncated at m + 4 (d(2 artanh u)/du ≤ 2.09, so that costs ≤ 2⁻ᵐ⁻²·⁹; then |u| ≤ 0.2625, |2u| ≤ 3/5, u² ≤ 1/14) and the series
+⍝ taken at m + 4: log y within 2⁻ᵐ⁻², k·log 2 within 2⁻ᵐ⁻², the final truncation 2⁻ᵐ⁻¹
+scl_cx ∶ 𝔇 → 𝔇 → ℤ → 𝔓 ℚ ℤ
+scl_cx π₁ κ₁ ν ≔ ((¬ (⩾ᶻ (⊠ᶻ κ₁ (◀ 111010000)) (⊠ᶻ π₁ (◀ 1101)))) (scl_cx π₁ (⊠ᶻ κ₁ (◀ 1100)) (⊞ ν 1)) ((¬ (⩾ᶻ (⊠ᶻ π₁ (◀ 1101)) (⊠ᶻ κ₁ (◀ 1100)))) (scl_cx (⊠ᶻ π₁ (◀ 1100)) κ₁ (⊟ ν 1)) (⊗ (⊗ (⊟ᶻ π₁ κ₁) (⊞ᶻ π₁ κ₁)) ν)))
+logpos_cx ∶ ℚ → ℕ → ℚ
+logpos_cx ξ μ ≔ ((κ₁ ↦ ((υ ↦ ((σ ↦ ((≐ (▶ κ₁) 0) (tr_cx σ (⊞ μ 1)) (tr_cx (qadd_cx (⊠ (ln2a_cx (⊞ (⊞ μ 1100) (blen_cx (abs (▶ κ₁)) 1 0))) (▶ κ₁)) σ) (⊞ μ 1)))) (ser_cx (⊠ υ 1100) (÷ 1101 111010001) (ν ↦ (÷ (⊠ (⊠ υ υ) (⊟ (⊠ 1100 ν) 1)) (⊞ (⊠ 1100 ν) 1))) (ν ↦ (÷ 1 111010010)) (⊞ μ 111010000)))) (tr_cx (◀ κ₁) (⊞ μ 111010000)))) ((ζ ↦ (scl_cx (◀ ζ) (▶ ζ) 0)) (pos_cx ξ)))
+⍝ ---- arctangent of a real x (exact or an approximant): |x| ≤ 1/2 directly; 1/2 < |x| ≤ 1: π/4 + atan((|x| − 1)/(|x| + 1));
+⍝ |x| > 1: π/2 − atan(1/|x|).  The argument is first truncated at m + 3 (atan has Lipschitz constant 1)
+atp_cx ∶ ℚ → ℕ → ℚ
+atp_cx ξ μ ≔ ((lt_cx (÷ 1 1100) ξ) (tr_cx (qadd_cx (÷ (pia_cx (⊞ μ 111010000)) 111010000) (atser_cx (⊗ (⊟ᶻ (◀ ξ) (▶ ξ)) (⊞ᶻ (◀ ξ) (▶ ξ))) (÷ 1 1101) (÷ 1 111000001) (⊞ μ 1100))) (⊞ μ 1)) (atser_cx ξ (÷ 1 1100) (÷ 1 111010000) μ))
+atpos_cx ∶ ℚ → ℕ → ℚ
+atpos_cx ξ μ ≔ ((lt_cx 1 ξ) (tr_cx (qsub_cx (÷ (pia_cx (⊞ μ 1101)) 1100) (atp_cx (⊗ (▶ ξ) (◀ ξ)) (⊞ μ 1100))) (⊞ μ 1)) (atp_cx ξ μ))
+atanq_cx ∶ ℚ → ℕ → ℚ
+atanq_cx ξ μ ≔ ((ξ′ ↦ ((isneg_cx ξ′) (⊖ (atpos_cx (pos_cx ξ′) (⊞ μ 1))) (atpos_cx (pos_cx ξ′) (⊞ μ 1)))) (tr_cx ξ (⊞ μ 1101)))
+⍝ ---- √x for x > 0 (exact or an approximant): x = 4ᵏ·y with 1/4 ≤ y ≤ 1, Newton z ← (z + y/z)/2 from z₀ = (1 + y)/2 with the
+⍝ precision doubling: to reach 2⁻ᵂ take one step, with y truncated at W + 3, from the root at ⌈(W + 3)/2⌉ (from z₀ when W ≤ 4):
+⍝ error ≤ (4/3)·e² + (4/3)·2⁻ᵂ⁻³ + 2⁻ᵂ⁻¹ ≤ 2⁻ᵂ, as z ≥ 3/8 near √y ∈ [1/2, 1] and e(z₀) ≤ 1/8
+sc4_cx ∶ 𝔇 → 𝔇 → ℤ → 𝔓 ℚ ℤ
+sc4_cx π₁ κ₁ ν ≔ ((¬ (⩾ᶻ κ₁ π₁)) (sc4_cx π₁ (⊠ᶻ κ₁ (◀ 111010000)) (⊞ ν 1)) ((¬ (⩾ᶻ (⊠ᶻ π₁ (◀ 111010000)) κ₁)) (sc4_cx (⊠ᶻ π₁ (◀ 111010000)) κ₁ (⊟ ν 1)) (⊗ (⊗ π₁ κ₁) ν)))
+nwt_cx ∶ ℚ → ℚ → ℚ
+nwt_cx ψ ζ ≔ ((π₁ κ₁ ↦ (⊗ (⊞ᶻ (mz_cx (⊠ᶻ π₁ π₁) (▶ ψ)) (mz_cx (⊠ᶻ κ₁ κ₁) (◀ ψ))) (mz_cx (mz_cx π₁ κ₁) (⊠ᶻ (▶ ψ) (◀ 1100))))) (◀ ζ) (▶ ζ))
+nw_cx ∶ ℚ → ℕ → ℚ
+nw_cx ψ μ ≔ ((θ ↦ (tr_cx (nwt_cx θ ((⩽ μ 111010000) (⊗ (⊞ᶻ (◀ θ) (▶ θ)) (⊠ᶻ (▶ θ) (◀ 1100))) (nw_cx θ (div (⊞ μ 111010000) 1100)))) (⊞ μ 1))) (tr_cx ψ (⊞ μ 1101)))
+sqrtpos_cx ∶ ℚ → ℕ → ℚ
+sqrtpos_cx ξ μ ≔ ((∅ᶻ (◀ ξ)) 0 ((κ₁ ↦ (tr_cx (⊠ (nw_cx (◀ κ₁) (⊞ (max (⊞ μ (▶ κ₁)) 0) 1)) (^ 1100 (▶ κ₁))) (⊞ μ 1))) ((ζ ↦ (sc4_cx (◀ ζ) (▶ ζ) 0)) (pos_cx ξ))))
+⍝ π and ln 2 at a precision of at least m: requests are rounded up to a multiple of 16 so that they share elements
+pia_cx ∶ ℕ → ℚ
+pia_cx μ ≔ (tr_cx (at_cx pi_cx (⊠ 111000000 (div (⊞ μ 111000001) 111000000))) (⊞ μ 1))
+ln2a_cx ∶ ℕ → ℚ
+ln2a_cx μ ≔ (tr_cx (at_cx ln2_cx (⊠ 111000000 (div (⊞ μ 111000001) 111000000))) (⊞ μ 1))
+⍝ ---- regular-stream arithmetic.  ub x: an e ≥ 0 with |x| ≤ 2ᵉ (e = ⌈(hp − lq)/2⌉ from the magnitudes of p and q);  ubs X: the same
+⍝ for a regular stream (|X| ≤ |X₀| + 1);  lb X: the first k with |Xₖ| > 2¹⁻ᵏ, so |X| > 2⁻ᵏ (it diverges if X = 0)
+ub_cx ∶ ℚ[i] → ℕ
+ub_cx ξ ≔ (div (⊞ (ℓ (excess_cx (▶ (magp_cx (⊡ (◀ ξ)))) (◀ (magp_cx (⊡ (▶ ξ)))))) 1) 1100)
+ubs_cx ∶ ℝ[i] → ℕ
+ubs_cx ξ ≔ (⊞ (ub_cx (at_cx ξ 0)) 1)
+lbk_cx ∶ ℝ[i] → ℕ → ℕ
+lbk_cx ξ ν ≔ ((lt_cx (^ 111010000 (⊟ 1 ν)) (𝒩 (at_cx ξ ν))) ν (lbk_cx ξ (⊞ ν 1)))
+lb_cx ∶ ℝ[i] → ℕ
+lb_cx ξ ≔ (lbk_cx ξ 0)
+⍝ the least ℓ ≥ 0 with x ≥ 4⁻ˡ for an exact x > 0
+lbq_cx ∶ ℚ → ℕ → ℕ
+lbq_cx ξ ν ≔ ((leq_cx (^ 111010000 (⊖ ν)) ξ) ν (lbq_cx ξ (⊞ ν 1)))
+sumR_cx ∶ ℝ[i] → ℝ[i] → ℝ[i]
+sumR_cx ξ η ≔ (mk_cx (μ ↦ (tr_cx (qadd_cx (at_cx ξ (⊞ μ 1100)) (at_cx η (⊞ μ 1100))) (⊞ μ 1))))
+difR_cx ∶ ℝ[i] → ℝ[i] → ℝ[i]
+difR_cx ξ η ≔ (mk_cx (μ ↦ (tr_cx (qsub_cx (at_cx ξ (⊞ μ 1100)) (at_cx η (⊞ μ 1100))) (⊞ μ 1))))
+⍝ x + i·y from two real streams
+cpxR_cx ∶ ℝ → ℝ → ℝ[i]
+cpxR_cx ξ η ≔ (mk_cx (μ ↦ (tr_cx (qadd_cx (at_cx ξ (⊞ μ 1100)) (⊠ (at_cx η (⊞ μ 1100)) 11)) (⊞ μ 1))))
+reR_cx ∶ ℝ[i] → ℝ
+reR_cx ξ ≔ (mk_cx (μ ↦ (tr_cx (ℜ (at_cx ξ (⊞ μ 1))) (⊞ μ 1))))
+imR_cx ∶ ℝ[i] → ℝ
+imR_cx ξ ≔ (mk_cx (μ ↦ (tr_cx (ℑ (at_cx ξ (⊞ μ 1))) (⊞ μ 1))))
+sclR_cx ∶ ℚ[i] → ℝ[i] → ℝ[i]
+sclR_cx κ ξ ≔ ((ν ↦ (mk_cx (μ ↦ (tr_cx (qmul_cx (at_cx ξ (⊞ μ ν)) κ) (⊞ μ 1))))) (⊞ (ub_cx κ) 1))
+mulR_cx ∶ ℝ[i] → ℝ[i] → ℝ[i]
+mulR_cx ξ η ≔ ((ν₁ ν₂ ↦ (mk_cx (μ ↦ (tr_cx (qmul_cx (at_cx ξ (⊞ μ (⊞ ν₂ 1100))) (at_cx η (⊞ μ (⊞ ν₁ 1101)))) (⊞ μ 1))))) (ubs_cx ξ) (ubs_cx η))
+invR_cx ∶ ℝ[i] → ℝ[i]
+invR_cx ξ ≔ ((ν ↦ (mk_cx (μ ↦ (tr_cx ((θ ↦ (⊗ (▶ θ) (◀ θ))) (at_cx ξ (⊞ μ (⊞ (⊠ 1100 ν) 1100)))) (⊞ μ 1))))) (lb_cx ξ))
+divR_cx ∶ ℝ[i] → ℝ[i] → ℝ[i]
+divR_cx ξ η ≔ (mulR_cx ξ (invR_cx η))
+⍝ ---- the elementary functions of a regular-stream argument (each with its Lipschitz bound)
+⍝ e^u: with B = ⌈3/2·(|Re u₀| + 1)⌉, |e^u| ≤ 2ᴮ and |e^ũ − e^u| ≤ 2ᴮ⁺¹|ũ − u|
+expR_cx ∶ ℝ[i] → ℝ[i]
+expR_cx ξ ≔ ((ν ↦ (mk_cx (μ ↦ (expq_cx (at_cx ξ (⊞ μ ν)) (⊞ μ 1))))) (⊞ (⌈ (⊠ (÷ 1101 1100) (⊞ (abs (ℜ (hd ξ))) 1))) 1100))
+⍝ log y for a real y > 0 (|y| > 2⁻ˡ):  |log ỹ − log y| ≤ 2ˡ⁺¹|ỹ − y|
+logR_cx ∶ ℝ → ℝ
+logR_cx ξ ≔ ((ν ↦ (mk_cx (μ ↦ (logpos_cx (ℜ (at_cx ξ (⊞ μ ν))) (⊞ μ 1))))) (⊞ (lb_cx ξ) 1100))
+⍝ √v for a real v > 0 (v > 2⁻ˡ):  |√ṽ − √v| ≤ 2^(ℓ/2)·|ṽ − v|
+sqrtR_cx ∶ ℝ → ℝ
+sqrtR_cx ξ ≔ ((ν ↦ (mk_cx (μ ↦ (sqrtpos_cx (ℜ (at_cx ξ (⊞ μ ν))) (⊞ μ 1))))) (⊞ (div (⊞ (lb_cx ξ) 1) 1100) 1))
+⍝ atan t for a real t: Lipschitz 1
+atanR_cx ∶ ℝ → ℝ
+atanR_cx ξ ≔ (mk_cx (μ ↦ (atanq_cx (ℜ (at_cx ξ (⊞ μ 1))) (⊞ μ 1))))
+⍝ asinh t = sgn t·log(|t| + √(t² + 1)) for a real t (exact or an approximant): u = |t| + √(t² + 1) ≥ 1, so log has Lipschitz
+⍝ constant 1 near u; with √ at m + 2 and log at m + 1 the error is ≤ 2⁻ᵐ⁻¹ + 1.07·2⁻ᵐ⁻² < 2⁻ᵐ.  Lipschitz 1 in t.
+asinhq_cx ∶ ℚ → ℕ → ℚ
+asinhq_cx ξ μ ≔ ((θ ↦ ((isneg_cx ξ) (⊖ θ) θ)) ((υ ↦ (logpos_cx (qadd_cx υ (sqrtpos_cx (⊞ (⊠ υ υ) 1) (⊞ μ 1100))) (⊞ μ 1))) (pos_cx ξ)))
+asinhR_cx ∶ ℝ → ℝ
+asinhR_cx ξ ≔ (mk_cx (μ ↦ (asinhq_cx (ℜ (at_cx ξ (⊞ μ 1))) (⊞ μ 1))))
+⍝ acosh x = log(x + √(x² − 1)) for x ≥ 1, the same way
+acoshq_cx ∶ ℚ → ℕ → ℚ
+acoshq_cx ξ μ ≔ (logpos_cx (qadd_cx ξ (sqrtpos_cx (⊟ (⊠ ξ ξ) 1) (⊞ μ 1100))) (⊞ μ 1))
+⍝ ---- exact arguments: atan2, complex logarithm, complex square root
+atan2q_cx ∶ ℚ → ℚ → ℕ → ℚ
+atan2q_cx η ξ μ ≔ ((⋚ ξ 0) ((⩾ η 0) (tr_cx (qadd_cx (atanq_cx (÷ η ξ) (⊞ μ 1100)) (pia_cx (⊞ μ 1100))) (⊞ μ 1)) (tr_cx (qsub_cx (atanq_cx (÷ η ξ) (⊞ μ 1100)) (pia_cx (⊞ μ 1100))) (⊞ μ 1))) ((⋚ η 0) (⊖ (÷ (pia_cx (⊞ μ 1)) 1100)) 0 (÷ (pia_cx (⊞ μ 1)) 1100)) (atanq_cx (÷ η ξ) μ))
+logq_cx ∶ ℚ[i] → ℕ → ℚ[i]
+logq_cx ξ μ ≔ ((≐ ξ 0) 0 (tr_cx (qadd_cx (÷ (logpos_cx (𝒩 ξ) (⊞ μ 1100)) 1100) (⊠ (atan2q_cx (ℑ ξ) (ℜ ξ) (⊞ μ 1100)) 11)) (⊞ μ 1)))
+⍝ principal √z: for z = a + bi (b ≠ 0) with u = √((|z| + |a|)/2) and v = |b|/(2u):  √z = u + i·sgn(b)·v (a ≥ 0),  v + i·sgn(b)·u (a < 0);
+⍝ √(max(|a|, |b|)/2) ≥ 2⁻ˡ bounds u from below, so |z| is taken at m + ℓ + 4.  On the cut (b = 0, a < 0) the value is i√|a|.
+sqrtq_cx ∶ ℚ[i] → ℕ → ℚ[i]
+sqrtq_cx ξ μ ≔ ((ϕ ψ ↦ ((≐ ψ 0) ((⩾ ϕ 0) (sqrtpos_cx ϕ μ) (⊠ 11 (sqrtpos_cx (⊖ ϕ) μ))) ((ν ↦ ((υ ↦ ((υ′ ↦ ((⩾ ϕ 0) (tr_cx (qadd_cx υ (⊠ υ′ ((⩾ ψ 0) 11 111))) (⊞ μ 1)) (tr_cx (qadd_cx υ′ (⊠ υ ((⩾ ψ 0) 11 111))) (⊞ μ 1)))) (qdiv_cx (abs ψ) (⊠ υ 1100)))) (sqrtpos_cx (÷ (qadd_cx (sqrtpos_cx (𝒩 ξ) (⊞ μ (⊞ ν 111010000))) (abs ϕ)) 1100) (⊞ μ 111010001)))) (lbq_cx (÷ (max (abs ϕ) (abs ψ)) 1100) 0)))) (ℜ ξ) (ℑ ξ))
+⍝ ---- more regular-stream tools: conjugate and negative (pointwise, the error is unchanged), |X|², atan2 and log of streams
+conjR_cx ∶ ℝ[i] → ℝ[i]
+conjR_cx ≔ (⫶ ∗)
+negR_cx ∶ ℝ[i] → ℝ[i]
+negR_cx ≔ (⫶ ⊖)
+⍝ |X|² (|X| ≤ 2^ν):  ||X̃|² − |X|²| ≤ δ(2|X| + δ), so X is taken at m + ν + 3
+normR_cx ∶ ℝ[i] → ℝ
+normR_cx ξ ≔ ((ν ↦ (mk_cx (μ ↦ (tr_cx (𝒩 (at_cx ξ (⊞ μ ν))) (⊞ μ 1))))) (⊞ (ubs_cx ξ) 1101))
+⍝ atan2(Y, X) of real streams with (X, Y) ≠ (0, 0) (|(X, Y)| > 2⁻ᵏ): the point is taken at m + k + 3, so it stays 2⁻ᵏ⁻¹ away from the
+⍝ origin and the angle moves by at most √2·2⁻ᵐ⁻² (the callers keep the point off the negative real axis, or Y exactly 0)
+atan2R_cx ∶ ℝ → ℝ → ℝ
+atan2R_cx η ξ ≔ ((κ ↦ (mk_cx (μ ↦ ((ν ↦ (atan2q_cx (ℜ (at_cx η ν)) (ℜ (at_cx ξ ν)) (⊞ μ 1))) (⊞ μ (⊞ κ 1101)))))) (lb_cx (cpxR_cx ξ η)))
+⍝ principal log of a stream X ≠ 0 that stays off the negative real axis: ½·log|X|² + i·atan2(Im X, Re X)
+logcR_cx ∶ ℝ[i] → ℝ[i]
+logcR_cx ξ ≔ (cpxR_cx (sclR_cx (÷ 1 1100) (logR_cx (normR_cx ξ))) (atan2R_cx (imR_cx ξ) (reR_cx ξ)))
+⍝ sin and cos of a stream: (e^(iU) − e^(−iU))/(2i), (e^(iU) + e^(−iU))/2
+sinR_cx ∶ ℝ[i] → ℝ[i]
+sinR_cx ξ ≔ (sclR_cx (÷ 111 1100) (difR_cx (expR_cx (sclR_cx 11 ξ)) (expR_cx (sclR_cx 111 ξ))))
+cosR_cx ∶ ℝ[i] → ℝ[i]
+cosR_cx ξ ≔ (sclR_cx (÷ 1 1100) (sumR_cx (expR_cx (sclR_cx 11 ξ)) (expR_cx (sclR_cx 111 ξ))))
+⍝ ---- regular streams of exact arguments
+expS_cx ∶ ℚ[i] → ℝ[i]
+expS_cx ξ ≔ (mkq_cx (μ ↦ (expq_cx ξ μ)))
+logS_cx ∶ ℚ[i] → ℝ[i]
+logS_cx ξ ≔ (mkq_cx (μ ↦ (logq_cx ξ μ)))
+sqrtS_cx ∶ ℚ[i] → ℝ[i]
+sqrtS_cx ξ ≔ (mkq_cx (μ ↦ (sqrtq_cx ξ μ)))
+⍝ log x for x > 0, √x for x ≥ 0, atan2(y, x), atan x (all real and exact)
+lpS_cx ∶ ℚ → ℝ
+lpS_cx ξ ≔ (mkq_cx (μ ↦ (logpos_cx ξ μ)))
+spS_cx ∶ ℚ → ℝ
+spS_cx ξ ≔ (mkq_cx (μ ↦ (sqrtpos_cx ξ μ)))
+at2S_cx ∶ ℚ → ℚ → ℝ
+at2S_cx η ξ ≔ (mkq_cx (μ ↦ (atan2q_cx η ξ μ)))
+atS_cx ∶ ℚ → ℝ
+atS_cx ξ ≔ (mkq_cx (μ ↦ (atanq_cx ξ μ)))
+⍝ ---- tests on exact values
+isreal_cx ∶ ℚ[i] → 𝔹
+isreal_cx ξ ≔ (≐ (ℑ ξ) 0)
+isint_cx ∶ ℚ[i] → 𝔹
+isint_cx ξ ≔ (∧ (isreal_cx ξ) (≐ (ℜ ξ) (⌊ (ℜ ξ))))
+⍝ z is 0, −1, −2, … (a pole of Γ)
+npi_cx ∶ ℚ[i] → 𝔹
+npi_cx ξ ≔ (∧ (isint_cx ξ) (⩽ (ℜ ξ) 0))
+⍝ an integer e with |x| ≤ 2ᵉ (it may be negative; any e will do for x = 0)
+ube_cx ∶ ℚ[i] → ℤ
+ube_cx ξ ≔ (div (⊞ (⊟ (ℓ (▶ (magp_cx (⊡ (◀ ξ))))) (ℓ (◀ (magp_cx (⊡ (▶ ξ)))))) 1) 1100)
+⍝ the least integer j with x ≤ 2ʲ, for an exact x > 0
+lg2u_cx ∶ ℚ → ℚ → ℤ → ℤ
+lg2u_cx ξ ρ ν ≔ ((leq_cx ξ ρ) ν (lg2u_cx ξ (⊠ 1100 ρ) (⊞ ν 1)))
+lg2d_cx ∶ ℚ → ℚ → ℤ → ℤ
+lg2d_cx ξ ρ ν ≔ ((leq_cx ξ (÷ ρ 1100)) (lg2d_cx ξ (÷ ρ 1100) (⊟ ν 1)) ν)
+lg2_cx ∶ ℚ → ℤ
+lg2_cx ξ ≔ ((leq_cx ξ 1) (lg2d_cx ξ 1 0) (lg2u_cx ξ 1100 1))
+⍝ an integer e with |z| ≤ 2ᵉ for an exact z ≠ 0:  ⌈½·log₂ |z|²⌉
+lgz_cx ∶ ℚ[i] → ℤ
+lgz_cx ξ ≔ (div (⊞ (lg2_cx (𝒩 ξ)) 1) 1100)
+⍝ ---- series whose first terms may grow.  serE t₀ e₀ ρ r α m is Σₖ tₖ (tₖ = tₖ₋₁·ρ(k)) within 2⁻ᵐ, given |t₀| ≤ 2^e₀ and
+⍝ |ρ(k)| ≤ 2^r(k) with integers r(k), non-increasing from the first k with r(k) ≤ −1 on.  It stops after term n once the bound
+⍝ eₙ = e₀ + r(1) + … + r(n) ≤ −m − 3 and r(n + 1) ≤ −1 (the tail is then below 2^eₙ).  Partial sum and term share a denominator and
+⍝ are truncated at w = m + 6 + α bits after each step; a truncation error is carried along by the later ratios, so the total error is
+⍝ at most 2n²A·2⁻ʷ (A the largest product of consecutive |ρ(k)|): α must cover 2·log₂ n + log₂ A.
+serEl_cx ∶ (ℚ[i] → ℚ[i]) → (ℚ[i] → ℤ) → ℤ → 𝔏 𝔹 → 𝔇 → 𝔇 → 𝔇 → ℚ[i] → ℤ → ℚ[i]
+serEl_cx ρ ϱ ε ψ σ τ ζ ν β ≔ ((ν′ ↦ ((θ′ ↦ ((∧ (⩽ β ε) (⩽ θ′ 11101)) (⊗ σ ζ) ((χ ↦ ((θ ι ↦ (trj_cx ψ (⊞ᶻ (⊠ᶻ σ ι) θ) θ (⊠ᶻ ζ ι) (σ′ τ′ ζ′ ↦ (serEl_cx ρ ϱ ε ψ σ′ τ′ ζ′ ν′ (⊞ β θ′))))) (⊠ᶻ τ (◀ χ)) (▶ χ))) (ρ ν′)))) (ϱ ν′))) (⊞ ν 1))
+serE_cx ∶ ℚ[i] → ℤ → (ℚ[i] → ℚ[i]) → (ℚ[i] → ℤ) → ℕ → ℕ → ℚ[i]
+serE_cx ξ ε₀ ρ ϱ α μ ≔ ((ψ ↦ (tr_cx (trj_cx ψ (◀ ξ) (◀ ξ) (▶ ξ) (σ τ ζ ↦ (serEl_cx ρ ϱ (⊖ (⊞ μ 1101)) ψ σ τ ζ 0 ε₀))) (⊞ μ 1))) (rul2_cx (⊞ (⊞ μ 111011100) α) 111010001))
+⍝ the same with a fixed number n of terms t₀ … tₙ₋₁ (the caller bounds the tail; with |ρ(k)| ≤ 1 the error is at most n²·2⁻ʷ)
+serNl_cx ∶ (ℚ[i] → ℚ[i]) → ℕ → 𝔏 𝔹 → 𝔇 → 𝔇 → 𝔇 → ℚ[i] → ℚ[i]
+serNl_cx ρ ε ψ σ τ ζ ν ≔ ((ν′ ↦ ((⩾ ν′ ε) (⊗ σ ζ) ((χ ↦ ((θ ι ↦ (trj_cx ψ (⊞ᶻ (⊠ᶻ σ ι) θ) θ (⊠ᶻ ζ ι) (σ′ τ′ ζ′ ↦ (serNl_cx ρ ε ψ σ′ τ′ ζ′ ν′)))) (⊠ᶻ τ (◀ χ)) (▶ χ))) (ρ ν′)))) (⊞ ν 1))
+serN_cx ∶ ℚ[i] → (ℚ[i] → ℚ[i]) → ℕ → ℕ → ℕ → ℚ[i]
+serN_cx ξ ρ ν α μ ≔ ((ψ ↦ (tr_cx (trj_cx ψ (◀ ξ) (◀ ξ) (▶ ξ) (σ τ ζ ↦ (serNl_cx ρ ν ψ σ τ ζ 0))) (⊞ μ 1))) (rul2_cx (⊞ (⊞ μ 111011100) α) 111010001))
+⍝ ---- the constants
+𝜋 ∶ ℝ   ⍝ π = 3.14159…, by Machin's formula 16·atan(1/5) − 4·atan(1/239); element n is within 2⁻ⁿ
+𝜋 ≔ pi_cx
+ℯ ∶ ℝ   ⍝ Euler's number e = 2.71828…; element n is within 2⁻ⁿ
+ℯ ≔ (mkq_cx (μ ↦ (expq_cx 1 μ)))
+⍝ ---- logarithms, powers and roots
+logc ∶ ℚ[i] → ℝ[i]   ⍝ principal logarithm log z = log|z| + i·arg z, Im in (−π, π] (log(−x) = log x + iπ); log 0 = 0; element n within 2⁻ⁿ
+logc ≔ logS_cx
+logcᴿ ∶ ℝ[i] → ℝ[i]   ⍝ principal logarithm of a lazy argument (through the diagonal ⟐; converges off the negative real axis)
+logcᴿ ≔ (⟐ logc)
+logb ∶ ℚ[i] → ℚ[i] → ℝ[i]   ⍝ logarithm to base b: logb(b, z) = log z / log b (principal logs); 0 when b is 0 or 1
+logb ξ η ≔ ((∨ (≐ ξ 0) (≐ ξ 1)) (⁂ 0) (divR_cx (logS_cx η) (logS_cx ξ)))
+log₁p ∶ ℚ[i] → ℝ[i]   ⍝ log(1 + z) (principal); 0 at z = −1
+log₁p ξ ≔ (logS_cx (⊞ 1 ξ))
+log₁pᴿ ∶ ℝ[i] → ℝ[i]   ⍝ log(1 + z) of a lazy argument
+log₁pᴿ ≔ (⟐ log₁p)
+expm₁ ∶ ℚ → ℝ   ⍝ eᶻ − 1 (absolute error: element n is within 2⁻ⁿ)
+expm₁ ∶ ℚ[i] → ℝ[i]
+expm₁ ξ ≔ (mk_cx (μ ↦ (tr_cx (⊟ (expq_cx ξ (⊞ μ 1)) 1) (⊞ μ 1))))
+expm₁ᴿ ∶ ℝ → ℝ   ⍝ eᶻ − 1 of a lazy argument
+expm₁ᴿ ∶ ℝ[i] → ℝ[i]
+expm₁ᴿ ≔ (⟐ expm₁)
+⍝ wᵏ as a stream (k an integer, exact) or e^(w·log z);  0^w = 0 for w ≠ 0 and 0⁰ = 1
+pow ∶ ℚ[i] → ℚ[i] → ℝ[i]   ⍝ principal power z^w = e^(w·log z); exact (a constant stream) for an integer w; 0^w = 0 for w ≠ 0, 0⁰ = 1
+pow ξ η ≔ ((isint_cx η) (⁂ (^ ξ (ℜ η))) ((≐ ξ 0) (⁂ 0) (expR_cx (sclR_cx η (logS_cx ξ)))))
+⍝ the diagonal of a function of two arguments: element n is element n of f(xₙ, yₙ)
+diag2_cx ∶ (α → β → 𝔖 γ) → 𝔖 α → 𝔖 β → 𝔖 γ
+diag2_cx φ ξ η ≔ (⟐ (θ ↦ (φ (◀ θ) (▶ θ))) (⫴ ⊗ ξ η))
+powᴿ ∶ ℝ[i] → ℝ[i] → ℝ[i]   ⍝ principal power of lazy arguments (element n of pow(xₙ, yₙ))
+powᴿ ≔ (diag2_cx pow)
+⍝ the n-th root z^(1/n) = e^(log z / n) (principal); 0 for z = 0 or n = 0
+rootS_cx ∶ ℚ[i] → ℚ → ℝ[i]
+rootS_cx ξ ν ≔ ((∨ (≐ ξ 0) (≐ ν 0)) (⁂ 0) (expR_cx (sclR_cx (÷ 1 ν) (logS_cx ξ))))
+nthroot ∶ ℚ[i] → ℤ → ℝ[i]   ⍝ principal n-th root z^(1/n) = e^(log z / n) (n may be negative); 0 for z = 0 or n = 0
+nthroot ξ ν ≔ (rootS_cx ξ ν)
+cbrt ∶ ℚ → ℝ   ⍝ cube root: the real root of a real x (cbrt(−8) = −2), the principal root e^(log z / 3) of a non-real z
+cbrt ∶ ℚ[i] → ℝ[i]
+cbrt ξ ≔ ((isreal_cx ξ) ((ϕ ↦ ((⋚ ϕ 0) (negR_cx (rootS_cx (⊖ ϕ) 1101)) (⁂ 0) (rootS_cx ϕ 1101))) (ℜ ξ)) (rootS_cx ξ 1101))
+cbrtᴿ ∶ ℝ → ℝ   ⍝ cube root of a lazy argument
+cbrtᴿ ∶ ℝ[i] → ℝ[i]
+cbrtᴿ ≔ (⟐ cbrt)
+⍝ e^(2πik/n): exact for k/n = 0, 1/4, 1/2, 3/4
+rootu_cx ∶ ℕ → ℕ → ℝ[i]
+rootu_cx ν κ ≔ ((θ ↦ ((≐ θ 0) (⁂ 1) ((≐ θ (÷ 1 111010000)) (⁂ 11) ((≐ θ (÷ 1 1100)) (⁂ 11101) ((≐ θ (÷ 1101 111010000)) (⁂ 111) (expR_cx (sclR_cx (⊠ 1110100 θ) pi_cx))))))) (÷ κ ν))
+rootsofunity ∶ ℤ → 𝔏 ℝ[i]   ⍝ the n-th roots of unity e^(2πik/n), k = 0 … n − 1 (empty for n ≤ 0)
+rootsofunity ν ≔ (⫶ (κ ↦ (rootu_cx ν κ)) (⍳ ν))
+⍝ ---- polar form
+arg ∶ ℚ[i] → ℝ   ⍝ principal argument of z, in (−π, π]; arg 0 = 0
+arg ξ ≔ (at2S_cx (ℑ ξ) (ℜ ξ))
+argᴿ ∶ ℝ[i] → ℝ   ⍝ principal argument of a lazy argument
+argᴿ ≔ (⟐ arg)
+atan2 ∶ ℚ → ℚ → ℝ   ⍝ atan2(y, x): the angle of the point (x, y), in (−π, π]; atan2(0, 0) = 0
+atan2 ≔ at2S_cx
+cis ∶ ℚ → ℝ[i]   ⍝ cis t = cos t + i·sin t = e^(it)
+cis ∶ ℚ[i] → ℝ[i]
+cis ξ ≔ (expS_cx (⊠ 11 ξ))
+cisᴿ ∶ ℝ[i] → ℝ[i]   ⍝ e^(it) of a lazy argument
+cisᴿ ≔ (⟐ cis)
+polar ∶ ℚ → ℚ → ℝ[i]   ⍝ polar(r, t) = r·e^(it)
+polar ∶ ℚ[i] → ℚ[i] → ℝ[i]
+polar ξ η ≔ (sclR_cx ξ (expS_cx (⊠ 11 η)))
+csgn ∶ ℚ[i] → ℝ[i]   ⍝ complex sign z/|z|; 0 at 0
+csgn ξ ≔ ((≐ ξ 0) (⁂ 0) (sclR_cx ξ (spS_cx (÷ 1 (𝒩 ξ)))))
+csgnᴿ ∶ ℝ[i] → ℝ[i]   ⍝ z/|z| of a lazy argument
+csgnᴿ ≔ (⟐ csgn)
+hypot ∶ ℚ → ℚ → ℝ   ⍝ hypot(x, y) = √(x² + y²) (for complex arguments √(|x|² + |y|²))
+hypot ∶ ℚ[i] → ℚ[i] → ℝ
+hypot ξ η ≔ (spS_cx (⊞ (𝒩 ξ) (𝒩 η)))
+⍝ ---- circular functions.  For an exact z, E = e^(2iz):  tan z = −i·(1 − 2/(E + 1)),  cot z = i·(1 + 2/(E − 1));  sin z ≠ 0 and
+⍝ cos z ≠ 0 for every rational z ≠ 0 (π is irrational), so the only pole is z = 0 (cot, csc), where the value is 0
+sinS_cx ∶ ℚ[i] → ℝ[i]
+sinS_cx ξ ≔ ((isreal_cx ξ) (imR_cx (expS_cx (⊠ 11 ξ))) (sclR_cx (÷ 111 1100) (difR_cx (expS_cx (⊠ 11 ξ)) (expS_cx (⊠ 111 ξ)))))
+cosS_cx ∶ ℚ[i] → ℝ[i]
+cosS_cx ξ ≔ ((isreal_cx ξ) (reR_cx (expS_cx (⊠ 11 ξ))) (sclR_cx (÷ 1 1100) (sumR_cx (expS_cx (⊠ 11 ξ)) (expS_cx (⊠ 111 ξ)))))
+⍝ real part only, for a real argument (the approximants of a real value are made real)
+rel_cx ∶ ℚ[i] → ℝ[i] → ℝ[i]
+rel_cx ξ η ≔ ((isreal_cx ξ) (⫶ ℜ η) η)
+cot ∶ ℚ → ℝ   ⍝ cotangent cos z / sin z = i·(e^(2iz) + 1)/(e^(2iz) − 1); cot 0 = 0 (pole)
+cot ∶ ℚ[i] → ℝ[i]
+cot ξ ≔ ((≐ ξ 0) (⁂ 0) (rel_cx ξ (sclR_cx 11 (sumR_cx (⁂ 1) (sclR_cx 1100 (invR_cx (difR_cx (expS_cx (⊠ 1110100 ξ)) (⁂ 1))))))))
+cotᴿ ∶ ℝ → ℝ   ⍝ cotangent of a lazy argument
+cotᴿ ∶ ℝ[i] → ℝ[i]
+cotᴿ ≔ (⟐ cot)
+sec ∶ ℚ → ℝ   ⍝ secant 1/cos z
+sec ∶ ℚ[i] → ℝ[i]
+sec ξ ≔ (rel_cx ξ (invR_cx (cosS_cx ξ)))
+secᴿ ∶ ℝ → ℝ   ⍝ secant of a lazy argument
+secᴿ ∶ ℝ[i] → ℝ[i]
+secᴿ ≔ (⟐ sec)
+csc ∶ ℚ → ℝ   ⍝ cosecant 1/sin z; csc 0 = 0 (pole)
+csc ∶ ℚ[i] → ℝ[i]
+csc ξ ≔ ((≐ ξ 0) (⁂ 0) (rel_cx ξ (invR_cx (sinS_cx ξ))))
+cscᴿ ∶ ℝ → ℝ   ⍝ cosecant of a lazy argument
+cscᴿ ∶ ℝ[i] → ℝ[i]
+cscᴿ ≔ (⟐ csc)
+tanᴿ ∶ ℝ → ℝ   ⍝ tangent of a lazy argument (the series quotient of lib/real.imo through the diagonal)
+tanᴿ ∶ ℝ[i] → ℝ[i]
+tanᴿ ≔ (⟐ tan)
+⍝ ---- hyperbolic functions.  E = e^(2z): coth z = 1 + 2/(E − 1); sinh z = 0 and cosh z = 0 have no rational root but 0 (sinh)
+sinhS_cx ∶ ℚ[i] → ℝ[i]
+sinhS_cx ξ ≔ (sclR_cx (÷ 1 1100) (difR_cx (expS_cx ξ) (expS_cx (⊖ ξ))))
+coshS_cx ∶ ℚ[i] → ℝ[i]
+coshS_cx ξ ≔ (sclR_cx (÷ 1 1100) (sumR_cx (expS_cx ξ) (expS_cx (⊖ ξ))))
+coth ∶ ℚ → ℝ   ⍝ hyperbolic cotangent cosh z / sinh z = 1 + 2/(e^(2z) − 1); coth 0 = 0 (pole)
+coth ∶ ℚ[i] → ℝ[i]
+coth ξ ≔ ((≐ ξ 0) (⁂ 0) (rel_cx ξ (sumR_cx (⁂ 1) (sclR_cx 1100 (invR_cx (difR_cx (expS_cx (⊠ 1100 ξ)) (⁂ 1)))))))
+cothᴿ ∶ ℝ → ℝ   ⍝ hyperbolic cotangent of a lazy argument
+cothᴿ ∶ ℝ[i] → ℝ[i]
+cothᴿ ≔ (⟐ coth)
+sech ∶ ℚ → ℝ   ⍝ hyperbolic secant 1/cosh z
+sech ∶ ℚ[i] → ℝ[i]
+sech ξ ≔ (rel_cx ξ (invR_cx (coshS_cx ξ)))
+sechᴿ ∶ ℝ → ℝ   ⍝ hyperbolic secant of a lazy argument
+sechᴿ ∶ ℝ[i] → ℝ[i]
+sechᴿ ≔ (⟐ sech)
+csch ∶ ℚ → ℝ   ⍝ hyperbolic cosecant 1/sinh z; csch 0 = 0 (pole)
+csch ∶ ℚ[i] → ℝ[i]
+csch ξ ≔ ((≐ ξ 0) (⁂ 0) (rel_cx ξ (invR_cx (sinhS_cx ξ))))
+cschᴿ ∶ ℝ → ℝ   ⍝ hyperbolic cosecant of a lazy argument
+cschᴿ ∶ ℝ[i] → ℝ[i]
+cschᴿ ≔ (⟐ csch)
+sinhᴿ ∶ ℝ → ℝ   ⍝ hyperbolic sine of a lazy argument (the series of lib/real.imo through the diagonal)
+sinhᴿ ∶ ℝ[i] → ℝ[i]
+sinhᴿ ≔ (⟐ sinh)
+coshᴿ ∶ ℝ → ℝ   ⍝ hyperbolic cosine of a lazy argument
+coshᴿ ∶ ℝ[i] → ℝ[i]
+coshᴿ ≔ (⟐ cosh)
+tanhᴿ ∶ ℝ → ℝ   ⍝ hyperbolic tangent of a lazy argument
+tanhᴿ ∶ ℝ[i] → ℝ[i]
+tanhᴿ ≔ (⟐ tanh)
+⍝ ---- sinc z = sin z / z (sinc 0 = 1): the series Σ (−z²)ᵏ/(2k + 1)! for |z| ≤ 1, sin z · (1/z) beyond
+sinc ∶ ℚ → ℝ   ⍝ sinc z = sin z / z, sinc 0 = 1 (unnormalised)
+sinc ∶ ℚ[i] → ℝ[i]
+sinc ξ ≔ ((leq_cx (𝒩 ξ) 1) (mk_cx (μ ↦ (ser_cx 1 1 (ν ↦ (÷ (⊖ (⊠ ξ ξ)) (⊠ (⊠ 1100 ν) (⊞ (⊠ 1100 ν) 1)))) (ν ↦ (÷ 1 (⊠ (⊠ 1100 ν) (⊞ (⊠ 1100 ν) 1)))) μ))) (sclR_cx (÷ 1 ξ) (sinS_cx ξ)))
+sincᴿ ∶ ℝ → ℝ   ⍝ sinc of a lazy argument
+sincᴿ ∶ ℝ[i] → ℝ[i]
+sincᴿ ≔ (⟐ sinc)
+⍝ ---- inverse circular and hyperbolic functions, principal values and branch cuts as in C99 / Python's cmath; a point on a cut
+⍝ takes the value of the side of +0 (the limit from above for a cut on the real axis, from the right for one on the imaginary axis).
+⍝ For exact z = x + iy the formulas below use only exact arguments for log, √ and atan2 (or square roots of exact values):
+⍝   atan z  = ½·atan2(2x, 1 − x² − y²) + i·¼·log(|z + i|²/|z − i|²)      (poles ±i: value 0)
+⍝   atanh z = ¼·log(|1 + z|²/|1 − z|²) + i·½·atan2(2y, 1 − x² − y²)      (poles ±1: value 0)
+⍝   asinh z = asinh(Im(conj(s₁)·s₂)) + i·atan2(y, Re(s₁s₂)),  s₁ = √(1 − iz), s₂ = √(1 + iz)     (Kahan)
+⍝   acos z  = 2·atan2(Re s₁, Re s₂) + i·asinh(Im(conj(s₂)·s₁)),  s₁ = √(1 − z), s₂ = √(1 + z)
+⍝   acosh z = asinh(Re(conj(s₁)·s₂)) + 2i·atan2(Im s₁, Re s₂),  s₁ = √(z − 1), s₂ = √(z + 1)
+⍝   asin z  = −i·asinh(iz)
+⍝ with the values on the cuts written out:  asin x = sgn(x)·π/2 + i·acosh|x|,  acos x = −i·acosh x (x > 1), π − i·acosh|x| (x < −1),
+⍝ asinh(iy) = acosh|y| + i·sgn(y)·π/2  (|x|, |y| > 1).
+⍝ asinh t of a real stream (exists: asinhR_cx); asinh and acosh of an exact real
+asinhX_cx ∶ ℚ → ℝ
+asinhX_cx ξ ≔ (mkq_cx (μ ↦ (asinhq_cx ξ μ)))
+acoshX_cx ∶ ℚ → ℝ
+acoshX_cx ξ ≔ (mkq_cx (μ ↦ (acoshq_cx ξ μ)))
+⍝ π/2 as a stream
+pih_cx ∶ ℝ
+pih_cx ≔ (sclR_cx (÷ 1 1100) pi_cx)
+⍝ |s₁| + |s₂| ≤ 2^U for the square roots s₁,₂ of 1 ∓ w, z ∓ 1 (|w| = |z|): |sᵢ|⁴ ≤ (1 + |z|)² ≤ 2 + 2|z|²
+ukh_cx ∶ ℚ[i] → ℤ
+ukh_cx ξ ≔ (⊞ (div (⊞ (lg2_cx (⊞ 1100 (⊠ 1100 (𝒩 ξ)))) 1101) 111010000) 1)
+⍝ the formulas above at one precision: s₁, s₂ are taken within 2⁻ᵖ, p = m + 5 + U (+ L): a product such as conj(s₁)·s₂ then moves by
+⍝ at most 2^(U+1−p) ≤ 2⁻ᵐ⁻⁴, asinh has Lipschitz constant 1, atan2 at most 1 where its point stays ≥ 1 from the origin (acos: Re s₁,
+⍝ Re s₂; acosh: Re s₂, Im s₁ — the squares sum to (|z − 1| + |z + 1| + 2)/2 ≥ 2) and 1/|y| for asinh's atan2(y, Re(s₁s₂))
+⍝ (2^L ≥ 1/|y|); every part is then within 2⁻ᵐ⁻², and the final truncation adds 2⁻ᵐ⁻¹.  S₁, S₂ are the streams of s₁, s₂.
+asinhF_cx ∶ ℚ[i] → ℝ[i] → ℝ[i] → ℝ[i]
+asinhF_cx ξ σ₁ σ₂ ≔ ((ψ ↦ ((ν ↦ (mk_cx (μ ↦ ((τ₁ τ₂ ↦ (tr_cx (⊞ (asinhq_cx (ℑ (⊠ (∗ τ₁) τ₂)) (⊞ μ 1100)) (⊠ 11 (atan2q_cx ψ (ℜ (⊠ τ₁ τ₂)) (⊞ μ 1101)))) (⊞ μ 1))) (at_cx σ₁ (⊞ μ ν)) (at_cx σ₂ (⊞ μ ν)))))) (⊞ (⊞ 111010001 (ukh_cx ξ)) (max 0 (⊟ 1 (lgz_cx ψ)))))) (ℑ ξ))
+acosF_cx ∶ ℚ[i] → ℝ[i] → ℝ[i] → ℝ[i]
+acosF_cx ξ σ₁ σ₂ ≔ ((ν ↦ (mk_cx (μ ↦ ((τ₁ τ₂ ↦ (tr_cx (⊞ (⊠ 1100 (atan2q_cx (ℜ τ₁) (ℜ τ₂) (⊞ μ 1101))) (⊠ 11 (asinhq_cx (ℑ (⊠ (∗ τ₂) τ₁)) (⊞ μ 1100)))) (⊞ μ 1))) (at_cx σ₁ (⊞ μ ν)) (at_cx σ₂ (⊞ μ ν)))))) (⊞ 111010001 (ukh_cx ξ)))
+acoshF_cx ∶ ℚ[i] → ℝ[i] → ℝ[i] → ℝ[i]
+acoshF_cx ξ σ₁ σ₂ ≔ ((ν ↦ (mk_cx (μ ↦ ((τ₁ τ₂ ↦ (tr_cx (⊞ (asinhq_cx (ℜ (⊠ (∗ τ₁) τ₂)) (⊞ μ 1100)) (⊠ 1110100 (atan2q_cx (ℑ τ₁) (ℜ τ₂) (⊞ μ 1101)))) (⊞ μ 1))) (at_cx σ₁ (⊞ μ ν)) (at_cx σ₂ (⊞ μ ν)))))) (⊞ 111010001 (ukh_cx ξ)))
+asinhC_cx ∶ ℚ[i] → ℝ[i]
+asinhC_cx ξ ≔ ((ϕ ψ ↦ ((∧ (≐ ϕ 0) (lt_cx 1 (abs ψ))) (cpxR_cx (acoshX_cx (abs ψ)) ((⩾ ψ 0) pih_cx (negR_cx pih_cx))) (asinhF_cx ξ (sqrtS_cx (⊟ 1 (⊠ 11 ξ))) (sqrtS_cx (⊞ 1 (⊠ 11 ξ)))))) (ℜ ξ) (ℑ ξ))
+asinh ∶ ℚ → ℝ   ⍝ inverse hyperbolic sine (principal; cuts on the imaginary axis beyond ±i, as in cmath)
+asinh ∶ ℚ[i] → ℝ[i]
+asinh ξ ≔ ((isreal_cx ξ) (asinhX_cx (ℜ ξ)) (asinhC_cx ξ))
+asinhᴿ ∶ ℝ → ℝ   ⍝ inverse hyperbolic sine of a lazy argument
+asinhᴿ ∶ ℝ[i] → ℝ[i]
+asinhᴿ ≔ (⟐ asinh)
+asin ∶ ℚ[i] → ℝ[i]   ⍝ inverse sine (principal; cuts (−∞, −1) and (1, ∞) as in cmath: asin x = sgn x·π/2 + i·acosh|x| there)
+asin ξ ≔ ((ϕ ψ ↦ ((≐ ψ 0) ((leq_cx (abs ϕ) 1) (atan2R_cx (⁂ ϕ) (spS_cx (⊟ 1 (⊠ ϕ ϕ)))) (cpxR_cx ((⩾ ϕ 0) pih_cx (negR_cx pih_cx)) (acoshX_cx (abs ϕ)))) (sclR_cx 111 (asinh (⊠ 11 ξ))))) (ℜ ξ) (ℑ ξ))
+asinᴿ ∶ ℝ[i] → ℝ[i]   ⍝ inverse sine of a lazy argument
+asinᴿ ≔ (⟐ asin)
+acos ∶ ℚ[i] → ℝ[i]   ⍝ inverse cosine (principal; cuts as asin: acos x = −i·acosh x for x > 1, π − i·acosh|x| for x < −1)
+acos ξ ≔ ((ϕ ψ ↦ ((≐ ψ 0) ((leq_cx (abs ϕ) 1) (atan2R_cx (spS_cx (⊟ 1 (⊠ ϕ ϕ))) (⁂ ϕ)) ((⩾ ϕ 0) (cpxR_cx (⁂ 0) (negR_cx (acoshX_cx ϕ))) (cpxR_cx pi_cx (negR_cx (acoshX_cx (⊖ ϕ)))))) (acosF_cx ξ (sqrtS_cx (⊟ 1 ξ)) (sqrtS_cx (⊞ 1 ξ))))) (ℜ ξ) (ℑ ξ))
+acosᴿ ∶ ℝ[i] → ℝ[i]   ⍝ inverse cosine of a lazy argument
+acosᴿ ≔ (⟐ acos)
+atanc ∶ ℚ[i] → ℝ[i]   ⍝ inverse tangent of a complex z (principal; cuts on the imaginary axis beyond ±i, as in cmath); 0 at the poles ±i
+atanc ξ ≔ ((ϕ ψ ↦ ((∧ (≐ ϕ 0) (≐ (abs ψ) 1)) (⁂ 0) ((θ ↦ ((≐ ψ 0) θ (cpxR_cx θ (sclR_cx (÷ 1 111010000) (lpS_cx (÷ (𝒩 (⊞ ξ 11)) (𝒩 (⊟ ξ 11)))))))) (sclR_cx (÷ 1 1100) (at2S_cx (⊠ 1100 ϕ) (⊟ (⊟ 1 (⊠ ϕ ϕ)) (⊠ ψ ψ))))))) (ℜ ξ) (ℑ ξ))
+atancᴿ ∶ ℝ[i] → ℝ[i]   ⍝ inverse tangent of a lazy complex argument
+atancᴿ ≔ (⟐ atanc)
+acot ∶ ℚ → ℝ   ⍝ inverse cotangent atan(1/z) (principal; acot 0 = π/2; 0 at the poles ±i)
+acot ∶ ℚ[i] → ℝ[i]
+acot ξ ≔ ((ϕ ψ ↦ ((∧ (≐ ϕ 0) (≐ (abs ψ) 1)) (⁂ 0) ((θ ↦ ((≐ ψ 0) θ (cpxR_cx θ (sclR_cx (÷ 1 111010000) (lpS_cx (÷ (𝒩 (⊞ 1 (⊠ 11 ξ))) (𝒩 (⊟ 1 (⊠ 11 ξ))))))))) (sclR_cx (÷ 1 1100) (at2S_cx (⊠ 1100 ϕ) (⊟ (𝒩 ξ) 1)))))) (ℜ ξ) (ℑ ξ))
+acotᴿ ∶ ℝ → ℝ   ⍝ inverse cotangent of a lazy argument
+acotᴿ ∶ ℝ[i] → ℝ[i]
+acotᴿ ≔ (⟐ acot)
+asec ∶ ℚ[i] → ℝ[i]   ⍝ inverse secant acos(1/z); 0 at z = 0 (pole)
+asec ξ ≔ ((≐ ξ 0) (⁂ 0) (acos (÷ 1 ξ)))
+asecᴿ ∶ ℝ[i] → ℝ[i]   ⍝ inverse secant of a lazy argument
+asecᴿ ≔ (⟐ asec)
+acsc ∶ ℚ[i] → ℝ[i]   ⍝ inverse cosecant asin(1/z); 0 at z = 0 (pole)
+acsc ξ ≔ ((≐ ξ 0) (⁂ 0) (asin (÷ 1 ξ)))
+acscᴿ ∶ ℝ[i] → ℝ[i]   ⍝ inverse cosecant of a lazy argument
+acscᴿ ≔ (⟐ acsc)
+acosh ∶ ℚ[i] → ℝ[i]   ⍝ inverse hyperbolic cosine (principal; cut (−∞, 1) as in cmath: acosh x = i·acos x on [−1, 1), acosh|x| + iπ below −1)
+acosh ξ ≔ ((ϕ ψ ↦ ((≐ ψ 0) ((⩾ ϕ 1) (acoshX_cx ϕ) ((⩾ ϕ 11101) (cpxR_cx (⁂ 0) (atan2R_cx (spS_cx (⊟ 1 (⊠ ϕ ϕ))) (⁂ ϕ))) (cpxR_cx (acoshX_cx (⊖ ϕ)) pi_cx))) (acoshF_cx ξ (sqrtS_cx (⊟ ξ 1)) (sqrtS_cx (⊞ ξ 1))))) (ℜ ξ) (ℑ ξ))
+acoshᴿ ∶ ℝ[i] → ℝ[i]   ⍝ inverse hyperbolic cosine of a lazy argument
+acoshᴿ ≔ (⟐ acosh)
+atanh ∶ ℚ[i] → ℝ[i]   ⍝ inverse hyperbolic tangent (principal; cuts (−∞, −1) and (1, ∞), value with Im = +π/2 there, as in cmath); 0 at ±1
+atanh ξ ≔ ((ϕ ψ ↦ ((∧ (≐ ψ 0) (≐ (abs ϕ) 1)) (⁂ 0) ((θ ↦ ((∧ (≐ ψ 0) (lt_cx (abs ϕ) 1)) θ (cpxR_cx θ (sclR_cx (÷ 1 1100) (at2S_cx (⊠ 1100 ψ) (⊟ (⊟ 1 (⊠ ϕ ϕ)) (⊠ ψ ψ))))))) (sclR_cx (÷ 1 111010000) (lpS_cx (÷ (𝒩 (⊞ 1 ξ)) (𝒩 (⊟ 1 ξ)))))))) (ℜ ξ) (ℑ ξ))
+atanhᴿ ∶ ℝ[i] → ℝ[i]   ⍝ inverse hyperbolic tangent of a lazy argument
+atanhᴿ ≔ (⟐ atanh)
+acoth ∶ ℚ[i] → ℝ[i]   ⍝ inverse hyperbolic cotangent atanh(1/z) = ¼·log(|z + 1|²/|z − 1|²) + i·½·atan2(−2y, |z|² − 1); acoth 0 = iπ/2; 0 at ±1
+acoth ξ ≔ ((ϕ ψ ↦ ((∧ (≐ ψ 0) (≐ (abs ϕ) 1)) (⁂ 0) ((θ ↦ ((∧ (≐ ψ 0) (lt_cx 1 (abs ϕ))) θ (cpxR_cx θ (sclR_cx (÷ 1 1100) (at2S_cx (⊠ 11100 ψ) (⊟ (𝒩 ξ) 1)))))) (sclR_cx (÷ 1 111010000) (lpS_cx (÷ (𝒩 (⊞ ξ 1)) (𝒩 (⊟ ξ 1)))))))) (ℜ ξ) (ℑ ξ))
+acothᴿ ∶ ℝ[i] → ℝ[i]   ⍝ inverse hyperbolic cotangent of a lazy argument
+acothᴿ ≔ (⟐ acoth)
+asech ∶ ℚ[i] → ℝ[i]   ⍝ inverse hyperbolic secant acosh(1/z); 0 at z = 0 (pole)
+asech ξ ≔ ((≐ ξ 0) (⁂ 0) (acosh (÷ 1 ξ)))
+asechᴿ ∶ ℝ[i] → ℝ[i]   ⍝ inverse hyperbolic secant of a lazy argument
+asechᴿ ≔ (⟐ asech)
+acsch ∶ ℚ → ℝ   ⍝ inverse hyperbolic cosecant asinh(1/z); 0 at z = 0 (pole)
+acsch ∶ ℚ[i] → ℝ[i]
+acsch ξ ≔ ((≐ ξ 0) (⁂ 0) (asinh (÷ 1 ξ)))
+acschᴿ ∶ ℝ → ℝ   ⍝ inverse hyperbolic cosecant of a lazy argument
+acschᴿ ∶ ℝ[i] → ℝ[i]
+acschᴿ ≔ (⟐ acsch)
+⍝ ==== special functions
+⍝ ---- Bernoulli numbers B₂ₖ from the tangent numbers Tₖ (integers; Brent–Harvey): start with Tₖ = (k − 1)!, then in round k = 2, 3, …
+⍝ Tⱼ ← (j − k)·Tⱼ₋₁ + (j − k + 2)·Tⱼ for j = k, k + 1, … (Tⱼ₋₁ already updated); Tₖ is final after round k, and
+⍝ B₂ₖ = (−1)^(k−1)·2k·Tₖ/(4ᵏ(4ᵏ − 1)).  The rows are infinite lazy lists of digit strings (row k: the values after round k).
+tsc_cx ∶ 𝔇 → 𝔇 → 𝔏 𝔇 → 𝔏 𝔇
+tsc_cx κ ω ξ ≔ (ξ (θ ι ↦ ((ν ↦ (∷ ν (tsc_cx (⊞ᶻ κ (◀ 1)) ν ι))) (⊞ᶻ (⊠ᶻ κ ω) (⊠ᶻ (⊞ᶻ κ (◀ 1100)) θ)))) ⊥)
+trows_cx ∶ 𝔇 → 𝔏 𝔇 → 𝔖 (𝔏 𝔇)
+trows_cx ν ξ ≔ (∷ ξ (trows_cx (⊞ᶻ ν (◀ 1)) (⧺ (take′ ν ξ) (tsc_cx ⊥ ⊥ (drop′ ν ξ)))))
+fl_cx ∶ 𝔇 → 𝔇 → 𝔖 𝔇
+fl_cx ν φ ≔ (∷ φ (fl_cx (⊞ᶻ ν (◀ 1)) (⊠ᶻ φ ν)))
+tang_cx ∶ 𝔖 (𝔏 𝔇)
+tang_cx ≔ (trows_cx (◀ 1) (fl_cx (◀ 1) (◀ 1)))
+⍝ the stream B₂, B₄, B₆, … (canonical fractions; a global stream, so every element is computed once)
+berns_cx ∶ 𝔖 ℚ
+berns_cx ≔ (⫶ (κ ↦ ((υ ↦ (⊜ (÷ (⊠ (⊠ (^ 11101 (⊟ κ 1)) (⊠ 1100 κ)) (⊗ (hd (drop (⊟ κ 1) (hd (drop (⊟ κ 1) tang_cx)))) (◀ 1))) (⊠ υ (⊟ υ 1))))) (^ 111010000 κ))) (iterate (ν ↦ (⊞ ν 1)) 1))
+⍝ B₂ₖ (k ≥ 1)
+bern_cx ∶ ℕ → ℚ
+bern_cx κ ≔ (hd (drop (⊟ κ 1) berns_cx))
+⍝ ---- asymptotic series of log Γ and ψ.  For an exact w with Re w ≥ |Im w| (|arg w| ≤ π/4) the remainder of
+⍝   log Γ(w) = (w − ½)·log w − w + ½·log 2π + Σₖ₌₁^(K−1) B₂ₖ/(2k(2k − 1)·w^(2k−1)) + R_K
+⍝   ψ(w)     = log w − 1/(2w) − Σₖ₌₁^(K−1) B₂ₖ/(2k·w^(2k)) + R_K
+⍝ is at most the first omitted term in modulus (Stieltjes' integral for the remainder, with |w²/(t² + w²)| ≤ 1 for t ≥ 0 when
+⍝ Re w² ≥ 0).  asl φ ω ε q k ρ σ: σ + Σ φ(j)·ρⱼ (ρₖ = ρ, ρⱼ₊₁ = ρⱼ·ω, all exact), the terms truncated at q, stopped before the
+⍝ first j with φ(j)²·|ρⱼ|² ≤ ε (ε: the square of the bound for the tail)
+asl_cx ∶ (ℕ → ℚ) → ℚ[i] → ℚ → ℕ → ℕ → ℚ[i] → ℚ[i] → ℚ[i]
+asl_cx φ ω ε μ κ ρ σ ≔ ((χ ↦ ((leq_cx (⊠ (⊠ χ χ) (𝒩 ρ)) ε) σ (asl_cx φ ω ε μ (⊞ κ 1) (qmul_cx ρ ω) (tr_cx (qadd_cx σ (⊠ ρ χ)) μ)))) (φ κ))
+⍝ ½·log 2π as a regular stream (π within 2⁻ᵐ⁻⁵, log has Lipschitz constant < 1/6 near 2π)
+hlp_cx ∶ ℝ
+hlp_cx ≔ (mkq_cx (μ ↦ (tr_cx (⊠ (÷ 1 1100) (logpos_cx (⊠ 1100 (pia_cx (⊞ μ 111010001))) (⊞ μ 1))) (⊞ μ 1))))
+⍝ log Γ(w) within 2⁻ᵖ for an exact w with |arg w| ≤ π/4, |w| ≥ 2: log w within 2^(−p−3)/|w − ½|, ½·log 2π within 2⁻ᵖ⁻³, the K
+⍝ terms within 2⁻ᵖ⁻¹⁰ each (K < 64), the tail below 2⁻ᵖ⁻³, the final truncation 2⁻ᵖ⁻¹
+lgw_cx ∶ ℚ[i] → ℕ → ℚ[i]
+lgw_cx ω μ ≔ ((υ ↦ (tr_cx (qadd_cx (qsub_cx (qmul_cx υ (logq_cx ω (⊞ (⊞ μ 1101) (max 0 (lgz_cx υ))))) ω) (qadd_cx (at_cx hlp_cx (⊞ μ 1101)) (asl_cx (κ ↦ (÷ (bern_cx κ) (⊠ (⊠ 1100 κ) (⊟ (⊠ 1100 κ) 1)))) (÷ 1 (⊠ ω ω)) (^ 111010000 (⊖ (⊞ μ 1101))) (⊞ μ 111001100) 1 (÷ 1 ω) 0))) (⊞ μ 1))) (⊟ ω (÷ 1 1100)))
+⍝ ψ(w) within 2⁻ᵖ (the same conditions and budget)
+psw_cx ∶ ℚ[i] → ℕ → ℚ[i]
+psw_cx ω μ ≔ (tr_cx (qsub_cx (qsub_cx (logq_cx ω (⊞ μ 1101)) (÷ 1 (⊠ 1100 ω))) (asl_cx (κ ↦ (÷ (bern_cx κ) (⊠ 1100 κ))) (÷ 1 (⊠ ω ω)) (^ 111010000 (⊖ (⊞ μ 1101))) (⊞ μ 111001100) 1 (÷ 1 (⊠ ω ω)) 0)) (⊞ μ 1))
+⍝ the shift for precision p: the least N ≥ 0 with Re z + N ≥ max(L, |Im z|), L = ⌈(p + 3)/6⌉ + 2 (then the smallest term of the
+⍝ series is far below 2⁻ᵖ⁻³: about 2^(−7L)), passed to a continuation
+shn_cx ∶ ℚ[i] → ℕ → (ℕ → β) → β
+shn_cx ξ μ κ ≔ (κ (max 0 (⌈ (⊟ (max (⊞ (⌈ (÷ (⊞ μ 1101) 111011100)) 1100) (abs (ℑ ξ))) (ℜ ξ)))))
+⍝ z(z + 1)⋯(z + N − 1)·ρ  and  σ + Σⱼ₌₀^(N−1) 1/(z + j)
+pch_cx ∶ ℚ[i] → ℕ → ℚ[i] → ℚ[i]
+pch_cx ξ ν ρ ≔ ((≐ ν 0) ρ (pch_cx (⊞ ξ 1) (⊟ ν 1) (qmul_cx ρ ξ)))
+hsum_cx ∶ ℚ[i] → ℕ → ℚ[i] → ℚ[i]
+hsum_cx ξ ν σ ≔ ((≐ ν 0) σ (hsum_cx (⊞ ξ 1) (⊟ ν 1) (qadd_cx σ (÷ 1 ξ))))
+⍝ log Γ(z + N) within 2⁻ᵖ and the product z⋯(z + N − 1), for the shift of precision p:  log Γ(z) = log Γ(z + N) − log P
+lgs_cx ∶ ℚ[i] → ℕ → (ℚ[i] → ℚ[i] → β) → β
+lgs_cx ξ μ κ ≔ (shn_cx ξ μ (ν ↦ (κ (lgw_cx (⊞ ξ ν) μ) (pch_cx ξ ν 1))))
+⍝ an integer u with eˣ ≤ 2ᵘ (1/ln 2 lies between 7/5 and 3/2), and an integer l with |z| ≥ 2ˡ (z ≠ 0, exact)
+el2u_cx ∶ ℚ → ℤ
+el2u_cx ξ ≔ (⌈ (⊠ ξ ((⩾ ξ 0) (÷ 1101 1100) (÷ 111011101 111010001))))
+lgl_cx ∶ ℚ[i] → ℤ
+lgl_cx ξ ≔ (div (⊟ (lg2_cx (𝒩 ξ)) 1) 1100)
+⍝ V = e^T·Q within 2⁻ᵐ, given φ(p) = (T within 2⁻ᵖ, Q exact ≠ 0) (the pair may depend on p, the value e^T·Q not): |V| ≤ 2ᵘ from
+⍝ the pair at p = 4; T is taken at p = m + 3 + u (relative error 1.07·2⁻ᵖ), e^T within 2^(−m−3)/|Q|, the product truncated at
+⍝ m + 1:  1.07·2⁻ᵐ⁻³ + 2⁻ᵐ⁻³ + 2⁻ᵐ⁻¹ < 2⁻ᵐ
+emq_cx ∶ (ℕ → 𝔓 ℚ[i] ℚ[i]) → ℕ → ℚ[i]
+emq_cx φ μ ≔ ((θ₀ ↦ ((υ ↦ ((θ ↦ (tr_cx (qmul_cx (expq_cx (◀ θ) (⊞ (⊞ μ 1101) (max 0 (lgz_cx (▶ θ))))) (▶ θ)) (⊞ μ 1))) (φ (max (⊞ (⊞ μ 1101) υ) 111010000)))) (⊞ (el2u_cx (⊞ (ℜ (◀ θ₀)) (÷ 1 100000000))) (lgz_cx (▶ θ₀))))) (φ 111010000))
+⍝ Γ(z), 1/Γ(z), B(a, b) = Γ(a)Γ(b)/Γ(a + b) at precision m (z, a, b not poles; a + b may be one: then B = 0)
+gmq_cx ∶ ℚ[i] → ℕ → ℚ[i]
+gmq_cx ξ ≔ (emq_cx (μ ↦ (lgs_cx ξ μ (θ ρ ↦ (⊗ θ (÷ 1 ρ))))))
+rgq_cx ∶ ℚ[i] → ℕ → ℚ[i]
+rgq_cx ξ ≔ (emq_cx (μ ↦ (lgs_cx ξ μ (θ ρ ↦ (⊗ (⊖ θ) ρ)))))
+btq_cx ∶ ℚ[i] → ℚ[i] → ℕ → ℚ[i]
+btq_cx ξ η ≔ (emq_cx (μ ↦ (lgs_cx ξ (⊞ μ 1100) (θ₁ ρ₁ ↦ (lgs_cx η (⊞ μ 1100) (θ₂ ρ₂ ↦ (lgs_cx (⊞ ξ η) (⊞ μ 1100) (θ₃ ρ₃ ↦ (⊗ (qsub_cx (qadd_cx θ₁ θ₂) θ₃) (qdiv_cx ρ₃ (qmul_cx ρ₁ ρ₂)))))))))))
+⍝ log|Γ(x)| for a real x (not a pole): log Γ(x + N) − log|P|
+lgq_cx ∶ ℚ → ℕ → ℚ
+lgq_cx ξ μ ≔ (lgs_cx ξ (⊞ μ 1101) (θ ρ ↦ (tr_cx (qsub_cx (ℜ θ) (logpos_cx (ℜ ρ) (⊞ μ 1101))) (⊞ μ 1))))
+⍝ ψ(z) = ψ(z + N) − Σⱼ₌₀^(N−1) 1/(z + j)
+dgq_cx ∶ ℚ[i] → ℕ → ℚ[i]
+dgq_cx ξ μ ≔ (shn_cx ξ (⊞ μ 1) (ν ↦ (tr_cx (qsub_cx (psw_cx (⊞ ξ ν) (⊞ μ 1)) (hsum_cx ξ ν 0)) (⊞ μ 1))))
+⍝ ---- entire functions by their power series.  sEs t₀ ρ r b: the regular stream of Σ tₖ (t₀ exact ≠ 0, tₖ = tₖ₋₁·ρ(k),
+⍝ |ρ(k)| ≤ 2^r(k)) by serE, for a series whose terms may first grow: every product of consecutive ratios is at most e^b (b ≥ 0 an
+⍝ integer, so at most 2^(3b/2)) and the number of terms stays below 3b + m + 10 (α = 3b/2 + 2·bitlength(3b + m + 10) + 2)
+sEs_cx ∶ ℚ[i] → (ℚ[i] → ℚ[i]) → (ℚ[i] → ℤ) → ℕ → ℝ[i]
+sEs_cx ξ ρ ϱ β ≔ ((ε ↦ (mkq_cx (μ ↦ (serE_cx ξ ε ρ ϱ (⊞ (⊞ (⌈ (⊠ (÷ 1101 1100) β)) (⊠ 1100 (blen_cx (⊞ (⊞ (⊠ 1101 β) μ) 111001100) 1 0))) 111010000) μ)))) (lgz_cx ξ))
+⍝ an integer b ≥ |z| (from b² ≥ ⌈|z|²⌉)
+bz_cx ∶ ℚ[i] → ℕ
+bz_cx ξ ≔ (⊞ (isqrt (⌈ (𝒩 ξ))) 1)
+⍝ 2/√π as a regular stream
+tsp_cx ∶ ℝ
+tsp_cx ≔ (sclR_cx 1100 (invR_cx (sqrtR_cx pi_cx)))
+⍝ erf z = (2/√π)·Σ (−1)ᵏ z^(2k+1)/(k!(2k + 1)):  ratio −z²(2k − 1)/(k(2k + 1)), |ratio| ≤ |z|²/k, products ≤ e^(|z|²)
+erfS_cx ∶ ℚ[i] → ℝ[i]
+erfS_cx ξ ≔ ((≐ ξ 0) (⁂ 0) (mulR_cx tsp_cx (sEs_cx ξ (ν ↦ (÷ (⊠ (⊖ (⊠ ξ ξ)) (⊟ (⊠ 1100 ν) 1)) (⊠ ν (⊞ (⊠ 1100 ν) 1)))) (ν ↦ (lg2_cx (÷ (𝒩 ξ) ν))) (⌈ (𝒩 ξ)))))
+⍝ Euler's constant γ = −ψ(1)
+𝛾 ∶ ℝ   ⍝ Euler's constant γ = 0.57721…, as −ψ(1) (asymptotic series of the digamma function after a shift); element n is within 2⁻ⁿ
+𝛾 ≔ (mkq_cx (μ ↦ (⊖ (dgq_cx 1 μ))))
+⍝ Catalan's constant G = (3/8)·Σₙ 1/((2n + 1)²·C(2n, n)) + (π/8)·log(2 + √3)  (ratio n(2n − 1)/(2(2n + 1)²) ≤ 1/4);  log(2 + √3) = acosh 2
+Catalan ∶ ℝ   ⍝ Catalan's constant G = Σ (−1)ᵏ/(2k + 1)² = 0.91596…, by Ramanujan's series; element n is within 2⁻ⁿ
+Catalan ≔ (sumR_cx (sclR_cx (÷ 1101 111000000) (mkq_cx (μ ↦ (ser_cx 1 1 (ν ↦ (÷ (⊠ ν (⊟ (⊠ 1100 ν) 1)) (⊠ 1100 (⊠ (⊞ (⊠ 1100 ν) 1) (⊞ (⊠ 1100 ν) 1))))) (ν ↦ (÷ 1 111010000)) μ)))) (sclR_cx (÷ 1 111000000) (mulR_cx pi_cx (acoshX_cx 1100))))
+⍝ ---- ζ(s) by Euler–Maclaurin:  with N = 2ʲ
+⍝   ζ(s) = Σₖ₌₁^(N−1) k⁻ˢ + N⁻ˢ·(N/(s − 1) + ½ + Σᵢ₌₁^K Tᵢ) + R,   Tᵢ = B₂ᵢ/(2i)!·s(s + 1)⋯(s + 2i − 2)·N^(1−2i),
+⍝   |R| ≤ 2·|T_(K+1)|·|s + 2K + 1|/(σ + 2K + 1)·N^(−σ)   (σ = Re s, σ + 2K + 1 > 0: one more integration by parts, with
+⍝   |B̃₂ₖ₊₂(x) − B₂ₖ₊₂| ≤ 2|B₂ₖ₊₂|).  As |B₂ᵢ|/(2i)! ≤ 3.3/(2π)²ⁱ the terms fall until 2i ≈ 2πN, the smallest being about
+⍝   e^(−2πN)·(2πN)ᵇ: N is the least power of 2 ≥ 4 with 6N ≥ p + 10 + ⌈−σ⌉⁺·j + b·(3 + j)  (b ≥ |s| an integer).
+⍝ The powers are exact for an integer s.  Otherwise p⁻ˢ = e^(−s·log p) for the primes p < N, with relative error ≤ 2ε, and
+⍝ k⁻ˢ = d⁻ˢ·(k/d)⁻ˢ (d the least prime factor of k) truncated to relative error ε/2 (absolute precision q + ⌈σ⌉⁺·⌈log₂ k⌉ with
+⍝ 2⁻ᵠ = ε): relative error ≤ 3Ω(k)·ε ≤ 3jε, so with ε = 2^(−p−3−j−⌈−σ⌉⁺·j−bitlength(3j)) the N − 1 powers sum within 2⁻ᵖ⁻³.
+⍝ the least divisor ≥ d of k (k ≥ 2)
+spf_cx ∶ ℕ → ℕ → ℕ
+spf_cx κ δ ≔ ((≻ (⊠ δ δ) κ) κ ((≐ (mod κ δ) 0) δ (spf_cx κ (⊞ δ 1))))
+⍝ p⁻ˢ for a prime p: log p within 2^(−q−2)/|s| (relative error of e^u ≤ 0.28ε), e^u within 2^(−q′−1) ≤ ε·p^(−σ)/2, truncated at q′ + 1
+ppw_cx ∶ ℚ[i] → ℕ → ℕ → ℕ → ℚ[i]
+ppw_cx ξ κ μ ν ≔ (tr_cx (expq_cx (qmul_cx (⊖ ξ) (logpos_cx κ (⊞ (⊞ μ 1100) (blen_cx (bz_cx ξ) 1 0)))) (⊞ ν 1)) (⊞ ν 1))
+⍝ the powers 2⁻ˢ … (N − 1)⁻ˢ in turn (λ: the list of those already made, from 2 on), added to σ
+zpl_cx ∶ ℚ[i] → ℕ → ℕ → ℕ → ℕ → 𝔏 ℚ[i] → ℚ[i] → ℚ[i]
+zpl_cx ξ μ ι ν κ λ σ ≔ ((≐ κ ν) σ ((δ ω ↦ ((θ ↦ (zpl_cx ξ μ ι ν (⊞ κ 1) (⧺ λ (∷ θ ⊥)) (qadd_cx σ θ))) ((≐ δ κ) (ppw_cx ξ κ μ ω) (tr_cx (qmul_cx (nth λ (⊟ δ 1100)) (nth λ (⊟ (div κ δ) 1100))) (⊞ ω 1))))) (spf_cx κ 1100) (⊞ μ (⊠ ι (lg2_cx κ)))))
+⍝ Σₖ₌₁^(n−1) k⁻ˢ for an integer s (exact)
+zis_cx ∶ ℚ[i] → ℕ → ℚ[i] → ℚ[i]
+zis_cx ξ ν σ ≔ ((≐ ν 1) σ (zis_cx ξ (⊟ ν 1) (⊞ σ (^ (⊟ ν 1) (⊖ (ℜ ξ))))))
+⍝ N⁻ˢ = 2^(−j·s) within 2⁻ᵠ (|N⁻ˢ| ≤ 2^(⌈−σ⌉⁺·j))
+pw2_cx ∶ ℚ[i] → ℕ → ℕ → ℕ → ℚ[i]
+pw2_cx ξ ι κ μ ≔ ((isint_cx ξ) (^ (^ 1100 ι) (⊖ (ℜ ξ))) (tr_cx (expq_cx (qmul_cx (⊖ (⊠ ξ ι)) (ln2a_cx (⊞ (⊞ (⊞ (⊞ μ 1101) (blen_cx (bz_cx ξ) 1 0)) (blen_cx ι 1 0)) (⊠ κ ι)))) (⊞ μ 1101)) (⊞ μ 1)))
+⍝ the least j ≥ 2 with 6·2ʲ ≥ p + 10 + c·j + b·(3 + j)
+jn_cx ∶ ℕ → ℕ → ℕ → ℕ → ℕ → ℕ
+jn_cx μ κ β ι ρ ≔ ((⩽ (⊞ (⊞ (⊞ μ 111001100) (⊠ κ ι)) (⊠ β (⊞ ι 1101))) (⊠ 111011100 ρ)) ι (jn_cx μ κ β (⊞ ι 1) (⊠ 1100 ρ)))
+⍝ the correction sum: zl s N² ε i f (2i)! N^(1−2i) c, with f = s(s + 1)⋯(s + 2i − 2); stops before term i when σ + 2i − 1 > 0 and
+⍝ 4·|Tᵢ·(s + 2i − 1)|² ≤ (σ + 2i − 1)²·4^(−p−3)·2^(−⌈−2σj⌉), i.e. |R|·N^(−σ) ≤ 2⁻ᵖ⁻³ (ε holds all but the (σ + 2i − 1)²)
+zl_cx ∶ ℚ[i] → ℚ → ℚ → ℕ → ℚ[i] → ℚ → ℚ → ℚ[i] → ℚ[i]
+zl_cx ξ ω ε ι φ υ ν σ ≔ ((τ δ ↦ ((∧ (lt_cx 0 δ) (leq_cx (𝒩 (qmul_cx τ (⊟ (⊞ ξ (⊠ 1100 ι)) 1))) (⊠ (⊠ δ δ) ε))) σ (zl_cx ξ ω ε (⊞ ι 1) (qmul_cx φ (qmul_cx (⊟ (⊞ ξ (⊠ 1100 ι)) 1) (⊞ ξ (⊠ 1100 ι)))) (⊠ υ (⊠ (⊞ (⊠ 1100 ι) 1) (⊞ (⊠ 1100 ι) 1100))) (÷ ν ω) (qadd_cx σ τ)))) (÷ (qmul_cx (⊠ (bern_cx ι) ν) φ) υ) (⊟ (⊞ (ℜ ξ) (⊠ 1100 ι)) 1))
+⍝ ζ(s) within 2⁻ᵖ (s ≠ 1): R ≤ 2⁻ᵖ⁻³, the N − 1 powers within 2⁻ᵖ⁻³ together, N⁻ˢ within 2⁻ᵖ⁻³/|C|, the truncation 2⁻ᵖ⁻¹
+zem_cx ∶ ℚ[i] → ℕ → ℚ[i]
+zem_cx ξ μ ≔ ((β κ ↦ ((ι ↦ ((ν ↦ ((χ ↦ (tr_cx (qadd_cx ((isint_cx ξ) (zis_cx ξ ν 0) (zpl_cx ξ (⊞ (⊞ (⊞ (⊞ μ 1101) ι) (⊠ κ ι)) (blen_cx (⊠ 1101 ι) 1 0)) (max 0 (⌈ (ℜ ξ))) ν 1100 ⊥ 1)) ((≐ χ 0) 0 (qmul_cx (pw2_cx ξ ι κ (⊞ (⊞ μ 1101) (max 0 (lgz_cx χ)))) χ))) (⊞ μ 1))) (zl_cx ξ (⊠ ν ν) (^ 1100 (⊖ (⊞ (⊞ (⊠ 1100 μ) 111000000) (⌈ (⊠ (⊖ (⊠ 1100 (ℜ ξ))) ι))))) 1 ξ 1100 (÷ 1 ν) (⊞ (÷ ν (⊟ ξ 1)) (÷ 1 1100))))) (^ 1100 ι))) (jn_cx μ κ β 1100 111010000))) (bz_cx ξ) (max 0 (⌈ (⊖ (ℜ ξ)))))
+⍝ ζ at the negative integers and 0: ζ(0) = −½, ζ(−n) = −B₍ₙ₊₁₎/(n + 1) (0 for even n > 0)
+zneg_cx ∶ ℚ → ℚ
+zneg_cx ξ ≔ ((≐ ξ 0) (÷ 11101 1100) ((θ ↦ ((≐ θ (⌊ θ)) (⊖ (÷ (bern_cx θ) (⊠ 1100 θ))) 0)) (÷ (⊟ 1 ξ) 1100)))
+⍝ the regular stream of ζ(s) by Euler–Maclaurin, and the functional equation ζ(s) = 2ˢ·π^(s−1)·sin(πs/2)·Γ(1 − s)·ζ(1 − s), used
+⍝ for Re s < −8 (where the sum would need many more bits)
+zemS_cx ∶ ℚ[i] → ℝ[i]
+zemS_cx ξ ≔ (mkq_cx (zem_cx ξ))
+gamS_cx ∶ ℚ[i] → ℝ[i]
+gamS_cx ξ ≔ ((npi_cx ξ) (⁂ 0) (mkq_cx (gmq_cx ξ)))
+zfe_cx ∶ ℚ[i] → ℝ[i]
+zfe_cx ξ ≔ (mulR_cx (mulR_cx (expR_cx (sclR_cx ξ ln2_cx)) (expR_cx (sclR_cx (⊟ ξ 1) (logR_cx pi_cx)))) (mulR_cx (sinR_cx (sclR_cx (÷ ξ 1100) pi_cx)) (mulR_cx (gamS_cx (⊟ 1 ξ)) (zemS_cx (⊟ 1 ξ)))))
+zetaS_cx ∶ ℚ[i] → ℝ[i]
+zetaS_cx ξ ≔ ((≐ ξ 1) (⁂ 0) ((∧ (isint_cx ξ) (⩽ (ℜ ξ) 0)) (⁂ (zneg_cx (ℜ ξ))) ((⩾ (ℜ ξ) 11000000) (zemS_cx ξ) (zfe_cx ξ))))
+⍝ ---- polylogarithm Liₛ(z) for an integer s.  s ≤ 0: the rational function z·Aₜ(z)/(1 − z)^(t+1) (t = −s ≥ 1, Aₜ the Eulerian
+⍝ polynomial, A(n, k) = (k + 1)·A(n − 1, k) + (n − k)·A(n − 1, k − 1)), z/(1 − z) for s = 0;  s = 1: −log(1 − z);  s ≥ 2 and |z| < 1:
+⍝ Σ zᵏ/kˢ with |z| ≤ r = 1 − 1/D (D the least integer ≥ 2 with |z|² ≤ r²): the tail after K terms is at most D·r^(K+1) and
+⍝ r^D ≤ 1/e ≤ 2^(−7/5), so K + 1 = D·⌈5(p + 2 + log₂ D)/7⌉ terms leave a tail ≤ 2⁻ᵖ⁻²;  s ≥ 2 and z = 1: ζ(s), z = −1: −(1 − 2^(1−s))·ζ(s)
+eur_cx ∶ ℕ → 𝔏 ℕ → 𝔏 ℕ
+eur_cx ν α ≔ (⫴ (θ κ ↦ (⊞ (⊠ (⊞ κ 1) (◀ θ)) (⊠ (⊟ ν κ) (▶ θ)))) (⫴ ⊗ (⧺ α (∷ 0 ⊥)) (∷ 0 α)) (⍳ ν))
+eul_cx ∶ ℕ → 𝔏 ℕ
+eul_cx ν ≔ ((⩽ ν 1) (∷ 1 ⊥) (eur_cx ν (eul_cx (⊟ ν 1))))
+plneg_cx ∶ ℤ → ℚ[i] → ℚ[i]
+plneg_cx ν ξ ≔ ((≐ ν 0) (÷ ξ (⊟ 1 ξ)) (÷ (⊠ ξ (foldr (θ υ ↦ (⊞ θ (⊠ ξ υ))) 0 (eul_cx (⊖ ν)))) (^ (⊟ 1 ξ) (⊞ (⊖ ν) 1))))
+pld_cx ∶ ℚ → ℕ → ℕ
+pld_cx ξ δ ≔ ((leq_cx ξ (^ (⊟ 1 (÷ 1 δ)) 1100)) δ (pld_cx ξ (⊞ δ 1)))
+plq_cx ∶ ℤ → ℚ[i] → ℕ → ℕ → ℚ[i]
+plq_cx ν ξ δ μ ≔ ((κ ↦ (serN_cx ξ (ι ↦ (⊠ ξ (^ (÷ ι (⊞ ι 1)) ν))) κ (⊞ (⊠ 1100 (blen_cx κ 1 0)) 1) (⊞ μ 1))) (⊟ (⊠ δ (⌈ (÷ (⊠ 111010001 (⊞ (⊞ μ 1100) (lg2_cx δ))) 111011101))) 1))
+plS_cx ∶ ℤ → ℚ[i] → ℝ[i]
+plS_cx ν ξ ≔ ((⩽ ν 0) ((≐ ξ 1) (⁂ 0) (⁂ (plneg_cx ν ξ))) ((≐ ν 1) ((≐ ξ 1) (⁂ 0) (negR_cx (logS_cx (⊟ 1 ξ)))) ((≐ ξ 1) (zetaS_cx ν) ((≐ ξ 11101) (sclR_cx (⊟ (^ 1100 (⊟ 1 ν)) 1) (zetaS_cx ν)) ((lt_cx (𝒩 ξ) 1) ((δ ↦ (mkq_cx (plq_cx ν ξ δ))) (pld_cx (𝒩 ξ) 1100)) (⁂ 0))))))
+⍝ ---- Bessel functions of integer order: Jₙ(z) = Σ (−1)ᵏ (z/2)^(2k+n)/(k!(k + n)!), J₋ₙ = (−1)ⁿ·Jₙ;  ratio −(z/2)²/(k(k + n)),
+⍝ |ratio| ≤ |z|²/(4k²), products ≤ e^|z|
+bjS_cx ∶ ℤ → ℚ[i] → ℝ[i]
+bjS_cx ν ξ ≔ ((⩾ ν 0) ((≐ ξ 0) ((≐ ν 0) (⁂ 1) (⁂ 0)) (sEs_cx (÷ (^ (÷ ξ 1100) ν) (fact ν)) (κ ↦ (÷ (⊖ (⊠ ξ ξ)) (⊠ 111010000 (⊠ κ (⊞ κ ν))))) (κ ↦ (lg2_cx (÷ (𝒩 ξ) (⊠ 111010000 (⊠ κ κ))))) (bz_cx ξ))) ((θ ↦ ((≐ (mod ν 1100) 0) θ (negR_cx θ))) (bjS_cx (⊖ ν) ξ)))
+⍝ ---- sine and cosine integrals, exponential integral, logarithmic integral
+⍝ Si z = Σ (−1)ᵏ z^(2k+1)/((2k + 1)(2k + 1)!):  ratio −z²(2k − 1)/(2k(2k + 1)²), |ratio| ≤ |z|²/(4k²)
+siS_cx ∶ ℚ[i] → ℝ[i]
+siS_cx ξ ≔ ((≐ ξ 0) (⁂ 0) (sEs_cx ξ (κ ↦ (÷ (⊠ (⊖ (⊠ ξ ξ)) (⊟ (⊠ 1100 κ) 1)) (⊠ (⊠ 1100 κ) (⊠ (⊞ (⊠ 1100 κ) 1) (⊞ (⊠ 1100 κ) 1))))) (κ ↦ (lg2_cx (÷ (𝒩 ξ) (⊠ 111010000 (⊠ κ κ))))) (bz_cx ξ)))
+⍝ Ci z = γ + log z + Σₖ≥₁ (−1)ᵏ z^(2k)/(2k(2k)!):  first term −z²/4, ratio −z²·2k/((2k + 2)²(2k + 1)), |ratio| ≤ |z|²/(4k²)
+ciS_cx ∶ ℚ[i] → ℝ[i]
+ciS_cx ξ ≔ ((≐ ξ 0) (⁂ 0) (sumR_cx (sumR_cx 𝛾 (logS_cx ξ)) (sEs_cx (÷ (⊖ (⊠ ξ ξ)) 111010000) (κ ↦ (÷ (⊠ (⊖ (⊠ ξ ξ)) (⊠ 1100 κ)) (⊠ (⊠ (⊞ (⊠ 1100 κ) 1100) (⊞ (⊠ 1100 κ) 1100)) (⊞ (⊠ 1100 κ) 1)))) (κ ↦ (lg2_cx (÷ (𝒩 ξ) (⊠ 111010000 (⊠ κ κ))))) (bz_cx ξ))))
+⍝ Ein*(u) = Σₖ≥₁ uᵏ/(k·k!) for an exact real u:  ratio u·k/(k + 1)², |ratio| ≤ |u|/k, products ≤ e^|u|
+einS_cx ∶ ℚ → ℝ
+einS_cx ξ ≔ ((≐ ξ 0) (⁂ 0) (sEs_cx ξ (κ ↦ (÷ (⊠ ξ κ) (⊠ (⊞ κ 1) (⊞ κ 1)))) (κ ↦ (lg2_cx (÷ (abs ξ) κ))) (⊞ (⌈ (abs ξ)) 1)))
+⍝ Ei x = γ + log|x| + Ein*(x) (x real ≠ 0)
+eiS_cx ∶ ℚ → ℝ
+eiS_cx ξ ≔ ((≐ ξ 0) (⁂ 0) (sumR_cx (sumR_cx 𝛾 (lpS_cx (abs ξ))) (einS_cx ξ)))
+⍝ Ein* of a real stream U: |d/du Ein*(u)| = |(eᵘ − 1)/u| ≤ e^|u| ≤ 2^(c−2), c = ⌈3/2·(|U₀| + 1)⌉ + 3 (|U − U₀| ≤ 2⁻⁸), so U is taken at m + c
+einR_cx ∶ ℝ → ℝ
+einR_cx ξ ≔ ((ν ↦ (mk_cx (μ ↦ (at_cx (einS_cx (ℜ (at_cx ξ (⊞ μ ν)))) (⊞ μ 1))))) (⊞ (⌈ (⊠ (÷ 1101 1100) (⊞ (abs (ℜ (at_cx ξ 0))) 1))) 1101))
+⍝ li x = Ei(log x) = γ + log|log x| + Ein*(log x)  (x > 0, x ≠ 1)
+liS_cx ∶ ℚ → ℝ
+liS_cx ξ ≔ ((∨ (⩽ ξ 0) (≐ ξ 1)) (⁂ 0) ((υ ↦ (sumR_cx (sumR_cx 𝛾 (logR_cx (⫶ (θ ↦ (abs (ℜ θ))) υ))) (einR_cx υ))) (lpS_cx ξ)))
+⍝ ---- the Lambert W function, principal branch, for a real x ≥ −1/e: Newton's step w ← (w²eʷ + x)/(eʷ(1 + w)) on f(w) = w·eʷ − x
+⍝ (convex and increasing on (−1, ∞), so from any start above −1 the steps go above W and then down to it), each at a working
+⍝ precision P = m + 8 + ⌈log₂ 1/(1 + w)⌉⁺ + ⌈log₂ |w|⌉⁺, until the residual R = |f(w)| + |w|·2⁻ᴾ⁻² (eʷ within 2⁻ᴾ⁻²) certifies
+⍝ |W − w| < d = 2⁻ᵐ⁻²:  either d ≤ (1 + w)/2 and R < d·(eʷ − 2⁻ᴾ⁻²)(1 + w)/4 (f′ ≥ e^(w−d)(1 + w − d) ≥ eʷ(1 + w)/4 on [w − d, w + d],
+⍝ so f changes sign there), or f(w) > |w|·2⁻ᴾ⁻² (w > W) and 1 + w ≤ d (W > −1).  Start: log(1 + x) (to 4 bits) for x ≥ 0,
+⍝ −1 + p − p²/3 with p ≈ √(2(1 + e·x)) for x < 0 (both above −1).
+lwn_cx ∶ ℚ → ℚ → ℕ → ℚ
+lwn_cx ξ ω ν ≔ ((η ↦ ((θ ↦ ((leq_cx (⊞ 1 θ) (^ 1100 (⊖ ν))) (⊟ (^ 1100 (⊖ ν)) 1) θ)) (tr_cx (qdiv_cx (qadd_cx (qmul_cx (qmul_cx ω ω) η) ξ) (qmul_cx η (⊞ 1 ω))) ν))) (ℜ (expq_cx ω (⊞ ν 1100))))
+lwl_cx ∶ ℚ → ℕ → ℚ → ℕ → ℚ
+lwl_cx ξ μ ω ν ≔ ((ϕ ↦ ((lt_cx ν ϕ) (lwl_cx ξ μ (lwn_cx ξ ω ν) (⊠ 1100 ν)) ((ϕ ↦ ((ε ↦ ((ε′ ↦ ((η ↦ ((ρ ↦ ((δ ↦ ((∨ (∧ (leq_cx δ (÷ (⊞ 1 ω) 1100)) (lt_cx (⊞ (abs ρ) (⊠ (abs ω) ε′)) (⊠ (⊠ δ (⊟ η ε′)) (÷ (⊞ 1 ω) 111010000)))) (∧ (lt_cx (⊠ (abs ω) ε′) ρ) (leq_cx (⊞ 1 ω) δ))) (tr_cx ω (⊞ μ 1100)) ((ω′ ↦ (lwl_cx ξ μ ((leq_cx (⊞ 1 ω′) ε) (⊟ ε 1) ω′) ϕ)) (tr_cx (qdiv_cx (qadd_cx (qmul_cx (qmul_cx ω ω) η) ξ) (qmul_cx η (⊞ 1 ω))) ϕ)))) (^ 1100 (⊖ (⊞ μ 1100))))) (qsub_cx (qmul_cx ω η) ξ))) (ℜ (expq_cx ω (⊞ ϕ 1100))))) (^ 1100 (⊖ (⊞ ϕ 1100))))) (^ 1100 (⊖ ϕ)))) ϕ))) (⊞ (⊞ (⊞ μ 111000000) (max 0 (⊖ (lgl_cx (⊞ 1 ω))))) (ub_cx ω)))
+⍝ x < −1/e?  (decided with e to ever more bits: e·x + 1 ≠ 0 for a rational x)
+lwdom_cx ∶ ℚ → ℕ → 𝔹
+lwdom_cx ξ ν ≔ ((υ ε ↦ ((lt_cx ε υ) ⊥ ((lt_cx υ (⊖ ε)) ⊤ (lwdom_cx ξ (⊞ ν 111000000))))) (⊞ (⊠ ξ (ℜ (at_cx ℯ ν))) 1) (⊠ (abs ξ) (^ 1100 (⊖ ν))))
+lwq_cx ∶ ℚ → ℕ → ℚ
+lwq_cx ξ μ ≔ (lwl_cx ξ μ ((⩾ ξ 0) (tr_cx (logpos_cx (⊞ 1 ξ) 111010000) 111010000) ((θ ↦ (tr_cx (⊟ (⊟ θ 1) (÷ (⊠ θ θ) 1101)) 111000000)) (sqrtpos_cx (max (÷ 1 (^ 1100 110011010000)) (⊠ 1100 (⊞ 1 (⊠ ξ (ℜ (at_cx ℯ 111000000)))))) 111000000))) 111000000)
+lwS_cx ∶ ℚ → ℝ
+lwS_cx ξ ≔ ((≐ ξ 0) (⁂ 0) ((∧ (lt_cx ξ (÷ 11101 111010000)) (lwdom_cx ξ 111000000)) (⁂ 0) (mkq_cx (lwq_cx ξ))))
+⍝ ---- the arithmetic–geometric mean of reals a, b ≥ 0 with outward rounding: M is increasing in both arguments and invariant under
+⍝ (a, b) ↦ ((a + b)/2, √(ab)), so bounds a⁻ ≤ a ≤ a⁺, b⁻ ≤ b ≤ b⁺ carried with downward and upward rounding keep
+⍝ min(a⁻, b⁻) ≤ M ≤ max(a⁺, b⁺).  The loop stops when the midpoints of the a and b intervals are within 2^(4−q) (the AGM has
+⍝ converged; the interval is then about 4n·2⁻ᵠ wide after n steps), or after 64 steps.  It also carries, for E(m),
+⍝ S = Σₙ 2^(n−1)·cₙ² with c₍ₙ₊₁₎ = (aₙ − bₙ)/2 as an interval [s⁻, s⁺] (τ = 2ⁿ), and passes κ lo hi s⁻ s⁺ τ to its continuation.
+⍝ rounding down and up: tr(x ∓ 2^(1−q), q) is within 2⁻ᵠ of x ∓ 2^(1−q), so it lies below (above) x, and its digits stay short
+dn_cx ∶ ℚ → ℕ → ℚ
+dn_cx ξ μ ≔ (max 0 (dnr_cx ξ μ))
+dnr_cx ∶ ℚ → ℕ → ℚ
+dnr_cx ξ μ ≔ (ℜ (tr_cx (⊟ ξ (^ 1100 (⊟ 1 μ))) μ))
+up_cx ∶ ℚ → ℕ → ℚ
+up_cx ξ μ ≔ (ℜ (tr_cx (⊞ ξ (^ 1100 (⊟ 1 μ))) μ))
+sq2_cx ∶ ℚ → ℚ → ℚ
+sq2_cx ξ η ≔ ((⩽ ξ 0) ((⩾ η 0) 0 (⊠ η η)) (⊠ ξ ξ))
+agl_cx ∶ ℕ → ℕ → ℚ → ℚ → ℚ → ℚ → ℚ → ℚ → ℚ → (ℚ → ℚ → ℚ → ℚ → ℚ → β) → β
+agl_cx μ ι τ α₁ α₂ β₁ β₂ σ₁ σ₂ κ ≔ ((λ υ ↦ ((∨ (⩽ (abs (⊟ (⊞ α₁ α₂) (⊞ β₁ β₂))) (^ 1100 (⊟ 111010001 μ))) (⩾ ι 11101000000000000)) (κ λ υ σ₁ σ₂ τ) ((ϕ ψ ↦ (agl_cx μ (⊞ ι 1) (⊠ 1100 τ) (dn_cx (÷ (⊞ α₁ β₁) 1100) μ) (up_cx (÷ (⊞ α₂ β₂) 1100) μ) (dn_cx (sqrtpos_cx (⊠ α₁ β₁) (⊞ μ 1)) μ) (up_cx (sqrtpos_cx (⊠ α₂ β₂) (⊞ μ 1)) μ) (dnr_cx (⊞ σ₁ (⊠ τ (sq2_cx ϕ ψ))) μ) (up_cx (⊞ σ₂ (⊠ τ (max (⊠ ϕ ϕ) (⊠ ψ ψ)))) μ) κ)) (dnr_cx (÷ (⊟ α₁ β₂) 1100) μ) (up_cx (÷ (⊟ α₂ β₁) 1100) μ)))) (min α₁ β₁) (max α₂ β₂))
+⍝ a regular-stream element from an interval (first at q = m + 12): retry with 8 more bits until hi − lo ≤ 2⁻ᵐ⁻¹, then the midpoint truncated at m + 2
+⍝ (φ q gives the pair (lo, hi) at working precision q)
+ivl_cx ∶ (ℕ → 𝔓 ℚ ℚ) → ℕ → ℕ → ℚ
+ivl_cx φ μ ν ≔ ((θ ↦ ((⩽ (⊟ (▶ θ) (◀ θ)) (^ 1100 (⊖ (⊞ μ 1)))) (tr_cx (÷ (⊞ (◀ θ) (▶ θ)) 1100) (⊞ μ 1100)) (ivl_cx φ μ (⊞ ν 111000000)))) (φ ν))
+⍝ M(a, b) for a, b ≥ 0
+agmq_cx ∶ ℚ → ℚ → ℕ → ℚ
+agmq_cx ξ η μ ≔ (ivl_cx (ν ↦ (agl_cx ν 0 1 ξ ξ η η 0 0 (λ υ σ₁ σ₂ τ ↦ (⊗ λ υ)))) μ (⊞ μ 100010000))
+⍝ K(m) = π/(2·M(1, √(1 − m))) and E(m) = K(m)·(1 − S), S = m/2 + Σₙ≥₁ 2^(n−1)·cₙ² (m < 1).  The tail after the loop is at most
+⍝ 2τh² (h = (hi − lo)/2 ≥ |c₍ₙ₊₁₎|, as c₍ⱼ₊₁₎ ≤ cⱼ²/(4M) falls by 4 or more once h ≤ lo); with π within 2⁻ᵠ:
+⍝ K ∈ [π⁻/(2hi), π⁺/(2lo)],  E ∈ [π⁻(1 − S⁺)/(2hi) (or 0 if 1 − S⁺ < 0), π⁺(1 − S⁻)/(2lo)].  An interval that is not yet certified
+⍝ (lo = 0, or h > lo) is made as wide as [0, 1 + K⁺] so that the retry takes over.
+ekl_cx ∶ ℚ → ℕ → (ℚ → ℚ → ℚ → ℚ → ℚ → ℚ → ℚ → 𝔓 ℚ ℚ) → 𝔓 ℚ ℚ
+ekl_cx ξ ν κ ≔ ((θ ↦ (agl_cx ν 0 1 1 1 (max 0 (⊟ θ (^ 1100 (⊖ ν)))) (⊞ θ (^ 1100 (⊖ ν))) (÷ ξ 1100) (÷ ξ 1100) (κ (⊟ (pia_cx ν) (^ 1100 (⊖ ν))) (⊞ (pia_cx ν) (^ 1100 (⊖ ν)))))) (sqrtpos_cx (⊟ 1 ξ) ν))
+ekq_cx ∶ ℚ → ℕ → ℚ
+ekq_cx ξ μ ≔ (ivl_cx (ν ↦ (ekl_cx ξ ν (π₁ π₂ λ υ σ₁ σ₂ τ ↦ ((⩽ λ 0) (⊗ 0 (^ 1100 μ)) (⊗ (÷ π₁ (⊠ 1100 υ)) (÷ π₂ (⊠ 1100 λ))))))) μ (⊞ μ 100010000))
+eeq_cx ∶ ℚ → ℕ → ℚ
+eeq_cx ξ μ ≔ (ivl_cx (ν ↦ (ekl_cx ξ ν (π₁ π₂ λ υ σ₁ σ₂ τ ↦ ((θ ↦ ((∨ (⩽ λ 0) (lt_cx λ θ)) (⊗ 0 (^ 1100 μ)) ((σ₃ ↦ (⊗ ((⩾ σ₃ 1) 0 (÷ (⊠ π₁ (⊟ 1 σ₃)) (⊠ 1100 υ))) (÷ (⊠ π₂ (⊟ 1 σ₁)) (⊠ 1100 λ)))) (⊞ σ₂ (⊠ (⊠ 1100 τ) (⊠ θ θ)))))) (÷ (⊟ υ λ) 1100))))) μ (⊞ μ 100010000))
+⍝ ==== the special functions (public)
+absc ∶ ℚ[i] → ℝ   ⍝ modulus |z| = √(x² + y²) of an exact complex number; element n within 2⁻ⁿ
+absc ξ ≔ (spS_cx (𝒩 ξ))
+Γ ∶ ℚ → ℝ   ⍝ gamma function Γ(z): Stirling's series (exact Bernoulli numbers, remainder ≤ first omitted term) after the shift Γ(z) = Γ(z + N)/(z(z + 1)⋯(z + N − 1)); 0 at the poles 0, −1, −2, …; element n within 2⁻ⁿ; the cost grows with |z|
+Γ ∶ ℚ[i] → ℝ[i]
+Γ ξ ≔ (rel_cx ξ (gamS_cx ξ))
+Γᴿ ∶ ℝ → ℝ   ⍝ gamma function of a lazy argument (through the diagonal; converges away from the poles)
+Γᴿ ∶ ℝ[i] → ℝ[i]
+Γᴿ ≔ (⟐ Γ)
+lgamma ∶ ℚ → ℝ   ⍝ log|Γ(x)| of a real x (as C's lgamma): Stirling's series after a shift; 0 at the poles; element n within 2⁻ⁿ
+lgamma ξ ≔ ((npi_cx ξ) (⁂ 0) (mkq_cx (lgq_cx ξ)))
+digamma ∶ ℚ → ℝ   ⍝ digamma function ψ(z) = Γ′(z)/Γ(z): asymptotic series after the shift ψ(z) = ψ(z + N) − Σ 1/(z + j); 0 at the poles; element n within 2⁻ⁿ
+digamma ∶ ℚ[i] → ℝ[i]
+digamma ξ ≔ ((npi_cx ξ) (⁂ 0) (rel_cx ξ (mkq_cx (dgq_cx ξ))))
+beta ∶ ℚ → ℚ → ℝ   ⍝ beta function B(a, b) = Γ(a)Γ(b)/Γ(a + b) = e^(log Γ(a) + log Γ(b) − log Γ(a + b)) (one exponential); 0 when a or b is a pole of Γ, and when a + b is one (1/Γ(a + b) = 0); element n within 2⁻ⁿ
+beta ∶ ℚ[i] → ℚ[i] → ℝ[i]
+beta ξ η ≔ ((∨ (∨ (npi_cx ξ) (npi_cx η)) (npi_cx (⊞ ξ η))) (⁂ 0) ((θ ↦ ((∧ (isreal_cx ξ) (isreal_cx η)) (⫶ ℜ θ) θ)) (mkq_cx (btq_cx ξ η))))
+erf ∶ ℚ → ℝ   ⍝ error function erf z = (2/√π)·Σ (−1)ᵏ z^(2k+1)/(k!(2k + 1)) (all terms carried at the precision the largest one needs); for real |x| ≥ 1 with x² ≥ 0.7n element n is ±1 (erfc|x| < e^(−x²)); element n within 2⁻ⁿ; the cost grows with |z|²
+erf ∶ ℚ[i] → ℝ[i]
+erf ξ ≔ ((θ ↦ ((isreal_cx ξ) (mk_cx (μ ↦ ((∧ (⩾ (abs (ℜ ξ)) 1) (⩾ (⊠ (ℜ ξ) (ℜ ξ)) (⊠ (÷ 111011101 111001100) μ))) ((⩾ (ℜ ξ) 0) 1 11101) (ℜ (at_cx θ μ))))) θ)) (erfS_cx ξ))
+erfᴿ ∶ ℝ → ℝ   ⍝ error function of a lazy argument
+erfᴿ ∶ ℝ[i] → ℝ[i]
+erfᴿ ≔ (⟐ erf)
+erfc ∶ ℚ → ℝ   ⍝ complementary error function 1 − erf z (absolute error: element n within 2⁻ⁿ)
+erfc ∶ ℚ[i] → ℝ[i]
+erfc ξ ≔ ((θ ↦ (mk_cx (μ ↦ (⊟ 1 (at_cx θ μ))))) (erf ξ))
+erfcᴿ ∶ ℝ → ℝ   ⍝ complementary error function of a lazy argument
+erfcᴿ ∶ ℝ[i] → ℝ[i]
+erfcᴿ ≔ (⟐ erfc)
+zeta ∶ ℚ → ℝ   ⍝ Riemann zeta function ζ(s): Euler–Maclaurin summation (Re s ≥ −8; exact powers for an integer s), the functional equation below; exact at 0 and the negative integers (−B₍ₙ₊₁₎/(n + 1)); ζ(1) = 0 (pole); element n within 2⁻ⁿ; the cost grows with |s|
+zeta ∶ ℚ[i] → ℝ[i]
+zeta ξ ≔ (rel_cx ξ (zetaS_cx ξ))
+polylog ∶ ℤ → ℚ[i] → ℝ[i]   ⍝ polylogarithm Liₛ(z) for an integer s: the rational function z·Aₜ(z)/(1 − z)^(t+1) for s = −t ≤ 0 (Eulerian polynomials, every z ≠ 1), −log(1 − z) for s = 1 (z ≠ 1), Σ zᵏ/kˢ for s ≥ 2 and |z| < 1, ζ(s) at z = 1 and −(1 − 2^(1−s))·ζ(s) at z = −1; 0 elsewhere (|z| ≥ 1) and at the pole z = 1; element n within 2⁻ⁿ
+polylog ≔ plS_cx
+lambertw ∶ ℚ → ℝ   ⍝ Lambert W function, principal branch: W(x)·e^W(x) = x for a real x ≥ −1/e (Newton's method with a certified residual bound); 0 for x < −1/e; element n within 2⁻ⁿ
+lambertw ≔ lwS_cx
+lambertwᴿ ∶ ℝ → ℝ   ⍝ Lambert W function of a lazy argument
+lambertwᴿ ≔ (⟐ lambertw)
+besselj ∶ ℤ → ℚ → ℝ   ⍝ Bessel function of the first kind Jₙ(z) of integer order n (power series; J₋ₙ = (−1)ⁿJₙ); element n within 2⁻ⁿ; the cost grows with |z|
+besselj ∶ ℤ → ℚ[i] → ℝ[i]
+besselj ν ξ ≔ (rel_cx ξ (bjS_cx ν ξ))
+⍝ modified Bessel function of the first kind of integer order: Iₙ(z) = Σ (z/2)^(2k+n)/(k!(k + n)!), I₋ₙ = Iₙ;  ratio (z/2)²/(k(k + n)),
+⍝ |ratio| ≤ |z|²/(4k²), products ≤ e^|z|   (the series of Jₙ without the alternating sign)
+biS_cx ∶ ℤ → ℚ[i] → ℝ[i]
+biS_cx ν ξ ≔ ((⩾ ν 0) ((≐ ξ 0) ((≐ ν 0) (⁂ 1) (⁂ 0)) (sEs_cx (÷ (^ (÷ ξ 1100) ν) (fact ν)) (κ ↦ (÷ (⊠ ξ ξ) (⊠ 111010000 (⊠ κ (⊞ κ ν))))) (κ ↦ (lg2_cx (÷ (𝒩 ξ) (⊠ 111010000 (⊠ κ κ))))) (bz_cx ξ))) (biS_cx (⊖ ν) ξ))
+besseli ∶ ℤ → ℚ → ℝ   ⍝ modified Bessel function of the first kind Iₙ(z) of integer order n (power series; I₋ₙ = Iₙ); element n within 2⁻ⁿ; the cost grows with |z|
+besseli ∶ ℤ → ℚ[i] → ℝ[i]
+besseli ν ξ ≔ (rel_cx ξ (biS_cx ν ξ))
+erfi ∶ ℚ → ℝ   ⍝ imaginary error function erfi z = −i·erf(iz) = (2/√π)·Σ z^(2k+1)/(k!(2k + 1)); element n within 2⁻ⁿ; the cost grows with |z|²
+erfi ∶ ℚ[i] → ℝ[i]
+erfi ξ ≔ (rel_cx ξ (sclR_cx 111 (erf (⊠ 11 ξ))))
+agm ∶ ℚ → ℚ → ℝ   ⍝ arithmetic–geometric mean M(a, b) of reals of one sign (M(−a, −b) = −M(a, b)), with outward rounding; 0 when a·b ≤ 0; element n within 2⁻ⁿ
+agm ξ η ≔ ((∨ (⩽ ξ 0) (⩽ η 0)) ((∧ (≺ ξ 0) (≺ η 0)) (negR_cx (mkq_cx (agmq_cx (⊖ ξ) (⊖ η)))) (⁂ 0)) (mkq_cx (agmq_cx ξ η)))
+ellipk ∶ ℚ → ℝ   ⍝ complete elliptic integral of the first kind K(m) = ∫₀^(π/2) dθ/√(1 − m·sin²θ) (parameter m < 1) = π/(2·M(1, √(1 − m))); 0 for m ≥ 1 (pole at 1); element n within 2⁻ⁿ
+ellipk ξ ≔ ((⩾ ξ 1) (⁂ 0) (mkq_cx (ekq_cx ξ)))
+ellipe ∶ ℚ → ℝ   ⍝ complete elliptic integral of the second kind E(m) = ∫₀^(π/2) √(1 − m·sin²θ) dθ (m ≤ 1) = K(m)·(1 − Σ 2^(n−1)cₙ²) (Gauss' AGM method, outward rounding); E(1) = 1; 0 for m > 1; element n within 2⁻ⁿ
+ellipe ξ ≔ ((≐ ξ 1) (⁂ 1) ((⩾ ξ 1) (⁂ 0) (mkq_cx (eeq_cx ξ))))
+Ei ∶ ℚ → ℝ   ⍝ exponential integral Ei(x) = γ + log|x| + Σ xᵏ/(k·k!) (principal value for x > 0); 0 at x = 0 (pole); element n within 2⁻ⁿ
+Ei ≔ eiS_cx
+li ∶ ℚ → ℝ   ⍝ logarithmic integral li(x) = Ei(log x) for x > 0 (principal value for x > 1); 0 at x = 1 (pole) and for x ≤ 0; element n within 2⁻ⁿ
+li ≔ liS_cx
+Si ∶ ℚ → ℝ   ⍝ sine integral Si(z) = ∫₀ᶻ sin t/t dt (power series); element n within 2⁻ⁿ
+Si ∶ ℚ[i] → ℝ[i]
+Si ξ ≔ (rel_cx ξ (siS_cx ξ))
+Siᴿ ∶ ℝ → ℝ   ⍝ sine integral of a lazy argument
+Siᴿ ∶ ℝ[i] → ℝ[i]
+Siᴿ ≔ (⟐ Si)
+Ci ∶ ℚ[i] → ℝ[i]   ⍝ cosine integral Ci(z) = γ + log z + Σ (−1)ᵏ z^(2k)/(2k(2k)!) (principal log: Ci(−x) = Ci(x) + iπ for x > 0); 0 at z = 0 (pole); element n within 2⁻ⁿ
+Ci ≔ ciS_cx
+⍝ hyperbolic sine and cosine integrals: Shi z = Σ z^(2k+1)/((2k + 1)(2k + 1)!) (the series of Si without the alternating sign) and
+⍝ Chi z = γ + log z + Σₖ≥₁ z^(2k)/(2k(2k)!) (that of Ci without it);  the same ratio bounds, |ratio| ≤ |z|²/(4k²)
+shiS_cx ∶ ℚ[i] → ℝ[i]
+shiS_cx ξ ≔ ((≐ ξ 0) (⁂ 0) (sEs_cx ξ (κ ↦ (÷ (⊠ (⊠ ξ ξ) (⊟ (⊠ 1100 κ) 1)) (⊠ (⊠ 1100 κ) (⊠ (⊞ (⊠ 1100 κ) 1) (⊞ (⊠ 1100 κ) 1))))) (κ ↦ (lg2_cx (÷ (𝒩 ξ) (⊠ 111010000 (⊠ κ κ))))) (bz_cx ξ)))
+chiS_cx ∶ ℚ[i] → ℝ[i]
+chiS_cx ξ ≔ ((≐ ξ 0) (⁂ 0) (sumR_cx (sumR_cx 𝛾 (logS_cx ξ)) (sEs_cx (÷ (⊠ ξ ξ) 111010000) (κ ↦ (÷ (⊠ (⊠ ξ ξ) (⊠ 1100 κ)) (⊠ (⊠ (⊞ (⊠ 1100 κ) 1100) (⊞ (⊠ 1100 κ) 1100)) (⊞ (⊠ 1100 κ) 1)))) (κ ↦ (lg2_cx (÷ (𝒩 ξ) (⊠ 111010000 (⊠ κ κ))))) (bz_cx ξ))))
+Shi ∶ ℚ → ℝ   ⍝ hyperbolic sine integral Shi(z) = ∫₀ᶻ sinh t/t dt (power series); element n within 2⁻ⁿ; the cost grows with |z|
+Shi ∶ ℚ[i] → ℝ[i]
+Shi ξ ≔ (rel_cx ξ (shiS_cx ξ))
+Chi ∶ ℚ[i] → ℝ[i]   ⍝ hyperbolic cosine integral Chi(z) = γ + log z + Σ z^(2k)/(2k(2k)!) (principal log); 0 at z = 0 (pole); element n within 2⁻ⁿ
+Chi ≔ chiS_cx
+⍝ Dawson's integral D(z) = e^(−z²)∫₀ᶻ e^(t²) dt = Σ (−2z²)ᵏ z/(3·5⋯(2k + 1)):  ratio −2z²/(2k + 1), |ratio| ≤ |z|²/k, products ≤ e^|z|²
+daS_cx ∶ ℚ[i] → ℝ[i]
+daS_cx ξ ≔ ((≐ ξ 0) (⁂ 0) (sEs_cx ξ (κ ↦ (÷ (⊠ 11101 (⊠ 1100 (⊠ ξ ξ))) (⊞ (⊠ 1100 κ) 1))) (κ ↦ (lg2_cx (÷ (𝒩 ξ) κ))) (⊞ (⌈ (𝒩 ξ)) 1)))
+dawson ∶ ℚ → ℝ   ⍝ Dawson's integral D(z) = e^(−z²)·∫₀ᶻ e^(t²) dt = (√π/2)·e^(−z²)·erfi(z) (power series); element n within 2⁻ⁿ; the cost grows with |z|²
+dawson ∶ ℚ[i] → ℝ[i]
+dawson ξ ≔ (rel_cx ξ (daS_cx ξ))

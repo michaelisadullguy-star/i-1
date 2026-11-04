@@ -1,0 +1,1 @@
+main in String := "Hello, " ++ str(6 * 7) ++ "!\n"

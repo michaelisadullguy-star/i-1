@@ -1,0 +1,20 @@
+⍝ lib/set.imo — spec notation — trusted prelude, part 10: sets as characteristic functions α → 𝔹 (a set is the test of its membership)
+∈ ∶ α → (α → 𝔹) → 𝔹
+∈ ξ η ≔ (η ξ)
+∅ˢ ∶ α → 𝔹
+∅ˢ ξ ≔ ⊥
+𝕌 ∶ α → 𝔹
+𝕌 ξ ≔ ⊤
+∪ ∶ (α → 𝔹) → (α → 𝔹) → (α → 𝔹)
+∪ ξ η θ ≔ (∨ (ξ θ) (η θ))
+∩ ∶ (α → 𝔹) → (α → 𝔹) → (α → 𝔹)
+∩ ξ η θ ≔ (∧ (ξ θ) (η θ))
+∖ ∶ (α → 𝔹) → (α → 𝔹) → (α → 𝔹)
+∖ ξ η θ ≔ (∧ (ξ θ) (¬ (η θ)))
+∁ ∶ (α → 𝔹) → (α → 𝔹)
+∁ ξ θ ≔ (¬ (ξ θ))
+⍝ the finite set of the elements of a list (membership by ≐), and the members of a set among the elements of a list
+setof ∶ 𝔏 ℚ[i] → (ℚ[i] → 𝔹)
+setof ξ θ ≔ (elem θ ξ)
+members ∶ (α → 𝔹) → 𝔏 α → 𝔏 α
+members ≔ filter

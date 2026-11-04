@@ -1,0 +1,3 @@
+p in \CC
+r in \CC
+main in List(Prop) := [p + r == 3 and p - r == 1]

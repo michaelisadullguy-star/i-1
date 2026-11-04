@@ -1,0 +1,2 @@
+w in \Q
+main in List(Prop) := [w^2 + 1 == 0, w^2 == 2, 2*w == 1 + i, w^2 - 1 == 0 or w == 3]

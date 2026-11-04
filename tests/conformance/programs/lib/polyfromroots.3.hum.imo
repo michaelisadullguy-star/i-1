@@ -1,0 +1,1 @@
+main in List(\QQ) := polyfromroots([3/4, -5/2, 7/3])

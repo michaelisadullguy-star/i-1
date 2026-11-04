@@ -1,0 +1,1 @@
+main in List(Char) := decode(2 + 3*i)

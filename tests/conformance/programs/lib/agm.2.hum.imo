@@ -1,0 +1,1 @@
+main in Stream(\QQ) := agm(-5/2, 1/6)

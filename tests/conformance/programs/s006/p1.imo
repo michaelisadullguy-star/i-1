@@ -1,0 +1,6 @@
+@spec
+π ∶ ℝ
+π ≔ (Σ 1100 (k ∶ ℚ ↦ (÷ k (⊞ (⊠ 1100 k) 1))))
+@hum
+e in \RR := sum(1, k in \QQ |-> 1 / k)
+z in \R := pi + e * i

@@ -1,0 +1,8 @@
+x in \RR
+z in \CC
+y in \CC
+n in \ZZ
+w in \Q
+pi in \RR := sum(2, k in \QQ |-> k / (2 * k + 1))
+e in \RR := sum(1, k in \QQ |-> 1 / k)
+again in Prop := n != 2

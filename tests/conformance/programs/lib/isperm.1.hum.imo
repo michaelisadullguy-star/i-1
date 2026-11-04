@@ -1,0 +1,1 @@
+main in Bool := isperm([12, 5, 7])

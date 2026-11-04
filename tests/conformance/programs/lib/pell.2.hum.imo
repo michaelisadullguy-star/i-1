@@ -1,0 +1,1 @@
+main in Pair(\NN, \NN) := pell(5)

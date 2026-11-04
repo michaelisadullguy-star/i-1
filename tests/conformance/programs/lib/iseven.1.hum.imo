@@ -1,0 +1,1 @@
+main in Bool := iseven([12, 5, 7])

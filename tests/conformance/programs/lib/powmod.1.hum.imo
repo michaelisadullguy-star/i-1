@@ -1,0 +1,1 @@
+main in \NN := powmod(12, 9, 9)

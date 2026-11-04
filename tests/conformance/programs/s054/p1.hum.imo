@@ -1,0 +1,2 @@
+@out spec
+main in \Q := 3 / 2 - i / 2

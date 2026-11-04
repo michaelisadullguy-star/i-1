@@ -1,0 +1,1 @@
+main in List(Char) := decimals(-5/2, 3)

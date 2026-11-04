@@ -1,0 +1,1 @@
+main in List(\QQ) := resolventcubic([-5/2, 7/3, 1/6])

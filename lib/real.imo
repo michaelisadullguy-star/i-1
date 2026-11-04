@@ -1,0 +1,83 @@
+⍝ lib/real.imo — spec notation — trusted prelude, part 8: more of analysis on the lazy ℝ[i]
+⍝ (every function returns a stream of exact ℚ[i] approximants; where a convergence modulus is known it is stated)
+⍝ ---- pointwise operations on streams
+÷ᴿ ∶ ℝ → ℝ → ℝ
+÷ᴿ ∶ ℝ[i] → ℝ[i] → ℝ[i]
+÷ᴿ ≔ (⫴ ÷)
+ℜᴿ ∶ ℝ[i] → ℝ
+ℜᴿ ≔ (⫶ ℜ)
+ℑᴿ ∶ ℝ[i] → ℝ
+ℑᴿ ≔ (⫶ ℑ)
+⍝ pointwise integer power of a lazy number: element n of x^k is (element n of x)^k
+^ᴿ ∶ ℝ → ℤ → ℝ   ⍝ pointwise integer power of a lazy number
+^ᴿ ∶ ℝ[i] → ℤ → ℝ[i]
+^ᴿ ξ η ≔ (⫶ (θ ↦ (^ θ η)) ξ)
+⍝ the diagonal: element n of (⟐ f x) is element n of f(xₙ).  It extends a function of ℚ[i] with approximants f to the lazy ℝ[i]
+⍝ (it converges to f(x) when f is continuous at x).
+⟐′ ∶ (α → 𝔖 β) → 𝔖 α → 𝔇 → 𝔖 β
+⟐′ ξ η ν ≔ (∷ (hd (drop′ ν (ξ (hd η)))) (⟐′ ξ (⌄ η) (⊞ᶻ ν (◀ 1))))
+⟐ ∶ (α → 𝔖 β) → 𝔖 α → 𝔖 β
+⟐ ξ η ≔ (⟐′ ξ η ⊥)
+⍝ ---- square roots.  For x ≥ 0 in ℚ, element n of √x is ⌊√(x·4ⁿ)⌋ / 2ⁿ: it is within 2⁻ⁿ of √x, from below (a modulus of convergence).
+⍝ For z = a + bi the principal root is √((|z| + a)/2) + i·sgn(b)·√((|z| − a)/2), with |z| taken from the same stream index.
+sq⁺ ∶ ℚ → ℚ → ℚ
+sq⁺ ξ θ ≔ (÷ (isqrt (⌊ (⊠ ξ (⊠ θ θ)))) θ)
+√⁺′ ∶ ℚ → ℚ → 𝔖 ℚ
+√⁺′ ξ θ ≔ (∷ (sq⁺ ξ θ) (√⁺′ ξ (⊠ θ 1100)))
+√ᶜ′ ∶ ℚ → ℚ → 𝔖 ℚ → ℚ → 𝔖 ℚ[i]
+√ᶜ′ ϕ ψ ρ θ ≔ (∷ (⊞ (sq⁺ (÷ (⊞ (hd ρ) ϕ) 1100) θ) (⊠ ((⩾ ψ 0) 11 111) (sq⁺ (÷ (⊟ (hd ρ) ϕ) 1100) θ))) (√ᶜ′ ϕ ψ (⌄ ρ) (⊠ θ 1100)))
+√ ∶ ℚ → ℝ
+√ ∶ ℚ[i] → ℝ[i]
+√ ξ ≔ ((ϕ ψ ↦ ((∧ (≐ ψ 0) (⩾ ϕ 0)) (√⁺′ ϕ 1) (√ᶜ′ ϕ ψ (√⁺′ (⊞ (⊠ ϕ ϕ) (⊠ ψ ψ)) 1) 1))) (ℜ ξ) (ℑ ξ))
+⍝ ---- logarithm: log x = 2·artanh y = 2 Σ y^(2k+1)/(2k+1),  y = (x − 1)/(x + 1);  converges for x > 0 (for z ∈ ℚ[i]: Re z > 0, principal branch)
+log ∶ ℚ → ℝ
+log ∶ ℚ[i] → ℝ[i]
+log ξ ≔ ((υ ↦ (Σ (⊠ 1100 υ) (ς ↦ (÷ (⊠ (⊠ υ υ) (⊟ (⊠ 1100 ς) 1)) (⊞ (⊠ 1100 ς) 1))))) (÷ (⊟ ξ 1) (⊞ ξ 1)))
+⍝ ---- arctangent by Euler's series  atan x = Σ 2²ᵏ(k!)²/(2k+1)! · x^(2k+1)/(1 + x²)^(k+1):  ratio (2k/(2k+1))·x²/(1 + x²) < 1, so it
+⍝ converges for every real x (at x = 1 it is the series of π/4 used by the π of examples/target)
+atan ∶ ℚ → ℝ
+atan ξ ≔ ((ω ↦ (Σ (÷ ξ ω) (ς ↦ (÷ (⊠ (⊠ 1100 ς) (⊠ ξ ξ)) (⊠ (⊞ (⊠ 1100 ς) 1) ω))))) (⊞ 1 (⊠ ξ ξ)))
+⍝ ---- hyperbolic functions and tangents
+sinh ∶ ℚ → ℝ
+sinh ∶ ℚ[i] → ℝ[i]
+sinh ξ ≔ (Σ ξ (ς ↦ (÷ (⊠ ξ ξ) (⊠ (⊠ 1100 ς) (⊞ (⊠ 1100 ς) 1)))))
+cosh ∶ ℚ → ℝ
+cosh ∶ ℚ[i] → ℝ[i]
+cosh ξ ≔ (Σ 1 (ς ↦ (÷ (⊠ ξ ξ) (⊠ (⊟ (⊠ 1100 ς) 1) (⊠ 1100 ς)))))
+tan ∶ ℚ → ℝ
+tan ∶ ℚ[i] → ℝ[i]
+tan ξ ≔ (÷ᴿ (sin ξ) (cos ξ))
+tanh ∶ ℚ → ℝ
+tanh ∶ ℚ[i] → ℝ[i]
+tanh ξ ≔ (÷ᴿ (sinh ξ) (cosh ξ))
+⍝ ---- the same functions of a lazy argument (through the diagonal)
+expᴿ ∶ ℝ → ℝ
+expᴿ ∶ ℝ[i] → ℝ[i]
+expᴿ ≔ (⟐ exp)
+sinᴿ ∶ ℝ → ℝ
+sinᴿ ∶ ℝ[i] → ℝ[i]
+sinᴿ ≔ (⟐ sin)
+cosᴿ ∶ ℝ → ℝ
+cosᴿ ∶ ℝ[i] → ℝ[i]
+cosᴿ ≔ (⟐ cos)
+√ᴿ ∶ ℝ → ℝ
+√ᴿ ∶ ℝ[i] → ℝ[i]
+√ᴿ ≔ (⟐ √)
+logᴿ ∶ ℝ → ℝ
+logᴿ ≔ (⟐ log)
+atanᴿ ∶ ℝ → ℝ
+atanᴿ ≔ (⟐ atan)
+⍝ |z| of a lazy complex number, and the absolute value of a lazy real
+absᴿ ∶ ℝ[i] → ℝ
+absᴿ ξ ≔ (√ᴿ (⫶ 𝒩 ξ))
+⍝ ---- derivative and integral as streams.  ∂ f x: central difference quotients with h = 2⁻ⁿ (error O(h²) for f of class C³);
+⍝ ∫ f a b: element n is the midpoint rule with n + 1 equal parts (converges for continuous f)
+∂′ ∶ (ℚ[i] → ℚ[i]) → ℚ[i] → ℚ[i] → 𝔖 ℚ[i]
+∂′ φ ξ η ≔ (∷ (÷ (⊟ (φ (⊞ ξ η)) (φ (⊟ ξ η))) (⊠ 1100 η)) (∂′ φ ξ (÷ η 1100)))
+∂ ∶ (ℚ → ℚ) → ℚ → ℝ
+∂ ∶ (ℚ[i] → ℚ[i]) → ℚ[i] → ℝ[i]
+∂ φ ξ ≔ (∂′ φ ξ 1)
+mid′ ∶ (ℚ → ℚ) → ℚ → ℚ → ℕ → ℚ
+mid′ φ ξ ζ ν ≔ (⊠ ζ (sumof (⫶ (κ ↦ (φ (⊞ ξ (⊠ (⊞ κ 1.11) ζ)))) (⍳ ν))))
+∫ ∶ (ℚ → ℚ) → ℚ → ℚ → ℝ
+∫ φ ξ η ≔ (⫶ (ν ↦ (mid′ φ ξ (÷ (⊟ η ξ) ν) ν)) (iterate (ν ↦ (⊞ ν 1)) 1))

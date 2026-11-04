@@ -1,0 +1,1 @@
+main in Stream(\Q) := sinh(2 - 1/3*i)

@@ -1,0 +1,1 @@
+main in List(\Z) := polyneg([1 - i, -4 + i, 3])

@@ -1,0 +1,257 @@
+⍝ lib/field.imo — spec notation — trusted prelude, part 17: fields: finite fields GF(p) and GF(pⁿ), number fields ℚ(α), algebraic numbers
+⍝ Everything is computed here, on base-(i−1) digit strings; helpers end in _fd.  A polynomial over GF(p) (p a prime) is the list of its
+⍝ coefficients, lowest degree first, each a natural number in [0, p), without trailing zeros; the zero polynomial is [].  The field
+⍝ GF(pⁿ) is the pair (p, m) of the prime and a monic irreducible polynomial m of degree n over GF(p): its elements are the polynomials
+⍝ of degree < n.  The number field ℚ(α), α a root of an irreducible f ∈ ℚ[x], is ℚ[x]/(f) of lib/ring.imo.
+⍝ ---------------------------------------------------------------------------------------------------------------------------
+⍝ 1. polynomials over GF(p)
+⍝ ---- the primitives, on polynomials already reduced modulo p: residues by the digit-level remainder of lib/poly.imo, sums of products
+⍝ carried unreduced and reduced once, the division by a monic polynomial with only the leading entry reduced at each step
+md_fd ∶ ℤ → ℕ → ℕ
+md_fd ξ η ≔ (⊗ (rd_pl (↓ᶻ η) (↓ᶻ ξ)) (◀ 1))
+ng_fd ∶ ℕ → 𝔏 ℕ → 𝔏 ℕ
+ng_fd π f ≔ (tr_fd (⫶ (κ ↦ (md_fd (⊖ κ) π)) f))
+ad_fd ∶ ℕ → 𝔏 ℕ → 𝔏 ℕ → 𝔏 ℕ
+ad_fd π f g ≔ (tr_fd (zl_fd (a b ↦ (md_fd (⊞ a b) π)) f g))
+sb_fd ∶ ℕ → 𝔏 ℕ → 𝔏 ℕ → 𝔏 ℕ
+sb_fd π f g ≔ (ad_fd π f (ng_fd π g))
+sc_fd ∶ ℕ → ℤ → 𝔏 ℕ → 𝔏 ℕ
+sc_fd π c f ≔ (tr_fd (⫶ (κ ↦ (md_fd (⊠ c κ) π)) f))
+mu_fd ∶ 𝔏 ℕ → 𝔏 ℕ → 𝔏 ℕ
+mu_fd ξ η ≔ (ξ (θ ι ↦ (zl_fd ⊞ (⫶ (⊠ θ) η) (∷ 0 (mu_fd ι η)))) ⊥)
+ml_fd ∶ ℕ → 𝔏 ℕ → 𝔏 ℕ → 𝔏 ℕ
+ml_fd π f g ≔ (tr_fd (⫶ (κ ↦ (md_fd κ π)) (mu_fd f g)))
+mo_fd ∶ ℕ → 𝔏 ℕ → 𝔏 ℕ
+mo_fd π f ≔ ((∅ f) ⊥ (sc_fd π (modinv (last f) π) f))
+dr_fd ∶ ℕ → 𝔏 ℕ → 𝔏 ℕ
+dr_fd π f ≔ (tr_fd (⌄ (⫴ (a c ↦ (md_fd (⊠ a c) π)) (⍳ (ℓ f)) f)))
+⍝ rest − c·τ (τ shorter than rest or as long); one step of the division by a monic polynomial with tail τ (highest entry first)
+sbq_fd ∶ ℤ → 𝔏 ℤ → 𝔏 ℤ → 𝔏 ℤ
+sbq_fd c τ rest ≔ (τ (t ts ↦ (rest (r rs ↦ (∷ (⊟ r (⊠ c t)) (sbq_fd c ts rs))) ⊥)) rest)
+dl_fd ∶ ℕ → ℕ → 𝔏 ℕ → 𝔏 ℤ → 𝔏 ℕ → 𝔓 (𝔏 ℕ) (𝔏 ℤ)
+dl_fd π k τ ξ qs ≔ ((≐ k 0) (⊗ qs ξ) ((c ↦ (dl_fd π (⊟ k 1) τ (sbq_fd c τ (⌄ ξ)) (∷ c qs))) (md_fd (hd ξ) π)))
+⍝ (quotient, remainder) of reduced f by reduced g ≠ 0
+dv_fd ∶ ℕ → 𝔏 ℕ → 𝔏 ℕ → 𝔓 (𝔏 ℕ) (𝔏 ℕ)
+dv_fd π f g ≔ ((≺ (fpdegree f) (fpdegree g)) (⊗ ⊥ f) ((iv ↦ ((τ ↦ ((r ↦ (⊗ (tr_fd (⫶ (κ ↦ (md_fd (⊠ iv κ) π)) (◀ r))) (tr_fd (reverse (⫶ (κ ↦ (md_fd κ π)) (▶ r)))))) (dl_fd π (⊞ (⊟ (fpdegree f) (fpdegree g)) 1) τ (reverse f) ⊥))) (⌄ (reverse (sc_fd π iv g))))) (modinv (last g) π)))
+rm_fd ∶ ℕ → 𝔏 ℕ → 𝔏 ℕ → 𝔏 ℕ
+rm_fd π f g ≔ (▶ (dv_fd π f g))
+qo_fd ∶ ℕ → 𝔏 ℕ → 𝔏 ℕ → 𝔏 ℕ
+qo_fd π f g ≔ (◀ (dv_fd π f g))
+zl_fd ∶ (α → α → α) → 𝔏 α → 𝔏 α → 𝔏 α
+zl_fd φ ξ η ≔ (ξ (θ ι ↦ (η (θ′ ι′ ↦ (∷ (φ θ θ′) (zl_fd φ ι ι′))) ξ)) η)
+tr_fd ∶ 𝔏 ℕ → 𝔏 ℕ
+tr_fd ξ ≔ (foldr (θ ι ↦ ((∧ (∅ ι) (≐ θ 0)) ⊥ (∷ θ ι))) ⊥ ξ)
+fpoly ∶ ℕ → 𝔏 ℤ → 𝔏 ℕ      ⍝ fpoly(p, f): the coefficients reduced modulo p, trailing zeros removed — the canonical form over GF(p)
+fpoly ξ η ≔ (tr_fd (⫶ (κ ↦ (md_fd κ ξ)) η))
+fpadd ∶ ℕ → 𝔏 ℤ → 𝔏 ℤ → 𝔏 ℕ      ⍝ f + g over GF(p)
+fpadd ξ η ζ ≔ (ad_fd ξ (fpoly ξ η) (fpoly ξ ζ))
+fpneg ∶ ℕ → 𝔏 ℤ → 𝔏 ℕ      ⍝ −f over GF(p)
+fpneg ξ η ≔ (ng_fd ξ (fpoly ξ η))
+fpsub ∶ ℕ → 𝔏 ℤ → 𝔏 ℤ → 𝔏 ℕ      ⍝ f − g over GF(p)
+fpsub ξ η ζ ≔ (sb_fd ξ (fpoly ξ η) (fpoly ξ ζ))
+fpscale ∶ ℕ → ℤ → 𝔏 ℤ → 𝔏 ℕ      ⍝ c·f over GF(p)
+fpscale ξ η ζ ≔ (sc_fd ξ η (fpoly ξ ζ))
+fpmul ∶ ℕ → 𝔏 ℤ → 𝔏 ℤ → 𝔏 ℕ      ⍝ f · g over GF(p)
+fpmul ξ η ζ ≔ (ml_fd ξ (fpoly ξ η) (fpoly ξ ζ))
+fpdegree ∶ 𝔏 ℕ → ℤ      ⍝ the degree of a polynomial in canonical form (−1 for the zero polynomial)
+fpdegree ξ ≔ (⊟ (ℓ ξ) 1)
+fpmonic ∶ ℕ → 𝔏 ℤ → 𝔏 ℕ      ⍝ the monic multiple of f over GF(p) (the zero polynomial stays)
+fpmonic ξ η ≔ (mo_fd ξ (fpoly ξ η))
+⍝ division with remainder of canonical polynomials: (quotient, remainder), g ≠ 0
+fpdivmod ∶ ℕ → 𝔏 ℤ → 𝔏 ℤ → 𝔓 (𝔏 ℕ) (𝔏 ℕ)      ⍝ fpdivmod(p, f, g): (quotient, remainder) with f = q·g + r, deg r < deg g; (0, f) for g = 0
+fpdivmod ξ η ζ ≔ ((f g ↦ ((∅ g) (⊗ ⊥ f) (dv_fd ξ f g))) (fpoly ξ η) (fpoly ξ ζ))
+fpquo ∶ ℕ → 𝔏 ℤ → 𝔏 ℤ → 𝔏 ℕ      ⍝ the quotient of f by g over GF(p)
+fpquo ξ η ζ ≔ (◀ (fpdivmod ξ η ζ))
+fprem ∶ ℕ → 𝔏 ℤ → 𝔏 ℤ → 𝔏 ℕ      ⍝ the remainder of f modulo g over GF(p)
+fprem ξ η ζ ≔ (▶ (fpdivmod ξ η ζ))
+gc_fd ∶ ℕ → 𝔏 ℕ → 𝔏 ℕ → 𝔏 ℕ
+gc_fd π f g ≔ ((∅ g) (mo_fd π f) (gc_fd π g (▶ (dv_fd π f g))))
+fpgcd ∶ ℕ → 𝔏 ℤ → 𝔏 ℤ → 𝔏 ℕ      ⍝ the monic gcd over GF(p) (gcd(0, 0) = 0)
+fpgcd ξ η ζ ≔ (gc_fd ξ (fpoly ξ η) (fpoly ξ ζ))
+⍝ extended Euclid: (g, (s, t)) with s·f + t·h = g monic
+eg_fd ∶ ℕ → 𝔏 ℕ → 𝔏 ℕ → 𝔏 ℕ → 𝔏 ℕ → 𝔏 ℕ → 𝔏 ℕ → 𝔓 (𝔏 ℕ) (𝔓 (𝔏 ℕ) (𝔏 ℕ))
+eg_fd π r₀ r₁ s₀ s₁ t₀ t₁ ≔ ((∅ r₁) ((∅ r₀) (⊗ ⊥ (⊗ ⊥ ⊥)) ((λ′ ↦ (⊗ (sc_fd π λ′ r₀) (⊗ (sc_fd π λ′ s₀) (sc_fd π λ′ t₀)))) (modinv (last r₀) π))) ((qr ↦ (eg_fd π r₁ (▶ qr) s₁ (sb_fd π s₀ (ml_fd π (◀ qr) s₁)) t₁ (sb_fd π t₀ (ml_fd π (◀ qr) t₁)))) (dv_fd π r₀ r₁)))
+fpegcd ∶ ℕ → 𝔏 ℤ → 𝔏 ℤ → 𝔓 (𝔏 ℕ) (𝔓 (𝔏 ℕ) (𝔏 ℕ))      ⍝ fpegcd(p, f, g): (d, (s, t)) with s·f + t·g = d = gcd(f, g) monic
+fpegcd ξ η ζ ≔ (eg_fd ξ (fpoly ξ η) (fpoly ξ ζ) (∷ 1 ⊥) ⊥ ⊥ (∷ 1 ⊥))
+pw_fd ∶ ℕ → 𝔏 ℕ → ℕ → 𝔏 ℕ → 𝔏 ℕ
+pw_fd π f n m ≔ ((≐ n 0) (rm_fd π (∷ 1 ⊥) m) ((h ↦ (rm_fd π ((≐ (mod n 1100) 0) (ml_fd π h h) (ml_fd π f (ml_fd π h h))) m)) (pw_fd π f (div n 1100) m)))
+fppowmod ∶ ℕ → 𝔏 ℤ → ℕ → 𝔏 ℤ → 𝔏 ℕ      ⍝ fppowmod(p, f, n, m): fⁿ mod m over GF(p) by squaring (m = 0: fⁿ itself is not computed — the result is [])
+fppowmod ξ η ζ ο ≔ ((m ↦ ((∅ m) ⊥ (pw_fd ξ (fprem ξ (fpoly ξ η) m) ζ m))) (fpoly ξ ο))
+fpderiv ∶ ℕ → 𝔏 ℤ → 𝔏 ℕ      ⍝ the derivative f′ over GF(p)
+fpderiv ξ η ≔ (dr_fd ξ (fpoly ξ η))
+fpeval ∶ ℕ → 𝔏 ℤ → ℤ → ℕ      ⍝ f(a) over GF(p)
+fpeval ξ η ζ ≔ (foldr (c acc ↦ (md_fd (⊞ c (⊠ ζ acc)) ξ)) 0 (fpoly ξ η))
+fproots ∶ ℕ → 𝔏 ℤ → 𝔏 ℕ      ⍝ the roots of f in GF(p), ascending (every element for f = 0)
+fproots ξ η ≔ (filter (a ↦ (≐ (fpeval ξ η a) 0)) (⍳ ξ))
+⍝ irreducibility (Ben-Or): f of degree n ≥ 1 is irreducible iff gcd(x^(pᵏ) − x, f) = 1 for k = 1 … ⌊n/2⌋
+bo_fd ∶ ℕ → 𝔏 ℕ → ℕ → 𝔏 ℕ → ℕ → 𝔹
+bo_fd π f k h ν ≔ ((≻ k ν) ⊤ ((hh ↦ ((≐ (fpdegree (gc_fd π f (sb_fd π hh (∷ 0 (∷ 1 ⊥))))) 0) (bo_fd π f (⊞ k 1) hh ν) ⊥)) (pw_fd π h π f)))
+fpirreducible ∶ ℕ → 𝔏 ℤ → 𝔹      ⍝ is f irreducible over GF(p)? (degree ≥ 1; Ben-Or's test)
+fpirreducible ξ η ≔ ((f ↦ ((≺ (fpdegree f) 1) ⊥ (bo_fd ξ f 1 (fprem ξ (∷ 0 (∷ 1 ⊥)) f) (div (fpdegree f) 1100)))) (fpoly ξ η))
+⍝ ---------------------------------------------------------------------------------------------------------------------------
+⍝ 2. factorisation over GF(p): square-free decomposition, distinct-degree factorisation, equal-degree splitting
+⍝ the p-th root of a polynomial in x^p: the coefficients at the multiples of p
+rt_fd ∶ ℕ → 𝔏 ℕ → 𝔏 ℕ
+rt_fd π c ≔ (c (θ ι ↦ (∷ θ (rt_fd π (drop (⊟ π 1) ι)))) ⊥)
+⍝ Yun's algorithm in characteristic p: sf_fd π w c i = (the list of (zᵢ, i), the rest of c)
+sf_fd ∶ ℕ → 𝔏 ℕ → 𝔏 ℕ → ℕ → 𝔓 (𝔏 (𝔓 (𝔏 ℕ) ℕ)) (𝔏 ℕ)
+sf_fd π w c i ≔ ((≺ (fpdegree w) 1) (⊗ ⊥ c) ((y ↦ ((z ↦ ((τ ↦ (⊗ ((≺ (fpdegree z) 1) (◀ τ) (∷ (⊗ z i) (◀ τ))) (▶ τ))) (sf_fd π y (qo_fd π c y) (⊞ i 1)))) (qo_fd π w y))) (gc_fd π w c)))
+sq_fd ∶ ℕ → 𝔏 ℕ → ℕ → 𝔏 (𝔓 (𝔏 ℕ) ℕ)
+sq_fd π f e ≔ ((c ↦ ((τ ↦ (⧺ (⫶ (zi ↦ (⊗ (◀ zi) (⊠ (▶ zi) e))) (◀ τ)) ((≺ (fpdegree (▶ τ)) 1) ⊥ (sq_fd π (rt_fd π (▶ τ)) (⊠ e π))))) (sf_fd π (qo_fd π f c) c 1))) (gc_fd π f (dr_fd π f)))
+⍝ distinct-degree factorisation of a monic square-free g: pairs (product of the irreducible factors of degree d, d)
+dd_fd ∶ ℕ → 𝔏 ℕ → ℕ → 𝔏 ℕ → 𝔏 (𝔓 (𝔏 ℕ) ℕ)
+dd_fd π g d xp ≔ ((≺ (fpdegree g) (⊠ 1100 d)) ((≺ (fpdegree g) 1) ⊥ (∷ (⊗ g (fpdegree g)) ⊥)) ((xq ↦ ((h ↦ ((≺ (fpdegree h) 1) (dd_fd π g (⊞ d 1) xq) ((g′ ↦ (∷ (⊗ h d) (dd_fd π g′ (⊞ d 1) (rm_fd π xq g′)))) (qo_fd π g h)))) (gc_fd π g (sb_fd π xq (∷ 0 (∷ 1 ⊥)))))) (pw_fd π xp π g)))
+⍝ equal-degree splitting.  The candidates a: for odd p all monic polynomials of degree 1 … n − 1 (the first that splits is used), for
+⍝ p = 2 the powers x^j.  A split: a proper factor of h.
+mnc_fd ∶ ℕ → ℕ → 𝔏 (𝔏 ℕ)
+mnc_fd π j ≔ ((≐ j 0) (∷ (∷ 1 ⊥) ⊥) (concat (⫶ (c ↦ (⫶ (t ↦ (∷ c t)) (mnc_fd π (⊟ j 1)))) (⍳ π))))
+cnd_fd ∶ ℕ → ℕ → 𝔏 (𝔏 ℕ)
+cnd_fd π n ≔ ((≐ π 1100) (⫶ (j ↦ (⧺ (replicate j 0) (∷ 1 ⊥))) (upto 1 (⊟ n 1))) (concat (⫶ (j ↦ (mnc_fd π j)) (upto 1 (⊟ n 1)))))
+tr2_fd ∶ ℕ → 𝔏 ℕ → 𝔏 ℕ → ℕ → 𝔏 ℕ
+tr2_fd π a h d ≔ (rm_fd π (tr3_fd π a h d a) h)
+tr3_fd ∶ ℕ → 𝔏 ℕ → 𝔏 ℕ → ℕ → 𝔏 ℕ → 𝔏 ℕ
+tr3_fd π a h d s ≔ ((≐ d 1) s (tr3_fd π (pw_fd π a 1100 h) h (⊟ d 1) (ad_fd π s (pw_fd π a 1100 h))))
+sp_fd ∶ ℕ → 𝔏 ℕ → ℕ → 𝔏 ℕ → 𝔏 ℕ
+sp_fd π h d a ≔ ((ν ↦ ((pr ↦ ((g ↦ ((pr g) g ((g′ ↦ ((pr g′) g′ ⊥)) (gc_fd π h ((≐ π 1100) (tr2_fd π a h d) (sb_fd π (pw_fd π a (div (⊟ (^ π d) 1) 1100) h) (∷ 1 ⊥))))))) (gc_fd π h a))) (g ↦ (∧ (≺ 0 (fpdegree g)) (≺ (fpdegree g) ν))))) (fpdegree h))
+ed_fd ∶ ℕ → 𝔏 ℕ → ℕ → 𝔏 (𝔏 ℕ)
+ed_fd π h d ≔ ((≐ (fpdegree h) d) (∷ h ⊥) ((g ↦ (⧺ (ed_fd π g d) (ed_fd π (qo_fd π h g) d))) (hd (filter (g ↦ (¬ (∅ g))) (⫶ (sp_fd π h d) (cnd_fd π (fpdegree h)))))))
+⍝ the whole factorisation of a monic polynomial: pairs (monic irreducible, multiplicity)
+fa_fd ∶ ℕ → 𝔏 ℕ → 𝔏 (𝔓 (𝔏 ℕ) ℕ)
+fa_fd π f ≔ (concat (⫶ (zi ↦ (⫶ (g ↦ (⊗ g (▶ zi))) (concat (⫶ (hd′ ↦ (ed_fd π (◀ hd′) (▶ hd′))) (dd_fd π (◀ zi) 1 (∷ 0 (∷ 1 ⊥))))))) (sq_fd π f 1)))
+⍝ sort the pairs by (degree, then the coefficients from the highest degree down)
+cm_fd ∶ 𝔏 ℕ → 𝔏 ℕ → 𝔒
+cm_fd ξ η ≔ ((⋚ (ℓ ξ) (ℓ η)) ⋖ (cl_fd (reverse ξ) (reverse η)) ⋗)
+cl_fd ∶ 𝔏 ℕ → 𝔏 ℕ → 𝔒
+cl_fd ξ η ≔ (ξ (a as ↦ (η (b bs ↦ ((⋚ a b) ⋖ (cl_fd as bs) ⋗)) ≖)) ≖)
+in_fd ∶ 𝔓 (𝔏 ℕ) ℕ → 𝔏 (𝔓 (𝔏 ℕ) ℕ) → 𝔏 (𝔓 (𝔏 ℕ) ℕ)
+in_fd θ ξ ≔ (ξ (h t ↦ ((cm_fd (◀ θ) (◀ h)) (∷ θ ξ) (∷ θ ξ) (∷ h (in_fd θ t)))) (∷ θ ⊥))
+fpfactor ∶ ℕ → 𝔏 ℤ → 𝔓 ℕ (𝔏 (𝔓 (𝔏 ℕ) ℕ))      ⍝ fpfactor(p, f): the complete factorisation over GF(p): (c, [(g, k)]) with f = c·Π gᵏ, c the leading coefficient, every g monic and irreducible, sorted by degree then coefficients; (0, []) for f = 0, (c, []) for a constant
+fpfactor ξ η ≔ ((f ↦ ((∅ f) (⊗ 0 ⊥) (⊗ (last f) (foldr in_fd ⊥ (fa_fd ξ (fpmonic ξ f)))))) (fpoly ξ η))
+⍝ ---------------------------------------------------------------------------------------------------------------------------
+⍝ 3. irreducible and primitive polynomials, counting
+numirreducible ∶ ℕ → ℕ → ℕ      ⍝ the number of monic irreducible polynomials of degree n over GF(p): (1/n)·Σ_(d | n) μ(d) p^(n/d)
+numirreducible ξ η ≔ ((≐ η 0) 0 (div (sumof (⫶ (d ↦ (⊠ (mobius d) (^ ξ (div η d)))) (divisors η))) η))
+cf_fd ∶ ℕ → ℕ → ℕ → 𝔏 ℕ
+cf_fd π n k ≔ (⫶ (j ↦ (mod (div k (^ π j)) π)) (⍳ n))
+mp_fd ∶ ℕ → ℕ → ℕ → 𝔏 ℕ
+mp_fd π n k ≔ (⧺ (cf_fd π n k) (∷ 1 ⊥))
+irreduciblepoly ∶ ℕ → ℕ → 𝔏 ℕ      ⍝ irreduciblepoly(p, n): the first monic irreducible polynomial of degree n ≥ 1 over GF(p), the candidates xⁿ + Σ aⱼxʲ taken in the order of Σ aⱼpʲ (x² + x + 1 over GF(2), x³ + x + 1, x⁴ + x + 1, …)
+irreduciblepoly ξ η ≔ (hd (filter (f ↦ (fpirreducible ξ f)) (⫶ (k ↦ (mp_fd ξ η k)) (iterate (k ↦ (⊞ k 1)) 0))))
+⍝ the order of x modulo f is p^n − 1: x^((p^n − 1)/r) ≠ 1 for every prime r dividing p^n − 1
+pr_fd ∶ ℕ → 𝔏 ℕ → ℕ → 𝔹
+pr_fd π f n ≔ ((q ↦ (∧ (eqlist ≐ (pw_fd π (∷ 0 (∷ 1 ⊥)) q f) (∷ 1 ⊥)) (∀ₗ (r ↦ (¬ (eqlist ≐ (pw_fd π (∷ 0 (∷ 1 ⊥)) (div q (◀ r)) f) (∷ 1 ⊥)))) (factor q)))) (⊟ (^ π n) 1))
+isprimitivepoly ∶ ℕ → 𝔏 ℤ → 𝔹      ⍝ is f a primitive polynomial over GF(p) — monic, irreducible, and x generates the multiplicative group of GF(p)[x]/(f)?
+isprimitivepoly ξ η ≔ ((f ↦ (∧ (¬ (∅ f)) (∧ (≐ (last f) 1) (∧ (fpirreducible ξ f) (pr_fd ξ f (fpdegree f)))))) (fpoly ξ η))
+primitivepoly ∶ ℕ → ℕ → 𝔏 ℕ      ⍝ primitivepoly(p, n): the first monic primitive polynomial of degree n ≥ 1 over GF(p), in the order of irreduciblepoly (x² + x + 1 and x³ + x + 1 over GF(2); for n = 1 the first x + a whose root −a is a primitive root modulo p)
+primitivepoly ξ η ≔ (hd (filter (f ↦ (∧ (fpirreducible ξ f) (pr_fd ξ f η))) (⫶ (k ↦ (mp_fd ξ η k)) (iterate (k ↦ (⊞ k 1)) 0))))
+⍝ ---------------------------------------------------------------------------------------------------------------------------
+⍝ 4. the finite field GF(pⁿ) = (p, m): the elements are the polynomials over GF(p) of degree < n, arithmetic modulo the irreducible m
+gf ∶ ℕ → ℕ → 𝔓 ℕ (𝔏 ℕ)      ⍝ gf(p, n): the field GF(pⁿ) as the pair (p, m), m = primitivepoly(p, n) (so that x is a generator of the multiplicative group); another irreducible modulus m can be used as the pair (p, m)
+gf ξ η ≔ (⊗ ξ (primitivepoly ξ η))
+gfchar ∶ 𝔓 ℕ (𝔏 ℕ) → ℕ      ⍝ the characteristic p of the field
+gfchar ξ ≔ (◀ ξ)
+gfmodulus ∶ 𝔓 ℕ (𝔏 ℕ) → 𝔏 ℕ      ⍝ the defining polynomial m of the field
+gfmodulus ξ ≔ (▶ ξ)
+gfdegree ∶ 𝔓 ℕ (𝔏 ℕ) → ℕ      ⍝ the degree n of the field over GF(p)
+gfdegree ξ ≔ (fpdegree (▶ ξ))
+gfsize ∶ 𝔓 ℕ (𝔏 ℕ) → ℕ      ⍝ the number of elements pⁿ
+gfsize ξ ≔ (^ (◀ ξ) (fpdegree (▶ ξ)))
+gfelement ∶ 𝔓 ℕ (𝔏 ℕ) → 𝔏 ℤ → 𝔏 ℕ      ⍝ the element of the field represented by a polynomial over GF(p) (reduced modulo p and m)
+gfelement ξ η ≔ (fprem (◀ ξ) (fpoly (◀ ξ) η) (▶ ξ))
+gfadd ∶ 𝔓 ℕ (𝔏 ℕ) → 𝔏 ℤ → 𝔏 ℤ → 𝔏 ℕ      ⍝ a + b in GF(pⁿ)
+gfadd ξ η ζ ≔ (fprem (◀ ξ) (fpadd (◀ ξ) η ζ) (▶ ξ))
+gfsub ∶ 𝔓 ℕ (𝔏 ℕ) → 𝔏 ℤ → 𝔏 ℤ → 𝔏 ℕ      ⍝ a − b in GF(pⁿ)
+gfsub ξ η ζ ≔ (fprem (◀ ξ) (fpsub (◀ ξ) η ζ) (▶ ξ))
+gfneg ∶ 𝔓 ℕ (𝔏 ℕ) → 𝔏 ℤ → 𝔏 ℕ      ⍝ −a in GF(pⁿ)
+gfneg ξ η ≔ (fprem (◀ ξ) (fpneg (◀ ξ) η) (▶ ξ))
+gfmul ∶ 𝔓 ℕ (𝔏 ℕ) → 𝔏 ℤ → 𝔏 ℤ → 𝔏 ℕ      ⍝ a · b in GF(pⁿ)
+gfmul ξ η ζ ≔ (fprem (◀ ξ) (fpmul (◀ ξ) η ζ) (▶ ξ))
+gfinv ∶ 𝔓 ℕ (𝔏 ℕ) → 𝔏 ℤ → 𝔏 ℕ      ⍝ the inverse of a in GF(pⁿ) (extended Euclid with the modulus); [] for a = 0
+gfinv ξ η ≔ ((σ ↦ ((eqlist ≐ (◀ σ) (∷ 1 ⊥)) (fprem (◀ ξ) (◀ (▶ σ)) (▶ ξ)) ⊥)) (fpegcd (◀ ξ) (gfelement ξ η) (▶ ξ)))
+gfdiv ∶ 𝔓 ℕ (𝔏 ℕ) → 𝔏 ℤ → 𝔏 ℤ → 𝔏 ℕ      ⍝ a / b in GF(pⁿ) ([] for b = 0)
+gfdiv ξ η ζ ≔ (gfmul ξ η (gfinv ξ ζ))
+gfpow ∶ 𝔓 ℕ (𝔏 ℕ) → 𝔏 ℤ → ℤ → 𝔏 ℕ      ⍝ aᵉ in GF(pⁿ) by squaring (e < 0: a power of the inverse; 0⁰ = 1)
+gfpow ξ η ζ ≔ ((≺ ζ 0) (pw_fd (◀ ξ) (gfinv ξ η) (⊖ ζ) (▶ ξ)) (pw_fd (◀ ξ) (gfelement ξ η) ζ (▶ ξ)))
+gfelements ∶ 𝔓 ℕ (𝔏 ℕ) → 𝔏 (𝔏 ℕ)      ⍝ all pⁿ elements, in the order of Σ aⱼpʲ (0 = [] first)
+gfelements ξ ≔ (⫶ (k ↦ (tr_fd (cf_fd (◀ ξ) (fpdegree (▶ ξ)) k))) (⍳ (gfsize ξ)))
+⍝ multiplicative order: from q − 1 down, removing each prime r while a^(o/r) = 1
+ro_fd ∶ 𝔓 ℕ (𝔏 ℕ) → 𝔏 ℕ → ℕ → ℕ → ℕ
+ro_fd F a o r ≔ ((∧ (≐ (mod o r) 0) (eqlist ≐ (gfpow F a (div o r)) (∷ 1 ⊥))) (ro_fd F a (div o r) r) o)
+gforder ∶ 𝔓 ℕ (𝔏 ℕ) → 𝔏 ℤ → ℕ      ⍝ the multiplicative order of a in GF(pⁿ) (0 for a = 0)
+gforder ξ η ≔ ((a ↦ ((∅ a) 0 (foldl (o r ↦ (ro_fd ξ a o (◀ r))) (⊟ (gfsize ξ) 1) (factor (⊟ (gfsize ξ) 1))))) (gfelement ξ η))
+gfisprimitive ∶ 𝔓 ℕ (𝔏 ℕ) → 𝔏 ℤ → 𝔹      ⍝ does a generate the multiplicative group of GF(pⁿ)?
+gfisprimitive ξ η ≔ (≐ (gforder ξ η) (⊟ (gfsize ξ) 1))
+gfprimitive ∶ 𝔓 ℕ (𝔏 ℕ) → 𝔏 ℕ      ⍝ the first primitive element of GF(pⁿ) in the order of gfelements
+gfprimitive ξ ≔ (hd (filter (a ↦ (gfisprimitive ξ a)) (gfelements ξ)))
+lg_fd ∶ 𝔓 ℕ (𝔏 ℕ) → 𝔏 ℕ → 𝔏 ℕ → ℕ → 𝔏 ℕ → ℤ
+lg_fd F g a k cur ≔ ((eqlist ≐ cur a) k ((⩾ k (gfsize F)) 11101 (lg_fd F g a (⊞ k 1) (gfmul F cur g))))
+gflog ∶ 𝔓 ℕ (𝔏 ℕ) → 𝔏 ℤ → 𝔏 ℤ → ℤ      ⍝ gflog(F, g, a): the least k ≥ 0 with gᵏ = a (the discrete logarithm by repeated multiplication), −1 if there is none
+gflog ξ η ζ ≔ (lg_fd ξ (gfelement ξ η) (gfelement ξ ζ) 0 (∷ 1 ⊥))
+gffrob ∶ 𝔓 ℕ (𝔏 ℕ) → 𝔏 ℤ → 𝔏 ℕ      ⍝ the Frobenius map a ↦ aᵖ
+gffrob ξ η ≔ (gfpow ξ η (◀ ξ))
+⍝ the conjugates a, aᵖ, aᵖ², … (n of them, with repetitions)
+cj_fd ∶ 𝔓 ℕ (𝔏 ℕ) → ℕ → 𝔏 ℕ → 𝔏 (𝔏 ℕ)
+cj_fd F k a ≔ ((≐ k 0) ⊥ (∷ a (cj_fd F (⊟ k 1) (gffrob F a))))
+gftrace ∶ 𝔓 ℕ (𝔏 ℕ) → 𝔏 ℤ → ℕ      ⍝ Tr(a) = a + aᵖ + … + aᵖ^(n−1), an element of GF(p)
+gftrace ξ η ≔ ((s ↦ ((∅ s) 0 (hd s))) (foldl (u v ↦ (gfadd ξ u v)) ⊥ (cj_fd ξ (gfdegree ξ) (gfelement ξ η))))
+gfnorm ∶ 𝔓 ℕ (𝔏 ℕ) → 𝔏 ℤ → ℕ      ⍝ N(a) = a·aᵖ·…·aᵖ^(n−1) = a^((pⁿ − 1)/(p − 1)), an element of GF(p)
+gfnorm ξ η ≔ ((s ↦ ((∅ s) 0 (hd s))) (foldl (u v ↦ (gfmul ξ u v)) (∷ 1 ⊥) (cj_fd ξ (gfdegree ξ) (gfelement ξ η))))
+gfconjugates ∶ 𝔓 ℕ (𝔏 ℕ) → 𝔏 ℤ → 𝔏 (𝔏 ℕ)      ⍝ the distinct conjugates of a over GF(p): a, aᵖ, … until a repeats
+gfconjugates ξ η ≔ ((a ↦ (take (gfdeg_fd ξ a) (cj_fd ξ (gfdegree ξ) a))) (gfelement ξ η))
+gfdeg_fd ∶ 𝔓 ℕ (𝔏 ℕ) → 𝔏 ℕ → ℕ
+gfdeg_fd F a ≔ (hd (filter (k ↦ (eqlist ≐ (gfpow F a (^ (◀ F) k)) a)) (upto 1 (gfdegree F))))
+gfminpoly ∶ 𝔓 ℕ (𝔏 ℕ) → 𝔏 ℤ → 𝔏 ℕ      ⍝ the minimal polynomial of a over GF(p) — monic, irreducible, of degree dividing n: Π (y − c) over the conjugates c of a
+gfminpoly ξ η ≔ ((a ↦ (⫶ (e ↦ ((∅ e) 0 (hd e))) (foldl (P c ↦ (zl_fd (u v ↦ (gfsub ξ u v)) (∷ ⊥ P) (⫶ (e ↦ (gfmul ξ c e)) P))) (∷ (∷ 1 ⊥) ⊥) (gfconjugates ξ a)))) (gfelement ξ η))
+gfsqrt ∶ 𝔓 ℕ (𝔏 ℕ) → 𝔏 ℤ → 𝔏 (𝔏 ℕ)      ⍝ all square roots of a in GF(pⁿ): [] if a is a non-square, [0] for 0, two roots (±r) otherwise, one in characteristic 2
+gfsqrt ξ η ≔ ((a ↦ (filter (e ↦ (eqlist ≐ (gfmul ξ e e) a)) (gfelements ξ))) (gfelement ξ η))
+gfissquare ∶ 𝔓 ℕ (𝔏 ℕ) → 𝔏 ℤ → 𝔹      ⍝ is a a square in GF(pⁿ)? (Euler's criterion a^((q−1)/2) = 1 for odd characteristic; every element in characteristic 2)
+gfissquare ξ η ≔ ((a ↦ ((∨ (∅ a) (≐ (◀ ξ) 1100)) ⊤ (eqlist ≐ (gfpow ξ a (div (⊟ (gfsize ξ) 1) 1100)) (∷ 1 ⊥)))) (gfelement ξ η))
+gfroots ∶ 𝔓 ℕ (𝔏 ℕ) → 𝔏 (𝔏 ℤ) → 𝔏 (𝔏 ℕ)      ⍝ the roots in GF(pⁿ) of a polynomial whose coefficients are elements of the field (lowest degree first), in the order of gfelements
+gfroots ξ η ≔ (filter (e ↦ (∅ (foldr (c acc ↦ (gfadd ξ c (gfmul ξ e acc))) ⊥ η))) (gfelements ξ))
+gfsubfields ∶ ℕ → 𝔏 ℕ      ⍝ the degrees of the subfields of GF(pⁿ) over GF(p): the divisors of n (one subfield of each such degree)
+gfsubfields ξ ≔ (divisors ξ)
+⍝ ---------------------------------------------------------------------------------------------------------------------------
+⍝ 5. number fields ℚ(α) = ℚ[x]/(f), f irreducible over ℚ: the elements are the polynomials of degree < n = deg f (the arithmetic is qradd,
+⍝ qrmul, qrinv, qrpow of lib/ring.imo).  The multiplication by a is a linear map; its matrix in the basis 1, α, …, αⁿ⁻¹ gives the
+⍝ characteristic polynomial, minimal polynomial, norm and trace of a.
+nfmatrix ∶ 𝔏 ℚ → 𝔏 ℚ → 𝔏 (𝔏 ℚ)      ⍝ nfmatrix(f, a): the matrix of the multiplication by a in ℚ[x]/(f) in the basis 1, x, …, xⁿ⁻¹ (column j: the coordinates of a·xʲ)
+nfmatrix ξ η ≔ ((ν ↦ (transpose (⫶ (j ↦ ((c ↦ (⧺ c (replicate (⊟ ν (ℓ c)) 0))) (qrmul ξ η (⧺ (replicate j 0) (∷ 1 ⊥))))) (⍳ ν)))) (deg ξ))
+nfcharpoly ∶ 𝔏 ℚ → 𝔏 ℚ → 𝔏 ℚ      ⍝ the characteristic polynomial of a over ℚ (degree n; a power of the minimal polynomial)
+nfcharpoly ξ η ≔ (charpoly (nfmatrix ξ η))
+nfminpoly ∶ 𝔏 ℚ → 𝔏 ℚ → 𝔏 ℚ      ⍝ the minimal polynomial of a over ℚ (monic; of degree dividing n)
+nfminpoly ξ η ≔ (minpoly (nfmatrix ξ η))
+nfdegree ∶ 𝔏 ℚ → 𝔏 ℚ → ℕ      ⍝ the degree [ℚ(a) : ℚ] of the element a (the degree of its minimal polynomial)
+nfdegree ξ η ≔ (deg (nfminpoly ξ η))
+nftrace ∶ 𝔏 ℚ → 𝔏 ℚ → ℚ      ⍝ the trace Tr(a) of a ∈ ℚ(α) over ℚ (the trace of the multiplication matrix: the sum of the conjugates of a)
+nftrace ξ η ≔ (trace (nfmatrix ξ η))
+nfnorm ∶ 𝔏 ℚ → 𝔏 ℚ → ℚ      ⍝ the norm N(a) of a ∈ ℚ(α) over ℚ (the determinant of the multiplication matrix: the product of the conjugates of a)
+nfnorm ξ η ≔ (det (nfmatrix ξ η))
+nfisintegral ∶ 𝔏 ℚ → 𝔏 ℚ → 𝔹      ⍝ is a an algebraic integer? (its minimal polynomial has integer coefficients)
+nfisintegral ξ η ≔ (∀ₗ (c ↦ (≐ (denom c) 1)) (nfminpoly ξ η))
+nfdiscriminant ∶ 𝔏 ℚ → ℚ      ⍝ the discriminant of the polynomial f — the discriminant of the basis 1, α, …, αⁿ⁻¹ of ℚ(α) (the field discriminant divides it)
+nfdiscriminant ξ ≔ (discriminant ξ)
+⍝ ---------------------------------------------------------------------------------------------------------------------------
+⍝ 6. algebraic numbers: the minimal polynomials of α + β, α·β, −α, 1/α, αᵏ, α^(1/k) for α, β roots of f, g.  Each function returns the
+⍝ monic irreducible factors over ℚ of the polynomial Π (x − γ), γ running over the combinations of ALL roots of f and g — the minimal
+⍝ polynomial of the combination of two given roots is one of them.  The polynomial is the resultant Res_y(f(y), G(x, y)), evaluated at
+⍝ as many integers x as its degree plus one and interpolated.
+fc_fd ∶ 𝔏 ℚ → 𝔏 (𝔏 ℚ)
+fc_fd ξ ≔ (⫶ (g ↦ (polymonic g)) (⫶ ◀ (▶ (polyfactor ξ))))
+hp_fd ∶ (ℚ → 𝔏 ℚ) → ℕ → 𝔏 ℚ → 𝔏 ℚ
+hp_fd G ν f ≔ ((pts ↦ (interpolate pts (⫶ (t ↦ (resultant f (G t))) pts))) (⍳ (⊞ ν 1)))
+algsum ∶ 𝔏 ℚ → 𝔏 ℚ → 𝔏 (𝔏 ℚ)      ⍝ algsum(f, g): the irreducible factors of the polynomial with the roots α + β (α a root of f, β of g); f, g non-constant
+algsum ξ η ≔ (fc_fd (hp_fd (t ↦ (polycompose η (∷ t (∷ 11101 ⊥)))) (⊠ (deg ξ) (deg η)) ξ))
+algneg ∶ 𝔏 ℚ → 𝔏 (𝔏 ℚ)      ⍝ algneg(f): the irreducible factors of the polynomial with the roots −α
+algneg ξ ≔ (fc_fd (polycompose ξ (∷ 0 (∷ 11101 ⊥))))
+algdiff ∶ 𝔏 ℚ → 𝔏 ℚ → 𝔏 (𝔏 ℚ)      ⍝ algdiff(f, g): the polynomial with the roots α − β
+algdiff ξ η ≔ (algsum ξ (polycompose η (∷ 0 (∷ 11101 ⊥))))
+algprod ∶ 𝔏 ℚ → 𝔏 ℚ → 𝔏 (𝔏 ℚ)      ⍝ algprod(f, g): the irreducible factors of the polynomial with the roots α·β; [x] when f or g has the root 0 (f(0) = 0 or g(0) = 0: take f, g without the factor x)
+algprod ξ η ≔ ((∨ (≐ (hd ξ) 0) (≐ (hd η) 0)) (∷ (∷ 0 (∷ 1 ⊥)) ⊥) ((μ ↦ (fc_fd (hp_fd (t ↦ (⫶ (j ↦ (⊠ (nth η (⊟ μ j)) (^ t (⊟ μ j)))) (⍳ (⊞ μ 1)))) (⊠ (deg ξ) μ) ξ))) (deg η)))
+alginv ∶ 𝔏 ℚ → 𝔏 (𝔏 ℚ)      ⍝ alginv(f): the irreducible factors of the polynomial with the roots 1/α (the reversed polynomial; the root 0 is dropped)
+alginv ξ ≔ (fc_fd (reverse ξ))
+algquot ∶ 𝔏 ℚ → 𝔏 ℚ → 𝔏 (𝔏 ℚ)      ⍝ algquot(f, g): the polynomial with the roots α/β
+algquot ξ η ≔ (algprod ξ (reverse η))
+algpow ∶ 𝔏 ℚ → ℕ → 𝔏 (𝔏 ℚ)      ⍝ algpow(f, k): the polynomial with the roots αᵏ (k ≥ 1)
+algpow ξ η ≔ (fc_fd (hp_fd (t ↦ (∷ t (⧺ (replicate (⊟ η 1) 0) (∷ 11101 ⊥)))) (deg ξ) ξ))
+algroot ∶ 𝔏 ℚ → ℕ → 𝔏 (𝔏 ℚ)      ⍝ algroot(f, k): the irreducible factors of f(xᵏ), the polynomials with the roots α^(1/k) (k ≥ 1)
+algroot ξ η ≔ (fc_fd (polycompose ξ (⧺ (replicate η 0) (∷ 1 ⊥))))

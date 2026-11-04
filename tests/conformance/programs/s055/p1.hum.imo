@@ -1,0 +1,2 @@
+f(x) in \Q -> \Q := x
+main in \Q -> \Q := f

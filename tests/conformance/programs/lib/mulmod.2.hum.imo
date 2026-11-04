@@ -1,0 +1,1 @@
+main in \NN := mulmod(4, -2, 2)

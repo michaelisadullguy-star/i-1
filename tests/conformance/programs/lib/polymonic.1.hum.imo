@@ -1,0 +1,1 @@
+main in List(\QQ) := polymonic([3/4, -5/2, 7/3])

@@ -1,0 +1,1 @@
+main in Pair(Bool, Pair(\NN, \NN)) := crt([-7, 4, 9], [7, 3, 9])

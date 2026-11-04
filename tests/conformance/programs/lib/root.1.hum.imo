@@ -1,0 +1,1 @@
+main in Stream(\QQ) := root([3/4, -5/2, 7/3], 7)

@@ -1,0 +1,1 @@
+main in Pair(\NN, List(\NN)) := cfsqrt(5)

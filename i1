@@ -1,0 +1,147 @@
+#!/bin/sh
+# i1 -- the i-1 language, on any of its three interpreters.
+#
+#   i1 [--impl pymo|haskimo|rustimo|auto|both|all] COMMAND ...     COMMAND ... is exactly as for  python3 pymo/i1.py :
+#                                                                  run  check  translate  eval  text   (see  i1 --help-impl)
+#
+# i-1 is interpreted: a program is read, class-checked and evaluated each time it runs; nothing compiles it to a file.  The language has
+# three interpreters, written to one specification, in this repository:
+#   pymo      the Python interpreter                  (pymo/*.py, run by python3)
+#   haskimo   the Haskell interpreter                 (haskimo/, one self-contained executable "haskimo": the prelude is built in)
+#   rustimo   the Rust interpreter                    (rustimo/, one self-contained executable "rustimo": the prelude is built in)
+# They read the same files and print the same bytes (tests/conformance/run.py checks it).  This script only chooses one:
+#
+#   1. the option  --impl X   (first argument; py, hs and rs are short for pymo, haskimo and rustimo),
+#   2. else the environment variable  I1_IMPL,
+#   3. else the default written at installation (the file "impl" next to the data directory: install.sh --default X),
+#   4. else  auto :  rustimo if it is found, otherwise haskimo, otherwise pymo.
+#
+#   --impl all     runs all that are found at the same time, prints the output once when they agree, and exits with status 3 (and a
+#                  diff on stderr) when they differ;  --impl both  does the same with Pymo and Haskimo only (the choice before Rustimo).
+#
+# Where things are looked for (all can be set explicitly):
+#   I1_PYMO     path of pymo/i1.py              (default: ../share/i1/pymo/i1.py or ./pymo/i1.py, relative to this script)
+#   I1_HASKIMO  path of the haskimo executable   (default: next to this script, ./build/haskimo, or haskimo on PATH)
+#   I1_RUSTIMO  path of the rustimo executable   (default: next to this script, ./build/rustimo, or rustimo on PATH)
+#   I1_PYTHON   the Python that runs Pymo        (default: python3)
+
+# --- where am I (follow symbolic links)
+self=$0
+while [ -h "$self" ]; do
+  dir=$(dirname "$self")
+  link=$(readlink "$self")
+  case $link in /*) self=$link ;; *) self=$dir/$link ;; esac
+done
+here=$(cd "$(dirname "$self")" && pwd -P)
+
+# the help is the comment block at the top of this file
+help() { awk 'NR > 1 && /^#/ { sub(/^# ?/, ""); print; next } NR > 1 { exit }' "$self"; }
+
+# --- the option
+impl=
+[ $# -gt 0 ] || { help; exit 0; }
+case ${1-} in
+  --impl) [ $# -ge 2 ] || { echo "i1: --impl needs pymo, haskimo, rustimo, auto, both or all" >&2; exit 2; }; impl=$2; shift 2 ;;
+  --impl=*) impl=${1#--impl=}; shift ;;
+  --help-impl) help; exit 0 ;;
+esac
+
+# --- locate the two interpreters  (a file that can be run: in a checkout "haskimo" next to this script is the directory of the Haskell core)
+is_exe() { [ -f "$1" ] && [ -x "$1" ]; }
+pymo=${I1_PYMO-${I1_PY-}}
+if [ -z "$pymo" ]; then
+  for c in "$here/../share/i1/pymo/i1.py" "$here/pymo/i1.py" "$here/../pymo/i1.py"; do
+    if [ -r "$c" ]; then pymo=$c; break; fi
+  done
+fi
+haskimo=${I1_HASKIMO-${I1_HS-}}
+if [ -z "$haskimo" ]; then
+  for c in "$here/haskimo" "$here/build/haskimo" "$here/dist/haskimo"; do
+    if is_exe "$c"; then haskimo=$c; break; fi
+  done
+  [ -n "$haskimo" ] || haskimo=$(command -v haskimo 2>/dev/null || true)
+fi
+rustimo=${I1_RUSTIMO-${I1_RS-}}
+if [ -z "$rustimo" ]; then
+  for c in "$here/rustimo" "$here/build/rustimo" "$here/dist/rustimo"; do
+    if is_exe "$c"; then rustimo=$c; break; fi
+  done
+  [ -n "$rustimo" ] || rustimo=$(command -v rustimo 2>/dev/null || true)
+fi
+python=${I1_PYTHON:-python3}
+
+# --- choose
+if [ -z "$impl" ]; then impl=${I1_IMPL-}; fi
+if [ -z "$impl" ]; then
+  for c in "$here/../share/i1/impl" "$here/impl"; do
+    if [ -r "$c" ]; then impl=$(head -n 1 "$c"); break; fi
+  done
+fi
+[ -n "$impl" ] || impl=auto
+case $impl in py) impl=pymo ;; hs) impl=haskimo ;; rs) impl=rustimo ;; esac
+if [ "$impl" = auto ]; then
+  if [ -n "$rustimo" ] && is_exe "$rustimo"; then impl=rustimo
+  elif [ -n "$haskimo" ] && is_exe "$haskimo"; then impl=haskimo
+  else impl=pymo; fi
+fi
+
+run_pymo() {
+  [ -n "$pymo" ] || { echo "i1: Pymo was not found (pymo/i1.py); set I1_PYMO" >&2; exit 127; }
+  exec "$python" "$pymo" "$@"
+}
+run_rustimo() {
+  if [ -z "$rustimo" ] || ! is_exe "$rustimo"; then
+    echo "i1: Rustimo was not found (the executable rustimo): build it with  make rustimo  or  ./install.sh --rustimo-only, or set I1_RUSTIMO" >&2
+    exit 127
+  fi
+  exec "$rustimo" "$@"
+}
+run_haskimo() {
+  if [ -z "$haskimo" ] || ! is_exe "$haskimo"; then
+    echo "i1: Haskimo was not found (the executable haskimo): build it with  make  or  ./install.sh --haskimo-only, or set I1_HASKIMO" >&2
+    exit 127
+  fi
+  exec "$haskimo" "$@"
+}
+
+# run the interpreters that are named (and found) at the same time and compare what they print
+run_together() {
+  tmp=$(mktemp -d "${TMPDIR:-/tmp}/i1.XXXXXX") || exit 1
+  trap 'rm -rf "$tmp"' EXIT HUP INT TERM
+  names=; pids=
+  if [ -n "$pymo" ]; then "$python" "$pymo" "$@" >"$tmp/pymo.out" 2>"$tmp/pymo.err" & pids="$!"; names="pymo"; fi
+  if [ "$use_hs" = yes ] && [ -n "$haskimo" ] && is_exe "$haskimo"; then
+    "$haskimo" "$@" >"$tmp/haskimo.out" 2>"$tmp/haskimo.err" & pids="$pids $!"; names="$names haskimo"
+  fi
+  if [ "$use_rs" = yes ] && [ -n "$rustimo" ] && is_exe "$rustimo"; then
+    "$rustimo" "$@" >"$tmp/rustimo.out" 2>"$tmp/rustimo.err" & pids="$pids $!"; names="$names rustimo"
+  fi
+  set -- $names; [ $# -ge 2 ] || { echo "i1: --impl $impl needs at least two interpreters (see --help-impl); found: $names" >&2; exit 127; }
+  # collect the exit statuses in the order of the names
+  k=0
+  for pid in $pids; do
+    k=$((k + 1)); wait "$pid"; eval "rc_$k=$?"
+  done
+  first=$1; shift
+  agree=yes; k=1
+  for n in "$@"; do
+    k=$((k + 1))
+    eval "rc_n=\$rc_$k"
+    if ! cmp -s "$tmp/$first.out" "$tmp/$n.out" || [ "$rc_1" -ne "$rc_n" ]; then agree=no; fi
+  done
+  if [ "$agree" = yes ]; then cat "$tmp/$first.out"; cat "$tmp/$first.err" >&2; exit "$rc_1"; fi
+  echo "i1: the interpreters disagree:" >&2
+  k=0
+  for n in $first "$@"; do k=$((k + 1)); eval "echo \"  $n exit \$rc_$k\" >&2"; done
+  for n in "$@"; do echo "diff $first $n:" >&2; diff "$tmp/$first.out" "$tmp/$n.out" >&2; done
+  exit 3
+}
+
+case $impl in
+  pymo) run_pymo "$@" ;;
+  haskimo) run_haskimo "$@" ;;
+  rustimo) run_rustimo "$@" ;;
+  both) use_hs=yes; use_rs=no; run_together "$@" ;;
+  all) use_hs=yes; use_rs=yes; run_together "$@" ;;
+  *) echo "i1: --impl takes pymo, haskimo, rustimo, auto, both or all (got '$impl')" >&2; exit 2 ;;
+esac

@@ -1,0 +1,2 @@
+q in \QQ
+main in List(Prop) := [q^2 == 2, q^2 lt 2, q^2 leq 4, q^2 == 4, 2*q == 3, q^2 gt 2, q != 1]

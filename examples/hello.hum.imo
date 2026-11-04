@@ -1,0 +1,2 @@
+greeting in String := "Hello, " ++ "i-1 — " ++ "λ"
+main in String := greeting ++ "\n"

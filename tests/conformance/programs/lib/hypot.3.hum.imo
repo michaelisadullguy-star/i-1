@@ -1,0 +1,1 @@
+main in Stream(\QQ) := hypot(1/2 + 3/4*i, 3/5)

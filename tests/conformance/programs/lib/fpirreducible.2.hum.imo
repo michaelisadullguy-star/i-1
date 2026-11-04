@@ -1,0 +1,1 @@
+main in Bool := fpirreducible(5, [-2, 6, -3])

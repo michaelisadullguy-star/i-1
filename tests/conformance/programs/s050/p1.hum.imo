@@ -1,0 +1,1 @@
+main in List(String) := ["a", "b" ++ "c"]

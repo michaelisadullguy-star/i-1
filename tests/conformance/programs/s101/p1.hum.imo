@@ -1,0 +1,2 @@
+m in \NN
+main in List(Prop) := [m^2 lt 10, m^2 leq 16 and m != 2, m gt 5, m != 0, m + 1 == 0, m geq 0]

@@ -1,0 +1,1 @@
+main in List(\QQ) := polyinteg([3/4, -5/2, 7/3])

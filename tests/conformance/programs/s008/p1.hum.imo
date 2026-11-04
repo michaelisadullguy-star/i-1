@@ -1,0 +1,29 @@
+
+a in \QQ := 1 + 2 * 3 - 4 / 2
+b in \QQ := 0.5 + 0.25
+c in \ZZ := -3 + 1
+w in \Q := (1 + 2 * i) * (3 - i)
+s in String := "héllo" ++ " wörld"
+n in \NN := length("héllo")
+ch in Char := 'λ'
+m in \NN := ord('λ')
+t in Bool := 3 geq 2
+u in Bool := 1 geq 2
+v in Bool := (-3 in \ZZ) geq -3
+f(x) in \Q -> \Q := x * x + 1
+y in \Q := f(1 + i)
+q in \D := j * j
+r in \D := j * k + 1
+cc in \D := conj(j)
+qa in Bool := forall(k in \NN |-> k geq 0, range(5))
+qb in Bool := exists(k in \NN |-> k geq 4, range(4))
+qc in Bool := exists(k in \NN |-> k geq 4, range(5))
+qd in Bool := forall(k in \NN |-> 2 geq k, range(3))
+nb in Bool := not 1 geq 2
+ife in \NN := if(1 geq 2, 10, 20)
+ca in Bool := 'a' == 'a'
+cb in Bool := 'a' == 'b'
+Ex in \R := exp(1 + 0 * i)
+Sn in \RR := sin(1 / 2)
+Cs in \RR := cos(1 / 2)
+\NN subseteq \QQ

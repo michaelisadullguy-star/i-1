@@ -1,0 +1,1 @@
+main in \NN := ndigits(2 + 3*i)

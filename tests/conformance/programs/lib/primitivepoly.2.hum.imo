@@ -1,0 +1,1 @@
+main in List(\NN) := primitivepoly(5, 3)

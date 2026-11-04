@@ -1,0 +1,1 @@
+main in \ZZ := eulercriterion(4, 3)

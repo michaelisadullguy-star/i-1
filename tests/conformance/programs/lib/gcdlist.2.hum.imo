@@ -1,0 +1,1 @@
+main in \NN := gcdlist([4, 9, -2])

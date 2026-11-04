@@ -1,0 +1,1 @@
+main in List(\ZZ) := polyscale(-7, [9, -2, 6])

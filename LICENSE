@@ -1,0 +1,118 @@
+i-1 License, version 1.0
+SPDX-License-Identifier: LicenseRef-i-1-1.0
+
+Copyright (c) 2026 Yinhao Wang <yinhao.wang@outlook.com>.  All rights reserved except as granted below.
+
+In short (the numbered terms below are what binds you):
+
+  * Free for NON-COMMERCIAL use, with source, under a STRONG COPYLEFT: what you build on this software and pass on must be passed on under
+    this same license, with its source.  You must give CREDIT to the author, and that duty cannot be waived under this license.
+  * COMMERCIAL use needs a separate, PAID commercial license, requested by email from the author.  It waives the credit duty; the strong
+    copyleft stays.  See section 5 and the file COMMERCIAL.md.
+  * This is a "source-available" license.  Because it limits use to non-commercial purposes it is NOT an open-source license in the sense of
+    the Open Source Definition (it is not OSI-approved), and it is not the GNU GPL.
+
+--------------------------------------------------------------------------------------------------------------------------------------
+
+1. Definitions
+
+  "Software" means this work in all the forms in which it is distributed: the interpreter Pymo in Python (pymo/), the
+  interpreter Haskimo in Haskell (haskimo/), the standard library (lib/), the system documents (docs/), the examples, the tests, the
+  documentation, and every file of the distribution that carries or is covered by this license.
+  "Author" means the copyright holder named above.
+  "You" means the individual or legal entity exercising rights under this license.
+  "Derivative Work" means any work based on the Software: a modification, translation or port (also to another programming language or
+  notation), and any work that contains a part of the Software or is combined with it so that the two are distributed as one program or
+  library.  A program written in the i-1 language is a Derivative Work if it is distributed together with the Software or with a part of it
+  (for example with files of lib/).  A program that is distributed alone and is merely run by the Software is not, and neither is the text
+  that the Software prints when it runs.
+  "Convey" means to make a copy of the Software or of a Derivative Work available to anyone else, by any means, with or without charge.
+  "Corresponding Source" of a work means its complete source code in the form preferred for making changes (for this Software: the .imo
+  files in every notation, the Python and Haskell files, the generated files that are part of the distribution, the build, installation,
+  generation and test scripts),
+  and everything needed to understand, build, run and test it.
+  "Non-Commercial Purpose" means a purpose that is not primarily intended for, or directed toward, commercial advantage or monetary
+  compensation.  Private study, hobby use, teaching and learning, academic and other research whose results are published openly, and use
+  by charities, schools, universities and public bodies for their non-commercial tasks are Non-Commercial Purposes.  The following are NOT:
+  use in or for a product or service that is sold, licensed or offered for a fee or other consideration; use by or for a for-profit
+  organization in the course of its business, including internal use, consulting, contract work and paid training; use that produces revenue
+  (advertising, subscriptions, sale of data or results); offering the Software or a Derivative Work as a paid or hosted service.  A
+  voluntary donation toward a Derivative Work that is conveyed free of charge does not make it commercial; a payment for the Software or a
+  Derivative Work, or for access to it, does.
+
+2. Grant for Non-Commercial Purposes
+
+  Subject to this license, the Author grants You a worldwide, royalty-free, non-exclusive, non-sublicensable license, for Non-Commercial
+  Purposes only, to use, reproduce, modify, and convey the Software and Derivative Works, and under the Author's patents that the Software
+  necessarily infringes, to the same extent.  No right is granted for any other purpose.  Each recipient to whom You convey receives the
+  license directly from the Author on these terms; You cannot grant more.
+
+3. Attribution (not waivable under this license)
+
+  (a) Keep every copyright notice, license notice and notice of authorship of the Software, and a copy of this license, in every copy You
+      convey.
+  (b) Mark each file You change with a prominent notice that You changed it, with the date and Your name.
+  (c) Credit the Author conspicuously: in the README or the first page of the documentation of every Derivative Work You convey, and where
+      the Derivative Work shows its own name or version to a user, with the sentence "Based on i-1 by Yinhao Wang, under the i-1 License".
+  (d) Any publication, talk or documentation that presents results obtained with the Software or a Derivative Work must acknowledge the
+      Software and its Author.
+  Only the Author, in a written commercial license (section 5), can release anyone from this section.
+
+4. Strong copyleft
+
+  If You convey the Software or any Derivative Work, in source or any other form, then:
+  (a) You must license the whole of it, as a whole, to all recipients under this license, unchanged, and no other terms; in particular
+      the Non-Commercial Purpose limit, the attribution duties of section 3 and the commercial license requirement of section 5 pass on to
+      every recipient.
+  (b) You must supply its Corresponding Source to every recipient with it, or by a written offer, valid for as long as You convey it and for
+      at least three years after, to give the Corresponding Source to anyone who has received the work from You, at no more than the cost of
+      the copy.
+  (c) You must not add restrictions on the exercise of the rights granted here, require a fee for the license, or impose terms that
+      contradict this license; and You must not convey a Derivative Work if You cannot satisfy this license and another obligation (a
+      patent, contract or court order) at the same time.
+  (d) You may combine the Software only with other code whose license allows it to be conveyed under the terms of this license as part of
+      the combined work.
+  Copying the Software or a Derivative Work for Your own Non-Commercial Purposes without conveying it creates no duty to publish it.
+
+5. Commercial use: a separate paid license
+
+  Any use of the Software or of a Derivative Work that is not a Non-Commercial Purpose is NOT licensed by this license.  Without a
+  written commercial license from the Author it is an infringement.  Request a commercial license by email to yinhao.wang@outlook.com.  The Author
+  decides whether to grant one and at what fee.  A commercial license (the "Commercial License"), if granted, has these terms, and the Author
+  and the licensee may add to them in writing but not subtract from them:
+  (a) It is paid: the fee, and the scope of use (the licensee, the products or services, the period), are set in the written agreement.
+  (b) It waives the attribution duties of section 3(c) and 3(d) for the licensee's own products and services: the licensee need not credit
+      the Author in them.  The notices of 3(a) in the files of the Software, and 3(b), remain.
+  (c) The strong copyleft of section 4 applies to the licensee as it applies to You: what the licensee conveys of the Software or of a
+      Derivative Work is conveyed under this license, with its Corresponding Source, and every recipient who wants to use it commercially
+      needs a Commercial License of their own.
+  Rights under a Commercial License do not reach other persons, and cannot be transferred without the Author's written consent.
+
+6. Contributions
+
+  If You intentionally submit a contribution (a change, addition, fix or file) to the Author for inclusion in the Software, it is licensed
+  under this license, and You grant the Author, in addition, a perpetual, worldwide, irrevocable, royalty-free right to reproduce, modify,
+  convey and sublicense Your contribution under any terms, including the Commercial License, so that the Author can license the whole
+  Software commercially.  You state that You have the right to make the contribution and to grant these rights.
+
+7. Termination
+
+  Your rights end automatically if You breach this license.  They are reinstated if You stop the breach and cure it within 30 days after You
+  are notified of it or become aware of it, for the first breach only; after a second breach they end for good unless the Author restores
+  them in writing.  The licenses of recipients who received the work from You in compliance with this license are not ended by Your breach.
+  Sections 8 and 9 survive termination.
+
+8. No warranty; limitation of liability
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR
+  A PARTICULAR PURPOSE, ACCURACY, AND NON-INFRINGEMENT.  THE RESULTS OF ITS COMPUTATIONS, ITS PROOFS AND ITS DECISIONS ARE NOT GUARANTEED.
+  TO THE EXTENT THE LAW ALLOWS, THE AUTHOR IS NOT LIABLE FOR ANY CLAIM OR DAMAGES, DIRECT OR INDIRECT, ARISING FROM THE SOFTWARE OR ITS USE,
+  WHETHER IN CONTRACT, TORT OR OTHERWISE.
+
+9. General
+
+  This license gives no right to the Author's name or marks beyond the credit of section 3.  If a part of this license is unenforceable
+  where You are, the rest remains in force, and the part is applied to the extent that is enforceable; the Non-Commercial Purpose limit and
+  the commercial license requirement are essential and are never to be read away.  This is the whole license for the Software; a Commercial
+  License is a separate written agreement.  The Author may publish new versions of this license; works already conveyed stay under the
+  version they were conveyed under.  Third-party material in the distribution, if any, is under its own license, named at its place.

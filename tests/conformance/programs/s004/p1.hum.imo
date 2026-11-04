@@ -1,0 +1,1 @@
+x in \ZZ := fstz(strpair("a", "b"))

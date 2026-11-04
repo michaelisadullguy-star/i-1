@@ -1,0 +1,4 @@
+f(n) in \Q -> \Q := 1 / (n + 1)
+g(n) in \Q -> \Q := 1 / (n + 2)
+ip in Stream(\Q) := inner(algQ, f, g)
+norm2 in Stream(\Q) := inner(algQ, f, f)

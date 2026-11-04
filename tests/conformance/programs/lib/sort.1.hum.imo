@@ -1,0 +1,1 @@
+main in List(\NN) := sort([12, 5, 7])

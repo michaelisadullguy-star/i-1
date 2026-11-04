@@ -1,0 +1,1 @@
+main in \ZZ := legendre(4, 3)

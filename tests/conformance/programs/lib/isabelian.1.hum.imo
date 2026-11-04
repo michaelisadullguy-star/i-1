@@ -1,0 +1,1 @@
+main in Bool := isabelian([[12, 5, 7], [5, 7, 3], [7, 3, 9]])

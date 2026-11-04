@@ -1,0 +1,8 @@
+-- characters and strings: escapes, unicode, comparison
+main in String := unlines([
+  "tab:\there",
+  "quote: \"q\" backslash: \\ newline escaped: \\n",
+  "unicode: λ → ∀ ℚ[i] 😀",
+  "chars: " ++ str(ord('a')) ++ " " ++ str(ord('λ')) ++ " " ++ str(ord('😀')),
+  "length: " ++ str(length("héllo, wörld")),
+  reverse("stressed")])

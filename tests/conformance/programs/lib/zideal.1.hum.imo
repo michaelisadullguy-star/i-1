@@ -1,0 +1,1 @@
+main in List(\NN) := zideal(12, [9, -2, 6])

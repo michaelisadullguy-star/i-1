@@ -1,0 +1,1 @@
+main in Stream(\QQ) := erfc(-5/2)

@@ -1,0 +1,1 @@
+main in Pair(\NN, List(Pair(List(\NN), \NN))) := fpfactor(5, [-2, 6, -3])

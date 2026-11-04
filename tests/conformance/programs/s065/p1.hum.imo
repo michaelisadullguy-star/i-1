@@ -1,0 +1,3 @@
+w in \QQ
+v in \QQ := w + 1
+ok in Prop := w + 1 == 2

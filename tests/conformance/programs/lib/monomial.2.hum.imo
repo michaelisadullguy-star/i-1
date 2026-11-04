@@ -1,0 +1,1 @@
+main in List(\ZZ) := monomial(4, 3)

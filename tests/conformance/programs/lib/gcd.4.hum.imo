@@ -1,0 +1,1 @@
+main in \NN := gcd(4, -2)

@@ -1,0 +1,1 @@
+main in \NN := nthprime(12)

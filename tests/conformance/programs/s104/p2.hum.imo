@@ -1,0 +1,2 @@
+z in \CC
+main in List(Prop) := [z * conj(z) + 1 == 0, z == conj(z), z * conj(z) == 0, z + conj(z) == 2, z - conj(z) == 2*i, re(z) == 1 and im(z) == 2, re(z)^2 + im(z)^2 geq 0]

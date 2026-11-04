@@ -1,0 +1,9 @@
+u0 in \NN
+u1 in \ZZ
+u2 in \QQ
+u3 in \Z
+u4 in \Q
+u5 in \RR
+u6 in \CC
+u7 in \R
+main in Prop := u0 == 0 and u1 == 0 and u2 == 0 and u3 == 0 and u4 == 0 and u5 == 0 and u6 == 0 and u7 == 0

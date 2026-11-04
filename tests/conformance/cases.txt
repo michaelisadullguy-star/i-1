@@ -1,0 +1,2067 @@
+# id <TAB> flags <TAB> command line (relative to the repository root); written by pymo/mkconformance.py --cases
+ex.run.analysis.hum.imo	-	run examples/analysis.hum.imo
+ex.check.analysis.hum.imo	-	check examples/analysis.hum.imo
+ex.spec.analysis.hum.imo	-	translate examples/analysis.hum.imo --to spec
+ex.bin.analysis.hum.imo	-	translate examples/analysis.hum.imo --to bin
+ex.run.bad.hum.imo	-	run examples/bad.hum.imo
+ex.check.bad.hum.imo	-	check examples/bad.hum.imo
+ex.spec.bad.hum.imo	-	translate examples/bad.hum.imo --to spec
+ex.bin.bad.hum.imo	-	translate examples/bad.hum.imo --to bin
+ex.run.decode.hum.imo	slow	run examples/decode.hum.imo
+ex.check.decode.hum.imo	-	check examples/decode.hum.imo
+ex.spec.decode.hum.imo	-	translate examples/decode.hum.imo --to spec
+ex.bin.decode.hum.imo	-	translate examples/decode.hum.imo --to bin
+ex.run.hello.bin.imo	-	run examples/hello.bin.imo
+ex.check.hello.bin.imo	-	check examples/hello.bin.imo
+ex.spec.hello.bin.imo	-	translate examples/hello.bin.imo --to spec
+ex.bin.hello.bin.imo	-	translate examples/hello.bin.imo --to bin
+ex.run.hello.hum.imo	-	run examples/hello.hum.imo
+ex.check.hello.hum.imo	-	check examples/hello.hum.imo
+ex.spec.hello.hum.imo	-	translate examples/hello.hum.imo --to spec
+ex.bin.hello.hum.imo	-	translate examples/hello.hum.imo --to bin
+ex.run.main.hum.imo	slow	run examples/main.hum.imo
+ex.check.main.hum.imo	-	check examples/main.hum.imo
+ex.spec.main.hum.imo	-	translate examples/main.hum.imo --to spec
+ex.bin.main.hum.imo	-	translate examples/main.hum.imo --to bin
+ex.run.norm.hum.imo	-	run examples/norm.hum.imo
+ex.check.norm.hum.imo	-	check examples/norm.hum.imo
+ex.spec.norm.hum.imo	-	translate examples/norm.hum.imo --to spec
+ex.bin.norm.hum.imo	-	translate examples/norm.hum.imo --to bin
+ex.run.point.hum.imo	-	run examples/point.hum.imo
+ex.check.point.hum.imo	-	check examples/point.hum.imo
+ex.spec.point.hum.imo	-	translate examples/point.hum.imo --to spec
+ex.bin.point.hum.imo	-	translate examples/point.hum.imo --to bin
+ex.run.predicates.hum.imo	-	run examples/predicates.hum.imo
+ex.check.predicates.hum.imo	-	check examples/predicates.hum.imo
+ex.spec.predicates.hum.imo	-	translate examples/predicates.hum.imo --to spec
+ex.bin.predicates.hum.imo	-	translate examples/predicates.hum.imo --to bin
+ex.run.prove.bin.imo	-	run examples/prove.bin.imo
+ex.check.prove.bin.imo	-	check examples/prove.bin.imo
+ex.spec.prove.bin.imo	-	translate examples/prove.bin.imo --to spec
+ex.bin.prove.bin.imo	-	translate examples/prove.bin.imo --to bin
+ex.run.prove.hum.imo	-	run examples/prove.hum.imo
+ex.check.prove.hum.imo	-	check examples/prove.hum.imo
+ex.spec.prove.hum.imo	-	translate examples/prove.hum.imo --to spec
+ex.bin.prove.hum.imo	-	translate examples/prove.hum.imo --to bin
+ex.run.quaternion.hum.imo	-	run examples/quaternion.hum.imo
+ex.check.quaternion.hum.imo	-	check examples/quaternion.hum.imo
+ex.spec.quaternion.hum.imo	-	translate examples/quaternion.hum.imo --to spec
+ex.bin.quaternion.hum.imo	-	translate examples/quaternion.hum.imo --to bin
+ex.run.spaces.bin.imo	-	run examples/spaces.bin.imo
+ex.check.spaces.bin.imo	-	check examples/spaces.bin.imo
+ex.spec.spaces.bin.imo	-	translate examples/spaces.bin.imo --to spec
+ex.bin.spaces.bin.imo	-	translate examples/spaces.bin.imo --to bin
+ex.run.spaces.hum.imo	-	run examples/spaces.hum.imo
+ex.check.spaces.hum.imo	-	check examples/spaces.hum.imo
+ex.spec.spaces.hum.imo	-	translate examples/spaces.hum.imo --to spec
+ex.bin.spaces.hum.imo	-	translate examples/spaces.hum.imo --to bin
+ex.run.spaces.spec.imo	-	run examples/spaces.spec.imo
+ex.check.spaces.spec.imo	-	check examples/spaces.spec.imo
+ex.spec.spaces.spec.imo	-	translate examples/spaces.spec.imo --to spec
+ex.bin.spaces.spec.imo	-	translate examples/spaces.spec.imo --to bin
+ex.run.target.bin.imo	-	run examples/target.bin.imo
+ex.check.target.bin.imo	-	check examples/target.bin.imo
+ex.spec.target.bin.imo	-	translate examples/target.bin.imo --to spec
+ex.bin.target.bin.imo	-	translate examples/target.bin.imo --to bin
+ex.run.target.hum.imo	-	run examples/target.hum.imo
+ex.check.target.hum.imo	-	check examples/target.hum.imo
+ex.spec.target.hum.imo	-	translate examples/target.hum.imo --to spec
+ex.bin.target.hum.imo	-	translate examples/target.hum.imo --to bin
+ex.run.target.spec.imo	-	run examples/target.spec.imo
+ex.check.target.spec.imo	-	check examples/target.spec.imo
+ex.spec.target.spec.imo	-	translate examples/target.spec.imo --to spec
+ex.bin.target.spec.imo	-	translate examples/target.spec.imo --to bin
+ex.run.tower.spec.imo	-	run examples/tower.spec.imo
+ex.check.tower.spec.imo	-	check examples/tower.spec.imo
+ex.spec.tower.spec.imo	-	translate examples/tower.spec.imo --to spec
+ex.bin.tower.spec.imo	-	translate examples/tower.spec.imo --to bin
+ex.out-bin.point.hum.imo	-	run examples/point.hum.imo --out bin
+ex.out-spec.point.hum.imo	-	run examples/point.hum.imo --out spec
+ex.out-hum.point.hum.imo	-	run examples/point.hum.imo --out hum
+ex.out-bin.hello.hum.imo	-	run examples/hello.hum.imo --out bin
+ex.out-spec.hello.hum.imo	-	run examples/hello.hum.imo --out spec
+ex.out-hum.hello.hum.imo	-	run examples/hello.hum.imo --out hum
+ex.out-bin.main.hum.imo	-	run examples/main.hum.imo --out bin
+ex.out-spec.main.hum.imo	-	run examples/main.hum.imo --out spec
+ex.out-hum.main.hum.imo	-	run examples/main.hum.imo --out hum
+ex.out-bin.prove.hum.imo	-	run examples/prove.hum.imo --out bin
+ex.out-spec.prove.hum.imo	-	run examples/prove.hum.imo --out spec
+ex.out-hum.prove.hum.imo	-	run examples/prove.hum.imo --out hum
+ex.out-bin.predicates.hum.imo	-	run examples/predicates.hum.imo --out bin
+ex.out-spec.predicates.hum.imo	-	run examples/predicates.hum.imo --out spec
+ex.out-hum.predicates.hum.imo	-	run examples/predicates.hum.imo --out hum
+ex.eval.target.hum.imo.pi	-	eval examples/target.hum.imo pi 14
+ex.eval.target.hum.imo.e	-	eval examples/target.hum.imo e 14
+ex.eval.target.hum.imo.z	-	eval examples/target.hum.imo z 14
+ex.eval.analysis.hum.imo.euler	-	eval examples/analysis.hum.imo euler 14
+ex.eval.quaternion.hum.imo.q1	-	eval examples/quaternion.hum.imo q1
+ex.eval.quaternion.hum.imo.q2	-	eval examples/quaternion.hum.imo q2
+ex.eval.quaternion.hum.imo.q3	-	eval examples/quaternion.hum.imo q3
+ex.eval.quaternion.hum.imo.q4	-	eval examples/quaternion.hum.imo q4
+ex.eval.spaces.hum.imo.ip	-	eval examples/spaces.hum.imo ip 6
+ex.eval.spaces.hum.imo.norm2	-	eval examples/spaces.hum.imo norm2 6
+ex.eval.hello.hum.imo.greeting	-	eval examples/hello.hum.imo greeting
+ex.eval.hello.bin.imo.main	-	eval examples/hello.bin.imo main
+ex.eval.main.hum.imo.x	-	eval examples/main.hum.imo x
+ex.eval.main.hum.imo.pi	-	eval examples/main.hum.imo pi 20
+ex.eval.norm.hum.imo.v	-	eval examples/norm.hum.imo v
+ex.eval.predicates.hum.imo.x	-	eval examples/predicates.hum.imo x
+ex.eval.spec-tower	-	eval examples/target.spec.imo examples/tower.spec.imo w 14
+ex.text.hello	-	text examples/hello.hum.imo greeting
+ex.check.bad	-	check examples/bad.hum.imo
+prelude-bin.run.hello.hum.imo	-	run lib/prelude.bin.imo examples/hello.hum.imo
+prelude-bin.run.hello.bin.imo	-	run lib/prelude.bin.imo examples/hello.bin.imo
+prelude-bin.run.prove.bin.imo	-	run lib/prelude.bin.imo examples/prove.bin.imo
+prelude-bin.check.point	-	check lib/prelude.bin.imo examples/point.hum.imo
+s001.check	-	check tests/conformance/programs/s001/p1.hum.imo
+s001.spec	-	translate tests/conformance/programs/s001/p1.hum.imo --to spec
+s001.bin	-	translate tests/conformance/programs/s001/p1.hum.imo --to bin
+s001.run	-	run tests/conformance/programs/s001/p1.hum.imo --n 6
+s002.check	-	check tests/conformance/programs/s002/p1.hum.imo
+s002.spec	-	translate tests/conformance/programs/s002/p1.hum.imo --to spec
+s002.bin	-	translate tests/conformance/programs/s002/p1.hum.imo --to bin
+s002.run	-	run tests/conformance/programs/s002/p1.hum.imo --n 6
+s003.check	-	check tests/conformance/programs/s003/p1.hum.imo
+s003.spec	-	translate tests/conformance/programs/s003/p1.hum.imo --to spec
+s003.bin	-	translate tests/conformance/programs/s003/p1.hum.imo --to bin
+s003.run	-	run tests/conformance/programs/s003/p1.hum.imo --n 6
+s004.check	-	check tests/conformance/programs/s004/p1.hum.imo
+s004.spec	-	translate tests/conformance/programs/s004/p1.hum.imo --to spec
+s004.bin	-	translate tests/conformance/programs/s004/p1.hum.imo --to bin
+s004.run	-	run tests/conformance/programs/s004/p1.hum.imo --n 6
+s005.check	-	check tests/conformance/programs/s005/p1.hum.imo
+s005.spec	-	translate tests/conformance/programs/s005/p1.hum.imo --to spec
+s005.bin	-	translate tests/conformance/programs/s005/p1.hum.imo --to bin
+s005.run	-	run tests/conformance/programs/s005/p1.hum.imo --n 6
+s006.check	-	check tests/conformance/programs/s006/p1.imo
+s006.spec	-	translate tests/conformance/programs/s006/p1.imo --to spec
+s006.bin	-	translate tests/conformance/programs/s006/p1.imo --to bin
+s006.run	-	run tests/conformance/programs/s006/p1.imo --n 6
+s007.check	-	check tests/conformance/programs/s007/p1.hum.imo
+s007.spec	-	translate tests/conformance/programs/s007/p1.hum.imo --to spec
+s007.bin	-	translate tests/conformance/programs/s007/p1.hum.imo --to bin
+s007.run	-	run tests/conformance/programs/s007/p1.hum.imo --n 6
+s008.check	-	check tests/conformance/programs/s008/p1.hum.imo
+s008.spec	-	translate tests/conformance/programs/s008/p1.hum.imo --to spec
+s008.bin	-	translate tests/conformance/programs/s008/p1.hum.imo --to bin
+s008.run	-	run tests/conformance/programs/s008/p1.hum.imo --n 6
+s009.check	-	check tests/conformance/programs/s009/p1.hum.imo
+s009.spec	-	translate tests/conformance/programs/s009/p1.hum.imo --to spec
+s009.bin	-	translate tests/conformance/programs/s009/p1.hum.imo --to bin
+s009.run	-	run tests/conformance/programs/s009/p1.hum.imo --n 6
+s010.check	-	check tests/conformance/programs/s010/p1.hum.imo
+s010.spec	-	translate tests/conformance/programs/s010/p1.hum.imo --to spec
+s010.bin	-	translate tests/conformance/programs/s010/p1.hum.imo --to bin
+s010.run	-	run tests/conformance/programs/s010/p1.hum.imo --n 6
+s011.check	-	check tests/conformance/programs/s011/p1.imo
+s011.spec	-	translate tests/conformance/programs/s011/p1.imo --to spec
+s011.bin	-	translate tests/conformance/programs/s011/p1.imo --to bin
+s011.run	-	run tests/conformance/programs/s011/p1.imo --n 6
+s012.check	-	check tests/conformance/programs/s012/p1.hum.imo
+s012.spec	-	translate tests/conformance/programs/s012/p1.hum.imo --to spec
+s012.bin	-	translate tests/conformance/programs/s012/p1.hum.imo --to bin
+s012.run	-	run tests/conformance/programs/s012/p1.hum.imo --n 6
+s013.check	-	check tests/conformance/programs/s013/p1.hum.imo
+s013.spec	-	translate tests/conformance/programs/s013/p1.hum.imo --to spec
+s013.bin	-	translate tests/conformance/programs/s013/p1.hum.imo --to bin
+s013.run	-	run tests/conformance/programs/s013/p1.hum.imo --n 6
+s014.check	-	check tests/conformance/programs/s014/p1.imo
+s014.spec	-	translate tests/conformance/programs/s014/p1.imo --to spec
+s014.bin	-	translate tests/conformance/programs/s014/p1.imo --to bin
+s014.run	-	run tests/conformance/programs/s014/p1.imo --n 6
+s015.check	-	check tests/conformance/programs/s015/p1.imo tests/conformance/programs/s015/p2.hum.imo
+s015.spec	-	translate tests/conformance/programs/s015/p1.imo tests/conformance/programs/s015/p2.hum.imo --to spec
+s015.bin	-	translate tests/conformance/programs/s015/p1.imo tests/conformance/programs/s015/p2.hum.imo --to bin
+s015.run	-	run tests/conformance/programs/s015/p1.imo tests/conformance/programs/s015/p2.hum.imo --n 6
+s016.check	-	check tests/conformance/programs/s016/p1.hum.imo
+s016.spec	-	translate tests/conformance/programs/s016/p1.hum.imo --to spec
+s016.bin	-	translate tests/conformance/programs/s016/p1.hum.imo --to bin
+s016.run	-	run tests/conformance/programs/s016/p1.hum.imo --n 6
+s017.check	-	check tests/conformance/programs/s017/p1.imo
+s017.spec	-	translate tests/conformance/programs/s017/p1.imo --to spec
+s017.bin	-	translate tests/conformance/programs/s017/p1.imo --to bin
+s017.run	-	run tests/conformance/programs/s017/p1.imo --n 6
+s018.check	-	check tests/conformance/programs/s018/p1.imo tests/conformance/programs/s018/p2.hum.imo
+s018.spec	-	translate tests/conformance/programs/s018/p1.imo tests/conformance/programs/s018/p2.hum.imo --to spec
+s018.bin	-	translate tests/conformance/programs/s018/p1.imo tests/conformance/programs/s018/p2.hum.imo --to bin
+s018.run	-	run tests/conformance/programs/s018/p1.imo tests/conformance/programs/s018/p2.hum.imo --n 6
+s019.check	-	check tests/conformance/programs/s019/p1.hum.imo
+s019.spec	-	translate tests/conformance/programs/s019/p1.hum.imo --to spec
+s019.bin	-	translate tests/conformance/programs/s019/p1.hum.imo --to bin
+s019.run	-	run tests/conformance/programs/s019/p1.hum.imo --n 6
+s020.check	-	check tests/conformance/programs/s020/p1.imo
+s020.spec	-	translate tests/conformance/programs/s020/p1.imo --to spec
+s020.bin	-	translate tests/conformance/programs/s020/p1.imo --to bin
+s020.run	-	run tests/conformance/programs/s020/p1.imo --n 6
+s021.check	-	check tests/conformance/programs/s021/p1.hum.imo tests/conformance/programs/s021/p2.hum.imo
+s021.spec	-	translate tests/conformance/programs/s021/p1.hum.imo tests/conformance/programs/s021/p2.hum.imo --to spec
+s021.bin	-	translate tests/conformance/programs/s021/p1.hum.imo tests/conformance/programs/s021/p2.hum.imo --to bin
+s021.run	-	run tests/conformance/programs/s021/p1.hum.imo tests/conformance/programs/s021/p2.hum.imo --n 6
+s022.check	-	check tests/conformance/programs/s022/p1.imo tests/conformance/programs/s022/p2.imo
+s022.spec	-	translate tests/conformance/programs/s022/p1.imo tests/conformance/programs/s022/p2.imo --to spec
+s022.bin	-	translate tests/conformance/programs/s022/p1.imo tests/conformance/programs/s022/p2.imo --to bin
+s022.run	-	run tests/conformance/programs/s022/p1.imo tests/conformance/programs/s022/p2.imo --n 6
+s023.check	-	check tests/conformance/programs/s023/p1.hum.imo tests/conformance/programs/s023/p2.hum.imo tests/conformance/programs/s023/p3.imo tests/conformance/programs/s023/p4.imo tests/conformance/programs/s023/p5.hum.imo tests/conformance/programs/s023/p6.hum.imo
+s023.spec	-	translate tests/conformance/programs/s023/p1.hum.imo tests/conformance/programs/s023/p2.hum.imo tests/conformance/programs/s023/p3.imo tests/conformance/programs/s023/p4.imo tests/conformance/programs/s023/p5.hum.imo tests/conformance/programs/s023/p6.hum.imo --to spec
+s023.bin	-	translate tests/conformance/programs/s023/p1.hum.imo tests/conformance/programs/s023/p2.hum.imo tests/conformance/programs/s023/p3.imo tests/conformance/programs/s023/p4.imo tests/conformance/programs/s023/p5.hum.imo tests/conformance/programs/s023/p6.hum.imo --to bin
+s023.run	-	run tests/conformance/programs/s023/p1.hum.imo tests/conformance/programs/s023/p2.hum.imo tests/conformance/programs/s023/p3.imo tests/conformance/programs/s023/p4.imo tests/conformance/programs/s023/p5.hum.imo tests/conformance/programs/s023/p6.hum.imo --n 6
+s024.check	-	check tests/conformance/programs/s024/p1.imo
+s024.spec	-	translate tests/conformance/programs/s024/p1.imo --to spec
+s024.bin	-	translate tests/conformance/programs/s024/p1.imo --to bin
+s024.run	-	run tests/conformance/programs/s024/p1.imo --n 6
+s025.check	-	check tests/conformance/programs/s025/p1.hum.imo tests/conformance/programs/s025/p2.hum.imo
+s025.spec	-	translate tests/conformance/programs/s025/p1.hum.imo tests/conformance/programs/s025/p2.hum.imo --to spec
+s025.bin	-	translate tests/conformance/programs/s025/p1.hum.imo tests/conformance/programs/s025/p2.hum.imo --to bin
+s025.run	-	run tests/conformance/programs/s025/p1.hum.imo tests/conformance/programs/s025/p2.hum.imo --n 6
+s026.check	-	check tests/conformance/programs/s026/p1.imo
+s026.spec	-	translate tests/conformance/programs/s026/p1.imo --to spec
+s026.bin	-	translate tests/conformance/programs/s026/p1.imo --to bin
+s026.run	-	run tests/conformance/programs/s026/p1.imo --n 6
+s027.check	-	check tests/conformance/programs/s027/p1.imo
+s027.spec	-	translate tests/conformance/programs/s027/p1.imo --to spec
+s027.bin	-	translate tests/conformance/programs/s027/p1.imo --to bin
+s027.run	-	run tests/conformance/programs/s027/p1.imo --n 6
+s028.check	-	check tests/conformance/programs/s028/p1.hum.imo tests/conformance/programs/s028/p2.hum.imo
+s028.spec	-	translate tests/conformance/programs/s028/p1.hum.imo tests/conformance/programs/s028/p2.hum.imo --to spec
+s028.bin	-	translate tests/conformance/programs/s028/p1.hum.imo tests/conformance/programs/s028/p2.hum.imo --to bin
+s028.run	-	run tests/conformance/programs/s028/p1.hum.imo tests/conformance/programs/s028/p2.hum.imo --n 6
+s029.check	-	check tests/conformance/programs/s029/p1.imo tests/conformance/programs/s029/p2.imo tests/conformance/programs/s029/p3.hum.imo tests/conformance/programs/s029/p4.hum.imo
+s029.spec	-	translate tests/conformance/programs/s029/p1.imo tests/conformance/programs/s029/p2.imo tests/conformance/programs/s029/p3.hum.imo tests/conformance/programs/s029/p4.hum.imo --to spec
+s029.bin	-	translate tests/conformance/programs/s029/p1.imo tests/conformance/programs/s029/p2.imo tests/conformance/programs/s029/p3.hum.imo tests/conformance/programs/s029/p4.hum.imo --to bin
+s029.run	-	run tests/conformance/programs/s029/p1.imo tests/conformance/programs/s029/p2.imo tests/conformance/programs/s029/p3.hum.imo tests/conformance/programs/s029/p4.hum.imo --n 6
+s030.check	-	check tests/conformance/programs/s030/p1.imo tests/conformance/programs/s030/p2.hum.imo
+s030.spec	-	translate tests/conformance/programs/s030/p1.imo tests/conformance/programs/s030/p2.hum.imo --to spec
+s030.bin	-	translate tests/conformance/programs/s030/p1.imo tests/conformance/programs/s030/p2.hum.imo --to bin
+s030.run	-	run tests/conformance/programs/s030/p1.imo tests/conformance/programs/s030/p2.hum.imo --n 6
+s031.check	-	check tests/conformance/programs/s031/p1.imo tests/conformance/programs/s031/p2.hum.imo
+s031.spec	-	translate tests/conformance/programs/s031/p1.imo tests/conformance/programs/s031/p2.hum.imo --to spec
+s031.bin	-	translate tests/conformance/programs/s031/p1.imo tests/conformance/programs/s031/p2.hum.imo --to bin
+s031.run	-	run tests/conformance/programs/s031/p1.imo tests/conformance/programs/s031/p2.hum.imo --n 6
+s032.check	-	check tests/conformance/programs/s032/p1.hum.imo tests/conformance/programs/s032/p2.hum.imo
+s032.spec	-	translate tests/conformance/programs/s032/p1.hum.imo tests/conformance/programs/s032/p2.hum.imo --to spec
+s032.bin	-	translate tests/conformance/programs/s032/p1.hum.imo tests/conformance/programs/s032/p2.hum.imo --to bin
+s032.run	-	run tests/conformance/programs/s032/p1.hum.imo tests/conformance/programs/s032/p2.hum.imo --n 6
+s033.check	-	check tests/conformance/programs/s033/p1.imo
+s033.spec	-	translate tests/conformance/programs/s033/p1.imo --to spec
+s033.bin	-	translate tests/conformance/programs/s033/p1.imo --to bin
+s033.run	-	run tests/conformance/programs/s033/p1.imo --n 6
+s034.check	-	check tests/conformance/programs/s034/p1.imo tests/conformance/programs/s034/p2.hum.imo tests/conformance/programs/s034/p3.hum.imo
+s034.spec	-	translate tests/conformance/programs/s034/p1.imo tests/conformance/programs/s034/p2.hum.imo tests/conformance/programs/s034/p3.hum.imo --to spec
+s034.bin	-	translate tests/conformance/programs/s034/p1.imo tests/conformance/programs/s034/p2.hum.imo tests/conformance/programs/s034/p3.hum.imo --to bin
+s034.run	-	run tests/conformance/programs/s034/p1.imo tests/conformance/programs/s034/p2.hum.imo tests/conformance/programs/s034/p3.hum.imo --n 6
+s035.check	-	check tests/conformance/programs/s035/p1.imo
+s035.spec	-	translate tests/conformance/programs/s035/p1.imo --to spec
+s035.bin	-	translate tests/conformance/programs/s035/p1.imo --to bin
+s035.run	-	run tests/conformance/programs/s035/p1.imo --n 6
+s036.check	-	check tests/conformance/programs/s036/p1.imo
+s036.spec	-	translate tests/conformance/programs/s036/p1.imo --to spec
+s036.bin	-	translate tests/conformance/programs/s036/p1.imo --to bin
+s036.run	-	run tests/conformance/programs/s036/p1.imo --n 6
+s037.check	-	check tests/conformance/programs/s037/p1.hum.imo
+s037.spec	-	translate tests/conformance/programs/s037/p1.hum.imo --to spec
+s037.bin	-	translate tests/conformance/programs/s037/p1.hum.imo --to bin
+s037.run	-	run tests/conformance/programs/s037/p1.hum.imo --n 6
+s038.check	-	check tests/conformance/programs/s038/p1.hum.imo
+s038.spec	-	translate tests/conformance/programs/s038/p1.hum.imo --to spec
+s038.bin	-	translate tests/conformance/programs/s038/p1.hum.imo --to bin
+s038.run	-	run tests/conformance/programs/s038/p1.hum.imo --n 6
+s039.check	-	check tests/conformance/programs/s039/p1.imo tests/conformance/programs/s039/p2.imo
+s039.spec	-	translate tests/conformance/programs/s039/p1.imo tests/conformance/programs/s039/p2.imo --to spec
+s039.bin	-	translate tests/conformance/programs/s039/p1.imo tests/conformance/programs/s039/p2.imo --to bin
+s039.run	-	run tests/conformance/programs/s039/p1.imo tests/conformance/programs/s039/p2.imo --n 6
+s040.check	-	check tests/conformance/programs/s040/p1.hum.imo tests/conformance/programs/s040/p2.hum.imo
+s040.spec	-	translate tests/conformance/programs/s040/p1.hum.imo tests/conformance/programs/s040/p2.hum.imo --to spec
+s040.bin	-	translate tests/conformance/programs/s040/p1.hum.imo tests/conformance/programs/s040/p2.hum.imo --to bin
+s040.run	-	run tests/conformance/programs/s040/p1.hum.imo tests/conformance/programs/s040/p2.hum.imo --n 6
+s041.check	-	check tests/conformance/programs/s041/p1.imo
+s041.spec	-	translate tests/conformance/programs/s041/p1.imo --to spec
+s041.bin	-	translate tests/conformance/programs/s041/p1.imo --to bin
+s041.run	-	run tests/conformance/programs/s041/p1.imo --n 6
+s042.check	-	check tests/conformance/programs/s042/p1.hum.imo
+s042.spec	-	translate tests/conformance/programs/s042/p1.hum.imo --to spec
+s042.bin	-	translate tests/conformance/programs/s042/p1.hum.imo --to bin
+s042.run	-	run tests/conformance/programs/s042/p1.hum.imo --n 6
+s043.check	-	check tests/conformance/programs/s043/p1.hum.imo
+s043.spec	-	translate tests/conformance/programs/s043/p1.hum.imo --to spec
+s043.bin	-	translate tests/conformance/programs/s043/p1.hum.imo --to bin
+s043.run	-	run tests/conformance/programs/s043/p1.hum.imo --n 6
+s044.check	-	check tests/conformance/programs/s044/p1.imo tests/conformance/programs/s044/p2.imo
+s044.spec	-	translate tests/conformance/programs/s044/p1.imo tests/conformance/programs/s044/p2.imo --to spec
+s044.bin	-	translate tests/conformance/programs/s044/p1.imo tests/conformance/programs/s044/p2.imo --to bin
+s044.run	-	run tests/conformance/programs/s044/p1.imo tests/conformance/programs/s044/p2.imo --n 6
+s045.check	-	check tests/conformance/programs/s045/p1.hum.imo tests/conformance/programs/s045/p2.hum.imo
+s045.spec	-	translate tests/conformance/programs/s045/p1.hum.imo tests/conformance/programs/s045/p2.hum.imo --to spec
+s045.bin	-	translate tests/conformance/programs/s045/p1.hum.imo tests/conformance/programs/s045/p2.hum.imo --to bin
+s045.run	-	run tests/conformance/programs/s045/p1.hum.imo tests/conformance/programs/s045/p2.hum.imo --n 6
+s046.check	-	check tests/conformance/programs/s046/p1.imo
+s046.spec	-	translate tests/conformance/programs/s046/p1.imo --to spec
+s046.bin	-	translate tests/conformance/programs/s046/p1.imo --to bin
+s046.run	-	run tests/conformance/programs/s046/p1.imo --n 6
+s047.check	-	check tests/conformance/programs/s047/p1.hum.imo
+s047.spec	-	translate tests/conformance/programs/s047/p1.hum.imo --to spec
+s047.bin	-	translate tests/conformance/programs/s047/p1.hum.imo --to bin
+s047.run	-	run tests/conformance/programs/s047/p1.hum.imo --n 6
+s048.check	-	check tests/conformance/programs/s048/p1.hum.imo
+s048.spec	-	translate tests/conformance/programs/s048/p1.hum.imo --to spec
+s048.bin	-	translate tests/conformance/programs/s048/p1.hum.imo --to bin
+s048.run	-	run tests/conformance/programs/s048/p1.hum.imo --n 6
+s049.check	-	check tests/conformance/programs/s049/p1.hum.imo
+s049.spec	-	translate tests/conformance/programs/s049/p1.hum.imo --to spec
+s049.bin	-	translate tests/conformance/programs/s049/p1.hum.imo --to bin
+s049.run	-	run tests/conformance/programs/s049/p1.hum.imo --n 6
+s050.check	-	check tests/conformance/programs/s050/p1.hum.imo
+s050.spec	-	translate tests/conformance/programs/s050/p1.hum.imo --to spec
+s050.bin	-	translate tests/conformance/programs/s050/p1.hum.imo --to bin
+s050.run	-	run tests/conformance/programs/s050/p1.hum.imo --n 6
+s051.check	-	check tests/conformance/programs/s051/p1.hum.imo
+s051.spec	-	translate tests/conformance/programs/s051/p1.hum.imo --to spec
+s051.bin	-	translate tests/conformance/programs/s051/p1.hum.imo --to bin
+s051.run	-	run tests/conformance/programs/s051/p1.hum.imo --n 6
+s052.check	-	check tests/conformance/programs/s052/p1.hum.imo
+s052.spec	-	translate tests/conformance/programs/s052/p1.hum.imo --to spec
+s052.bin	-	translate tests/conformance/programs/s052/p1.hum.imo --to bin
+s052.run	-	run tests/conformance/programs/s052/p1.hum.imo --n 6
+s053.check	-	check tests/conformance/programs/s053/p1.imo
+s053.spec	-	translate tests/conformance/programs/s053/p1.imo --to spec
+s053.bin	-	translate tests/conformance/programs/s053/p1.imo --to bin
+s053.run	-	run tests/conformance/programs/s053/p1.imo --n 6
+s054.check	-	check tests/conformance/programs/s054/p1.hum.imo
+s054.spec	-	translate tests/conformance/programs/s054/p1.hum.imo --to spec
+s054.bin	-	translate tests/conformance/programs/s054/p1.hum.imo --to bin
+s054.run	-	run tests/conformance/programs/s054/p1.hum.imo --n 6
+s055.check	-	check tests/conformance/programs/s055/p1.hum.imo
+s055.spec	-	translate tests/conformance/programs/s055/p1.hum.imo --to spec
+s055.bin	-	translate tests/conformance/programs/s055/p1.hum.imo --to bin
+s055.run	-	run tests/conformance/programs/s055/p1.hum.imo --n 6
+s056.check	-	check tests/conformance/programs/s056/p1.hum.imo
+s056.spec	-	translate tests/conformance/programs/s056/p1.hum.imo --to spec
+s056.bin	-	translate tests/conformance/programs/s056/p1.hum.imo --to bin
+s056.run	-	run tests/conformance/programs/s056/p1.hum.imo --n 6
+s057.check	-	check tests/conformance/programs/s057/p1.hum.imo
+s057.spec	-	translate tests/conformance/programs/s057/p1.hum.imo --to spec
+s057.bin	-	translate tests/conformance/programs/s057/p1.hum.imo --to bin
+s057.run	-	run tests/conformance/programs/s057/p1.hum.imo --n 6
+s058.check	-	check tests/conformance/programs/s058/p1.imo
+s058.spec	-	translate tests/conformance/programs/s058/p1.imo --to spec
+s058.bin	-	translate tests/conformance/programs/s058/p1.imo --to bin
+s058.run	-	run tests/conformance/programs/s058/p1.imo --n 6
+s059.check	-	check tests/conformance/programs/s059/p1.hum.imo
+s059.spec	-	translate tests/conformance/programs/s059/p1.hum.imo --to spec
+s059.bin	-	translate tests/conformance/programs/s059/p1.hum.imo --to bin
+s059.run	-	run tests/conformance/programs/s059/p1.hum.imo --n 6
+s060.check	-	check tests/conformance/programs/s060/p1.hum.imo
+s060.spec	-	translate tests/conformance/programs/s060/p1.hum.imo --to spec
+s060.bin	-	translate tests/conformance/programs/s060/p1.hum.imo --to bin
+s060.run	-	run tests/conformance/programs/s060/p1.hum.imo --n 6
+s061.check	-	check tests/conformance/programs/s061/p1.hum.imo
+s061.spec	-	translate tests/conformance/programs/s061/p1.hum.imo --to spec
+s061.bin	-	translate tests/conformance/programs/s061/p1.hum.imo --to bin
+s061.run	-	run tests/conformance/programs/s061/p1.hum.imo --n 6
+s062.check	-	check tests/conformance/programs/s062/p1.hum.imo
+s062.spec	-	translate tests/conformance/programs/s062/p1.hum.imo --to spec
+s062.bin	-	translate tests/conformance/programs/s062/p1.hum.imo --to bin
+s062.run	-	run tests/conformance/programs/s062/p1.hum.imo --n 6
+s063.check	-	check tests/conformance/programs/s063/p1.hum.imo
+s063.spec	-	translate tests/conformance/programs/s063/p1.hum.imo --to spec
+s063.bin	-	translate tests/conformance/programs/s063/p1.hum.imo --to bin
+s063.run	-	run tests/conformance/programs/s063/p1.hum.imo --n 6
+s064.check	-	check tests/conformance/programs/s064/p1.imo
+s064.spec	-	translate tests/conformance/programs/s064/p1.imo --to spec
+s064.bin	-	translate tests/conformance/programs/s064/p1.imo --to bin
+s064.run	-	run tests/conformance/programs/s064/p1.imo --n 6
+s065.check	-	check tests/conformance/programs/s065/p1.hum.imo
+s065.spec	-	translate tests/conformance/programs/s065/p1.hum.imo --to spec
+s065.bin	-	translate tests/conformance/programs/s065/p1.hum.imo --to bin
+s065.run	-	run tests/conformance/programs/s065/p1.hum.imo --n 6
+s066.check	-	check tests/conformance/programs/s066/p1.hum.imo
+s066.spec	-	translate tests/conformance/programs/s066/p1.hum.imo --to spec
+s066.bin	-	translate tests/conformance/programs/s066/p1.hum.imo --to bin
+s066.run	-	run tests/conformance/programs/s066/p1.hum.imo --n 6
+s067.check	-	check tests/conformance/programs/s067/p1.hum.imo
+s067.spec	-	translate tests/conformance/programs/s067/p1.hum.imo --to spec
+s067.bin	-	translate tests/conformance/programs/s067/p1.hum.imo --to bin
+s067.run	-	run tests/conformance/programs/s067/p1.hum.imo --n 6
+s068.check	-	check tests/conformance/programs/s068/p1.imo tests/conformance/programs/s068/p2.hum.imo tests/conformance/programs/s068/p3.imo tests/conformance/programs/s068/p4.imo tests/conformance/programs/s068/p5.hum.imo tests/conformance/programs/s068/p6.imo
+s068.spec	-	translate tests/conformance/programs/s068/p1.imo tests/conformance/programs/s068/p2.hum.imo tests/conformance/programs/s068/p3.imo tests/conformance/programs/s068/p4.imo tests/conformance/programs/s068/p5.hum.imo tests/conformance/programs/s068/p6.imo --to spec
+s068.bin	-	translate tests/conformance/programs/s068/p1.imo tests/conformance/programs/s068/p2.hum.imo tests/conformance/programs/s068/p3.imo tests/conformance/programs/s068/p4.imo tests/conformance/programs/s068/p5.hum.imo tests/conformance/programs/s068/p6.imo --to bin
+s068.run	-	run tests/conformance/programs/s068/p1.imo tests/conformance/programs/s068/p2.hum.imo tests/conformance/programs/s068/p3.imo tests/conformance/programs/s068/p4.imo tests/conformance/programs/s068/p5.hum.imo tests/conformance/programs/s068/p6.imo --n 6
+s069.check	-	check tests/conformance/programs/s069/p1.hum.imo
+s069.spec	-	translate tests/conformance/programs/s069/p1.hum.imo --to spec
+s069.bin	-	translate tests/conformance/programs/s069/p1.hum.imo --to bin
+s069.run	-	run tests/conformance/programs/s069/p1.hum.imo --n 6
+s070.check	-	check tests/conformance/programs/s070/p1.imo tests/conformance/programs/s070/p2.hum.imo tests/conformance/programs/s070/p3.imo
+s070.spec	-	translate tests/conformance/programs/s070/p1.imo tests/conformance/programs/s070/p2.hum.imo tests/conformance/programs/s070/p3.imo --to spec
+s070.bin	-	translate tests/conformance/programs/s070/p1.imo tests/conformance/programs/s070/p2.hum.imo tests/conformance/programs/s070/p3.imo --to bin
+s070.run	-	run tests/conformance/programs/s070/p1.imo tests/conformance/programs/s070/p2.hum.imo tests/conformance/programs/s070/p3.imo --n 6
+s071.check	-	check tests/conformance/programs/s071/p1.hum.imo
+s071.spec	-	translate tests/conformance/programs/s071/p1.hum.imo --to spec
+s071.bin	-	translate tests/conformance/programs/s071/p1.hum.imo --to bin
+s071.run	-	run tests/conformance/programs/s071/p1.hum.imo --n 6
+s072.check	-	check tests/conformance/programs/s072/p1.imo tests/conformance/programs/s072/p2.hum.imo tests/conformance/programs/s072/p3.imo
+s072.spec	-	translate tests/conformance/programs/s072/p1.imo tests/conformance/programs/s072/p2.hum.imo tests/conformance/programs/s072/p3.imo --to spec
+s072.bin	-	translate tests/conformance/programs/s072/p1.imo tests/conformance/programs/s072/p2.hum.imo tests/conformance/programs/s072/p3.imo --to bin
+s072.run	-	run tests/conformance/programs/s072/p1.imo tests/conformance/programs/s072/p2.hum.imo tests/conformance/programs/s072/p3.imo --n 6
+s073.check	-	check tests/conformance/programs/s073/p1.hum.imo
+s073.spec	-	translate tests/conformance/programs/s073/p1.hum.imo --to spec
+s073.bin	-	translate tests/conformance/programs/s073/p1.hum.imo --to bin
+s073.run	-	run tests/conformance/programs/s073/p1.hum.imo --n 6
+s074.check	-	check tests/conformance/programs/s074/p1.imo tests/conformance/programs/s074/p2.hum.imo tests/conformance/programs/s074/p3.imo
+s074.spec	-	translate tests/conformance/programs/s074/p1.imo tests/conformance/programs/s074/p2.hum.imo tests/conformance/programs/s074/p3.imo --to spec
+s074.bin	-	translate tests/conformance/programs/s074/p1.imo tests/conformance/programs/s074/p2.hum.imo tests/conformance/programs/s074/p3.imo --to bin
+s074.run	-	run tests/conformance/programs/s074/p1.imo tests/conformance/programs/s074/p2.hum.imo tests/conformance/programs/s074/p3.imo --n 6
+s075.check	-	check tests/conformance/programs/s075/p1.hum.imo
+s075.spec	-	translate tests/conformance/programs/s075/p1.hum.imo --to spec
+s075.bin	-	translate tests/conformance/programs/s075/p1.hum.imo --to bin
+s075.run	-	run tests/conformance/programs/s075/p1.hum.imo --n 6
+s076.check	-	check tests/conformance/programs/s076/p1.imo tests/conformance/programs/s076/p2.hum.imo tests/conformance/programs/s076/p3.imo
+s076.spec	-	translate tests/conformance/programs/s076/p1.imo tests/conformance/programs/s076/p2.hum.imo tests/conformance/programs/s076/p3.imo --to spec
+s076.bin	-	translate tests/conformance/programs/s076/p1.imo tests/conformance/programs/s076/p2.hum.imo tests/conformance/programs/s076/p3.imo --to bin
+s076.run	-	run tests/conformance/programs/s076/p1.imo tests/conformance/programs/s076/p2.hum.imo tests/conformance/programs/s076/p3.imo --n 6
+s077.check	-	check tests/conformance/programs/s077/p1.imo tests/conformance/programs/s077/p2.hum.imo tests/conformance/programs/s077/p3.imo tests/conformance/programs/s077/p4.hum.imo
+s077.spec	-	translate tests/conformance/programs/s077/p1.imo tests/conformance/programs/s077/p2.hum.imo tests/conformance/programs/s077/p3.imo tests/conformance/programs/s077/p4.hum.imo --to spec
+s077.bin	-	translate tests/conformance/programs/s077/p1.imo tests/conformance/programs/s077/p2.hum.imo tests/conformance/programs/s077/p3.imo tests/conformance/programs/s077/p4.hum.imo --to bin
+s077.run	-	run tests/conformance/programs/s077/p1.imo tests/conformance/programs/s077/p2.hum.imo tests/conformance/programs/s077/p3.imo tests/conformance/programs/s077/p4.hum.imo --n 6
+s078.check	-	check tests/conformance/programs/s078/p1.imo tests/conformance/programs/s078/p2.hum.imo tests/conformance/programs/s078/p3.imo
+s078.spec	-	translate tests/conformance/programs/s078/p1.imo tests/conformance/programs/s078/p2.hum.imo tests/conformance/programs/s078/p3.imo --to spec
+s078.bin	-	translate tests/conformance/programs/s078/p1.imo tests/conformance/programs/s078/p2.hum.imo tests/conformance/programs/s078/p3.imo --to bin
+s078.run	-	run tests/conformance/programs/s078/p1.imo tests/conformance/programs/s078/p2.hum.imo tests/conformance/programs/s078/p3.imo --n 6
+s079.check	-	check tests/conformance/programs/s079/p1.hum.imo
+s079.spec	-	translate tests/conformance/programs/s079/p1.hum.imo --to spec
+s079.bin	-	translate tests/conformance/programs/s079/p1.hum.imo --to bin
+s079.run	-	run tests/conformance/programs/s079/p1.hum.imo --n 6
+s080.check	-	check tests/conformance/programs/s080/p1.imo tests/conformance/programs/s080/p2.hum.imo tests/conformance/programs/s080/p3.imo
+s080.spec	-	translate tests/conformance/programs/s080/p1.imo tests/conformance/programs/s080/p2.hum.imo tests/conformance/programs/s080/p3.imo --to spec
+s080.bin	-	translate tests/conformance/programs/s080/p1.imo tests/conformance/programs/s080/p2.hum.imo tests/conformance/programs/s080/p3.imo --to bin
+s080.run	-	run tests/conformance/programs/s080/p1.imo tests/conformance/programs/s080/p2.hum.imo tests/conformance/programs/s080/p3.imo --n 6
+s081.check	-	check tests/conformance/programs/s081/p1.imo tests/conformance/programs/s081/p2.hum.imo tests/conformance/programs/s081/p3.imo tests/conformance/programs/s081/p4.hum.imo tests/conformance/programs/s081/p5.imo tests/conformance/programs/s081/p6.hum.imo tests/conformance/programs/s081/p7.imo tests/conformance/programs/s081/p8.hum.imo
+s081.spec	-	translate tests/conformance/programs/s081/p1.imo tests/conformance/programs/s081/p2.hum.imo tests/conformance/programs/s081/p3.imo tests/conformance/programs/s081/p4.hum.imo tests/conformance/programs/s081/p5.imo tests/conformance/programs/s081/p6.hum.imo tests/conformance/programs/s081/p7.imo tests/conformance/programs/s081/p8.hum.imo --to spec
+s081.bin	-	translate tests/conformance/programs/s081/p1.imo tests/conformance/programs/s081/p2.hum.imo tests/conformance/programs/s081/p3.imo tests/conformance/programs/s081/p4.hum.imo tests/conformance/programs/s081/p5.imo tests/conformance/programs/s081/p6.hum.imo tests/conformance/programs/s081/p7.imo tests/conformance/programs/s081/p8.hum.imo --to bin
+s081.run	-	run tests/conformance/programs/s081/p1.imo tests/conformance/programs/s081/p2.hum.imo tests/conformance/programs/s081/p3.imo tests/conformance/programs/s081/p4.hum.imo tests/conformance/programs/s081/p5.imo tests/conformance/programs/s081/p6.hum.imo tests/conformance/programs/s081/p7.imo tests/conformance/programs/s081/p8.hum.imo --n 6
+s082.check	-	check tests/conformance/programs/s082/p1.hum.imo
+s082.spec	-	translate tests/conformance/programs/s082/p1.hum.imo --to spec
+s082.bin	-	translate tests/conformance/programs/s082/p1.hum.imo --to bin
+s082.run	-	run tests/conformance/programs/s082/p1.hum.imo --n 6
+s083.check	-	check tests/conformance/programs/s083/p1.imo tests/conformance/programs/s083/p2.hum.imo tests/conformance/programs/s083/p3.imo
+s083.spec	-	translate tests/conformance/programs/s083/p1.imo tests/conformance/programs/s083/p2.hum.imo tests/conformance/programs/s083/p3.imo --to spec
+s083.bin	-	translate tests/conformance/programs/s083/p1.imo tests/conformance/programs/s083/p2.hum.imo tests/conformance/programs/s083/p3.imo --to bin
+s083.run	-	run tests/conformance/programs/s083/p1.imo tests/conformance/programs/s083/p2.hum.imo tests/conformance/programs/s083/p3.imo --n 6
+s084.check	-	check tests/conformance/programs/s084/p1.hum.imo
+s084.spec	-	translate tests/conformance/programs/s084/p1.hum.imo --to spec
+s084.bin	-	translate tests/conformance/programs/s084/p1.hum.imo --to bin
+s084.run	-	run tests/conformance/programs/s084/p1.hum.imo --n 6
+s085.check	-	check tests/conformance/programs/s085/p1.imo tests/conformance/programs/s085/p2.hum.imo tests/conformance/programs/s085/p3.imo
+s085.spec	-	translate tests/conformance/programs/s085/p1.imo tests/conformance/programs/s085/p2.hum.imo tests/conformance/programs/s085/p3.imo --to spec
+s085.bin	-	translate tests/conformance/programs/s085/p1.imo tests/conformance/programs/s085/p2.hum.imo tests/conformance/programs/s085/p3.imo --to bin
+s085.run	-	run tests/conformance/programs/s085/p1.imo tests/conformance/programs/s085/p2.hum.imo tests/conformance/programs/s085/p3.imo --n 6
+s086.check	-	check tests/conformance/programs/s086/p1.hum.imo
+s086.spec	-	translate tests/conformance/programs/s086/p1.hum.imo --to spec
+s086.bin	-	translate tests/conformance/programs/s086/p1.hum.imo --to bin
+s086.run	-	run tests/conformance/programs/s086/p1.hum.imo --n 6
+s087.check	-	check tests/conformance/programs/s087/p1.hum.imo tests/conformance/programs/s087/p2.imo
+s087.spec	-	translate tests/conformance/programs/s087/p1.hum.imo tests/conformance/programs/s087/p2.imo --to spec
+s087.bin	-	translate tests/conformance/programs/s087/p1.hum.imo tests/conformance/programs/s087/p2.imo --to bin
+s087.run	-	run tests/conformance/programs/s087/p1.hum.imo tests/conformance/programs/s087/p2.imo --n 6
+s088.check	-	check tests/conformance/programs/s088/p1.hum.imo tests/conformance/programs/s088/p2.imo
+s088.spec	-	translate tests/conformance/programs/s088/p1.hum.imo tests/conformance/programs/s088/p2.imo --to spec
+s088.bin	-	translate tests/conformance/programs/s088/p1.hum.imo tests/conformance/programs/s088/p2.imo --to bin
+s088.run	-	run tests/conformance/programs/s088/p1.hum.imo tests/conformance/programs/s088/p2.imo --n 6
+s089.check	-	check tests/conformance/programs/s089/p1.hum.imo tests/conformance/programs/s089/p2.imo
+s089.spec	-	translate tests/conformance/programs/s089/p1.hum.imo tests/conformance/programs/s089/p2.imo --to spec
+s089.bin	-	translate tests/conformance/programs/s089/p1.hum.imo tests/conformance/programs/s089/p2.imo --to bin
+s089.run	-	run tests/conformance/programs/s089/p1.hum.imo tests/conformance/programs/s089/p2.imo --n 6
+s090.check	-	check tests/conformance/programs/s090/p1.hum.imo tests/conformance/programs/s090/p2.imo
+s090.spec	-	translate tests/conformance/programs/s090/p1.hum.imo tests/conformance/programs/s090/p2.imo --to spec
+s090.bin	-	translate tests/conformance/programs/s090/p1.hum.imo tests/conformance/programs/s090/p2.imo --to bin
+s090.run	-	run tests/conformance/programs/s090/p1.hum.imo tests/conformance/programs/s090/p2.imo --n 6
+s091.check	-	check tests/conformance/programs/s091/p1.hum.imo tests/conformance/programs/s091/p2.imo
+s091.spec	-	translate tests/conformance/programs/s091/p1.hum.imo tests/conformance/programs/s091/p2.imo --to spec
+s091.bin	-	translate tests/conformance/programs/s091/p1.hum.imo tests/conformance/programs/s091/p2.imo --to bin
+s091.run	-	run tests/conformance/programs/s091/p1.hum.imo tests/conformance/programs/s091/p2.imo --n 6
+s092.check	-	check tests/conformance/programs/s092/p1.hum.imo tests/conformance/programs/s092/p2.imo
+s092.spec	-	translate tests/conformance/programs/s092/p1.hum.imo tests/conformance/programs/s092/p2.imo --to spec
+s092.bin	-	translate tests/conformance/programs/s092/p1.hum.imo tests/conformance/programs/s092/p2.imo --to bin
+s092.run	-	run tests/conformance/programs/s092/p1.hum.imo tests/conformance/programs/s092/p2.imo --n 6
+s093.check	-	check tests/conformance/programs/s093/p1.hum.imo tests/conformance/programs/s093/p2.imo
+s093.spec	-	translate tests/conformance/programs/s093/p1.hum.imo tests/conformance/programs/s093/p2.imo --to spec
+s093.bin	-	translate tests/conformance/programs/s093/p1.hum.imo tests/conformance/programs/s093/p2.imo --to bin
+s093.run	-	run tests/conformance/programs/s093/p1.hum.imo tests/conformance/programs/s093/p2.imo --n 6
+s094.check	-	check tests/conformance/programs/s094/p1.hum.imo tests/conformance/programs/s094/p2.imo
+s094.spec	-	translate tests/conformance/programs/s094/p1.hum.imo tests/conformance/programs/s094/p2.imo --to spec
+s094.bin	-	translate tests/conformance/programs/s094/p1.hum.imo tests/conformance/programs/s094/p2.imo --to bin
+s094.run	-	run tests/conformance/programs/s094/p1.hum.imo tests/conformance/programs/s094/p2.imo --n 6
+s095.check	-	check tests/conformance/programs/s095/p1.imo
+s095.spec	-	translate tests/conformance/programs/s095/p1.imo --to spec
+s095.bin	-	translate tests/conformance/programs/s095/p1.imo --to bin
+s095.run	-	run tests/conformance/programs/s095/p1.imo --n 6
+s096.check	-	check tests/conformance/programs/s096/p1.hum.imo
+s096.spec	-	translate tests/conformance/programs/s096/p1.hum.imo --to spec
+s096.bin	-	translate tests/conformance/programs/s096/p1.hum.imo --to bin
+s096.run	-	run tests/conformance/programs/s096/p1.hum.imo --n 6
+s097.check	-	check tests/conformance/programs/s097/p1.hum.imo
+s097.spec	-	translate tests/conformance/programs/s097/p1.hum.imo --to spec
+s097.bin	-	translate tests/conformance/programs/s097/p1.hum.imo --to bin
+s097.run	-	run tests/conformance/programs/s097/p1.hum.imo --n 6
+s098.check	-	check tests/conformance/programs/s098/p1.hum.imo
+s098.spec	-	translate tests/conformance/programs/s098/p1.hum.imo --to spec
+s098.bin	-	translate tests/conformance/programs/s098/p1.hum.imo --to bin
+s098.run	-	run tests/conformance/programs/s098/p1.hum.imo --n 6
+s099.check	-	check tests/conformance/programs/s099/p1.hum.imo
+s099.spec	-	translate tests/conformance/programs/s099/p1.hum.imo --to spec
+s099.bin	-	translate tests/conformance/programs/s099/p1.hum.imo --to bin
+s099.run	-	run tests/conformance/programs/s099/p1.hum.imo --n 6
+s100.check	-	check tests/conformance/programs/s100/p1.hum.imo tests/conformance/programs/s100/p2.hum.imo
+s100.spec	-	translate tests/conformance/programs/s100/p1.hum.imo tests/conformance/programs/s100/p2.hum.imo --to spec
+s100.bin	-	translate tests/conformance/programs/s100/p1.hum.imo tests/conformance/programs/s100/p2.hum.imo --to bin
+s100.run	-	run tests/conformance/programs/s100/p1.hum.imo tests/conformance/programs/s100/p2.hum.imo --n 6
+s101.check	-	check tests/conformance/programs/s101/p1.hum.imo
+s101.spec	-	translate tests/conformance/programs/s101/p1.hum.imo --to spec
+s101.bin	-	translate tests/conformance/programs/s101/p1.hum.imo --to bin
+s101.run	-	run tests/conformance/programs/s101/p1.hum.imo --n 6
+s102.check	-	check tests/conformance/programs/s102/p1.hum.imo
+s102.spec	-	translate tests/conformance/programs/s102/p1.hum.imo --to spec
+s102.bin	-	translate tests/conformance/programs/s102/p1.hum.imo --to bin
+s102.run	-	run tests/conformance/programs/s102/p1.hum.imo --n 6
+s103.check	-	check tests/conformance/programs/s103/p1.hum.imo
+s103.spec	-	translate tests/conformance/programs/s103/p1.hum.imo --to spec
+s103.bin	-	translate tests/conformance/programs/s103/p1.hum.imo --to bin
+s103.run	-	run tests/conformance/programs/s103/p1.hum.imo --n 6
+s104.check	-	check tests/conformance/programs/s104/p1.hum.imo tests/conformance/programs/s104/p2.hum.imo
+s104.spec	-	translate tests/conformance/programs/s104/p1.hum.imo tests/conformance/programs/s104/p2.hum.imo --to spec
+s104.bin	-	translate tests/conformance/programs/s104/p1.hum.imo tests/conformance/programs/s104/p2.hum.imo --to bin
+s104.run	-	run tests/conformance/programs/s104/p1.hum.imo tests/conformance/programs/s104/p2.hum.imo --n 6
+s105.check	-	check tests/conformance/programs/s105/p1.hum.imo
+s105.spec	-	translate tests/conformance/programs/s105/p1.hum.imo --to spec
+s105.bin	-	translate tests/conformance/programs/s105/p1.hum.imo --to bin
+s105.run	-	run tests/conformance/programs/s105/p1.hum.imo --n 6
+s106.check	-	check tests/conformance/programs/s106/p1.hum.imo
+s106.spec	-	translate tests/conformance/programs/s106/p1.hum.imo --to spec
+s106.bin	-	translate tests/conformance/programs/s106/p1.hum.imo --to bin
+s106.run	-	run tests/conformance/programs/s106/p1.hum.imo --n 6
+s107.check	-	check tests/conformance/programs/s107/p1.hum.imo tests/conformance/programs/s107/p2.hum.imo
+s107.spec	-	translate tests/conformance/programs/s107/p1.hum.imo tests/conformance/programs/s107/p2.hum.imo --to spec
+s107.bin	-	translate tests/conformance/programs/s107/p1.hum.imo tests/conformance/programs/s107/p2.hum.imo --to bin
+s107.run	-	run tests/conformance/programs/s107/p1.hum.imo tests/conformance/programs/s107/p2.hum.imo --n 6
+err.e01	-	check tests/conformance/programs/err/e01.imo
+err.e02	-	check tests/conformance/programs/err/e02.imo
+err.e03	-	check tests/conformance/programs/err/e03.imo
+err.e04	-	check tests/conformance/programs/err/e04.imo
+err.e05	-	check tests/conformance/programs/err/e05.imo
+err.e06	-	check tests/conformance/programs/err/e06.imo
+err.e07.hum	-	check tests/conformance/programs/err/e07.hum.imo
+err.e08	-	check tests/conformance/programs/err/e08.imo
+cli.bad-out	-	run examples/hello.hum.imo --out nothing
+cli.n-lines	-	run tests/conformance/programs/misc/stream.hum.imo --n 3
+misc.bool.hum	-	run tests/conformance/programs/misc/bool.hum.imo --n 6
+misc.chars.hum	-	run tests/conformance/programs/misc/chars.hum.imo --n 6
+misc.chars.spec	-	run tests/conformance/programs/misc/chars.spec.imo --n 6
+misc.comments.hum	-	run tests/conformance/programs/misc/comments.hum.imo --n 6
+misc.complex.hum	-	run tests/conformance/programs/misc/complex.hum.imo --n 6
+misc.deep.hum	-	run tests/conformance/programs/misc/deep.hum.imo --n 6
+misc.function_main.hum	-	run tests/conformance/programs/misc/function_main.hum.imo --n 6
+misc.lists.hum	-	run tests/conformance/programs/misc/lists.hum.imo --n 6
+misc.mixed	-	run tests/conformance/programs/misc/mixed.imo --n 6
+misc.ordering.hum	-	run tests/conformance/programs/misc/ordering.hum.imo --n 6
+misc.out_line.hum	-	run tests/conformance/programs/misc/out_line.hum.imo --n 6
+misc.pairs.hum	-	run tests/conformance/programs/misc/pairs.hum.imo --n 6
+misc.real.hum	-	run tests/conformance/programs/misc/real.hum.imo --n 6
+misc.reduce_gone.hum	-	run tests/conformance/programs/misc/reduce_gone.hum.imo --n 6
+misc.stream.hum	-	run tests/conformance/programs/misc/stream.hum.imo --n 6
+misc.tree.hum	-	run tests/conformance/programs/misc/tree.hum.imo --n 6
+misc.twice.hum	-	run tests/conformance/programs/misc/twice.hum.imo --n 6
+misc.undeclared.hum	-	run tests/conformance/programs/misc/undeclared.hum.imo --n 6
+misc.unknown_ok.hum	-	run tests/conformance/programs/misc/unknown_ok.hum.imo --n 6
+misc.unknown_use.hum	-	run tests/conformance/programs/misc/unknown_use.hum.imo --n 6
+misc.wrongclass.hum	-	run tests/conformance/programs/misc/wrongclass.hum.imo --n 6
+lib.Chi.1	-	run tests/conformance/programs/lib/Chi.1.hum.imo --n 4
+lib.Chi.1.spec	-	run tests/conformance/programs/lib/Chi.1.hum.imo --n 4 --out spec
+lib.Chi.2	-	run tests/conformance/programs/lib/Chi.2.hum.imo --n 4
+lib.Ci.1	-	run tests/conformance/programs/lib/Ci.1.hum.imo --n 4
+lib.Ci.2	-	run tests/conformance/programs/lib/Ci.2.hum.imo --n 4
+lib.Ci.2.bin	-	run tests/conformance/programs/lib/Ci.2.hum.imo --n 4 --out bin
+lib.Log.1	-	run tests/conformance/programs/lib/Log.1.hum.imo --n 4
+lib.Log.2	-	run tests/conformance/programs/lib/Log.2.hum.imo --n 4
+lib.Log.2.spec	-	run tests/conformance/programs/lib/Log.2.hum.imo --n 4 --out spec
+lib.Shi.1	-	run tests/conformance/programs/lib/Shi.1.hum.imo --n 4
+lib.Shi.2	-	run tests/conformance/programs/lib/Shi.2.hum.imo --n 4
+lib.Shi.3	-	run tests/conformance/programs/lib/Shi.3.hum.imo --n 4
+lib.Shi.4	-	run tests/conformance/programs/lib/Shi.4.hum.imo --n 4
+lib.Si.1	-	run tests/conformance/programs/lib/Si.1.hum.imo --n 4
+lib.Si.1.spec	-	run tests/conformance/programs/lib/Si.1.hum.imo --n 4 --out spec
+lib.Si.2	-	run tests/conformance/programs/lib/Si.2.hum.imo --n 4
+lib.Si.3	-	run tests/conformance/programs/lib/Si.3.hum.imo --n 4
+lib.Si.4	-	run tests/conformance/programs/lib/Si.4.hum.imo --n 4
+lib.Si.4.bin	-	run tests/conformance/programs/lib/Si.4.hum.imo --n 4 --out bin
+lib.abelianinvariants.1	-	run tests/conformance/programs/lib/abelianinvariants.1.hum.imo --n 4
+lib.abelianinvariants.2	-	run tests/conformance/programs/lib/abelianinvariants.2.hum.imo --n 4
+lib.abelianinvariants.2.spec	-	run tests/conformance/programs/lib/abelianinvariants.2.hum.imo --n 4 --out spec
+lib.abs.1	-	run tests/conformance/programs/lib/abs.1.hum.imo --n 4
+lib.abs.2	-	run tests/conformance/programs/lib/abs.2.hum.imo --n 4
+lib.abs.3	-	run tests/conformance/programs/lib/abs.3.hum.imo --n 4
+lib.abs.4	-	run tests/conformance/programs/lib/abs.4.hum.imo --n 4
+lib.abs.5	-	run tests/conformance/programs/lib/abs.5.hum.imo --n 4
+lib.abs.5.spec	-	run tests/conformance/programs/lib/abs.5.hum.imo --n 4 --out spec
+lib.abs.6	-	run tests/conformance/programs/lib/abs.6.hum.imo --n 4
+lib.abs.7	-	run tests/conformance/programs/lib/abs.7.hum.imo --n 4
+lib.abs.8	-	run tests/conformance/programs/lib/abs.8.hum.imo --n 4
+lib.abs.8.bin	-	run tests/conformance/programs/lib/abs.8.hum.imo --n 4 --out bin
+lib.acos.1	-	run tests/conformance/programs/lib/acos.1.hum.imo --n 4
+lib.acos.2	-	run tests/conformance/programs/lib/acos.2.hum.imo --n 4
+lib.acos.2.spec	-	run tests/conformance/programs/lib/acos.2.hum.imo --n 4 --out spec
+lib.acosh.1	-	run tests/conformance/programs/lib/acosh.1.hum.imo --n 4
+lib.acosh.2	-	run tests/conformance/programs/lib/acosh.2.hum.imo --n 4
+lib.acot.1	-	run tests/conformance/programs/lib/acot.1.hum.imo --n 4
+lib.acot.2	-	run tests/conformance/programs/lib/acot.2.hum.imo --n 4
+lib.acot.3	-	run tests/conformance/programs/lib/acot.3.hum.imo --n 4
+lib.acot.3.spec	-	run tests/conformance/programs/lib/acot.3.hum.imo --n 4 --out spec
+lib.acot.4	-	run tests/conformance/programs/lib/acot.4.hum.imo --n 4
+lib.acoth.1	-	run tests/conformance/programs/lib/acoth.1.hum.imo --n 4
+lib.acoth.2	-	run tests/conformance/programs/lib/acoth.2.hum.imo --n 4
+lib.acoth.2.bin	-	run tests/conformance/programs/lib/acoth.2.hum.imo --n 4 --out bin
+lib.acsc.1	-	run tests/conformance/programs/lib/acsc.1.hum.imo --n 4
+lib.acsc.2	-	run tests/conformance/programs/lib/acsc.2.hum.imo --n 4
+lib.acsc.2.spec	-	run tests/conformance/programs/lib/acsc.2.hum.imo --n 4 --out spec
+lib.acsch.1	-	run tests/conformance/programs/lib/acsch.1.hum.imo --n 4
+lib.acsch.2	-	run tests/conformance/programs/lib/acsch.2.hum.imo --n 4
+lib.acsch.3	-	run tests/conformance/programs/lib/acsch.3.hum.imo --n 4
+lib.acsch.4	-	run tests/conformance/programs/lib/acsch.4.hum.imo --n 4
+lib.addmod.1	-	run tests/conformance/programs/lib/addmod.1.hum.imo --n 4
+lib.addmod.1.spec	-	run tests/conformance/programs/lib/addmod.1.hum.imo --n 4 --out spec
+lib.addmod.2	-	run tests/conformance/programs/lib/addmod.2.hum.imo --n 4
+lib.adjugate.1	-	run tests/conformance/programs/lib/adjugate.1.hum.imo --n 4
+lib.adjugate.2	-	run tests/conformance/programs/lib/adjugate.2.hum.imo --n 4
+lib.adjugate.2.bin	-	run tests/conformance/programs/lib/adjugate.2.hum.imo --n 4 --out bin
+lib.agm.1	-	run tests/conformance/programs/lib/agm.1.hum.imo --n 4
+lib.agm.2	-	run tests/conformance/programs/lib/agm.2.hum.imo --n 4
+lib.agm.2.spec	-	run tests/conformance/programs/lib/agm.2.hum.imo --n 4 --out spec
+lib.algdiff.1	-	run tests/conformance/programs/lib/algdiff.1.hum.imo --n 4
+lib.algdiff.2	-	run tests/conformance/programs/lib/algdiff.2.hum.imo --n 4
+lib.alginv.1	-	run tests/conformance/programs/lib/alginv.1.hum.imo --n 4
+lib.alginv.2	-	run tests/conformance/programs/lib/alginv.2.hum.imo --n 4
+lib.algneg.1	-	run tests/conformance/programs/lib/algneg.1.hum.imo --n 4
+lib.algneg.1.spec	-	run tests/conformance/programs/lib/algneg.1.hum.imo --n 4 --out spec
+lib.algneg.2	-	run tests/conformance/programs/lib/algneg.2.hum.imo --n 4
+lib.algpow.1	-	run tests/conformance/programs/lib/algpow.1.hum.imo --n 4
+lib.algpow.2	-	run tests/conformance/programs/lib/algpow.2.hum.imo --n 4
+lib.algpow.2.bin	-	run tests/conformance/programs/lib/algpow.2.hum.imo --n 4 --out bin
+lib.algprod.1	-	run tests/conformance/programs/lib/algprod.1.hum.imo --n 4
+lib.algprod.2	-	run tests/conformance/programs/lib/algprod.2.hum.imo --n 4
+lib.algprod.2.spec	-	run tests/conformance/programs/lib/algprod.2.hum.imo --n 4 --out spec
+lib.algquot.1	-	run tests/conformance/programs/lib/algquot.1.hum.imo --n 4
+lib.algquot.2	-	run tests/conformance/programs/lib/algquot.2.hum.imo --n 4
+lib.algroot.2	-	run tests/conformance/programs/lib/algroot.2.hum.imo --n 4
+lib.algsum.1	-	run tests/conformance/programs/lib/algsum.1.hum.imo --n 4
+lib.algsum.2	-	run tests/conformance/programs/lib/algsum.2.hum.imo --n 4
+lib.algsum.2.spec	-	run tests/conformance/programs/lib/algsum.2.hum.imo --n 4 --out spec
+lib.altgroup.2	-	run tests/conformance/programs/lib/altgroup.2.hum.imo --n 4
+lib.arg.1	-	run tests/conformance/programs/lib/arg.1.hum.imo --n 4
+lib.arg.2	-	run tests/conformance/programs/lib/arg.2.hum.imo --n 4
+lib.arg.2.bin	-	run tests/conformance/programs/lib/arg.2.hum.imo --n 4 --out bin
+lib.asec.1	-	run tests/conformance/programs/lib/asec.1.hum.imo --n 4
+lib.asec.2	-	run tests/conformance/programs/lib/asec.2.hum.imo --n 4
+lib.asec.2.spec	-	run tests/conformance/programs/lib/asec.2.hum.imo --n 4 --out spec
+lib.asech.1	-	run tests/conformance/programs/lib/asech.1.hum.imo --n 4
+lib.asech.2	-	run tests/conformance/programs/lib/asech.2.hum.imo --n 4
+lib.asin.1	-	run tests/conformance/programs/lib/asin.1.hum.imo --n 4
+lib.asin.2	-	run tests/conformance/programs/lib/asin.2.hum.imo --n 4
+lib.asinh.1	-	run tests/conformance/programs/lib/asinh.1.hum.imo --n 4
+lib.asinh.1.spec	-	run tests/conformance/programs/lib/asinh.1.hum.imo --n 4 --out spec
+lib.asinh.2	-	run tests/conformance/programs/lib/asinh.2.hum.imo --n 4
+lib.asinh.3	-	run tests/conformance/programs/lib/asinh.3.hum.imo --n 4
+lib.asinh.4	-	run tests/conformance/programs/lib/asinh.4.hum.imo --n 4
+lib.asinh.4.bin	-	run tests/conformance/programs/lib/asinh.4.hum.imo --n 4 --out bin
+lib.atan.1	-	run tests/conformance/programs/lib/atan.1.hum.imo --n 4
+lib.atan.2	-	run tests/conformance/programs/lib/atan.2.hum.imo --n 4
+lib.atan.2.spec	-	run tests/conformance/programs/lib/atan.2.hum.imo --n 4 --out spec
+lib.atan.3	-	run tests/conformance/programs/lib/atan.3.hum.imo --n 4
+lib.atan.4	-	run tests/conformance/programs/lib/atan.4.hum.imo --n 4
+lib.atan2.1	-	run tests/conformance/programs/lib/atan2.1.hum.imo --n 4
+lib.atan2.2	-	run tests/conformance/programs/lib/atan2.2.hum.imo --n 4
+lib.atanh.1	-	run tests/conformance/programs/lib/atanh.1.hum.imo --n 4
+lib.atanh.1.spec	-	run tests/conformance/programs/lib/atanh.1.hum.imo --n 4 --out spec
+lib.atanh.2	-	run tests/conformance/programs/lib/atanh.2.hum.imo --n 4
+lib.band.1	-	run tests/conformance/programs/lib/band.1.hum.imo --n 4
+lib.band.2	-	run tests/conformance/programs/lib/band.2.hum.imo --n 4
+lib.band.2.bin	-	run tests/conformance/programs/lib/band.2.hum.imo --n 4 --out bin
+lib.bell.1	-	run tests/conformance/programs/lib/bell.1.hum.imo --n 4
+lib.bell.2	-	run tests/conformance/programs/lib/bell.2.hum.imo --n 4
+lib.bell.2.spec	-	run tests/conformance/programs/lib/bell.2.hum.imo --n 4 --out spec
+lib.bernoulli.1	-	run tests/conformance/programs/lib/bernoulli.1.hum.imo --n 4
+lib.bernoulli.2	-	run tests/conformance/programs/lib/bernoulli.2.hum.imo --n 4
+lib.besseli.1	-	run tests/conformance/programs/lib/besseli.1.hum.imo --n 4
+lib.besseli.2	-	run tests/conformance/programs/lib/besseli.2.hum.imo --n 4
+lib.besseli.3	-	run tests/conformance/programs/lib/besseli.3.hum.imo --n 4
+lib.besseli.3.spec	-	run tests/conformance/programs/lib/besseli.3.hum.imo --n 4 --out spec
+lib.besseli.4	-	run tests/conformance/programs/lib/besseli.4.hum.imo --n 4
+lib.besselj.1	-	run tests/conformance/programs/lib/besselj.1.hum.imo --n 4
+lib.besselj.2	-	run tests/conformance/programs/lib/besselj.2.hum.imo --n 4
+lib.besselj.2.bin	-	run tests/conformance/programs/lib/besselj.2.hum.imo --n 4 --out bin
+lib.besselj.3	-	run tests/conformance/programs/lib/besselj.3.hum.imo --n 4
+lib.besselj.4	-	run tests/conformance/programs/lib/besselj.4.hum.imo --n 4
+lib.besselj.4.spec	-	run tests/conformance/programs/lib/besselj.4.hum.imo --n 4 --out spec
+lib.bigomega.1	-	run tests/conformance/programs/lib/bigomega.1.hum.imo --n 4
+lib.bigomega.2	-	run tests/conformance/programs/lib/bigomega.2.hum.imo --n 4
+lib.bits.1	-	run tests/conformance/programs/lib/bits.1.hum.imo --n 4
+lib.bits.2	-	run tests/conformance/programs/lib/bits.2.hum.imo --n 4
+lib.blockdiag.1	-	run tests/conformance/programs/lib/blockdiag.1.hum.imo --n 4
+lib.blockdiag.1.spec	-	run tests/conformance/programs/lib/blockdiag.1.hum.imo --n 4 --out spec
+lib.blockdiag.2	-	run tests/conformance/programs/lib/blockdiag.2.hum.imo --n 4
+lib.bor.1	-	run tests/conformance/programs/lib/bor.1.hum.imo --n 4
+lib.bor.2	-	run tests/conformance/programs/lib/bor.2.hum.imo --n 4
+lib.bor.2.bin	-	run tests/conformance/programs/lib/bor.2.hum.imo --n 4 --out bin
+lib.bracelets.1	-	run tests/conformance/programs/lib/bracelets.1.hum.imo --n 4
+lib.bracelets.2	-	run tests/conformance/programs/lib/bracelets.2.hum.imo --n 4
+lib.bracelets.2.spec	-	run tests/conformance/programs/lib/bracelets.2.hum.imo --n 4 --out spec
+lib.burnside.1	-	run tests/conformance/programs/lib/burnside.1.hum.imo --n 4
+lib.burnside.2	-	run tests/conformance/programs/lib/burnside.2.hum.imo --n 4
+lib.bxor.1	-	run tests/conformance/programs/lib/bxor.1.hum.imo --n 4
+lib.bxor.2	-	run tests/conformance/programs/lib/bxor.2.hum.imo --n 4
+lib.canon.1	-	run tests/conformance/programs/lib/canon.1.hum.imo --n 4
+lib.canon.1.spec	-	run tests/conformance/programs/lib/canon.1.hum.imo --n 4 --out spec
+lib.canon.10	-	run tests/conformance/programs/lib/canon.10.hum.imo --n 4
+lib.canon.2	-	run tests/conformance/programs/lib/canon.2.hum.imo --n 4
+lib.canon.3	-	run tests/conformance/programs/lib/canon.3.hum.imo --n 4
+lib.canon.3.bin	-	run tests/conformance/programs/lib/canon.3.hum.imo --n 4 --out bin
+lib.canon.4	-	run tests/conformance/programs/lib/canon.4.hum.imo --n 4
+lib.canon.5	-	run tests/conformance/programs/lib/canon.5.hum.imo --n 4
+lib.canon.5.spec	-	run tests/conformance/programs/lib/canon.5.hum.imo --n 4 --out spec
+lib.canon.6	-	run tests/conformance/programs/lib/canon.6.hum.imo --n 4
+lib.canon.7	-	run tests/conformance/programs/lib/canon.7.hum.imo --n 4
+lib.canon.8	-	run tests/conformance/programs/lib/canon.8.hum.imo --n 4
+lib.canon.9	-	run tests/conformance/programs/lib/canon.9.hum.imo --n 4
+lib.carmichael.1	-	run tests/conformance/programs/lib/carmichael.1.hum.imo --n 4
+lib.carmichael.1.spec	-	run tests/conformance/programs/lib/carmichael.1.hum.imo --n 4 --out spec
+lib.carmichael.2	-	run tests/conformance/programs/lib/carmichael.2.hum.imo --n 4
+lib.catalan.1	-	run tests/conformance/programs/lib/catalan.1.hum.imo --n 4
+lib.catalan.2	-	run tests/conformance/programs/lib/catalan.2.hum.imo --n 4
+lib.catalan.2.bin	-	run tests/conformance/programs/lib/catalan.2.hum.imo --n 4 --out bin
+lib.cayleytable.1	-	run tests/conformance/programs/lib/cayleytable.1.hum.imo --n 4
+lib.cayleytable.2	-	run tests/conformance/programs/lib/cayleytable.2.hum.imo --n 4
+lib.cayleytable.2.spec	-	run tests/conformance/programs/lib/cayleytable.2.hum.imo --n 4 --out spec
+lib.cbrt.1	-	run tests/conformance/programs/lib/cbrt.1.hum.imo --n 4
+lib.cbrt.2	-	run tests/conformance/programs/lib/cbrt.2.hum.imo --n 4
+lib.cbrt.3	-	run tests/conformance/programs/lib/cbrt.3.hum.imo --n 4
+lib.cbrt.4	-	run tests/conformance/programs/lib/cbrt.4.hum.imo --n 4
+lib.ceil.1	-	run tests/conformance/programs/lib/ceil.1.hum.imo --n 4
+lib.ceil.1.spec	-	run tests/conformance/programs/lib/ceil.1.hum.imo --n 4 --out spec
+lib.ceil.2	-	run tests/conformance/programs/lib/ceil.2.hum.imo --n 4
+lib.center.1	-	run tests/conformance/programs/lib/center.1.hum.imo --n 4
+lib.center.2	-	run tests/conformance/programs/lib/center.2.hum.imo --n 4
+lib.center.2.bin	-	run tests/conformance/programs/lib/center.2.hum.imo --n 4 --out bin
+lib.centralizer.1	-	run tests/conformance/programs/lib/centralizer.1.hum.imo --n 4
+lib.centralizer.2	-	run tests/conformance/programs/lib/centralizer.2.hum.imo --n 4
+lib.centralizer.2.spec	-	run tests/conformance/programs/lib/centralizer.2.hum.imo --n 4 --out spec
+lib.cfsqrt.1	-	run tests/conformance/programs/lib/cfsqrt.1.hum.imo --n 4
+lib.cfsqrt.2	-	run tests/conformance/programs/lib/cfsqrt.2.hum.imo --n 4
+lib.charpoly.1	-	run tests/conformance/programs/lib/charpoly.1.hum.imo --n 4
+lib.charpoly.2	-	run tests/conformance/programs/lib/charpoly.2.hum.imo --n 4
+lib.chebyshevT.1	-	run tests/conformance/programs/lib/chebyshevT.1.hum.imo --n 4
+lib.chebyshevT.1.spec	-	run tests/conformance/programs/lib/chebyshevT.1.hum.imo --n 4 --out spec
+lib.chebyshevT.2	-	run tests/conformance/programs/lib/chebyshevT.2.hum.imo --n 4
+lib.chebyshevU.1	-	run tests/conformance/programs/lib/chebyshevU.1.hum.imo --n 4
+lib.chebyshevU.2	-	run tests/conformance/programs/lib/chebyshevU.2.hum.imo --n 4
+lib.chebyshevU.2.bin	-	run tests/conformance/programs/lib/chebyshevU.2.hum.imo --n 4 --out bin
+lib.choose.1	-	run tests/conformance/programs/lib/choose.1.hum.imo --n 4
+lib.choose.2	-	run tests/conformance/programs/lib/choose.2.hum.imo --n 4
+lib.choose.2.spec	-	run tests/conformance/programs/lib/choose.2.hum.imo --n 4 --out spec
+lib.cis.1	-	run tests/conformance/programs/lib/cis.1.hum.imo --n 4
+lib.cis.2	-	run tests/conformance/programs/lib/cis.2.hum.imo --n 4
+lib.cis.3	-	run tests/conformance/programs/lib/cis.3.hum.imo --n 4
+lib.cis.4	-	run tests/conformance/programs/lib/cis.4.hum.imo --n 4
+lib.coeff.1	-	run tests/conformance/programs/lib/coeff.1.hum.imo --n 4
+lib.coeff.1.spec	-	run tests/conformance/programs/lib/coeff.1.hum.imo --n 4 --out spec
+lib.coeff.2	-	run tests/conformance/programs/lib/coeff.2.hum.imo --n 4
+lib.coeff.3	-	run tests/conformance/programs/lib/coeff.3.hum.imo --n 4
+lib.coeff.4	-	run tests/conformance/programs/lib/coeff.4.hum.imo --n 4
+lib.coeff.4.bin	-	run tests/conformance/programs/lib/coeff.4.hum.imo --n 4 --out bin
+lib.coeff.5	-	run tests/conformance/programs/lib/coeff.5.hum.imo --n 4
+lib.coeff.6	-	run tests/conformance/programs/lib/coeff.6.hum.imo --n 4
+lib.coeff.6.spec	-	run tests/conformance/programs/lib/coeff.6.hum.imo --n 4 --out spec
+lib.coeff.7	-	run tests/conformance/programs/lib/coeff.7.hum.imo --n 4
+lib.coeff.8	-	run tests/conformance/programs/lib/coeff.8.hum.imo --n 4
+lib.cofactor.1	-	run tests/conformance/programs/lib/cofactor.1.hum.imo --n 4
+lib.cofactor.2	-	run tests/conformance/programs/lib/cofactor.2.hum.imo --n 4
+lib.colorings.1	-	run tests/conformance/programs/lib/colorings.1.hum.imo --n 4
+lib.colorings.1.spec	-	run tests/conformance/programs/lib/colorings.1.hum.imo --n 4 --out spec
+lib.colorings.2	-	run tests/conformance/programs/lib/colorings.2.hum.imo --n 4
+lib.colspace.1	-	run tests/conformance/programs/lib/colspace.1.hum.imo --n 4
+lib.colspace.2	-	run tests/conformance/programs/lib/colspace.2.hum.imo --n 4
+lib.colspace.2.bin	-	run tests/conformance/programs/lib/colspace.2.hum.imo --n 4 --out bin
+lib.commutatorsubgroup.1	-	run tests/conformance/programs/lib/commutatorsubgroup.1.hum.imo --n 4
+lib.commutatorsubgroup.2	-	run tests/conformance/programs/lib/commutatorsubgroup.2.hum.imo --n 4
+lib.commutatorsubgroup.2.spec	-	run tests/conformance/programs/lib/commutatorsubgroup.2.hum.imo --n 4 --out spec
+lib.companion.1	-	run tests/conformance/programs/lib/companion.1.hum.imo --n 4
+lib.companion.2	-	run tests/conformance/programs/lib/companion.2.hum.imo --n 4
+lib.companion.3	-	run tests/conformance/programs/lib/companion.3.hum.imo --n 4
+lib.companion.4	-	run tests/conformance/programs/lib/companion.4.hum.imo --n 4
+lib.compare.1	-	run tests/conformance/programs/lib/compare.1.hum.imo --n 4
+lib.compare.1.spec	-	run tests/conformance/programs/lib/compare.1.hum.imo --n 4 --out spec
+lib.compare.2	-	run tests/conformance/programs/lib/compare.2.hum.imo --n 4
+lib.conj.1	-	run tests/conformance/programs/lib/conj.1.hum.imo --n 4
+lib.conj.10	-	run tests/conformance/programs/lib/conj.10.hum.imo --n 4
+lib.conj.10.bin	-	run tests/conformance/programs/lib/conj.10.hum.imo --n 4 --out bin
+lib.conj.2	-	run tests/conformance/programs/lib/conj.2.hum.imo --n 4
+lib.conj.3	-	run tests/conformance/programs/lib/conj.3.hum.imo --n 4
+lib.conj.3.spec	-	run tests/conformance/programs/lib/conj.3.hum.imo --n 4 --out spec
+lib.conj.4	-	run tests/conformance/programs/lib/conj.4.hum.imo --n 4
+lib.conj.5	-	run tests/conformance/programs/lib/conj.5.hum.imo --n 4
+lib.conj.6	-	run tests/conformance/programs/lib/conj.6.hum.imo --n 4
+lib.conj.7	-	run tests/conformance/programs/lib/conj.7.hum.imo --n 4
+lib.conj.8	-	run tests/conformance/programs/lib/conj.8.hum.imo --n 4
+lib.conj.8.spec	-	run tests/conformance/programs/lib/conj.8.hum.imo --n 4 --out spec
+lib.conj.9	-	run tests/conformance/programs/lib/conj.9.hum.imo --n 4
+lib.conjclasses.1	-	run tests/conformance/programs/lib/conjclasses.1.hum.imo --n 4
+lib.conjclasses.2	-	run tests/conformance/programs/lib/conjclasses.2.hum.imo --n 4
+lib.conjclasses.2.bin	-	run tests/conformance/programs/lib/conjclasses.2.hum.imo --n 4 --out bin
+lib.contfrac.1	-	run tests/conformance/programs/lib/contfrac.1.hum.imo --n 4
+lib.contfrac.2	-	run tests/conformance/programs/lib/contfrac.2.hum.imo --n 4
+lib.contfrac.2.spec	-	run tests/conformance/programs/lib/contfrac.2.hum.imo --n 4 --out spec
+lib.convergents.1	-	run tests/conformance/programs/lib/convergents.1.hum.imo --n 4
+lib.convergents.2	-	run tests/conformance/programs/lib/convergents.2.hum.imo --n 4
+lib.cos.1	-	run tests/conformance/programs/lib/cos.1.hum.imo --n 4
+lib.cos.2	-	run tests/conformance/programs/lib/cos.2.hum.imo --n 4
+lib.cos.3	-	run tests/conformance/programs/lib/cos.3.hum.imo --n 4
+lib.cos.3.spec	-	run tests/conformance/programs/lib/cos.3.hum.imo --n 4 --out spec
+lib.cos.4	-	run tests/conformance/programs/lib/cos.4.hum.imo --n 4
+lib.cosh.1	-	run tests/conformance/programs/lib/cosh.1.hum.imo --n 4
+lib.cosh.2	-	run tests/conformance/programs/lib/cosh.2.hum.imo --n 4
+lib.cosh.2.bin	-	run tests/conformance/programs/lib/cosh.2.hum.imo --n 4 --out bin
+lib.cosh.3	-	run tests/conformance/programs/lib/cosh.3.hum.imo --n 4
+lib.cosh.4	-	run tests/conformance/programs/lib/cosh.4.hum.imo --n 4
+lib.cosh.4.spec	-	run tests/conformance/programs/lib/cosh.4.hum.imo --n 4 --out spec
+lib.cot.1	-	run tests/conformance/programs/lib/cot.1.hum.imo --n 4
+lib.cot.2	-	run tests/conformance/programs/lib/cot.2.hum.imo --n 4
+lib.cot.3	-	run tests/conformance/programs/lib/cot.3.hum.imo --n 4
+lib.cot.4	-	run tests/conformance/programs/lib/cot.4.hum.imo --n 4
+lib.coth.1	-	run tests/conformance/programs/lib/coth.1.hum.imo --n 4
+lib.coth.1.spec	-	run tests/conformance/programs/lib/coth.1.hum.imo --n 4 --out spec
+lib.coth.2	-	run tests/conformance/programs/lib/coth.2.hum.imo --n 4
+lib.coth.3	-	run tests/conformance/programs/lib/coth.3.hum.imo --n 4
+lib.coth.4	-	run tests/conformance/programs/lib/coth.4.hum.imo --n 4
+lib.coth.4.bin	-	run tests/conformance/programs/lib/coth.4.hum.imo --n 4 --out bin
+lib.countroots.1	-	run tests/conformance/programs/lib/countroots.1.hum.imo --n 4
+lib.countroots.2	-	run tests/conformance/programs/lib/countroots.2.hum.imo --n 4
+lib.countroots.2.spec	-	run tests/conformance/programs/lib/countroots.2.hum.imo --n 4 --out spec
+lib.croots.1	-	run tests/conformance/programs/lib/croots.1.hum.imo --n 4
+lib.croots.2	-	run tests/conformance/programs/lib/croots.2.hum.imo --n 4
+lib.cross.1	-	run tests/conformance/programs/lib/cross.1.hum.imo --n 4
+lib.cross.2	-	run tests/conformance/programs/lib/cross.2.hum.imo --n 4
+lib.crt.1	-	run tests/conformance/programs/lib/crt.1.hum.imo --n 4
+lib.crt.1.spec	-	run tests/conformance/programs/lib/crt.1.hum.imo --n 4 --out spec
+lib.crt.2	-	run tests/conformance/programs/lib/crt.2.hum.imo --n 4
+lib.csc.1	-	run tests/conformance/programs/lib/csc.1.hum.imo --n 4
+lib.csc.2	-	run tests/conformance/programs/lib/csc.2.hum.imo --n 4
+lib.csc.2.bin	-	run tests/conformance/programs/lib/csc.2.hum.imo --n 4 --out bin
+lib.csc.3	-	run tests/conformance/programs/lib/csc.3.hum.imo --n 4
+lib.csc.4	-	run tests/conformance/programs/lib/csc.4.hum.imo --n 4
+lib.csc.4.spec	-	run tests/conformance/programs/lib/csc.4.hum.imo --n 4 --out spec
+lib.csch.1	-	run tests/conformance/programs/lib/csch.1.hum.imo --n 4
+lib.csch.2	-	run tests/conformance/programs/lib/csch.2.hum.imo --n 4
+lib.csch.3	-	run tests/conformance/programs/lib/csch.3.hum.imo --n 4
+lib.csch.4	-	run tests/conformance/programs/lib/csch.4.hum.imo --n 4
+lib.csgn.1	-	run tests/conformance/programs/lib/csgn.1.hum.imo --n 4
+lib.csgn.1.spec	-	run tests/conformance/programs/lib/csgn.1.hum.imo --n 4 --out spec
+lib.csgn.2	-	run tests/conformance/programs/lib/csgn.2.hum.imo --n 4
+lib.cycletype.1	-	run tests/conformance/programs/lib/cycletype.1.hum.imo --n 4
+lib.cycletype.2	-	run tests/conformance/programs/lib/cycletype.2.hum.imo --n 4
+lib.cycletype.2.bin	-	run tests/conformance/programs/lib/cycletype.2.hum.imo --n 4 --out bin
+lib.cyclicgroup.1	-	run tests/conformance/programs/lib/cyclicgroup.1.hum.imo --n 4
+lib.cyclicgroup.2	-	run tests/conformance/programs/lib/cyclicgroup.2.hum.imo --n 4
+lib.cyclicgroup.2.spec	-	run tests/conformance/programs/lib/cyclicgroup.2.hum.imo --n 4 --out spec
+lib.cyclotomic.1	-	run tests/conformance/programs/lib/cyclotomic.1.hum.imo --n 4
+lib.cyclotomic.2	-	run tests/conformance/programs/lib/cyclotomic.2.hum.imo --n 4
+lib.cyclotomicfactors.2	-	run tests/conformance/programs/lib/cyclotomicfactors.2.hum.imo --n 4
+lib.dawson.1	-	run tests/conformance/programs/lib/dawson.1.hum.imo --n 4
+lib.dawson.2	-	run tests/conformance/programs/lib/dawson.2.hum.imo --n 4
+lib.dawson.2.spec	-	run tests/conformance/programs/lib/dawson.2.hum.imo --n 4 --out spec
+lib.dawson.3	-	run tests/conformance/programs/lib/dawson.3.hum.imo --n 4
+lib.dawson.4	-	run tests/conformance/programs/lib/dawson.4.hum.imo --n 4
+lib.decimals.1	-	run tests/conformance/programs/lib/decimals.1.hum.imo --n 4
+lib.decimals.1.bin	-	run tests/conformance/programs/lib/decimals.1.hum.imo --n 4 --out bin
+lib.decimals.2	-	run tests/conformance/programs/lib/decimals.2.hum.imo --n 4
+lib.decode.1	-	run tests/conformance/programs/lib/decode.1.hum.imo --n 4
+lib.decode.1.spec	-	run tests/conformance/programs/lib/decode.1.hum.imo --n 4 --out spec
+lib.decode.2	-	run tests/conformance/programs/lib/decode.2.hum.imo --n 4
+lib.decode.3	-	run tests/conformance/programs/lib/decode.3.hum.imo --n 4
+lib.decode.4	-	run tests/conformance/programs/lib/decode.4.hum.imo --n 4
+lib.deg.1	-	run tests/conformance/programs/lib/deg.1.hum.imo --n 4
+lib.deg.2	-	run tests/conformance/programs/lib/deg.2.hum.imo --n 4
+lib.deg.2.spec	-	run tests/conformance/programs/lib/deg.2.hum.imo --n 4 --out spec
+lib.denom.1	-	run tests/conformance/programs/lib/denom.1.hum.imo --n 4
+lib.denom.2	-	run tests/conformance/programs/lib/denom.2.hum.imo --n 4
+lib.det.1	-	run tests/conformance/programs/lib/det.1.hum.imo --n 4
+lib.det.1.bin	-	run tests/conformance/programs/lib/det.1.hum.imo --n 4 --out bin
+lib.det.2	-	run tests/conformance/programs/lib/det.2.hum.imo --n 4
+lib.diagm.1	-	run tests/conformance/programs/lib/diagm.1.hum.imo --n 4
+lib.diagm.1.spec	-	run tests/conformance/programs/lib/diagm.1.hum.imo --n 4 --out spec
+lib.diagm.2	-	run tests/conformance/programs/lib/diagm.2.hum.imo --n 4
+lib.digamma.1	-	run tests/conformance/programs/lib/digamma.1.hum.imo --n 4
+lib.digamma.2	-	run tests/conformance/programs/lib/digamma.2.hum.imo --n 4
+lib.digamma.3	-	run tests/conformance/programs/lib/digamma.3.hum.imo --n 4
+lib.digamma.4	-	run tests/conformance/programs/lib/digamma.4.hum.imo --n 4
+lib.digamma.4.spec	-	run tests/conformance/programs/lib/digamma.4.hum.imo --n 4 --out spec
+lib.digit.1	-	run tests/conformance/programs/lib/digit.1.hum.imo --n 4
+lib.digit.2	-	run tests/conformance/programs/lib/digit.2.hum.imo --n 4
+lib.digitsum.1	-	run tests/conformance/programs/lib/digitsum.1.hum.imo --n 4
+lib.digitsum.1.bin	-	run tests/conformance/programs/lib/digitsum.1.hum.imo --n 4 --out bin
+lib.digitsum.2	-	run tests/conformance/programs/lib/digitsum.2.hum.imo --n 4
+lib.dihedralgroup.1	-	run tests/conformance/programs/lib/dihedralgroup.1.hum.imo --n 4
+lib.dihedralgroup.1.spec	-	run tests/conformance/programs/lib/dihedralgroup.1.hum.imo --n 4 --out spec
+lib.dihedralgroup.2	-	run tests/conformance/programs/lib/dihedralgroup.2.hum.imo --n 4
+lib.directproduct.1	-	run tests/conformance/programs/lib/directproduct.1.hum.imo --n 4
+lib.directproduct.2	-	run tests/conformance/programs/lib/directproduct.2.hum.imo --n 4
+lib.disc.1	-	run tests/conformance/programs/lib/disc.1.hum.imo --n 4
+lib.disc.2	-	run tests/conformance/programs/lib/disc.2.hum.imo --n 4
+lib.disc.2.spec	-	run tests/conformance/programs/lib/disc.2.hum.imo --n 4 --out spec
+lib.disc.3	-	run tests/conformance/programs/lib/disc.3.hum.imo --n 4
+lib.disc.4	-	run tests/conformance/programs/lib/disc.4.hum.imo --n 4
+lib.disc.5	-	run tests/conformance/programs/lib/disc.5.hum.imo --n 4
+lib.disc.5.bin	-	run tests/conformance/programs/lib/disc.5.hum.imo --n 4 --out bin
+lib.disc.6	-	run tests/conformance/programs/lib/disc.6.hum.imo --n 4
+lib.disc.7	-	run tests/conformance/programs/lib/disc.7.hum.imo --n 4
+lib.disc.7.spec	-	run tests/conformance/programs/lib/disc.7.hum.imo --n 4 --out spec
+lib.disc.8	-	run tests/conformance/programs/lib/disc.8.hum.imo --n 4
+lib.divisors.1	-	run tests/conformance/programs/lib/divisors.1.hum.imo --n 4
+lib.divisors.2	-	run tests/conformance/programs/lib/divisors.2.hum.imo --n 4
+lib.dlog.1	-	run tests/conformance/programs/lib/dlog.1.hum.imo --n 4
+lib.dlog.2	-	run tests/conformance/programs/lib/dlog.2.hum.imo --n 4
+lib.dlog.2.spec	-	run tests/conformance/programs/lib/dlog.2.hum.imo --n 4 --out spec
+lib.dot.1	-	run tests/conformance/programs/lib/dot.1.hum.imo --n 4
+lib.dot.2	-	run tests/conformance/programs/lib/dot.2.hum.imo --n 4
+lib.egcd.1	-	run tests/conformance/programs/lib/egcd.1.hum.imo --n 4
+lib.egcd.1.bin	-	run tests/conformance/programs/lib/egcd.1.hum.imo --n 4 --out bin
+lib.egcd.2	-	run tests/conformance/programs/lib/egcd.2.hum.imo --n 4
+lib.egcd.3	-	run tests/conformance/programs/lib/egcd.3.hum.imo --n 4
+lib.egcd.3.spec	-	run tests/conformance/programs/lib/egcd.3.hum.imo --n 4 --out spec
+lib.egcd.4	-	run tests/conformance/programs/lib/egcd.4.hum.imo --n 4
+lib.eigvals.1	-	run tests/conformance/programs/lib/eigvals.1.hum.imo --n 4
+lib.eigvals.2	-	run tests/conformance/programs/lib/eigvals.2.hum.imo --n 4
+lib.eigvecs.1	-	run tests/conformance/programs/lib/eigvecs.1.hum.imo --n 4
+lib.eigvecs.2	-	run tests/conformance/programs/lib/eigvecs.2.hum.imo --n 4
+lib.eigvecs.2.spec	-	run tests/conformance/programs/lib/eigvecs.2.hum.imo --n 4 --out spec
+lib.eisensteinprime.1	-	run tests/conformance/programs/lib/eisensteinprime.1.hum.imo --n 4
+lib.eisensteinprime.2	-	run tests/conformance/programs/lib/eisensteinprime.2.hum.imo --n 4
+lib.elem.1	-	run tests/conformance/programs/lib/elem.1.hum.imo --n 4
+lib.elem.1.bin	-	run tests/conformance/programs/lib/elem.1.hum.imo --n 4 --out bin
+lib.elem.2	-	run tests/conformance/programs/lib/elem.2.hum.imo --n 4
+lib.elementorders.1	-	run tests/conformance/programs/lib/elementorders.1.hum.imo --n 4
+lib.elementorders.1.spec	-	run tests/conformance/programs/lib/elementorders.1.hum.imo --n 4 --out spec
+lib.elementorders.2	-	run tests/conformance/programs/lib/elementorders.2.hum.imo --n 4
+lib.ellipe.1	-	run tests/conformance/programs/lib/ellipe.1.hum.imo --n 4
+lib.ellipk.1	-	run tests/conformance/programs/lib/ellipk.1.hum.imo --n 4
+lib.ellipk.2	-	run tests/conformance/programs/lib/ellipk.2.hum.imo --n 4
+lib.erf.1	-	run tests/conformance/programs/lib/erf.1.hum.imo --n 4
+lib.erf.1.spec	-	run tests/conformance/programs/lib/erf.1.hum.imo --n 4 --out spec
+lib.erf.2	-	run tests/conformance/programs/lib/erf.2.hum.imo --n 4
+lib.erf.3	-	run tests/conformance/programs/lib/erf.3.hum.imo --n 4
+lib.erf.4	-	run tests/conformance/programs/lib/erf.4.hum.imo --n 4
+lib.erf.4.bin	-	run tests/conformance/programs/lib/erf.4.hum.imo --n 4 --out bin
+lib.erfc.1	-	run tests/conformance/programs/lib/erfc.1.hum.imo --n 4
+lib.erfc.2	-	run tests/conformance/programs/lib/erfc.2.hum.imo --n 4
+lib.erfc.2.spec	-	run tests/conformance/programs/lib/erfc.2.hum.imo --n 4 --out spec
+lib.erfc.3	-	run tests/conformance/programs/lib/erfc.3.hum.imo --n 4
+lib.erfc.4	-	run tests/conformance/programs/lib/erfc.4.hum.imo --n 4
+lib.erfi.1	-	run tests/conformance/programs/lib/erfi.1.hum.imo --n 4
+lib.erfi.2	-	run tests/conformance/programs/lib/erfi.2.hum.imo --n 4
+lib.erfi.3	-	run tests/conformance/programs/lib/erfi.3.hum.imo --n 4
+lib.erfi.3.spec	-	run tests/conformance/programs/lib/erfi.3.hum.imo --n 4 --out spec
+lib.erfi.4	-	run tests/conformance/programs/lib/erfi.4.hum.imo --n 4
+lib.eulercriterion.1	-	run tests/conformance/programs/lib/eulercriterion.1.hum.imo --n 4
+lib.eulercriterion.2	-	run tests/conformance/programs/lib/eulercriterion.2.hum.imo --n 4
+lib.eulercriterion.2.bin	-	run tests/conformance/programs/lib/eulercriterion.2.hum.imo --n 4 --out bin
+lib.exp.1	-	run tests/conformance/programs/lib/exp.1.hum.imo --n 4
+lib.exp.2	-	run tests/conformance/programs/lib/exp.2.hum.imo --n 4
+lib.exp.2.spec	-	run tests/conformance/programs/lib/exp.2.hum.imo --n 4 --out spec
+lib.exp.3	-	run tests/conformance/programs/lib/exp.3.hum.imo --n 4
+lib.exp.4	-	run tests/conformance/programs/lib/exp.4.hum.imo --n 4
+lib.expint.1	-	run tests/conformance/programs/lib/expint.1.hum.imo --n 4
+lib.expint.2	-	run tests/conformance/programs/lib/expint.2.hum.imo --n 4
+lib.expm1.1	-	run tests/conformance/programs/lib/expm1.1.hum.imo --n 4
+lib.expm1.1.spec	-	run tests/conformance/programs/lib/expm1.1.hum.imo --n 4 --out spec
+lib.expm1.2	-	run tests/conformance/programs/lib/expm1.2.hum.imo --n 4
+lib.expm1.3	-	run tests/conformance/programs/lib/expm1.3.hum.imo --n 4
+lib.expm1.4	-	run tests/conformance/programs/lib/expm1.4.hum.imo --n 4
+lib.expm1.4.bin	-	run tests/conformance/programs/lib/expm1.4.hum.imo --n 4 --out bin
+lib.exponent.1	-	run tests/conformance/programs/lib/exponent.1.hum.imo --n 4
+lib.exponent.2	-	run tests/conformance/programs/lib/exponent.2.hum.imo --n 4
+lib.exponent.2.spec	-	run tests/conformance/programs/lib/exponent.2.hum.imo --n 4 --out spec
+lib.factor.1	-	run tests/conformance/programs/lib/factor.1.hum.imo --n 4
+lib.factor.2	-	run tests/conformance/programs/lib/factor.2.hum.imo --n 4
+lib.factorial.1	-	run tests/conformance/programs/lib/factorial.1.hum.imo --n 4
+lib.factorial.2	-	run tests/conformance/programs/lib/factorial.2.hum.imo --n 4
+lib.fib.1	-	run tests/conformance/programs/lib/fib.1.hum.imo --n 4
+lib.fib.1.spec	-	run tests/conformance/programs/lib/fib.1.hum.imo --n 4 --out spec
+lib.fib.2	-	run tests/conformance/programs/lib/fib.2.hum.imo --n 4
+lib.fib.3	-	run tests/conformance/programs/lib/fib.3.hum.imo --n 4
+lib.fib.4	-	run tests/conformance/programs/lib/fib.4.hum.imo --n 4
+lib.fib.4.bin	-	run tests/conformance/programs/lib/fib.4.hum.imo --n 4 --out bin
+lib.floor.1	-	run tests/conformance/programs/lib/floor.1.hum.imo --n 4
+lib.floor.2	-	run tests/conformance/programs/lib/floor.2.hum.imo --n 4
+lib.floor.2.spec	-	run tests/conformance/programs/lib/floor.2.hum.imo --n 4 --out spec
+lib.fpadd.1	-	run tests/conformance/programs/lib/fpadd.1.hum.imo --n 4
+lib.fpadd.2	-	run tests/conformance/programs/lib/fpadd.2.hum.imo --n 4
+lib.fpdegree.1	-	run tests/conformance/programs/lib/fpdegree.1.hum.imo --n 4
+lib.fpdegree.2	-	run tests/conformance/programs/lib/fpdegree.2.hum.imo --n 4
+lib.fpderiv.1	-	run tests/conformance/programs/lib/fpderiv.1.hum.imo --n 4
+lib.fpderiv.1.spec	-	run tests/conformance/programs/lib/fpderiv.1.hum.imo --n 4 --out spec
+lib.fpderiv.2	-	run tests/conformance/programs/lib/fpderiv.2.hum.imo --n 4
+lib.fpdivmod.1	-	run tests/conformance/programs/lib/fpdivmod.1.hum.imo --n 4
+lib.fpdivmod.2	-	run tests/conformance/programs/lib/fpdivmod.2.hum.imo --n 4
+lib.fpdivmod.2.bin	-	run tests/conformance/programs/lib/fpdivmod.2.hum.imo --n 4 --out bin
+lib.fpegcd.1	-	run tests/conformance/programs/lib/fpegcd.1.hum.imo --n 4
+lib.fpegcd.2	-	run tests/conformance/programs/lib/fpegcd.2.hum.imo --n 4
+lib.fpegcd.2.spec	-	run tests/conformance/programs/lib/fpegcd.2.hum.imo --n 4 --out spec
+lib.fpeval.1	-	run tests/conformance/programs/lib/fpeval.1.hum.imo --n 4
+lib.fpeval.2	-	run tests/conformance/programs/lib/fpeval.2.hum.imo --n 4
+lib.fpfactor.2	-	run tests/conformance/programs/lib/fpfactor.2.hum.imo --n 4
+lib.fpgcd.1	-	run tests/conformance/programs/lib/fpgcd.1.hum.imo --n 4
+lib.fpgcd.2	-	run tests/conformance/programs/lib/fpgcd.2.hum.imo --n 4
+lib.fpgcd.2.spec	-	run tests/conformance/programs/lib/fpgcd.2.hum.imo --n 4 --out spec
+lib.fpirreducible.1	-	run tests/conformance/programs/lib/fpirreducible.1.hum.imo --n 4
+lib.fpirreducible.2	-	run tests/conformance/programs/lib/fpirreducible.2.hum.imo --n 4
+lib.fpmonic.1	-	run tests/conformance/programs/lib/fpmonic.1.hum.imo --n 4
+lib.fpmonic.1.bin	-	run tests/conformance/programs/lib/fpmonic.1.hum.imo --n 4 --out bin
+lib.fpmonic.2	-	run tests/conformance/programs/lib/fpmonic.2.hum.imo --n 4
+lib.fpmul.1	-	run tests/conformance/programs/lib/fpmul.1.hum.imo --n 4
+lib.fpmul.1.spec	-	run tests/conformance/programs/lib/fpmul.1.hum.imo --n 4 --out spec
+lib.fpmul.2	-	run tests/conformance/programs/lib/fpmul.2.hum.imo --n 4
+lib.fpneg.1	-	run tests/conformance/programs/lib/fpneg.1.hum.imo --n 4
+lib.fpneg.2	-	run tests/conformance/programs/lib/fpneg.2.hum.imo --n 4
+lib.fpoly.1	-	run tests/conformance/programs/lib/fpoly.1.hum.imo --n 4
+lib.fpoly.2	-	run tests/conformance/programs/lib/fpoly.2.hum.imo --n 4
+lib.fpoly.2.spec	-	run tests/conformance/programs/lib/fpoly.2.hum.imo --n 4 --out spec
+lib.fppowmod.1	-	run tests/conformance/programs/lib/fppowmod.1.hum.imo --n 4
+lib.fppowmod.2	-	run tests/conformance/programs/lib/fppowmod.2.hum.imo --n 4
+lib.fpquo.1	-	run tests/conformance/programs/lib/fpquo.1.hum.imo --n 4
+lib.fpquo.1.bin	-	run tests/conformance/programs/lib/fpquo.1.hum.imo --n 4 --out bin
+lib.fpquo.2	-	run tests/conformance/programs/lib/fpquo.2.hum.imo --n 4
+lib.fprem.1	-	run tests/conformance/programs/lib/fprem.1.hum.imo --n 4
+lib.fprem.1.spec	-	run tests/conformance/programs/lib/fprem.1.hum.imo --n 4 --out spec
+lib.fprem.2	-	run tests/conformance/programs/lib/fprem.2.hum.imo --n 4
+lib.fproots.1	-	run tests/conformance/programs/lib/fproots.1.hum.imo --n 4
+lib.fproots.2	-	run tests/conformance/programs/lib/fproots.2.hum.imo --n 4
+lib.fpscale.1	-	run tests/conformance/programs/lib/fpscale.1.hum.imo --n 4
+lib.fpscale.2	-	run tests/conformance/programs/lib/fpscale.2.hum.imo --n 4
+lib.fpscale.2.spec	-	run tests/conformance/programs/lib/fpscale.2.hum.imo --n 4 --out spec
+lib.fpsub.1	-	run tests/conformance/programs/lib/fpsub.1.hum.imo --n 4
+lib.fpsub.2	-	run tests/conformance/programs/lib/fpsub.2.hum.imo --n 4
+lib.frobeniuscensus.1	-	run tests/conformance/programs/lib/frobeniuscensus.1.hum.imo --n 4
+lib.frobeniuscensus.1.bin	-	run tests/conformance/programs/lib/frobeniuscensus.1.hum.imo --n 4 --out bin
+lib.frobeniuscensus.2	-	run tests/conformance/programs/lib/frobeniuscensus.2.hum.imo --n 4
+lib.frobeniuspattern.1	-	run tests/conformance/programs/lib/frobeniuspattern.1.hum.imo --n 4
+lib.frobeniuspattern.1.spec	-	run tests/conformance/programs/lib/frobeniuspattern.1.hum.imo --n 4 --out spec
+lib.frobeniuspattern.2	-	run tests/conformance/programs/lib/frobeniuspattern.2.hum.imo --n 4
+lib.fromcycles.1	-	run tests/conformance/programs/lib/fromcycles.1.hum.imo --n 4
+lib.fromcycles.2	-	run tests/conformance/programs/lib/fromcycles.2.hum.imo --n 4
+lib.galoiscyclotomic.1	-	run tests/conformance/programs/lib/galoiscyclotomic.1.hum.imo --n 4
+lib.galoiscyclotomic.2	-	run tests/conformance/programs/lib/galoiscyclotomic.2.hum.imo --n 4
+lib.galoiscyclotomic.2.spec	-	run tests/conformance/programs/lib/galoiscyclotomic.2.hum.imo --n 4 --out spec
+lib.galoisgroup.1	-	run tests/conformance/programs/lib/galoisgroup.1.hum.imo --n 4
+lib.galoisgroup.2	-	run tests/conformance/programs/lib/galoisgroup.2.hum.imo --n 4
+lib.galoisname.1	-	run tests/conformance/programs/lib/galoisname.1.hum.imo --n 4
+lib.galoisname.1.bin	-	run tests/conformance/programs/lib/galoisname.1.hum.imo --n 4 --out bin
+lib.galoisname.2	-	run tests/conformance/programs/lib/galoisname.2.hum.imo --n 4
+lib.galoisorder.1	-	run tests/conformance/programs/lib/galoisorder.1.hum.imo --n 4
+lib.galoisorder.1.spec	-	run tests/conformance/programs/lib/galoisorder.1.hum.imo --n 4 --out spec
+lib.galoisorder.2	-	run tests/conformance/programs/lib/galoisorder.2.hum.imo --n 4
+lib.gaussfactor.1	-	run tests/conformance/programs/lib/gaussfactor.1.hum.imo --n 4
+lib.gaussfactor.2	-	run tests/conformance/programs/lib/gaussfactor.2.hum.imo --n 4
+lib.gaussprimes.1	-	run tests/conformance/programs/lib/gaussprimes.1.hum.imo --n 4
+lib.gaussprimes.2	-	run tests/conformance/programs/lib/gaussprimes.2.hum.imo --n 4
+lib.gaussprimes.2.spec	-	run tests/conformance/programs/lib/gaussprimes.2.hum.imo --n 4 --out spec
+lib.gcd.1	-	run tests/conformance/programs/lib/gcd.1.hum.imo --n 4
+lib.gcd.2	-	run tests/conformance/programs/lib/gcd.2.hum.imo --n 4
+lib.gcd.3	-	run tests/conformance/programs/lib/gcd.3.hum.imo --n 4
+lib.gcd.3.bin	-	run tests/conformance/programs/lib/gcd.3.hum.imo --n 4 --out bin
+lib.gcd.4	-	run tests/conformance/programs/lib/gcd.4.hum.imo --n 4
+lib.gcd.5	-	run tests/conformance/programs/lib/gcd.5.hum.imo --n 4
+lib.gcd.5.spec	-	run tests/conformance/programs/lib/gcd.5.hum.imo --n 4 --out spec
+lib.gcd.6	-	run tests/conformance/programs/lib/gcd.6.hum.imo --n 4
+lib.gcdlist.1	-	run tests/conformance/programs/lib/gcdlist.1.hum.imo --n 4
+lib.gcdlist.2	-	run tests/conformance/programs/lib/gcdlist.2.hum.imo --n 4
+lib.gcdlist.3	-	run tests/conformance/programs/lib/gcdlist.3.hum.imo --n 4
+lib.gcdlist.4	-	run tests/conformance/programs/lib/gcdlist.4.hum.imo --n 4
+lib.gcdlist.4.spec	-	run tests/conformance/programs/lib/gcdlist.4.hum.imo --n 4 --out spec
+lib.generate.1	-	run tests/conformance/programs/lib/generate.1.hum.imo --n 4
+lib.generate.2	-	run tests/conformance/programs/lib/generate.2.hum.imo --n 4
+lib.gf.2	-	run tests/conformance/programs/lib/gf.2.hum.imo --n 4
+lib.gf.2.bin	-	run tests/conformance/programs/lib/gf.2.hum.imo --n 4 --out bin
+lib.gfadd.1	-	run tests/conformance/programs/lib/gfadd.1.hum.imo --n 4
+lib.gfadd.2	-	run tests/conformance/programs/lib/gfadd.2.hum.imo --n 4
+lib.gfadd.2.spec	-	run tests/conformance/programs/lib/gfadd.2.hum.imo --n 4 --out spec
+lib.gfchar.1	-	run tests/conformance/programs/lib/gfchar.1.hum.imo --n 4
+lib.gfchar.2	-	run tests/conformance/programs/lib/gfchar.2.hum.imo --n 4
+lib.gfconjugates.1	-	run tests/conformance/programs/lib/gfconjugates.1.hum.imo --n 4
+lib.gfconjugates.2	-	run tests/conformance/programs/lib/gfconjugates.2.hum.imo --n 4
+lib.gfdegree.1	-	run tests/conformance/programs/lib/gfdegree.1.hum.imo --n 4
+lib.gfdegree.1.spec	-	run tests/conformance/programs/lib/gfdegree.1.hum.imo --n 4 --out spec
+lib.gfdegree.2	-	run tests/conformance/programs/lib/gfdegree.2.hum.imo --n 4
+lib.gfdiv.1	-	run tests/conformance/programs/lib/gfdiv.1.hum.imo --n 4
+lib.gfdiv.2	-	run tests/conformance/programs/lib/gfdiv.2.hum.imo --n 4
+lib.gfdiv.2.bin	-	run tests/conformance/programs/lib/gfdiv.2.hum.imo --n 4 --out bin
+lib.gfelement.1	-	run tests/conformance/programs/lib/gfelement.1.hum.imo --n 4
+lib.gfelement.2	-	run tests/conformance/programs/lib/gfelement.2.hum.imo --n 4
+lib.gfelement.2.spec	-	run tests/conformance/programs/lib/gfelement.2.hum.imo --n 4 --out spec
+lib.gfelements.1	-	run tests/conformance/programs/lib/gfelements.1.hum.imo --n 4
+lib.gfelements.2	-	run tests/conformance/programs/lib/gfelements.2.hum.imo --n 4
+lib.gffrob.1	-	run tests/conformance/programs/lib/gffrob.1.hum.imo --n 4
+lib.gffrob.2	-	run tests/conformance/programs/lib/gffrob.2.hum.imo --n 4
+lib.gfinv.1	-	run tests/conformance/programs/lib/gfinv.1.hum.imo --n 4
+lib.gfinv.1.spec	-	run tests/conformance/programs/lib/gfinv.1.hum.imo --n 4 --out spec
+lib.gfinv.2	-	run tests/conformance/programs/lib/gfinv.2.hum.imo --n 4
+lib.gfisprimitive.1	-	run tests/conformance/programs/lib/gfisprimitive.1.hum.imo --n 4
+lib.gfisprimitive.2	-	run tests/conformance/programs/lib/gfisprimitive.2.hum.imo --n 4
+lib.gfisprimitive.2.bin	-	run tests/conformance/programs/lib/gfisprimitive.2.hum.imo --n 4 --out bin
+lib.gfissquare.1	-	run tests/conformance/programs/lib/gfissquare.1.hum.imo --n 4
+lib.gfissquare.2	-	run tests/conformance/programs/lib/gfissquare.2.hum.imo --n 4
+lib.gfissquare.2.spec	-	run tests/conformance/programs/lib/gfissquare.2.hum.imo --n 4 --out spec
+lib.gflog.1	-	run tests/conformance/programs/lib/gflog.1.hum.imo --n 4
+lib.gflog.2	-	run tests/conformance/programs/lib/gflog.2.hum.imo --n 4
+lib.gfminpoly.1	-	run tests/conformance/programs/lib/gfminpoly.1.hum.imo --n 4
+lib.gfminpoly.2	-	run tests/conformance/programs/lib/gfminpoly.2.hum.imo --n 4
+lib.gfmodulus.1	-	run tests/conformance/programs/lib/gfmodulus.1.hum.imo --n 4
+lib.gfmodulus.1.spec	-	run tests/conformance/programs/lib/gfmodulus.1.hum.imo --n 4 --out spec
+lib.gfmodulus.2	-	run tests/conformance/programs/lib/gfmodulus.2.hum.imo --n 4
+lib.gfmul.1	-	run tests/conformance/programs/lib/gfmul.1.hum.imo --n 4
+lib.gfmul.2	-	run tests/conformance/programs/lib/gfmul.2.hum.imo --n 4
+lib.gfmul.2.bin	-	run tests/conformance/programs/lib/gfmul.2.hum.imo --n 4 --out bin
+lib.gfneg.1	-	run tests/conformance/programs/lib/gfneg.1.hum.imo --n 4
+lib.gfneg.2	-	run tests/conformance/programs/lib/gfneg.2.hum.imo --n 4
+lib.gfneg.2.spec	-	run tests/conformance/programs/lib/gfneg.2.hum.imo --n 4 --out spec
+lib.gfnorm.1	-	run tests/conformance/programs/lib/gfnorm.1.hum.imo --n 4
+lib.gfnorm.2	-	run tests/conformance/programs/lib/gfnorm.2.hum.imo --n 4
+lib.gforder.1	-	run tests/conformance/programs/lib/gforder.1.hum.imo --n 4
+lib.gforder.2	-	run tests/conformance/programs/lib/gforder.2.hum.imo --n 4
+lib.gfpow.1	-	run tests/conformance/programs/lib/gfpow.1.hum.imo --n 4
+lib.gfpow.1.spec	-	run tests/conformance/programs/lib/gfpow.1.hum.imo --n 4 --out spec
+lib.gfpow.2	-	run tests/conformance/programs/lib/gfpow.2.hum.imo --n 4
+lib.gfprimitive.1	-	run tests/conformance/programs/lib/gfprimitive.1.hum.imo --n 4
+lib.gfprimitive.2	-	run tests/conformance/programs/lib/gfprimitive.2.hum.imo --n 4
+lib.gfprimitive.2.bin	-	run tests/conformance/programs/lib/gfprimitive.2.hum.imo --n 4 --out bin
+lib.gfroots.1	-	run tests/conformance/programs/lib/gfroots.1.hum.imo --n 4
+lib.gfroots.2	-	run tests/conformance/programs/lib/gfroots.2.hum.imo --n 4
+lib.gfroots.2.spec	-	run tests/conformance/programs/lib/gfroots.2.hum.imo --n 4 --out spec
+lib.gfsize.1	-	run tests/conformance/programs/lib/gfsize.1.hum.imo --n 4
+lib.gfsize.2	-	run tests/conformance/programs/lib/gfsize.2.hum.imo --n 4
+lib.gfsqrt.1	-	run tests/conformance/programs/lib/gfsqrt.1.hum.imo --n 4
+lib.gfsqrt.2	-	run tests/conformance/programs/lib/gfsqrt.2.hum.imo --n 4
+lib.gfsub.1	-	run tests/conformance/programs/lib/gfsub.1.hum.imo --n 4
+lib.gfsub.1.spec	-	run tests/conformance/programs/lib/gfsub.1.hum.imo --n 4 --out spec
+lib.gfsub.2	-	run tests/conformance/programs/lib/gfsub.2.hum.imo --n 4
+lib.gfsubfields.1	-	run tests/conformance/programs/lib/gfsubfields.1.hum.imo --n 4
+lib.gfsubfields.2	-	run tests/conformance/programs/lib/gfsubfields.2.hum.imo --n 4
+lib.gfsubfields.2.bin	-	run tests/conformance/programs/lib/gfsubfields.2.hum.imo --n 4 --out bin
+lib.gftrace.1	-	run tests/conformance/programs/lib/gftrace.1.hum.imo --n 4
+lib.gftrace.2	-	run tests/conformance/programs/lib/gftrace.2.hum.imo --n 4
+lib.gftrace.2.spec	-	run tests/conformance/programs/lib/gftrace.2.hum.imo --n 4 --out spec
+lib.gramschmidt.2	-	run tests/conformance/programs/lib/gramschmidt.2.hum.imo --n 4
+lib.grouporder.1	-	run tests/conformance/programs/lib/grouporder.1.hum.imo --n 4
+lib.grouporder.2	-	run tests/conformance/programs/lib/grouporder.2.hum.imo --n 4
+lib.hadamard.1	-	run tests/conformance/programs/lib/hadamard.1.hum.imo --n 4
+lib.hadamard.2	-	run tests/conformance/programs/lib/hadamard.2.hum.imo --n 4
+lib.hadamard.2.spec	-	run tests/conformance/programs/lib/hadamard.2.hum.imo --n 4 --out spec
+lib.harmonic.1	-	run tests/conformance/programs/lib/harmonic.1.hum.imo --n 4
+lib.harmonic.2	-	run tests/conformance/programs/lib/harmonic.2.hum.imo --n 4
+lib.hdot.1	-	run tests/conformance/programs/lib/hdot.1.hum.imo --n 4
+lib.hdot.1.bin	-	run tests/conformance/programs/lib/hdot.1.hum.imo --n 4 --out bin
+lib.hdot.2	-	run tests/conformance/programs/lib/hdot.2.hum.imo --n 4
+lib.hermiteH.1	-	run tests/conformance/programs/lib/hermiteH.1.hum.imo --n 4
+lib.hermiteH.1.spec	-	run tests/conformance/programs/lib/hermiteH.1.hum.imo --n 4 --out spec
+lib.hermiteH.2	-	run tests/conformance/programs/lib/hermiteH.2.hum.imo --n 4
+lib.htranspose.1	-	run tests/conformance/programs/lib/htranspose.1.hum.imo --n 4
+lib.htranspose.2	-	run tests/conformance/programs/lib/htranspose.2.hum.imo --n 4
+lib.hypot.1	-	run tests/conformance/programs/lib/hypot.1.hum.imo --n 4
+lib.hypot.2	-	run tests/conformance/programs/lib/hypot.2.hum.imo --n 4
+lib.hypot.2.spec	-	run tests/conformance/programs/lib/hypot.2.hum.imo --n 4 --out spec
+lib.hypot.3	-	run tests/conformance/programs/lib/hypot.3.hum.imo --n 4
+lib.hypot.4	-	run tests/conformance/programs/lib/hypot.4.hum.imo --n 4
+lib.idealcontains.1	-	run tests/conformance/programs/lib/idealcontains.1.hum.imo --n 4
+lib.idealcontains.1.bin	-	run tests/conformance/programs/lib/idealcontains.1.hum.imo --n 4 --out bin
+lib.idealcontains.2	-	run tests/conformance/programs/lib/idealcontains.2.hum.imo --n 4
+lib.idealintersect.1	-	run tests/conformance/programs/lib/idealintersect.1.hum.imo --n 4
+lib.idealintersect.1.spec	-	run tests/conformance/programs/lib/idealintersect.1.hum.imo --n 4 --out spec
+lib.idealintersect.2	-	run tests/conformance/programs/lib/idealintersect.2.hum.imo --n 4
+lib.idealproduct.1	-	run tests/conformance/programs/lib/idealproduct.1.hum.imo --n 4
+lib.idealproduct.2	-	run tests/conformance/programs/lib/idealproduct.2.hum.imo --n 4
+lib.idealradical.1	-	run tests/conformance/programs/lib/idealradical.1.hum.imo --n 4
+lib.idealradical.2	-	run tests/conformance/programs/lib/idealradical.2.hum.imo --n 4
+lib.idealradical.2.spec	-	run tests/conformance/programs/lib/idealradical.2.hum.imo --n 4 --out spec
+lib.idealsum.1	-	run tests/conformance/programs/lib/idealsum.1.hum.imo --n 4
+lib.idealsum.2	-	run tests/conformance/programs/lib/idealsum.2.hum.imo --n 4
+lib.identity.1	-	run tests/conformance/programs/lib/identity.1.hum.imo --n 4
+lib.identity.1.bin	-	run tests/conformance/programs/lib/identity.1.hum.imo --n 4 --out bin
+lib.identity.2	-	run tests/conformance/programs/lib/identity.2.hum.imo --n 4
+lib.im.1	-	run tests/conformance/programs/lib/im.1.hum.imo --n 4
+lib.im.1.spec	-	run tests/conformance/programs/lib/im.1.hum.imo --n 4 --out spec
+lib.im.2	-	run tests/conformance/programs/lib/im.2.hum.imo --n 4
+lib.index.1	-	run tests/conformance/programs/lib/index.1.hum.imo --n 4
+lib.index.2	-	run tests/conformance/programs/lib/index.2.hum.imo --n 4
+lib.intermediatefielddegrees.1	-	run tests/conformance/programs/lib/intermediatefielddegrees.1.hum.imo --n 4
+lib.intermediatefielddegrees.2	-	run tests/conformance/programs/lib/intermediatefielddegrees.2.hum.imo --n 4
+lib.intermediatefielddegrees.2.spec	-	run tests/conformance/programs/lib/intermediatefielddegrees.2.hum.imo --n 4 --out spec
+lib.interpolate.1	-	run tests/conformance/programs/lib/interpolate.1.hum.imo --n 4
+lib.interpolate.2	-	run tests/conformance/programs/lib/interpolate.2.hum.imo --n 4
+lib.interpolate.3	-	run tests/conformance/programs/lib/interpolate.3.hum.imo --n 4
+lib.interpolate.3.bin	-	run tests/conformance/programs/lib/interpolate.3.hum.imo --n 4 --out bin
+lib.interpolate.4	-	run tests/conformance/programs/lib/interpolate.4.hum.imo --n 4
+lib.inverse.1	-	run tests/conformance/programs/lib/inverse.1.hum.imo --n 4
+lib.inverse.1.spec	-	run tests/conformance/programs/lib/inverse.1.hum.imo --n 4 --out spec
+lib.inverse.2	-	run tests/conformance/programs/lib/inverse.2.hum.imo --n 4
+lib.iroot.1	-	run tests/conformance/programs/lib/iroot.1.hum.imo --n 4
+lib.iroot.2	-	run tests/conformance/programs/lib/iroot.2.hum.imo --n 4
+lib.irreduciblepoly.2	-	run tests/conformance/programs/lib/irreduciblepoly.2.hum.imo --n 4
+lib.isabelian.1	-	run tests/conformance/programs/lib/isabelian.1.hum.imo --n 4
+lib.isabelian.1.spec	-	run tests/conformance/programs/lib/isabelian.1.hum.imo --n 4 --out spec
+lib.isabelian.2	-	run tests/conformance/programs/lib/isabelian.2.hum.imo --n 4
+lib.iscoprime.1	-	run tests/conformance/programs/lib/iscoprime.1.hum.imo --n 4
+lib.iscoprime.2	-	run tests/conformance/programs/lib/iscoprime.2.hum.imo --n 4
+lib.iscoprime.2.bin	-	run tests/conformance/programs/lib/iscoprime.2.hum.imo --n 4 --out bin
+lib.iscoprime.3	-	run tests/conformance/programs/lib/iscoprime.3.hum.imo --n 4
+lib.iscoprime.4	-	run tests/conformance/programs/lib/iscoprime.4.hum.imo --n 4
+lib.iscoprime.4.spec	-	run tests/conformance/programs/lib/iscoprime.4.hum.imo --n 4 --out spec
+lib.iscyclic.1	-	run tests/conformance/programs/lib/iscyclic.1.hum.imo --n 4
+lib.iscyclic.2	-	run tests/conformance/programs/lib/iscyclic.2.hum.imo --n 4
+lib.isdiagonal.1	-	run tests/conformance/programs/lib/isdiagonal.1.hum.imo --n 4
+lib.isdiagonal.2	-	run tests/conformance/programs/lib/isdiagonal.2.hum.imo --n 4
+lib.isdiscsquare.1	-	run tests/conformance/programs/lib/isdiscsquare.1.hum.imo --n 4
+lib.isdiscsquare.1.spec	-	run tests/conformance/programs/lib/isdiscsquare.1.hum.imo --n 4 --out spec
+lib.isdiscsquare.2	-	run tests/conformance/programs/lib/isdiscsquare.2.hum.imo --n 4
+lib.iseisenstein.1	-	run tests/conformance/programs/lib/iseisenstein.1.hum.imo --n 4
+lib.iseisenstein.2	-	run tests/conformance/programs/lib/iseisenstein.2.hum.imo --n 4
+lib.iseisenstein.2.bin	-	run tests/conformance/programs/lib/iseisenstein.2.hum.imo --n 4 --out bin
+lib.iseven.1	-	run tests/conformance/programs/lib/iseven.1.hum.imo --n 4
+lib.iseven.2	-	run tests/conformance/programs/lib/iseven.2.hum.imo --n 4
+lib.iseven.2.spec	-	run tests/conformance/programs/lib/iseven.2.hum.imo --n 4 --out spec
+lib.isgausspower.1	-	run tests/conformance/programs/lib/isgausspower.1.hum.imo --n 4
+lib.isgausspower.2	-	run tests/conformance/programs/lib/isgausspower.2.hum.imo --n 4
+lib.isgaussprime.1	-	run tests/conformance/programs/lib/isgaussprime.1.hum.imo --n 4
+lib.isgaussprime.2	-	run tests/conformance/programs/lib/isgaussprime.2.hum.imo --n 4
+lib.isgoodprime.1	-	run tests/conformance/programs/lib/isgoodprime.1.hum.imo --n 4
+lib.isgoodprime.1.spec	-	run tests/conformance/programs/lib/isgoodprime.1.hum.imo --n 4 --out spec
+lib.isgoodprime.2	-	run tests/conformance/programs/lib/isgoodprime.2.hum.imo --n 4
+lib.isgroup.1	-	run tests/conformance/programs/lib/isgroup.1.hum.imo --n 4
+lib.isgroup.2	-	run tests/conformance/programs/lib/isgroup.2.hum.imo --n 4
+lib.isgroup.2.bin	-	run tests/conformance/programs/lib/isgroup.2.hum.imo --n 4 --out bin
+lib.ishermitian.1	-	run tests/conformance/programs/lib/ishermitian.1.hum.imo --n 4
+lib.ishermitian.2	-	run tests/conformance/programs/lib/ishermitian.2.hum.imo --n 4
+lib.ishermitian.2.spec	-	run tests/conformance/programs/lib/ishermitian.2.hum.imo --n 4 --out spec
+lib.isinvertible.1	-	run tests/conformance/programs/lib/isinvertible.1.hum.imo --n 4
+lib.isinvertible.2	-	run tests/conformance/programs/lib/isinvertible.2.hum.imo --n 4
+lib.isirreducible.1	-	run tests/conformance/programs/lib/isirreducible.1.hum.imo --n 4
+lib.isirreducible.2	-	run tests/conformance/programs/lib/isirreducible.2.hum.imo --n 4
+lib.islower.1	-	run tests/conformance/programs/lib/islower.1.hum.imo --n 4
+lib.islower.1.spec	-	run tests/conformance/programs/lib/islower.1.hum.imo --n 4 --out spec
+lib.islower.2	-	run tests/conformance/programs/lib/islower.2.hum.imo --n 4
+lib.islucasprp.1	-	run tests/conformance/programs/lib/islucasprp.1.hum.imo --n 4
+lib.islucasprp.2	-	run tests/conformance/programs/lib/islucasprp.2.hum.imo --n 4
+lib.islucasprp.2.bin	-	run tests/conformance/programs/lib/islucasprp.2.hum.imo --n 4 --out bin
+lib.isnormal.1	-	run tests/conformance/programs/lib/isnormal.1.hum.imo --n 4
+lib.isnormal.2	-	run tests/conformance/programs/lib/isnormal.2.hum.imo --n 4
+lib.isnormal.2.spec	-	run tests/conformance/programs/lib/isnormal.2.hum.imo --n 4 --out spec
+lib.isolate.1	-	run tests/conformance/programs/lib/isolate.1.hum.imo --n 4
+lib.isolate.2	-	run tests/conformance/programs/lib/isolate.2.hum.imo --n 4
+lib.isomorphic.1	-	run tests/conformance/programs/lib/isomorphic.1.hum.imo --n 4
+lib.isomorphic.2	-	run tests/conformance/programs/lib/isomorphic.2.hum.imo --n 4
+lib.isperfect.1	-	run tests/conformance/programs/lib/isperfect.1.hum.imo --n 4
+lib.isperfect.1.spec	-	run tests/conformance/programs/lib/isperfect.1.hum.imo --n 4 --out spec
+lib.isperfect.2	-	run tests/conformance/programs/lib/isperfect.2.hum.imo --n 4
+lib.isperm.1	-	run tests/conformance/programs/lib/isperm.1.hum.imo --n 4
+lib.isperm.2	-	run tests/conformance/programs/lib/isperm.2.hum.imo --n 4
+lib.isperm.2.bin	-	run tests/conformance/programs/lib/isperm.2.hum.imo --n 4 --out bin
+lib.ispower.1	-	run tests/conformance/programs/lib/ispower.1.hum.imo --n 4
+lib.ispower.2	-	run tests/conformance/programs/lib/ispower.2.hum.imo --n 4
+lib.ispower.2.spec	-	run tests/conformance/programs/lib/ispower.2.hum.imo --n 4 --out spec
+lib.isprime.1	-	run tests/conformance/programs/lib/isprime.1.hum.imo --n 4
+lib.isprime.2	-	run tests/conformance/programs/lib/isprime.2.hum.imo --n 4
+lib.isprimepower.1	-	run tests/conformance/programs/lib/isprimepower.1.hum.imo --n 4
+lib.isprimepower.2	-	run tests/conformance/programs/lib/isprimepower.2.hum.imo --n 4
+lib.isprimitivepoly.1	-	run tests/conformance/programs/lib/isprimitivepoly.1.hum.imo --n 4
+lib.isprimitivepoly.1.spec	-	run tests/conformance/programs/lib/isprimitivepoly.1.hum.imo --n 4 --out spec
+lib.isprimitivepoly.2	-	run tests/conformance/programs/lib/isprimitivepoly.2.hum.imo --n 4
+lib.isqrt.1	-	run tests/conformance/programs/lib/isqrt.1.hum.imo --n 4
+lib.isqrt.2	-	run tests/conformance/programs/lib/isqrt.2.hum.imo --n 4
+lib.isqrt.2.bin	-	run tests/conformance/programs/lib/isqrt.2.hum.imo --n 4 --out bin
+lib.issolvable.1	-	run tests/conformance/programs/lib/issolvable.1.hum.imo --n 4
+lib.issolvable.2	-	run tests/conformance/programs/lib/issolvable.2.hum.imo --n 4
+lib.issolvable.2.spec	-	run tests/conformance/programs/lib/issolvable.2.hum.imo --n 4 --out spec
+lib.issquare.1	-	run tests/conformance/programs/lib/issquare.1.hum.imo --n 4
+lib.issquare.2	-	run tests/conformance/programs/lib/issquare.2.hum.imo --n 4
+lib.issquarefree.1	-	run tests/conformance/programs/lib/issquarefree.1.hum.imo --n 4
+lib.issquarefree.2	-	run tests/conformance/programs/lib/issquarefree.2.hum.imo --n 4
+lib.issubgroup.1	-	run tests/conformance/programs/lib/issubgroup.1.hum.imo --n 4
+lib.issubgroup.1.spec	-	run tests/conformance/programs/lib/issubgroup.1.hum.imo --n 4 --out spec
+lib.issubgroup.2	-	run tests/conformance/programs/lib/issubgroup.2.hum.imo --n 4
+lib.issymmetric.1	-	run tests/conformance/programs/lib/issymmetric.1.hum.imo --n 4
+lib.issymmetric.2	-	run tests/conformance/programs/lib/issymmetric.2.hum.imo --n 4
+lib.issymmetric.2.bin	-	run tests/conformance/programs/lib/issymmetric.2.hum.imo --n 4 --out bin
+lib.isunitary.1	-	run tests/conformance/programs/lib/isunitary.1.hum.imo --n 4
+lib.isunitary.2	-	run tests/conformance/programs/lib/isunitary.2.hum.imo --n 4
+lib.isunitary.2.spec	-	run tests/conformance/programs/lib/isunitary.2.hum.imo --n 4 --out spec
+lib.isupper.1	-	run tests/conformance/programs/lib/isupper.1.hum.imo --n 4
+lib.isupper.2	-	run tests/conformance/programs/lib/isupper.2.hum.imo --n 4
+lib.jacobi.1	-	run tests/conformance/programs/lib/jacobi.1.hum.imo --n 4
+lib.jacobi.2	-	run tests/conformance/programs/lib/jacobi.2.hum.imo --n 4
+lib.join.1	-	run tests/conformance/programs/lib/join.1.hum.imo --n 4
+lib.join.1.spec	-	run tests/conformance/programs/lib/join.1.hum.imo --n 4 --out spec
+lib.join.2	-	run tests/conformance/programs/lib/join.2.hum.imo --n 4
+lib.kron.1	-	run tests/conformance/programs/lib/kron.1.hum.imo --n 4
+lib.kron.2	-	run tests/conformance/programs/lib/kron.2.hum.imo --n 4
+lib.kron.2.bin	-	run tests/conformance/programs/lib/kron.2.hum.imo --n 4 --out bin
+lib.kronecker.1	-	run tests/conformance/programs/lib/kronecker.1.hum.imo --n 4
+lib.kronecker.2	-	run tests/conformance/programs/lib/kronecker.2.hum.imo --n 4
+lib.kronecker.2.spec	-	run tests/conformance/programs/lib/kronecker.2.hum.imo --n 4 --out spec
+lib.laguerreL.1	-	run tests/conformance/programs/lib/laguerreL.1.hum.imo --n 4
+lib.laguerreL.2	-	run tests/conformance/programs/lib/laguerreL.2.hum.imo --n 4
+lib.lambertw.1	-	run tests/conformance/programs/lib/lambertw.1.hum.imo --n 4
+lib.lambertw.2	-	run tests/conformance/programs/lib/lambertw.2.hum.imo --n 4
+lib.lc.1	-	run tests/conformance/programs/lib/lc.1.hum.imo --n 4
+lib.lc.1.spec	-	run tests/conformance/programs/lib/lc.1.hum.imo --n 4 --out spec
+lib.lc.2	-	run tests/conformance/programs/lib/lc.2.hum.imo --n 4
+lib.lc.3	-	run tests/conformance/programs/lib/lc.3.hum.imo --n 4
+lib.lc.4	-	run tests/conformance/programs/lib/lc.4.hum.imo --n 4
+lib.lc.4.bin	-	run tests/conformance/programs/lib/lc.4.hum.imo --n 4 --out bin
+lib.lc.5	-	run tests/conformance/programs/lib/lc.5.hum.imo --n 4
+lib.lc.6	-	run tests/conformance/programs/lib/lc.6.hum.imo --n 4
+lib.lc.6.spec	-	run tests/conformance/programs/lib/lc.6.hum.imo --n 4 --out spec
+lib.lc.7	-	run tests/conformance/programs/lib/lc.7.hum.imo --n 4
+lib.lc.8	-	run tests/conformance/programs/lib/lc.8.hum.imo --n 4
+lib.lcm.1	-	run tests/conformance/programs/lib/lcm.1.hum.imo --n 4
+lib.lcm.2	-	run tests/conformance/programs/lib/lcm.2.hum.imo --n 4
+lib.lcm.3	-	run tests/conformance/programs/lib/lcm.3.hum.imo --n 4
+lib.lcm.3.spec	-	run tests/conformance/programs/lib/lcm.3.hum.imo --n 4 --out spec
+lib.lcm.4	-	run tests/conformance/programs/lib/lcm.4.hum.imo --n 4
+lib.lcmlist.1	-	run tests/conformance/programs/lib/lcmlist.1.hum.imo --n 4
+lib.lcmlist.2	-	run tests/conformance/programs/lib/lcmlist.2.hum.imo --n 4
+lib.lcmlist.2.bin	-	run tests/conformance/programs/lib/lcmlist.2.hum.imo --n 4 --out bin
+lib.leftcosets.1	-	run tests/conformance/programs/lib/leftcosets.1.hum.imo --n 4
+lib.leftcosets.2	-	run tests/conformance/programs/lib/leftcosets.2.hum.imo --n 4
+lib.leftcosets.2.spec	-	run tests/conformance/programs/lib/leftcosets.2.hum.imo --n 4 --out spec
+lib.legendre.1	-	run tests/conformance/programs/lib/legendre.1.hum.imo --n 4
+lib.legendre.2	-	run tests/conformance/programs/lib/legendre.2.hum.imo --n 4
+lib.legendreP.1	-	run tests/conformance/programs/lib/legendreP.1.hum.imo --n 4
+lib.legendreP.2	-	run tests/conformance/programs/lib/legendreP.2.hum.imo --n 4
+lib.lgamma.1	-	run tests/conformance/programs/lib/lgamma.1.hum.imo --n 4
+lib.lgamma.1.spec	-	run tests/conformance/programs/lib/lgamma.1.hum.imo --n 4 --out spec
+lib.lgamma.2	-	run tests/conformance/programs/lib/lgamma.2.hum.imo --n 4
+lib.li.1	-	run tests/conformance/programs/lib/li.1.hum.imo --n 4
+lib.li.2	-	run tests/conformance/programs/lib/li.2.hum.imo --n 4
+lib.li.2.bin	-	run tests/conformance/programs/lib/li.2.hum.imo --n 4 --out bin
+lib.linsolve.1	-	run tests/conformance/programs/lib/linsolve.1.hum.imo --n 4
+lib.linsolve.2	-	run tests/conformance/programs/lib/linsolve.2.hum.imo --n 4
+lib.linsolve.2.spec	-	run tests/conformance/programs/lib/linsolve.2.hum.imo --n 4 --out spec
+lib.liouville.1	-	run tests/conformance/programs/lib/liouville.1.hum.imo --n 4
+lib.liouville.2	-	run tests/conformance/programs/lib/liouville.2.hum.imo --n 4
+lib.log.1	-	run tests/conformance/programs/lib/log.1.hum.imo --n 4
+lib.log.2	-	run tests/conformance/programs/lib/log.2.hum.imo --n 4
+lib.log.3	-	run tests/conformance/programs/lib/log.3.hum.imo --n 4
+lib.log.3.spec	-	run tests/conformance/programs/lib/log.3.hum.imo --n 4 --out spec
+lib.log.4	-	run tests/conformance/programs/lib/log.4.hum.imo --n 4
+lib.log1p.1	-	run tests/conformance/programs/lib/log1p.1.hum.imo --n 4
+lib.log1p.2	-	run tests/conformance/programs/lib/log1p.2.hum.imo --n 4
+lib.log1p.2.bin	-	run tests/conformance/programs/lib/log1p.2.hum.imo --n 4 --out bin
+lib.logb.1	-	run tests/conformance/programs/lib/logb.1.hum.imo --n 4
+lib.logb.2	-	run tests/conformance/programs/lib/logb.2.hum.imo --n 4
+lib.logb.2.spec	-	run tests/conformance/programs/lib/logb.2.hum.imo --n 4 --out spec
+lib.lu.1	-	run tests/conformance/programs/lib/lu.1.hum.imo --n 4
+lib.lu.2	-	run tests/conformance/programs/lib/lu.2.hum.imo --n 4
+lib.lucas.1	-	run tests/conformance/programs/lib/lucas.1.hum.imo --n 4
+lib.lucas.2	-	run tests/conformance/programs/lib/lucas.2.hum.imo --n 4
+lib.lucas.3	-	run tests/conformance/programs/lib/lucas.3.hum.imo --n 4
+lib.lucas.3.spec	-	run tests/conformance/programs/lib/lucas.3.hum.imo --n 4 --out spec
+lib.lucas.4	-	run tests/conformance/programs/lib/lucas.4.hum.imo --n 4
+lib.madd.1	-	run tests/conformance/programs/lib/madd.1.hum.imo --n 4
+lib.madd.2	-	run tests/conformance/programs/lib/madd.2.hum.imo --n 4
+lib.madd.2.bin	-	run tests/conformance/programs/lib/madd.2.hum.imo --n 4 --out bin
+lib.matexp.2	-	run tests/conformance/programs/lib/matexp.2.hum.imo --n 4
+lib.max.1	-	run tests/conformance/programs/lib/max.1.hum.imo --n 4
+lib.max.1.spec	-	run tests/conformance/programs/lib/max.1.hum.imo --n 4 --out spec
+lib.max.2	-	run tests/conformance/programs/lib/max.2.hum.imo --n 4
+lib.max.3	-	run tests/conformance/programs/lib/max.3.hum.imo --n 4
+lib.max.4	-	run tests/conformance/programs/lib/max.4.hum.imo --n 4
+lib.max.5	-	run tests/conformance/programs/lib/max.5.hum.imo --n 4
+lib.max.6	-	run tests/conformance/programs/lib/max.6.hum.imo --n 4
+lib.max.6.spec	-	run tests/conformance/programs/lib/max.6.hum.imo --n 4 --out spec
+lib.max.7	-	run tests/conformance/programs/lib/max.7.hum.imo --n 4
+lib.max.8	-	run tests/conformance/programs/lib/max.8.hum.imo --n 4
+lib.mdiag.1	-	run tests/conformance/programs/lib/mdiag.1.hum.imo --n 4
+lib.mdiag.1.bin	-	run tests/conformance/programs/lib/mdiag.1.hum.imo --n 4 --out bin
+lib.mdiag.2	-	run tests/conformance/programs/lib/mdiag.2.hum.imo --n 4
+lib.min.1	-	run tests/conformance/programs/lib/min.1.hum.imo --n 4
+lib.min.1.spec	-	run tests/conformance/programs/lib/min.1.hum.imo --n 4 --out spec
+lib.min.2	-	run tests/conformance/programs/lib/min.2.hum.imo --n 4
+lib.min.3	-	run tests/conformance/programs/lib/min.3.hum.imo --n 4
+lib.min.4	-	run tests/conformance/programs/lib/min.4.hum.imo --n 4
+lib.min.5	-	run tests/conformance/programs/lib/min.5.hum.imo --n 4
+lib.min.6	-	run tests/conformance/programs/lib/min.6.hum.imo --n 4
+lib.min.6.spec	-	run tests/conformance/programs/lib/min.6.hum.imo --n 4 --out spec
+lib.min.7	-	run tests/conformance/programs/lib/min.7.hum.imo --n 4
+lib.min.8	-	run tests/conformance/programs/lib/min.8.hum.imo --n 4
+lib.minor.1	-	run tests/conformance/programs/lib/minor.1.hum.imo --n 4
+lib.minor.1.bin	-	run tests/conformance/programs/lib/minor.1.hum.imo --n 4 --out bin
+lib.minor.2	-	run tests/conformance/programs/lib/minor.2.hum.imo --n 4
+lib.minpoly.1	-	run tests/conformance/programs/lib/minpoly.1.hum.imo --n 4
+lib.minpoly.1.spec	-	run tests/conformance/programs/lib/minpoly.1.hum.imo --n 4 --out spec
+lib.minpoly.2	-	run tests/conformance/programs/lib/minpoly.2.hum.imo --n 4
+lib.mmul.1	-	run tests/conformance/programs/lib/mmul.1.hum.imo --n 4
+lib.mmul.2	-	run tests/conformance/programs/lib/mmul.2.hum.imo --n 4
+lib.mneg.1	-	run tests/conformance/programs/lib/mneg.1.hum.imo --n 4
+lib.mneg.2	-	run tests/conformance/programs/lib/mneg.2.hum.imo --n 4
+lib.mneg.2.spec	-	run tests/conformance/programs/lib/mneg.2.hum.imo --n 4 --out spec
+lib.mobius.1	-	run tests/conformance/programs/lib/mobius.1.hum.imo --n 4
+lib.mobius.2	-	run tests/conformance/programs/lib/mobius.2.hum.imo --n 4
+lib.modinv.1	-	run tests/conformance/programs/lib/modinv.1.hum.imo --n 4
+lib.modinv.1.bin	-	run tests/conformance/programs/lib/modinv.1.hum.imo --n 4 --out bin
+lib.modinv.2	-	run tests/conformance/programs/lib/modinv.2.hum.imo --n 4
+lib.modinv.3	-	run tests/conformance/programs/lib/modinv.3.hum.imo --n 4
+lib.modinv.3.spec	-	run tests/conformance/programs/lib/modinv.3.hum.imo --n 4 --out spec
+lib.modinv.4	-	run tests/conformance/programs/lib/modinv.4.hum.imo --n 4
+lib.modinv.5	-	run tests/conformance/programs/lib/modinv.5.hum.imo --n 4
+lib.modinv.6	-	run tests/conformance/programs/lib/modinv.6.hum.imo --n 4
+lib.monomial.1	-	run tests/conformance/programs/lib/monomial.1.hum.imo --n 4
+lib.monomial.2	-	run tests/conformance/programs/lib/monomial.2.hum.imo --n 4
+lib.monomial.2.spec	-	run tests/conformance/programs/lib/monomial.2.hum.imo --n 4 --out spec
+lib.monomial.3	-	run tests/conformance/programs/lib/monomial.3.hum.imo --n 4
+lib.monomial.4	-	run tests/conformance/programs/lib/monomial.4.hum.imo --n 4
+lib.monomial.5	-	run tests/conformance/programs/lib/monomial.5.hum.imo --n 4
+lib.monomial.5.bin	-	run tests/conformance/programs/lib/monomial.5.hum.imo --n 4 --out bin
+lib.monomial.6	-	run tests/conformance/programs/lib/monomial.6.hum.imo --n 4
+lib.monomial.7	-	run tests/conformance/programs/lib/monomial.7.hum.imo --n 4
+lib.monomial.7.spec	-	run tests/conformance/programs/lib/monomial.7.hum.imo --n 4 --out spec
+lib.monomial.8	-	run tests/conformance/programs/lib/monomial.8.hum.imo --n 4
+lib.mscale.1	-	run tests/conformance/programs/lib/mscale.1.hum.imo --n 4
+lib.mscale.2	-	run tests/conformance/programs/lib/mscale.2.hum.imo --n 4
+lib.msub.1	-	run tests/conformance/programs/lib/msub.1.hum.imo --n 4
+lib.msub.2	-	run tests/conformance/programs/lib/msub.2.hum.imo --n 4
+lib.msub.2.spec	-	run tests/conformance/programs/lib/msub.2.hum.imo --n 4 --out spec
+lib.mulmod.1	-	run tests/conformance/programs/lib/mulmod.1.hum.imo --n 4
+lib.mulmod.2	-	run tests/conformance/programs/lib/mulmod.2.hum.imo --n 4
+lib.mvec.1	-	run tests/conformance/programs/lib/mvec.1.hum.imo --n 4
+lib.mvec.1.bin	-	run tests/conformance/programs/lib/mvec.1.hum.imo --n 4 --out bin
+lib.mvec.2	-	run tests/conformance/programs/lib/mvec.2.hum.imo --n 4
+lib.natstr.1	-	run tests/conformance/programs/lib/natstr.1.hum.imo --n 4
+lib.natstr.1.spec	-	run tests/conformance/programs/lib/natstr.1.hum.imo --n 4 --out spec
+lib.natstr.2	-	run tests/conformance/programs/lib/natstr.2.hum.imo --n 4
+lib.ndigits.1	-	run tests/conformance/programs/lib/ndigits.1.hum.imo --n 4
+lib.ndigits.2	-	run tests/conformance/programs/lib/ndigits.2.hum.imo --n 4
+lib.necklaces.1	-	run tests/conformance/programs/lib/necklaces.1.hum.imo --n 4
+lib.necklaces.2	-	run tests/conformance/programs/lib/necklaces.2.hum.imo --n 4
+lib.necklaces.2.spec	-	run tests/conformance/programs/lib/necklaces.2.hum.imo --n 4 --out spec
+lib.negmod.1	-	run tests/conformance/programs/lib/negmod.1.hum.imo --n 4
+lib.negmod.2	-	run tests/conformance/programs/lib/negmod.2.hum.imo --n 4
+lib.nextgaussprime.1	-	run tests/conformance/programs/lib/nextgaussprime.1.hum.imo --n 4
+lib.nextgaussprime.1.bin	-	run tests/conformance/programs/lib/nextgaussprime.1.hum.imo --n 4 --out bin
+lib.nextgaussprime.2	-	run tests/conformance/programs/lib/nextgaussprime.2.hum.imo --n 4
+lib.nextprime.1	-	run tests/conformance/programs/lib/nextprime.1.hum.imo --n 4
+lib.nextprime.1.spec	-	run tests/conformance/programs/lib/nextprime.1.hum.imo --n 4 --out spec
+lib.nextprime.2	-	run tests/conformance/programs/lib/nextprime.2.hum.imo --n 4
+lib.nfcharpoly.1	-	run tests/conformance/programs/lib/nfcharpoly.1.hum.imo --n 4
+lib.nfcharpoly.2	-	run tests/conformance/programs/lib/nfcharpoly.2.hum.imo --n 4
+lib.nfdegree.1	-	run tests/conformance/programs/lib/nfdegree.1.hum.imo --n 4
+lib.nfdegree.2	-	run tests/conformance/programs/lib/nfdegree.2.hum.imo --n 4
+lib.nfdegree.2.spec	-	run tests/conformance/programs/lib/nfdegree.2.hum.imo --n 4 --out spec
+lib.nfdiscriminant.1	-	run tests/conformance/programs/lib/nfdiscriminant.1.hum.imo --n 4
+lib.nfdiscriminant.2	-	run tests/conformance/programs/lib/nfdiscriminant.2.hum.imo --n 4
+lib.nfisintegral.1	-	run tests/conformance/programs/lib/nfisintegral.1.hum.imo --n 4
+lib.nfisintegral.1.bin	-	run tests/conformance/programs/lib/nfisintegral.1.hum.imo --n 4 --out bin
+lib.nfisintegral.2	-	run tests/conformance/programs/lib/nfisintegral.2.hum.imo --n 4
+lib.nfmatrix.1	-	run tests/conformance/programs/lib/nfmatrix.1.hum.imo --n 4
+lib.nfmatrix.1.spec	-	run tests/conformance/programs/lib/nfmatrix.1.hum.imo --n 4 --out spec
+lib.nfmatrix.2	-	run tests/conformance/programs/lib/nfmatrix.2.hum.imo --n 4
+lib.nfminpoly.1	-	run tests/conformance/programs/lib/nfminpoly.1.hum.imo --n 4
+lib.nfminpoly.2	-	run tests/conformance/programs/lib/nfminpoly.2.hum.imo --n 4
+lib.nfnorm.1	-	run tests/conformance/programs/lib/nfnorm.1.hum.imo --n 4
+lib.nfnorm.2	-	run tests/conformance/programs/lib/nfnorm.2.hum.imo --n 4
+lib.nfnorm.2.spec	-	run tests/conformance/programs/lib/nfnorm.2.hum.imo --n 4 --out spec
+lib.nftrace.1	-	run tests/conformance/programs/lib/nftrace.1.hum.imo --n 4
+lib.nftrace.2	-	run tests/conformance/programs/lib/nftrace.2.hum.imo --n 4
+lib.norm.1	-	run tests/conformance/programs/lib/norm.1.hum.imo --n 4
+lib.norm.1.bin	-	run tests/conformance/programs/lib/norm.1.hum.imo --n 4 --out bin
+lib.norm.2	-	run tests/conformance/programs/lib/norm.2.hum.imo --n 4
+lib.normalizer.1	-	run tests/conformance/programs/lib/normalizer.1.hum.imo --n 4
+lib.normalizer.1.spec	-	run tests/conformance/programs/lib/normalizer.1.hum.imo --n 4 --out spec
+lib.normalizer.2	-	run tests/conformance/programs/lib/normalizer.2.hum.imo --n 4
+lib.nrealroots.1	-	run tests/conformance/programs/lib/nrealroots.1.hum.imo --n 4
+lib.nrealroots.2	-	run tests/conformance/programs/lib/nrealroots.2.hum.imo --n 4
+lib.nthprime.1	-	run tests/conformance/programs/lib/nthprime.1.hum.imo --n 4
+lib.nthprime.2	-	run tests/conformance/programs/lib/nthprime.2.hum.imo --n 4
+lib.nthprime.2.spec	-	run tests/conformance/programs/lib/nthprime.2.hum.imo --n 4 --out spec
+lib.nthroot.1	-	run tests/conformance/programs/lib/nthroot.1.hum.imo --n 4
+lib.nthroot.2	-	run tests/conformance/programs/lib/nthroot.2.hum.imo --n 4
+lib.nullspace.1	-	run tests/conformance/programs/lib/nullspace.1.hum.imo --n 4
+lib.nullspace.1.bin	-	run tests/conformance/programs/lib/nullspace.1.hum.imo --n 4 --out bin
+lib.nullspace.2	-	run tests/conformance/programs/lib/nullspace.2.hum.imo --n 4
+lib.numdivisors.1	-	run tests/conformance/programs/lib/numdivisors.1.hum.imo --n 4
+lib.numdivisors.1.spec	-	run tests/conformance/programs/lib/numdivisors.1.hum.imo --n 4 --out spec
+lib.numdivisors.2	-	run tests/conformance/programs/lib/numdivisors.2.hum.imo --n 4
+lib.numer.1	-	run tests/conformance/programs/lib/numer.1.hum.imo --n 4
+lib.numer.2	-	run tests/conformance/programs/lib/numer.2.hum.imo --n 4
+lib.numer.3	-	run tests/conformance/programs/lib/numer.3.hum.imo --n 4
+lib.numer.4	-	run tests/conformance/programs/lib/numer.4.hum.imo --n 4
+lib.numer.4.spec	-	run tests/conformance/programs/lib/numer.4.hum.imo --n 4 --out spec
+lib.numirreducible.1	-	run tests/conformance/programs/lib/numirreducible.1.hum.imo --n 4
+lib.numirreducible.2	-	run tests/conformance/programs/lib/numirreducible.2.hum.imo --n 4
+lib.omega.1	-	run tests/conformance/programs/lib/omega.1.hum.imo --n 4
+lib.omega.1.bin	-	run tests/conformance/programs/lib/omega.1.hum.imo --n 4 --out bin
+lib.omega.2	-	run tests/conformance/programs/lib/omega.2.hum.imo --n 4
+lib.orbit.1	-	run tests/conformance/programs/lib/orbit.1.hum.imo --n 4
+lib.orbit.1.spec	-	run tests/conformance/programs/lib/orbit.1.hum.imo --n 4 --out spec
+lib.orbit.2	-	run tests/conformance/programs/lib/orbit.2.hum.imo --n 4
+lib.orbits.1	-	run tests/conformance/programs/lib/orbits.1.hum.imo --n 4
+lib.orbits.2	-	run tests/conformance/programs/lib/orbits.2.hum.imo --n 4
+lib.ordmod.1	-	run tests/conformance/programs/lib/ordmod.1.hum.imo --n 4
+lib.ordmod.2	-	run tests/conformance/programs/lib/ordmod.2.hum.imo --n 4
+lib.ordmod.2.spec	-	run tests/conformance/programs/lib/ordmod.2.hum.imo --n 4 --out spec
+lib.outer.1	-	run tests/conformance/programs/lib/outer.1.hum.imo --n 4
+lib.outer.2	-	run tests/conformance/programs/lib/outer.2.hum.imo --n 4
+lib.papply.1	-	run tests/conformance/programs/lib/papply.1.hum.imo --n 4
+lib.papply.1.bin	-	run tests/conformance/programs/lib/papply.1.hum.imo --n 4 --out bin
+lib.papply.2	-	run tests/conformance/programs/lib/papply.2.hum.imo --n 4
+lib.parsebits.1	-	run tests/conformance/programs/lib/parsebits.1.hum.imo --n 4
+lib.parsebits.1.spec	-	run tests/conformance/programs/lib/parsebits.1.hum.imo --n 4 --out spec
+lib.parsebits.2	-	run tests/conformance/programs/lib/parsebits.2.hum.imo --n 4
+lib.partitions.1	-	run tests/conformance/programs/lib/partitions.1.hum.imo --n 4
+lib.partitions.2	-	run tests/conformance/programs/lib/partitions.2.hum.imo --n 4
+lib.pcompose.1	-	run tests/conformance/programs/lib/pcompose.1.hum.imo --n 4
+lib.pcompose.2	-	run tests/conformance/programs/lib/pcompose.2.hum.imo --n 4
+lib.pcompose.2.spec	-	run tests/conformance/programs/lib/pcompose.2.hum.imo --n 4 --out spec
+lib.pconj.1	-	run tests/conformance/programs/lib/pconj.1.hum.imo --n 4
+lib.pconj.2	-	run tests/conformance/programs/lib/pconj.2.hum.imo --n 4
+lib.pcycles.1	-	run tests/conformance/programs/lib/pcycles.1.hum.imo --n 4
+lib.pcycles.1.bin	-	run tests/conformance/programs/lib/pcycles.1.hum.imo --n 4 --out bin
+lib.pcycles.2	-	run tests/conformance/programs/lib/pcycles.2.hum.imo --n 4
+lib.pell.1	-	run tests/conformance/programs/lib/pell.1.hum.imo --n 4
+lib.pell.1.spec	-	run tests/conformance/programs/lib/pell.1.hum.imo --n 4 --out spec
+lib.pell.2	-	run tests/conformance/programs/lib/pell.2.hum.imo --n 4
+lib.pid.1	-	run tests/conformance/programs/lib/pid.1.hum.imo --n 4
+lib.pid.2	-	run tests/conformance/programs/lib/pid.2.hum.imo --n 4
+lib.pinverse.1	-	run tests/conformance/programs/lib/pinverse.1.hum.imo --n 4
+lib.pinverse.2	-	run tests/conformance/programs/lib/pinverse.2.hum.imo --n 4
+lib.pinverse.2.spec	-	run tests/conformance/programs/lib/pinverse.2.hum.imo --n 4 --out spec
+lib.polar.1	-	run tests/conformance/programs/lib/polar.1.hum.imo --n 4
+lib.polar.2	-	run tests/conformance/programs/lib/polar.2.hum.imo --n 4
+lib.polar.3	-	run tests/conformance/programs/lib/polar.3.hum.imo --n 4
+lib.polar.3.bin	-	run tests/conformance/programs/lib/polar.3.hum.imo --n 4 --out bin
+lib.polar.4	-	run tests/conformance/programs/lib/polar.4.hum.imo --n 4
+lib.poly.1	-	run tests/conformance/programs/lib/poly.1.hum.imo --n 4
+lib.poly.1.spec	-	run tests/conformance/programs/lib/poly.1.hum.imo --n 4 --out spec
+lib.poly.2	-	run tests/conformance/programs/lib/poly.2.hum.imo --n 4
+lib.poly.3	-	run tests/conformance/programs/lib/poly.3.hum.imo --n 4
+lib.poly.4	-	run tests/conformance/programs/lib/poly.4.hum.imo --n 4
+lib.poly.5	-	run tests/conformance/programs/lib/poly.5.hum.imo --n 4
+lib.poly.6	-	run tests/conformance/programs/lib/poly.6.hum.imo --n 4
+lib.poly.6.spec	-	run tests/conformance/programs/lib/poly.6.hum.imo --n 4 --out spec
+lib.poly.7	-	run tests/conformance/programs/lib/poly.7.hum.imo --n 4
+lib.poly.8	-	run tests/conformance/programs/lib/poly.8.hum.imo --n 4
+lib.polyadd.1	-	run tests/conformance/programs/lib/polyadd.1.hum.imo --n 4
+lib.polyadd.1.bin	-	run tests/conformance/programs/lib/polyadd.1.hum.imo --n 4 --out bin
+lib.polyadd.2	-	run tests/conformance/programs/lib/polyadd.2.hum.imo --n 4
+lib.polyadd.3	-	run tests/conformance/programs/lib/polyadd.3.hum.imo --n 4
+lib.polyadd.3.spec	-	run tests/conformance/programs/lib/polyadd.3.hum.imo --n 4 --out spec
+lib.polyadd.4	-	run tests/conformance/programs/lib/polyadd.4.hum.imo --n 4
+lib.polyadd.5	-	run tests/conformance/programs/lib/polyadd.5.hum.imo --n 4
+lib.polyadd.6	-	run tests/conformance/programs/lib/polyadd.6.hum.imo --n 4
+lib.polyadd.7	-	run tests/conformance/programs/lib/polyadd.7.hum.imo --n 4
+lib.polyadd.8	-	run tests/conformance/programs/lib/polyadd.8.hum.imo --n 4
+lib.polyadd.8.spec	-	run tests/conformance/programs/lib/polyadd.8.hum.imo --n 4 --out spec
+lib.polycompose.1	-	run tests/conformance/programs/lib/polycompose.1.hum.imo --n 4
+lib.polycompose.2	-	run tests/conformance/programs/lib/polycompose.2.hum.imo --n 4
+lib.polycompose.3	-	run tests/conformance/programs/lib/polycompose.3.hum.imo --n 4
+lib.polycompose.3.bin	-	run tests/conformance/programs/lib/polycompose.3.hum.imo --n 4 --out bin
+lib.polycompose.4	-	run tests/conformance/programs/lib/polycompose.4.hum.imo --n 4
+lib.polycompose.5	-	run tests/conformance/programs/lib/polycompose.5.hum.imo --n 4
+lib.polycompose.5.spec	-	run tests/conformance/programs/lib/polycompose.5.hum.imo --n 4 --out spec
+lib.polycompose.6	-	run tests/conformance/programs/lib/polycompose.6.hum.imo --n 4
+lib.polycompose.7	-	run tests/conformance/programs/lib/polycompose.7.hum.imo --n 4
+lib.polycompose.8	-	run tests/conformance/programs/lib/polycompose.8.hum.imo --n 4
+lib.polyconj.1	-	run tests/conformance/programs/lib/polyconj.1.hum.imo --n 4
+lib.polyconj.2	-	run tests/conformance/programs/lib/polyconj.2.hum.imo --n 4
+lib.polyconj.2.spec	-	run tests/conformance/programs/lib/polyconj.2.hum.imo --n 4 --out spec
+lib.polycontent.1	-	run tests/conformance/programs/lib/polycontent.1.hum.imo --n 4
+lib.polycontent.2	-	run tests/conformance/programs/lib/polycontent.2.hum.imo --n 4
+lib.polyderiv.1	-	run tests/conformance/programs/lib/polyderiv.1.hum.imo --n 4
+lib.polyderiv.1.bin	-	run tests/conformance/programs/lib/polyderiv.1.hum.imo --n 4 --out bin
+lib.polyderiv.2	-	run tests/conformance/programs/lib/polyderiv.2.hum.imo --n 4
+lib.polyderiv.3	-	run tests/conformance/programs/lib/polyderiv.3.hum.imo --n 4
+lib.polyderiv.3.spec	-	run tests/conformance/programs/lib/polyderiv.3.hum.imo --n 4 --out spec
+lib.polyderiv.4	-	run tests/conformance/programs/lib/polyderiv.4.hum.imo --n 4
+lib.polyderiv.5	-	run tests/conformance/programs/lib/polyderiv.5.hum.imo --n 4
+lib.polyderiv.6	-	run tests/conformance/programs/lib/polyderiv.6.hum.imo --n 4
+lib.polyderiv.7	-	run tests/conformance/programs/lib/polyderiv.7.hum.imo --n 4
+lib.polyderiv.8	-	run tests/conformance/programs/lib/polyderiv.8.hum.imo --n 4
+lib.polyderiv.8.spec	-	run tests/conformance/programs/lib/polyderiv.8.hum.imo --n 4 --out spec
+lib.polydivmod.1	-	run tests/conformance/programs/lib/polydivmod.1.hum.imo --n 4
+lib.polydivmod.2	-	run tests/conformance/programs/lib/polydivmod.2.hum.imo --n 4
+lib.polydivmod.3	-	run tests/conformance/programs/lib/polydivmod.3.hum.imo --n 4
+lib.polydivmod.3.bin	-	run tests/conformance/programs/lib/polydivmod.3.hum.imo --n 4 --out bin
+lib.polydivmod.4	-	run tests/conformance/programs/lib/polydivmod.4.hum.imo --n 4
+lib.polyegcd.1	-	run tests/conformance/programs/lib/polyegcd.1.hum.imo --n 4
+lib.polyegcd.1.spec	-	run tests/conformance/programs/lib/polyegcd.1.hum.imo --n 4 --out spec
+lib.polyegcd.2	-	run tests/conformance/programs/lib/polyegcd.2.hum.imo --n 4
+lib.polyegcd.3	-	run tests/conformance/programs/lib/polyegcd.3.hum.imo --n 4
+lib.polyegcd.4	-	run tests/conformance/programs/lib/polyegcd.4.hum.imo --n 4
+lib.polyeq.1	-	run tests/conformance/programs/lib/polyeq.1.hum.imo --n 4
+lib.polyeq.2	-	run tests/conformance/programs/lib/polyeq.2.hum.imo --n 4
+lib.polyeq.2.spec	-	run tests/conformance/programs/lib/polyeq.2.hum.imo --n 4 --out spec
+lib.polyeval.1	-	run tests/conformance/programs/lib/polyeval.1.hum.imo --n 4
+lib.polyeval.10	-	run tests/conformance/programs/lib/polyeval.10.hum.imo --n 4
+lib.polyeval.2	-	run tests/conformance/programs/lib/polyeval.2.hum.imo --n 4
+lib.polyeval.2.bin	-	run tests/conformance/programs/lib/polyeval.2.hum.imo --n 4 --out bin
+lib.polyeval.3	-	run tests/conformance/programs/lib/polyeval.3.hum.imo --n 4
+lib.polyeval.4	-	run tests/conformance/programs/lib/polyeval.4.hum.imo --n 4
+lib.polyeval.4.spec	-	run tests/conformance/programs/lib/polyeval.4.hum.imo --n 4 --out spec
+lib.polyeval.5	-	run tests/conformance/programs/lib/polyeval.5.hum.imo --n 4
+lib.polyeval.6	-	run tests/conformance/programs/lib/polyeval.6.hum.imo --n 4
+lib.polyeval.7	-	run tests/conformance/programs/lib/polyeval.7.hum.imo --n 4
+lib.polyeval.8	-	run tests/conformance/programs/lib/polyeval.8.hum.imo --n 4
+lib.polyeval.9	-	run tests/conformance/programs/lib/polyeval.9.hum.imo --n 4
+lib.polyeval.9.spec	-	run tests/conformance/programs/lib/polyeval.9.hum.imo --n 4 --out spec
+lib.polyevalmany.1	-	run tests/conformance/programs/lib/polyevalmany.1.hum.imo --n 4
+lib.polyevalmany.2	-	run tests/conformance/programs/lib/polyevalmany.2.hum.imo --n 4
+lib.polyevalmany.3	-	run tests/conformance/programs/lib/polyevalmany.3.hum.imo --n 4
+lib.polyevalmany.3.bin	-	run tests/conformance/programs/lib/polyevalmany.3.hum.imo --n 4 --out bin
+lib.polyevalmany.4	-	run tests/conformance/programs/lib/polyevalmany.4.hum.imo --n 4
+lib.polyfactor.1	-	run tests/conformance/programs/lib/polyfactor.1.hum.imo --n 4
+lib.polyfactor.1.spec	-	run tests/conformance/programs/lib/polyfactor.1.hum.imo --n 4 --out spec
+lib.polyfactor.2	-	run tests/conformance/programs/lib/polyfactor.2.hum.imo --n 4
+lib.polyfromroots.1	-	run tests/conformance/programs/lib/polyfromroots.1.hum.imo --n 4
+lib.polyfromroots.2	-	run tests/conformance/programs/lib/polyfromroots.2.hum.imo --n 4
+lib.polyfromroots.3	-	run tests/conformance/programs/lib/polyfromroots.3.hum.imo --n 4
+lib.polyfromroots.4	-	run tests/conformance/programs/lib/polyfromroots.4.hum.imo --n 4
+lib.polyfromroots.4.spec	-	run tests/conformance/programs/lib/polyfromroots.4.hum.imo --n 4 --out spec
+lib.polyfromroots.5	-	run tests/conformance/programs/lib/polyfromroots.5.hum.imo --n 4
+lib.polyfromroots.6	-	run tests/conformance/programs/lib/polyfromroots.6.hum.imo --n 4
+lib.polyfromroots.7	-	run tests/conformance/programs/lib/polyfromroots.7.hum.imo --n 4
+lib.polyfromroots.7.bin	-	run tests/conformance/programs/lib/polyfromroots.7.hum.imo --n 4 --out bin
+lib.polyfromroots.8	-	run tests/conformance/programs/lib/polyfromroots.8.hum.imo --n 4
+lib.polygcd.1	-	run tests/conformance/programs/lib/polygcd.1.hum.imo --n 4
+lib.polygcd.1.spec	-	run tests/conformance/programs/lib/polygcd.1.hum.imo --n 4 --out spec
+lib.polygcd.2	-	run tests/conformance/programs/lib/polygcd.2.hum.imo --n 4
+lib.polygcd.3	-	run tests/conformance/programs/lib/polygcd.3.hum.imo --n 4
+lib.polygcd.4	-	run tests/conformance/programs/lib/polygcd.4.hum.imo --n 4
+lib.polyidealcontains.1	-	run tests/conformance/programs/lib/polyidealcontains.1.hum.imo --n 4
+lib.polyidealcontains.2	-	run tests/conformance/programs/lib/polyidealcontains.2.hum.imo --n 4
+lib.polyidealcontains.2.spec	-	run tests/conformance/programs/lib/polyidealcontains.2.hum.imo --n 4 --out spec
+lib.polyidealgen.1	-	run tests/conformance/programs/lib/polyidealgen.1.hum.imo --n 4
+lib.polyidealgen.2	-	run tests/conformance/programs/lib/polyidealgen.2.hum.imo --n 4
+lib.polyidealintersect.1	-	run tests/conformance/programs/lib/polyidealintersect.1.hum.imo --n 4
+lib.polyidealintersect.1.bin	-	run tests/conformance/programs/lib/polyidealintersect.1.hum.imo --n 4 --out bin
+lib.polyidealintersect.2	-	run tests/conformance/programs/lib/polyidealintersect.2.hum.imo --n 4
+lib.polyidealmember.1	-	run tests/conformance/programs/lib/polyidealmember.1.hum.imo --n 4
+lib.polyidealmember.1.spec	-	run tests/conformance/programs/lib/polyidealmember.1.hum.imo --n 4 --out spec
+lib.polyidealmember.2	-	run tests/conformance/programs/lib/polyidealmember.2.hum.imo --n 4
+lib.polyidealproduct.1	-	run tests/conformance/programs/lib/polyidealproduct.1.hum.imo --n 4
+lib.polyidealproduct.2	-	run tests/conformance/programs/lib/polyidealproduct.2.hum.imo --n 4
+lib.polyidealradical.1	-	run tests/conformance/programs/lib/polyidealradical.1.hum.imo --n 4
+lib.polyidealradical.2	-	run tests/conformance/programs/lib/polyidealradical.2.hum.imo --n 4
+lib.polyidealradical.2.spec	-	run tests/conformance/programs/lib/polyidealradical.2.hum.imo --n 4 --out spec
+lib.polyidealsum.1	-	run tests/conformance/programs/lib/polyidealsum.1.hum.imo --n 4
+lib.polyidealsum.2	-	run tests/conformance/programs/lib/polyidealsum.2.hum.imo --n 4
+lib.polyinteg.1	-	run tests/conformance/programs/lib/polyinteg.1.hum.imo --n 4
+lib.polyinteg.1.bin	-	run tests/conformance/programs/lib/polyinteg.1.hum.imo --n 4 --out bin
+lib.polyinteg.2	-	run tests/conformance/programs/lib/polyinteg.2.hum.imo --n 4
+lib.polyinteg.3	-	run tests/conformance/programs/lib/polyinteg.3.hum.imo --n 4
+lib.polyinteg.3.spec	-	run tests/conformance/programs/lib/polyinteg.3.hum.imo --n 4 --out spec
+lib.polyinteg.4	-	run tests/conformance/programs/lib/polyinteg.4.hum.imo --n 4
+lib.polylcm.1	-	run tests/conformance/programs/lib/polylcm.1.hum.imo --n 4
+lib.polylcm.2	-	run tests/conformance/programs/lib/polylcm.2.hum.imo --n 4
+lib.polylcm.3	-	run tests/conformance/programs/lib/polylcm.3.hum.imo --n 4
+lib.polylcm.4	-	run tests/conformance/programs/lib/polylcm.4.hum.imo --n 4
+lib.polylcm.4.spec	-	run tests/conformance/programs/lib/polylcm.4.hum.imo --n 4 --out spec
+lib.polylog.1	-	run tests/conformance/programs/lib/polylog.1.hum.imo --n 4
+lib.polylog.2	-	run tests/conformance/programs/lib/polylog.2.hum.imo --n 4
+lib.polymonic.1	-	run tests/conformance/programs/lib/polymonic.1.hum.imo --n 4
+lib.polymonic.1.bin	-	run tests/conformance/programs/lib/polymonic.1.hum.imo --n 4 --out bin
+lib.polymonic.2	-	run tests/conformance/programs/lib/polymonic.2.hum.imo --n 4
+lib.polymonic.3	-	run tests/conformance/programs/lib/polymonic.3.hum.imo --n 4
+lib.polymonic.3.spec	-	run tests/conformance/programs/lib/polymonic.3.hum.imo --n 4 --out spec
+lib.polymonic.4	-	run tests/conformance/programs/lib/polymonic.4.hum.imo --n 4
+lib.polymul.1	-	run tests/conformance/programs/lib/polymul.1.hum.imo --n 4
+lib.polymul.2	-	run tests/conformance/programs/lib/polymul.2.hum.imo --n 4
+lib.polymul.3	-	run tests/conformance/programs/lib/polymul.3.hum.imo --n 4
+lib.polymul.4	-	run tests/conformance/programs/lib/polymul.4.hum.imo --n 4
+lib.polymul.4.spec	-	run tests/conformance/programs/lib/polymul.4.hum.imo --n 4 --out spec
+lib.polymul.5	-	run tests/conformance/programs/lib/polymul.5.hum.imo --n 4
+lib.polymul.6	-	run tests/conformance/programs/lib/polymul.6.hum.imo --n 4
+lib.polymul.7	-	run tests/conformance/programs/lib/polymul.7.hum.imo --n 4
+lib.polymul.7.bin	-	run tests/conformance/programs/lib/polymul.7.hum.imo --n 4 --out bin
+lib.polymul.8	-	run tests/conformance/programs/lib/polymul.8.hum.imo --n 4
+lib.polyneg.1	-	run tests/conformance/programs/lib/polyneg.1.hum.imo --n 4
+lib.polyneg.1.spec	-	run tests/conformance/programs/lib/polyneg.1.hum.imo --n 4 --out spec
+lib.polyneg.2	-	run tests/conformance/programs/lib/polyneg.2.hum.imo --n 4
+lib.polyneg.3	-	run tests/conformance/programs/lib/polyneg.3.hum.imo --n 4
+lib.polyneg.4	-	run tests/conformance/programs/lib/polyneg.4.hum.imo --n 4
+lib.polyneg.5	-	run tests/conformance/programs/lib/polyneg.5.hum.imo --n 4
+lib.polyneg.6	-	run tests/conformance/programs/lib/polyneg.6.hum.imo --n 4
+lib.polyneg.6.spec	-	run tests/conformance/programs/lib/polyneg.6.hum.imo --n 4 --out spec
+lib.polyneg.7	-	run tests/conformance/programs/lib/polyneg.7.hum.imo --n 4
+lib.polyneg.8	-	run tests/conformance/programs/lib/polyneg.8.hum.imo --n 4
+lib.polypow.1	-	run tests/conformance/programs/lib/polypow.1.hum.imo --n 4
+lib.polypow.1.bin	-	run tests/conformance/programs/lib/polypow.1.hum.imo --n 4 --out bin
+lib.polypow.2	-	run tests/conformance/programs/lib/polypow.2.hum.imo --n 4
+lib.polypow.3	-	run tests/conformance/programs/lib/polypow.3.hum.imo --n 4
+lib.polypow.3.spec	-	run tests/conformance/programs/lib/polypow.3.hum.imo --n 4 --out spec
+lib.polypow.4	-	run tests/conformance/programs/lib/polypow.4.hum.imo --n 4
+lib.polypow.5	-	run tests/conformance/programs/lib/polypow.5.hum.imo --n 4
+lib.polypow.6	-	run tests/conformance/programs/lib/polypow.6.hum.imo --n 4
+lib.polypow.7	-	run tests/conformance/programs/lib/polypow.7.hum.imo --n 4
+lib.polypow.8	-	run tests/conformance/programs/lib/polypow.8.hum.imo --n 4
+lib.polypow.8.spec	-	run tests/conformance/programs/lib/polypow.8.hum.imo --n 4 --out spec
+lib.polypowmod.1	-	run tests/conformance/programs/lib/polypowmod.1.hum.imo --n 4
+lib.polypowmod.2	-	run tests/conformance/programs/lib/polypowmod.2.hum.imo --n 4
+lib.polypowmod.4	-	run tests/conformance/programs/lib/polypowmod.4.hum.imo --n 4
+lib.polypowmod.4.bin	-	run tests/conformance/programs/lib/polypowmod.4.hum.imo --n 4 --out bin
+lib.polyprimitive.1	-	run tests/conformance/programs/lib/polyprimitive.1.hum.imo --n 4
+lib.polyprimitive.2	-	run tests/conformance/programs/lib/polyprimitive.2.hum.imo --n 4
+lib.polyprimitive.2.spec	-	run tests/conformance/programs/lib/polyprimitive.2.hum.imo --n 4 --out spec
+lib.polyquo.1	-	run tests/conformance/programs/lib/polyquo.1.hum.imo --n 4
+lib.polyquo.2	-	run tests/conformance/programs/lib/polyquo.2.hum.imo --n 4
+lib.polyquo.3	-	run tests/conformance/programs/lib/polyquo.3.hum.imo --n 4
+lib.polyquo.4	-	run tests/conformance/programs/lib/polyquo.4.hum.imo --n 4
+lib.polyrem.1	-	run tests/conformance/programs/lib/polyrem.1.hum.imo --n 4
+lib.polyrem.1.spec	-	run tests/conformance/programs/lib/polyrem.1.hum.imo --n 4 --out spec
+lib.polyrem.2	-	run tests/conformance/programs/lib/polyrem.2.hum.imo --n 4
+lib.polyrem.3	-	run tests/conformance/programs/lib/polyrem.3.hum.imo --n 4
+lib.polyrem.4	-	run tests/conformance/programs/lib/polyrem.4.hum.imo --n 4
+lib.polyrem.4.bin	-	run tests/conformance/programs/lib/polyrem.4.hum.imo --n 4 --out bin
+lib.polyscale.1	-	run tests/conformance/programs/lib/polyscale.1.hum.imo --n 4
+lib.polyscale.2	-	run tests/conformance/programs/lib/polyscale.2.hum.imo --n 4
+lib.polyscale.2.spec	-	run tests/conformance/programs/lib/polyscale.2.hum.imo --n 4 --out spec
+lib.polyscale.3	-	run tests/conformance/programs/lib/polyscale.3.hum.imo --n 4
+lib.polyscale.4	-	run tests/conformance/programs/lib/polyscale.4.hum.imo --n 4
+lib.polyscale.5	-	run tests/conformance/programs/lib/polyscale.5.hum.imo --n 4
+lib.polyscale.6	-	run tests/conformance/programs/lib/polyscale.6.hum.imo --n 4
+lib.polyscale.7	-	run tests/conformance/programs/lib/polyscale.7.hum.imo --n 4
+lib.polyscale.7.spec	-	run tests/conformance/programs/lib/polyscale.7.hum.imo --n 4 --out spec
+lib.polyscale.8	-	run tests/conformance/programs/lib/polyscale.8.hum.imo --n 4
+lib.polyshift.1	-	run tests/conformance/programs/lib/polyshift.1.hum.imo --n 4
+lib.polyshift.2	-	run tests/conformance/programs/lib/polyshift.2.hum.imo --n 4
+lib.polyshift.2.bin	-	run tests/conformance/programs/lib/polyshift.2.hum.imo --n 4 --out bin
+lib.polyshift.3	-	run tests/conformance/programs/lib/polyshift.3.hum.imo --n 4
+lib.polyshift.4	-	run tests/conformance/programs/lib/polyshift.4.hum.imo --n 4
+lib.polyshift.4.spec	-	run tests/conformance/programs/lib/polyshift.4.hum.imo --n 4 --out spec
+lib.polyshift.5	-	run tests/conformance/programs/lib/polyshift.5.hum.imo --n 4
+lib.polyshift.6	-	run tests/conformance/programs/lib/polyshift.6.hum.imo --n 4
+lib.polyshift.7	-	run tests/conformance/programs/lib/polyshift.7.hum.imo --n 4
+lib.polyshift.8	-	run tests/conformance/programs/lib/polyshift.8.hum.imo --n 4
+lib.polystr.1	-	run tests/conformance/programs/lib/polystr.1.hum.imo --n 4
+lib.polystr.1.spec	-	run tests/conformance/programs/lib/polystr.1.hum.imo --n 4 --out spec
+lib.polystr.2	-	run tests/conformance/programs/lib/polystr.2.hum.imo --n 4
+lib.polysub.1	-	run tests/conformance/programs/lib/polysub.1.hum.imo --n 4
+lib.polysub.2	-	run tests/conformance/programs/lib/polysub.2.hum.imo --n 4
+lib.polysub.2.bin	-	run tests/conformance/programs/lib/polysub.2.hum.imo --n 4 --out bin
+lib.polysub.3	-	run tests/conformance/programs/lib/polysub.3.hum.imo --n 4
+lib.polysub.4	-	run tests/conformance/programs/lib/polysub.4.hum.imo --n 4
+lib.polysub.4.spec	-	run tests/conformance/programs/lib/polysub.4.hum.imo --n 4 --out spec
+lib.polysub.5	-	run tests/conformance/programs/lib/polysub.5.hum.imo --n 4
+lib.polysub.6	-	run tests/conformance/programs/lib/polysub.6.hum.imo --n 4
+lib.polysub.7	-	run tests/conformance/programs/lib/polysub.7.hum.imo --n 4
+lib.polysub.8	-	run tests/conformance/programs/lib/polysub.8.hum.imo --n 4
+lib.porder.1	-	run tests/conformance/programs/lib/porder.1.hum.imo --n 4
+lib.porder.1.spec	-	run tests/conformance/programs/lib/porder.1.hum.imo --n 4 --out spec
+lib.porder.2	-	run tests/conformance/programs/lib/porder.2.hum.imo --n 4
+lib.pow.1	-	run tests/conformance/programs/lib/pow.1.hum.imo --n 4
+lib.pow.2	-	run tests/conformance/programs/lib/pow.2.hum.imo --n 4
+lib.pow.2.bin	-	run tests/conformance/programs/lib/pow.2.hum.imo --n 4 --out bin
+lib.powmod.1	-	run tests/conformance/programs/lib/powmod.1.hum.imo --n 4
+lib.powmod.2	-	run tests/conformance/programs/lib/powmod.2.hum.imo --n 4
+lib.powmod.2.spec	-	run tests/conformance/programs/lib/powmod.2.hum.imo --n 4 --out spec
+lib.powmod.3	-	run tests/conformance/programs/lib/powmod.3.hum.imo --n 4
+lib.powmod.4	-	run tests/conformance/programs/lib/powmod.4.hum.imo --n 4
+lib.ppow.1	-	run tests/conformance/programs/lib/ppow.1.hum.imo --n 4
+lib.ppow.2	-	run tests/conformance/programs/lib/ppow.2.hum.imo --n 4
+lib.prevprime.1	-	run tests/conformance/programs/lib/prevprime.1.hum.imo --n 4
+lib.prevprime.1.spec	-	run tests/conformance/programs/lib/prevprime.1.hum.imo --n 4 --out spec
+lib.prevprime.2	-	run tests/conformance/programs/lib/prevprime.2.hum.imo --n 4
+lib.primefactors.1	-	run tests/conformance/programs/lib/primefactors.1.hum.imo --n 4
+lib.primefactors.2	-	run tests/conformance/programs/lib/primefactors.2.hum.imo --n 4
+lib.primefactors.2.bin	-	run tests/conformance/programs/lib/primefactors.2.hum.imo --n 4 --out bin
+lib.primepi.1	-	run tests/conformance/programs/lib/primepi.1.hum.imo --n 4
+lib.primepi.2	-	run tests/conformance/programs/lib/primepi.2.hum.imo --n 4
+lib.primepi.2.spec	-	run tests/conformance/programs/lib/primepi.2.hum.imo --n 4 --out spec
+lib.primes.1	-	run tests/conformance/programs/lib/primes.1.hum.imo --n 4
+lib.primes.2	-	run tests/conformance/programs/lib/primes.2.hum.imo --n 4
+lib.primitivepoly.2	-	run tests/conformance/programs/lib/primitivepoly.2.hum.imo --n 4
+lib.primitiveroots.1	-	run tests/conformance/programs/lib/primitiveroots.1.hum.imo --n 4
+lib.primitiveroots.2	-	run tests/conformance/programs/lib/primitiveroots.2.hum.imo --n 4
+lib.primitiveroots.2.spec	-	run tests/conformance/programs/lib/primitiveroots.2.hum.imo --n 4 --out spec
+lib.primroot.1	-	run tests/conformance/programs/lib/primroot.1.hum.imo --n 4
+lib.primroot.2	-	run tests/conformance/programs/lib/primroot.2.hum.imo --n 4
+lib.proj.1	-	run tests/conformance/programs/lib/proj.1.hum.imo --n 4
+lib.proj.1.bin	-	run tests/conformance/programs/lib/proj.1.hum.imo --n 4 --out bin
+lib.proj.2	-	run tests/conformance/programs/lib/proj.2.hum.imo --n 4
+lib.psign.1	-	run tests/conformance/programs/lib/psign.1.hum.imo --n 4
+lib.psign.1.spec	-	run tests/conformance/programs/lib/psign.1.hum.imo --n 4 --out spec
+lib.psign.2	-	run tests/conformance/programs/lib/psign.2.hum.imo --n 4
+lib.qradd.1	-	run tests/conformance/programs/lib/qradd.1.hum.imo --n 4
+lib.qradd.2	-	run tests/conformance/programs/lib/qradd.2.hum.imo --n 4
+lib.qrdimension.1	-	run tests/conformance/programs/lib/qrdimension.1.hum.imo --n 4
+lib.qrdimension.2	-	run tests/conformance/programs/lib/qrdimension.2.hum.imo --n 4
+lib.qrdimension.2.spec	-	run tests/conformance/programs/lib/qrdimension.2.hum.imo --n 4 --out spec
+lib.qrinv.1	-	run tests/conformance/programs/lib/qrinv.1.hum.imo --n 4
+lib.qrinv.2	-	run tests/conformance/programs/lib/qrinv.2.hum.imo --n 4
+lib.qrisfield.1	-	run tests/conformance/programs/lib/qrisfield.1.hum.imo --n 4
+lib.qrisfield.1.bin	-	run tests/conformance/programs/lib/qrisfield.1.hum.imo --n 4 --out bin
+lib.qrisfield.2	-	run tests/conformance/programs/lib/qrisfield.2.hum.imo --n 4
+lib.qrisunit.1	-	run tests/conformance/programs/lib/qrisunit.1.hum.imo --n 4
+lib.qrisunit.1.spec	-	run tests/conformance/programs/lib/qrisunit.1.hum.imo --n 4 --out spec
+lib.qrisunit.2	-	run tests/conformance/programs/lib/qrisunit.2.hum.imo --n 4
+lib.qrmul.1	-	run tests/conformance/programs/lib/qrmul.1.hum.imo --n 4
+lib.qrmul.2	-	run tests/conformance/programs/lib/qrmul.2.hum.imo --n 4
+lib.qrneg.1	-	run tests/conformance/programs/lib/qrneg.1.hum.imo --n 4
+lib.qrneg.2	-	run tests/conformance/programs/lib/qrneg.2.hum.imo --n 4
+lib.qrneg.2.spec	-	run tests/conformance/programs/lib/qrneg.2.hum.imo --n 4 --out spec
+lib.qrpow.1	-	run tests/conformance/programs/lib/qrpow.1.hum.imo --n 4
+lib.qrreduce.1	-	run tests/conformance/programs/lib/qrreduce.1.hum.imo --n 4
+lib.qrreduce.2	-	run tests/conformance/programs/lib/qrreduce.2.hum.imo --n 4
+lib.qrreduce.2.bin	-	run tests/conformance/programs/lib/qrreduce.2.hum.imo --n 4 --out bin
+lib.qrsub.1	-	run tests/conformance/programs/lib/qrsub.1.hum.imo --n 4
+lib.qrsub.2	-	run tests/conformance/programs/lib/qrsub.2.hum.imo --n 4
+lib.qrsub.2.spec	-	run tests/conformance/programs/lib/qrsub.2.hum.imo --n 4 --out spec
+lib.quadresidues.1	-	run tests/conformance/programs/lib/quadresidues.1.hum.imo --n 4
+lib.quadresidues.2	-	run tests/conformance/programs/lib/quadresidues.2.hum.imo --n 4
+lib.quo.1	-	run tests/conformance/programs/lib/quo.1.hum.imo --n 4
+lib.quo.2	-	run tests/conformance/programs/lib/quo.2.hum.imo --n 4
+lib.radical.1	-	run tests/conformance/programs/lib/radical.1.hum.imo --n 4
+lib.radical.1.spec	-	run tests/conformance/programs/lib/radical.1.hum.imo --n 4 --out spec
+lib.radical.2	-	run tests/conformance/programs/lib/radical.2.hum.imo --n 4
+lib.ramanujansum.1	-	run tests/conformance/programs/lib/ramanujansum.1.hum.imo --n 4
+lib.ramanujansum.2	-	run tests/conformance/programs/lib/ramanujansum.2.hum.imo --n 4
+lib.ramanujansum.2.bin	-	run tests/conformance/programs/lib/ramanujansum.2.hum.imo --n 4 --out bin
+lib.range.1	-	run tests/conformance/programs/lib/range.1.hum.imo --n 4
+lib.range.2	-	run tests/conformance/programs/lib/range.2.hum.imo --n 4
+lib.range.2.spec	-	run tests/conformance/programs/lib/range.2.hum.imo --n 4 --out spec
+lib.rank.1	-	run tests/conformance/programs/lib/rank.1.hum.imo --n 4
+lib.rank.2	-	run tests/conformance/programs/lib/rank.2.hum.imo --n 4
+lib.ratroots.1	-	run tests/conformance/programs/lib/ratroots.1.hum.imo --n 4
+lib.ratroots.2	-	run tests/conformance/programs/lib/ratroots.2.hum.imo --n 4
+lib.re.1	-	run tests/conformance/programs/lib/re.1.hum.imo --n 4
+lib.re.1.spec	-	run tests/conformance/programs/lib/re.1.hum.imo --n 4 --out spec
+lib.re.2	-	run tests/conformance/programs/lib/re.2.hum.imo --n 4
+lib.realroots.1	-	run tests/conformance/programs/lib/realroots.1.hum.imo --n 4
+lib.realroots.2	-	run tests/conformance/programs/lib/realroots.2.hum.imo --n 4
+lib.realroots.2.bin	-	run tests/conformance/programs/lib/realroots.2.hum.imo --n 4 --out bin
+lib.refine.1	-	run tests/conformance/programs/lib/refine.1.hum.imo --n 4
+lib.refine.2	-	run tests/conformance/programs/lib/refine.2.hum.imo --n 4
+lib.refine.2.spec	-	run tests/conformance/programs/lib/refine.2.hum.imo --n 4 --out spec
+lib.rem.1	-	run tests/conformance/programs/lib/rem.1.hum.imo --n 4
+lib.rem.2	-	run tests/conformance/programs/lib/rem.2.hum.imo --n 4
+lib.resolventcubic.1	-	run tests/conformance/programs/lib/resolventcubic.1.hum.imo --n 4
+lib.resolventcubic.2	-	run tests/conformance/programs/lib/resolventcubic.2.hum.imo --n 4
+lib.resultant.1	-	run tests/conformance/programs/lib/resultant.1.hum.imo --n 4
+lib.resultant.1.spec	-	run tests/conformance/programs/lib/resultant.1.hum.imo --n 4 --out spec
+lib.resultant.2	-	run tests/conformance/programs/lib/resultant.2.hum.imo --n 4
+lib.resultant.3	-	run tests/conformance/programs/lib/resultant.3.hum.imo --n 4
+lib.resultant.4	-	run tests/conformance/programs/lib/resultant.4.hum.imo --n 4
+lib.resultant.4.bin	-	run tests/conformance/programs/lib/resultant.4.hum.imo --n 4 --out bin
+lib.resultant.5	-	run tests/conformance/programs/lib/resultant.5.hum.imo --n 4
+lib.resultant.6	-	run tests/conformance/programs/lib/resultant.6.hum.imo --n 4
+lib.resultant.6.spec	-	run tests/conformance/programs/lib/resultant.6.hum.imo --n 4 --out spec
+lib.resultant.7	-	run tests/conformance/programs/lib/resultant.7.hum.imo --n 4
+lib.resultant.8	-	run tests/conformance/programs/lib/resultant.8.hum.imo --n 4
+lib.rightcosets.1	-	run tests/conformance/programs/lib/rightcosets.1.hum.imo --n 4
+lib.rightcosets.2	-	run tests/conformance/programs/lib/rightcosets.2.hum.imo --n 4
+lib.root.1	-	run tests/conformance/programs/lib/root.1.hum.imo --n 4
+lib.root.1.spec	-	run tests/conformance/programs/lib/root.1.hum.imo --n 4 --out spec
+lib.root.2	-	run tests/conformance/programs/lib/root.2.hum.imo --n 4
+lib.rootsofunity.1	-	run tests/conformance/programs/lib/rootsofunity.1.hum.imo --n 4
+lib.rootsofunity.2	-	run tests/conformance/programs/lib/rootsofunity.2.hum.imo --n 4
+lib.rootsofunity.2.bin	-	run tests/conformance/programs/lib/rootsofunity.2.hum.imo --n 4 --out bin
+lib.round.1	-	run tests/conformance/programs/lib/round.1.hum.imo --n 4
+lib.round.2	-	run tests/conformance/programs/lib/round.2.hum.imo --n 4
+lib.round.2.spec	-	run tests/conformance/programs/lib/round.2.hum.imo --n 4 --out spec
+lib.rowspace.1	-	run tests/conformance/programs/lib/rowspace.1.hum.imo --n 4
+lib.rowspace.2	-	run tests/conformance/programs/lib/rowspace.2.hum.imo --n 4
+lib.rref.1	-	run tests/conformance/programs/lib/rref.1.hum.imo --n 4
+lib.rref.2	-	run tests/conformance/programs/lib/rref.2.hum.imo --n 4
+lib.sameinvariants.1	-	run tests/conformance/programs/lib/sameinvariants.1.hum.imo --n 4
+lib.sameinvariants.1.spec	-	run tests/conformance/programs/lib/sameinvariants.1.hum.imo --n 4 --out spec
+lib.sameinvariants.2	-	run tests/conformance/programs/lib/sameinvariants.2.hum.imo --n 4
+lib.sec.1	-	run tests/conformance/programs/lib/sec.1.hum.imo --n 4
+lib.sec.2	-	run tests/conformance/programs/lib/sec.2.hum.imo --n 4
+lib.sec.2.bin	-	run tests/conformance/programs/lib/sec.2.hum.imo --n 4 --out bin
+lib.sec.3	-	run tests/conformance/programs/lib/sec.3.hum.imo --n 4
+lib.sec.4	-	run tests/conformance/programs/lib/sec.4.hum.imo --n 4
+lib.sec.4.spec	-	run tests/conformance/programs/lib/sec.4.hum.imo --n 4 --out spec
+lib.sech.1	-	run tests/conformance/programs/lib/sech.1.hum.imo --n 4
+lib.sech.2	-	run tests/conformance/programs/lib/sech.2.hum.imo --n 4
+lib.sech.3	-	run tests/conformance/programs/lib/sech.3.hum.imo --n 4
+lib.sech.4	-	run tests/conformance/programs/lib/sech.4.hum.imo --n 4
+lib.semidirect.1	-	run tests/conformance/programs/lib/semidirect.1.hum.imo --n 4
+lib.semidirect.1.spec	-	run tests/conformance/programs/lib/semidirect.1.hum.imo --n 4 --out spec
+lib.semidirect.2	-	run tests/conformance/programs/lib/semidirect.2.hum.imo --n 4
+lib.sgn.1	-	run tests/conformance/programs/lib/sgn.1.hum.imo --n 4
+lib.sgn.2	-	run tests/conformance/programs/lib/sgn.2.hum.imo --n 4
+lib.sgn.2.bin	-	run tests/conformance/programs/lib/sgn.2.hum.imo --n 4 --out bin
+lib.shl.1	-	run tests/conformance/programs/lib/shl.1.hum.imo --n 4
+lib.shl.2	-	run tests/conformance/programs/lib/shl.2.hum.imo --n 4
+lib.shl.2.spec	-	run tests/conformance/programs/lib/shl.2.hum.imo --n 4 --out spec
+lib.shr.1	-	run tests/conformance/programs/lib/shr.1.hum.imo --n 4
+lib.shr.2	-	run tests/conformance/programs/lib/shr.2.hum.imo --n 4
+lib.sigma.1	-	run tests/conformance/programs/lib/sigma.1.hum.imo --n 4
+lib.sigma.2	-	run tests/conformance/programs/lib/sigma.2.hum.imo --n 4
+lib.signat.1	-	run tests/conformance/programs/lib/signat.1.hum.imo --n 4
+lib.signat.1.spec	-	run tests/conformance/programs/lib/signat.1.hum.imo --n 4 --out spec
+lib.signat.2	-	run tests/conformance/programs/lib/signat.2.hum.imo --n 4
+lib.sin.1	-	run tests/conformance/programs/lib/sin.1.hum.imo --n 4
+lib.sin.2	-	run tests/conformance/programs/lib/sin.2.hum.imo --n 4
+lib.sin.2.bin	-	run tests/conformance/programs/lib/sin.2.hum.imo --n 4 --out bin
+lib.sin.3	-	run tests/conformance/programs/lib/sin.3.hum.imo --n 4
+lib.sin.4	-	run tests/conformance/programs/lib/sin.4.hum.imo --n 4
+lib.sin.4.spec	-	run tests/conformance/programs/lib/sin.4.hum.imo --n 4 --out spec
+lib.sinc.1	-	run tests/conformance/programs/lib/sinc.1.hum.imo --n 4
+lib.sinc.2	-	run tests/conformance/programs/lib/sinc.2.hum.imo --n 4
+lib.sinc.3	-	run tests/conformance/programs/lib/sinc.3.hum.imo --n 4
+lib.sinc.4	-	run tests/conformance/programs/lib/sinc.4.hum.imo --n 4
+lib.sinh.1	-	run tests/conformance/programs/lib/sinh.1.hum.imo --n 4
+lib.sinh.1.spec	-	run tests/conformance/programs/lib/sinh.1.hum.imo --n 4 --out spec
+lib.sinh.2	-	run tests/conformance/programs/lib/sinh.2.hum.imo --n 4
+lib.sinh.3	-	run tests/conformance/programs/lib/sinh.3.hum.imo --n 4
+lib.sinh.4	-	run tests/conformance/programs/lib/sinh.4.hum.imo --n 4
+lib.sinh.4.bin	-	run tests/conformance/programs/lib/sinh.4.hum.imo --n 4 --out bin
+lib.smith.1	-	run tests/conformance/programs/lib/smith.1.hum.imo --n 4
+lib.smith.2	-	run tests/conformance/programs/lib/smith.2.hum.imo --n 4
+lib.smith.2.spec	-	run tests/conformance/programs/lib/smith.2.hum.imo --n 4 --out spec
+lib.solve.1	-	run tests/conformance/programs/lib/solve.1.hum.imo --n 4
+lib.solve.2	-	run tests/conformance/programs/lib/solve.2.hum.imo --n 4
+lib.sort.1	-	run tests/conformance/programs/lib/sort.1.hum.imo --n 4
+lib.sort.2	-	run tests/conformance/programs/lib/sort.2.hum.imo --n 4
+lib.sort.3	-	run tests/conformance/programs/lib/sort.3.hum.imo --n 4
+lib.sort.3.spec	-	run tests/conformance/programs/lib/sort.3.hum.imo --n 4 --out spec
+lib.sort.4	-	run tests/conformance/programs/lib/sort.4.hum.imo --n 4
+lib.sort.5	-	run tests/conformance/programs/lib/sort.5.hum.imo --n 4
+lib.sort.6	-	run tests/conformance/programs/lib/sort.6.hum.imo --n 4
+lib.sort.6.bin	-	run tests/conformance/programs/lib/sort.6.hum.imo --n 4 --out bin
+lib.sqfree.1	-	run tests/conformance/programs/lib/sqfree.1.hum.imo --n 4
+lib.sqfree.2	-	run tests/conformance/programs/lib/sqfree.2.hum.imo --n 4
+lib.sqfree.2.spec	-	run tests/conformance/programs/lib/sqfree.2.hum.imo --n 4 --out spec
+lib.sqfree.3	-	run tests/conformance/programs/lib/sqfree.3.hum.imo --n 4
+lib.sqfree.4	-	run tests/conformance/programs/lib/sqfree.4.hum.imo --n 4
+lib.sqfreefactor.1	-	run tests/conformance/programs/lib/sqfreefactor.1.hum.imo --n 4
+lib.sqfreefactor.2	-	run tests/conformance/programs/lib/sqfreefactor.2.hum.imo --n 4
+lib.sqfreefactor.3	-	run tests/conformance/programs/lib/sqfreefactor.3.hum.imo --n 4
+lib.sqfreefactor.3.spec	-	run tests/conformance/programs/lib/sqfreefactor.3.hum.imo --n 4 --out spec
+lib.sqfreefactor.4	-	run tests/conformance/programs/lib/sqfreefactor.4.hum.imo --n 4
+lib.sqrt.1	-	run tests/conformance/programs/lib/sqrt.1.hum.imo --n 4
+lib.sqrt.2	-	run tests/conformance/programs/lib/sqrt.2.hum.imo --n 4
+lib.sqrt.2.bin	-	run tests/conformance/programs/lib/sqrt.2.hum.imo --n 4 --out bin
+lib.sqrt.3	-	run tests/conformance/programs/lib/sqrt.3.hum.imo --n 4
+lib.sqrt.4	-	run tests/conformance/programs/lib/sqrt.4.hum.imo --n 4
+lib.sqrt.4.spec	-	run tests/conformance/programs/lib/sqrt.4.hum.imo --n 4 --out spec
+lib.sqrtmod.1	-	run tests/conformance/programs/lib/sqrtmod.1.hum.imo --n 4
+lib.sqrtmod.2	-	run tests/conformance/programs/lib/sqrtmod.2.hum.imo --n 4
+lib.stabilizer.1	-	run tests/conformance/programs/lib/stabilizer.1.hum.imo --n 4
+lib.stabilizer.2	-	run tests/conformance/programs/lib/stabilizer.2.hum.imo --n 4
+lib.stirling1.1	-	run tests/conformance/programs/lib/stirling1.1.hum.imo --n 4
+lib.stirling1.1.spec	-	run tests/conformance/programs/lib/stirling1.1.hum.imo --n 4 --out spec
+lib.stirling1.2	-	run tests/conformance/programs/lib/stirling1.2.hum.imo --n 4
+lib.stirling2.1	-	run tests/conformance/programs/lib/stirling2.1.hum.imo --n 4
+lib.stirling2.2	-	run tests/conformance/programs/lib/stirling2.2.hum.imo --n 4
+lib.stirling2.2.bin	-	run tests/conformance/programs/lib/stirling2.2.hum.imo --n 4 --out bin
+lib.str.1	-	run tests/conformance/programs/lib/str.1.hum.imo --n 4
+lib.str.2	-	run tests/conformance/programs/lib/str.2.hum.imo --n 4
+lib.str.2.spec	-	run tests/conformance/programs/lib/str.2.hum.imo --n 4 --out spec
+lib.str.3	-	run tests/conformance/programs/lib/str.3.hum.imo --n 4
+lib.str.4	-	run tests/conformance/programs/lib/str.4.hum.imo --n 4
+lib.str.5	-	run tests/conformance/programs/lib/str.5.hum.imo --n 4
+lib.str.6	-	run tests/conformance/programs/lib/str.6.hum.imo --n 4
+lib.str.7	-	run tests/conformance/programs/lib/str.7.hum.imo --n 4
+lib.str.7.spec	-	run tests/conformance/programs/lib/str.7.hum.imo --n 4 --out spec
+lib.str.8	-	run tests/conformance/programs/lib/str.8.hum.imo --n 4
+lib.strnat.1	-	run tests/conformance/programs/lib/strnat.1.hum.imo --n 4
+lib.strnat.2	-	run tests/conformance/programs/lib/strnat.2.hum.imo --n 4
+lib.strnat.2.bin	-	run tests/conformance/programs/lib/strnat.2.hum.imo --n 4 --out bin
+lib.sturm.1	-	run tests/conformance/programs/lib/sturm.1.hum.imo --n 4
+lib.sturm.2	-	run tests/conformance/programs/lib/sturm.2.hum.imo --n 4
+lib.sturm.2.spec	-	run tests/conformance/programs/lib/sturm.2.hum.imo --n 4 --out spec
+lib.subgroups.1	-	run tests/conformance/programs/lib/subgroups.1.hum.imo --n 4
+lib.subgroups.2	-	run tests/conformance/programs/lib/subgroups.2.hum.imo --n 4
+lib.submod.1	-	run tests/conformance/programs/lib/submod.1.hum.imo --n 4
+lib.submod.2	-	run tests/conformance/programs/lib/submod.2.hum.imo --n 4
+lib.sumtwosquares.1	-	run tests/conformance/programs/lib/sumtwosquares.1.hum.imo --n 4
+lib.sumtwosquares.1.spec	-	run tests/conformance/programs/lib/sumtwosquares.1.hum.imo --n 4 --out spec
+lib.sumtwosquares.2	-	run tests/conformance/programs/lib/sumtwosquares.2.hum.imo --n 4
+lib.supp.1	-	run tests/conformance/programs/lib/supp.1.hum.imo --n 4
+lib.supp.2	-	run tests/conformance/programs/lib/supp.2.hum.imo --n 4
+lib.supp.2.bin	-	run tests/conformance/programs/lib/supp.2.hum.imo --n 4 --out bin
+lib.sylow.1	-	run tests/conformance/programs/lib/sylow.1.hum.imo --n 4
+lib.sylow.2	-	run tests/conformance/programs/lib/sylow.2.hum.imo --n 4
+lib.sylow.2.spec	-	run tests/conformance/programs/lib/sylow.2.hum.imo --n 4 --out spec
+lib.symgroup.2	-	run tests/conformance/programs/lib/symgroup.2.hum.imo --n 4
+lib.tan.1	-	run tests/conformance/programs/lib/tan.1.hum.imo --n 4
+lib.tan.2	-	run tests/conformance/programs/lib/tan.2.hum.imo --n 4
+lib.tan.4	-	run tests/conformance/programs/lib/tan.4.hum.imo --n 4
+lib.tanh.1	-	run tests/conformance/programs/lib/tanh.1.hum.imo --n 4
+lib.tanh.1.spec	-	run tests/conformance/programs/lib/tanh.1.hum.imo --n 4 --out spec
+lib.tanh.2	-	run tests/conformance/programs/lib/tanh.2.hum.imo --n 4
+lib.tanh.4	-	run tests/conformance/programs/lib/tanh.4.hum.imo --n 4
+lib.totatives.1	-	run tests/conformance/programs/lib/totatives.1.hum.imo --n 4
+lib.totatives.1.bin	-	run tests/conformance/programs/lib/totatives.1.hum.imo --n 4 --out bin
+lib.totatives.2	-	run tests/conformance/programs/lib/totatives.2.hum.imo --n 4
+lib.totient.1	-	run tests/conformance/programs/lib/totient.1.hum.imo --n 4
+lib.totient.1.spec	-	run tests/conformance/programs/lib/totient.1.hum.imo --n 4 --out spec
+lib.totient.2	-	run tests/conformance/programs/lib/totient.2.hum.imo --n 4
+lib.trace.1	-	run tests/conformance/programs/lib/trace.1.hum.imo --n 4
+lib.trace.2	-	run tests/conformance/programs/lib/trace.2.hum.imo --n 4
+lib.unitgroup.1	-	run tests/conformance/programs/lib/unitgroup.1.hum.imo --n 4
+lib.unitgroup.2	-	run tests/conformance/programs/lib/unitgroup.2.hum.imo --n 4
+lib.unitgroup.2.spec	-	run tests/conformance/programs/lib/unitgroup.2.hum.imo --n 4 --out spec
+lib.unitv.1	-	run tests/conformance/programs/lib/unitv.1.hum.imo --n 4
+lib.unitv.2	-	run tests/conformance/programs/lib/unitv.2.hum.imo --n 4
+lib.unlines.1	-	run tests/conformance/programs/lib/unlines.1.hum.imo --n 4
+lib.unlines.1.bin	-	run tests/conformance/programs/lib/unlines.1.hum.imo --n 4 --out bin
+lib.unlines.2	-	run tests/conformance/programs/lib/unlines.2.hum.imo --n 4
+lib.upto.1	-	run tests/conformance/programs/lib/upto.1.hum.imo --n 4
+lib.upto.1.spec	-	run tests/conformance/programs/lib/upto.1.hum.imo --n 4 --out spec
+lib.upto.2	-	run tests/conformance/programs/lib/upto.2.hum.imo --n 4
+lib.upto.3	-	run tests/conformance/programs/lib/upto.3.hum.imo --n 4
+lib.upto.4	-	run tests/conformance/programs/lib/upto.4.hum.imo --n 4
+lib.vadd.1	-	run tests/conformance/programs/lib/vadd.1.hum.imo --n 4
+lib.vadd.2	-	run tests/conformance/programs/lib/vadd.2.hum.imo --n 4
+lib.vadd.2.spec	-	run tests/conformance/programs/lib/vadd.2.hum.imo --n 4 --out spec
+lib.vneg.1	-	run tests/conformance/programs/lib/vneg.1.hum.imo --n 4
+lib.vneg.2	-	run tests/conformance/programs/lib/vneg.2.hum.imo --n 4
+lib.vnorm.1	-	run tests/conformance/programs/lib/vnorm.1.hum.imo --n 4
+lib.vnorm.1.bin	-	run tests/conformance/programs/lib/vnorm.1.hum.imo --n 4 --out bin
+lib.vnorm.2	-	run tests/conformance/programs/lib/vnorm.2.hum.imo --n 4
+lib.vnorm2.1	-	run tests/conformance/programs/lib/vnorm2.1.hum.imo --n 4
+lib.vnorm2.1.spec	-	run tests/conformance/programs/lib/vnorm2.1.hum.imo --n 4 --out spec
+lib.vnorm2.2	-	run tests/conformance/programs/lib/vnorm2.2.hum.imo --n 4
+lib.vscale.1	-	run tests/conformance/programs/lib/vscale.1.hum.imo --n 4
+lib.vscale.2	-	run tests/conformance/programs/lib/vscale.2.hum.imo --n 4
+lib.vsub.1	-	run tests/conformance/programs/lib/vsub.1.hum.imo --n 4
+lib.vsub.2	-	run tests/conformance/programs/lib/vsub.2.hum.imo --n 4
+lib.vsub.2.spec	-	run tests/conformance/programs/lib/vsub.2.hum.imo --n 4 --out spec
+lib.wilson.1	-	run tests/conformance/programs/lib/wilson.1.hum.imo --n 4
+lib.wilson.2	-	run tests/conformance/programs/lib/wilson.2.hum.imo --n 4
+lib.xor.1	-	run tests/conformance/programs/lib/xor.1.hum.imo --n 4
+lib.xor.1.bin	-	run tests/conformance/programs/lib/xor.1.hum.imo --n 4 --out bin
+lib.xor.2	-	run tests/conformance/programs/lib/xor.2.hum.imo --n 4
+lib.zeros.1	-	run tests/conformance/programs/lib/zeros.1.hum.imo --n 4
+lib.zeros.1.spec	-	run tests/conformance/programs/lib/zeros.1.hum.imo --n 4 --out spec
+lib.zeros.2	-	run tests/conformance/programs/lib/zeros.2.hum.imo --n 4
+lib.zeta.1	-	run tests/conformance/programs/lib/zeta.1.hum.imo --n 4
+lib.zeta.3	-	run tests/conformance/programs/lib/zeta.3.hum.imo --n 4
+lib.zeta.4	-	run tests/conformance/programs/lib/zeta.4.hum.imo --n 4
+lib.zetaeven.1	-	run tests/conformance/programs/lib/zetaeven.1.hum.imo --n 4
+lib.zetaeven.1.spec	-	run tests/conformance/programs/lib/zetaeven.1.hum.imo --n 4 --out spec
+lib.zetaeven.2	-	run tests/conformance/programs/lib/zetaeven.2.hum.imo --n 4
+lib.zideal.1	-	run tests/conformance/programs/lib/zideal.1.hum.imo --n 4
+lib.zideal.2	-	run tests/conformance/programs/lib/zideal.2.hum.imo --n 4
+lib.zideal.2.bin	-	run tests/conformance/programs/lib/zideal.2.hum.imo --n 4 --out bin
+lib.zideals.1	-	run tests/conformance/programs/lib/zideals.1.hum.imo --n 4
+lib.zideals.2	-	run tests/conformance/programs/lib/zideals.2.hum.imo --n 4
+lib.zideals.2.spec	-	run tests/conformance/programs/lib/zideals.2.hum.imo --n 4 --out spec
+lib.zidempotents.1	-	run tests/conformance/programs/lib/zidempotents.1.hum.imo --n 4
+lib.zidempotents.2	-	run tests/conformance/programs/lib/zidempotents.2.hum.imo --n 4
+lib.zmaxideals.1	-	run tests/conformance/programs/lib/zmaxideals.1.hum.imo --n 4
+lib.zmaxideals.2	-	run tests/conformance/programs/lib/zmaxideals.2.hum.imo --n 4
+lib.znilpotents.1	-	run tests/conformance/programs/lib/znilpotents.1.hum.imo --n 4
+lib.znilpotents.1.spec	-	run tests/conformance/programs/lib/znilpotents.1.hum.imo --n 4 --out spec
+lib.znilpotents.2	-	run tests/conformance/programs/lib/znilpotents.2.hum.imo --n 4
+lib.zprimeideals.1	-	run tests/conformance/programs/lib/zprimeideals.1.hum.imo --n 4
+lib.zprimeideals.2	-	run tests/conformance/programs/lib/zprimeideals.2.hum.imo --n 4
+lib.zprimeideals.2.bin	-	run tests/conformance/programs/lib/zprimeideals.2.hum.imo --n 4 --out bin
+lib.zunits.1	-	run tests/conformance/programs/lib/zunits.1.hum.imo --n 4
+lib.zunits.2	-	run tests/conformance/programs/lib/zunits.2.hum.imo --n 4
+lib.zunits.2.spec	-	run tests/conformance/programs/lib/zunits.2.hum.imo --n 4 --out spec
+lib.zzerodivisors.1	-	run tests/conformance/programs/lib/zzerodivisors.1.hum.imo --n 4
+lib.zzerodivisors.2	-	run tests/conformance/programs/lib/zzerodivisors.2.hum.imo --n 4

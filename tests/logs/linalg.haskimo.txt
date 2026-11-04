@@ -1,0 +1,24 @@
+core: Haskimo
+PASS  the test program (128 statements) passes the class checker — the matrix operators + - * ^ resolve without ambiguity [] 
+PASS  vsub, vneg, outer, hdot, vnorm2 
+PASS  proj(u, v) = (<v, u>/<v, v>) v  (0 for v = 0);  cross product of two 3-vectors 
+PASS  msub, mneg, mscale, hadamard, htranspose 
+PASS  kron, blockdiag, zeros, trace, mdiag, diagm 
+PASS  mpow: A^3, A^0 = I, A^-2 (a power of the inverse) 
+PASS  the operators of the human notation on matrices:  A + B,  A - B,  A * B,  2 * A,  A * v,  -A,  A ^ 3,  A ^ -1  (and scalars as before) 
+PASS  issymmetric, ishermitian, isunitary, isdiagonal, isupper, islower, isinvertible [] 
+PASS  rref (= the reduced echelon form), rank, nullspace (A x = 0, independent, dimension n - rank), colspace (the pivot columns), rowspace — 6 matrices incl. singular, rectangular, rank-deficient [] 
+PASS  det, adjugate (A adj(A) = det(A) I), charpoly (= Faddeev-LeVerrier, annihilates A), minpoly (monic, annihilates A, of least degree) — 4 matrices [] 
+PASS  minor, cofactor (sign (-1)^(i+j)) 
+PASS  eigenvals: diag-like [2,2,3] -> (2, 2), (3, 1);  rotation by 90 deg -> -i, i;  [[2,1],[1,2]] -> 1, 3;  [[0,2],[1,0]] (eigenvalues +-sqrt 2) has none in Q(i) 
+PASS  eigvecs: A x = lambda x, independent, of the right dimension (geometric multiplicity 2 for lambda = 2 of [2,2,3] ...) 
+PASS  eigvals (numerical, lazy, element n within 2^-n): +-sqrt 2 for [[0,2],[1,0]], 1 and 3 for [[2,1],[1,2]] 
+PASS  linsolve: a unique solution (A x = b, no kernel); a consistent singular system (particular solution + kernel basis); an inconsistent one; an under-determined rectangular one 
+PASS  lu: P A = L U with P a permutation matrix, L unit lower triangular, U upper triangular — including a zero leading pivot, a singular matrix and a matrix with a zero first column [] 
+PASS  gramschmidt: orthogonal vectors, no zero vector, the same span (the dependent fourth vector is dropped) 
+PASS  pinv: the four Penrose equations A A+ A = A, A+ A A+ = A+, (A A+)^H = A A+, (A+ A)^H = A+ A — wide, tall, rank-deficient, singular, invertible [] 
+PASS  lstsq: the residual b - A x is orthogonal to the columns of A (normal equations A^H (b - A x) = 0) 
+PASS  smith: the invariant factors of integer matrices agree with an independent row/column reduction [[2, 6, 12], [1, 6], [1, 3], [], [2, 8]] 
+PASS  matexp: element n of e^A is the exact partial sum A^0/0! + ... + A^n/n! (A = rotation generator) 
+
+21/21 passed  (22.8s)

@@ -1,0 +1,9 @@
+⍝ lib/bounded.imo — spec notation — trusted prelude, part 4: bounded quantifiers over lists (unbounded quantifiers are not decidable and are not provided)
+∀ₗ ∶ (α → 𝔹) → 𝔏 α → 𝔹
+∀ₗ ξ η ≔ (η (ζ ω ↦ (∧ (ξ ζ) (∀ₗ ξ ω))) ⊤)
+∃ₗ ∶ (α → 𝔹) → 𝔏 α → 𝔹
+∃ₗ ξ η ≔ (η (ζ ω ↦ (∨ (ξ ζ) (∃ₗ ξ ω))) ⊥)
+⍳′ ∶ ℕ → ℕ → 𝔏 ℕ
+⍳′ ξ η ≔ ((⩾ η ξ) ⊘ (∷ η (⍳′ ξ (⊞ η 1))))
+⍳ ∶ ℕ → 𝔏 ℕ
+⍳ ξ ≔ (⍳′ ξ 0)

@@ -1,0 +1,10 @@
+⍝ lib/analysis.imo — spec notation — trusted prelude, part 5: the first analytic functions, each defined by its power series through Σ
+exp ∶ ℚ → ℝ
+exp ∶ ℚ[i] → ℝ[i]
+exp ξ ≔ (Σ 1 (ς ↦ (÷ ξ ς)))
+sin ∶ ℚ → ℝ
+sin ∶ ℚ[i] → ℝ[i]
+sin ξ ≔ (Σ ξ (ς ↦ (÷ (⊖ (⊠ ξ ξ)) (⊠ (⊠ 1100 ς) (⊞ (⊠ 1100 ς) 1)))))
+cos ∶ ℚ → ℝ
+cos ∶ ℚ[i] → ℝ[i]
+cos ξ ≔ (Σ 1 (ς ↦ (÷ (⊖ (⊠ ξ ξ)) (⊠ (⊞ (⊠ 1100 ς) 11101) (⊠ 1100 ς)))))

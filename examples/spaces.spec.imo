@@ -1,0 +1,5 @@
+⍝ examples/spaces.spec.imo — two vectors of the sequence space (functions ℚ[i] → ℚ[i], indexed by n = 0, 1, 2, …)
+ϝ ∶ ℚ[i] → ℚ[i]
+ϝ ξ ≔ (÷ 1 (⊞ ξ 1))
+ϛ ∶ ℚ[i] → ℚ[i]
+ϛ ξ ≔ (÷ 1 (⊞ ξ 1100))

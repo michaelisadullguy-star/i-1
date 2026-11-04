@@ -1,0 +1,1 @@
+main in Stream(\QQ) := lgamma(3/4)

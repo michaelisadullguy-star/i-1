@@ -1,0 +1,1 @@
+main in List(List(\QQ)) := algneg([3/4, -5/2, 7/3])

@@ -1,0 +1,1 @@
+main in Pair(List(\NN), List(\NN)) := fpdivmod(12, [9, -2, 6], [6, -3, -7])

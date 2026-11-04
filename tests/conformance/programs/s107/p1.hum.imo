@@ -1,0 +1,3 @@
+b in \RR
+a in \RR
+main in List(Prop) := [b + a == 3 and b - a == 1]

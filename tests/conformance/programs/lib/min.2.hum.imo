@@ -1,0 +1,1 @@
+main in \NN := min(5, 3)

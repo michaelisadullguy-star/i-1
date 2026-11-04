@@ -1,0 +1,1 @@
+main in Stream(\QQ) := hypot(-5/2, 1/6)

@@ -1,0 +1,1 @@
+main in \Z := parsebits(['z', 'Q', '7'])

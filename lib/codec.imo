@@ -1,0 +1,61 @@
+⍝ lib/codec.imo — spec notation — trusted prelude, part 22: types as decoding keys
+⍝ A value is stored as a binary string, the digits of a Gaussian integer in base i − 1, and its CLASS (its type) is the key that decodes it:
+⍝   110101 ∈ ℤ[i]   is  1 − 6i          110101 ∈ ℤ²   is the pair (1, −6) — the Gaussian integer a + b·i stands for the pair (a, b)
+⍝   110101 ∈ ℚ read as a fraction is  1/(−6)        a pair of strings is the Gaussian integer a + b·i with a, b the codes of the strings
+⍝ The classes are erased at run time, so the string is the same; the class chosen by an ascription (`x in \ZZ2`) selects the decoder.  A binary string
+⍝ decodes under every key (the decoding is total); what each key can ENCODE is listed with the key.  Helpers end in _cd.
+ℤ² ∶ 𝒦
+𝕊² ∶ 𝒦
+asz2 ∶ ℤ[i] → ℤ²      ⍝ the key ℤ²: a Gaussian integer a + b·i read as the pair (a, b) — the identity on the string (an automatic coercion, cost 1)
+asz2 ξ ≔ ξ
+asstr2 ∶ ℤ[i] → 𝕊²      ⍝ the key String²: a Gaussian integer read as a pair of strings — the identity on the string (an automatic coercion, cost 1)
+asstr2 ξ ≔ ξ
+(↪ asz2)
+(↪ asstr2)
+⍝ ---- ordered pairs of integers: (a, b) is the Gaussian integer a + b·i; the operations are those of the Gaussian integers
+pairz ∶ ℤ → ℤ → ℤ²      ⍝ pairz(a, b): the ordered pair (a, b) of integers, stored as the Gaussian integer a + b·i
+pairz ξ η ≔ (⊞ ξ (⊠ 11 η))
+fstz ∶ ℤ² → ℤ      ⍝ the first component a of the pair (a, b) = a + b·i: the real part
+fstz ξ ≔ (ℜ ξ)
+sndz ∶ ℤ² → ℤ      ⍝ the second component b: the imaginary part
+sndz ξ ≔ (ℑ ξ)
+addz2 ∶ ℤ² → ℤ² → ℤ²      ⍝ (a, b) + (c, d) = (a + c, b + d): the sum of the Gaussian integers
+addz2 ξ η ≔ (⊞ ξ η)
+subz2 ∶ ℤ² → ℤ² → ℤ²      ⍝ (a, b) − (c, d)
+subz2 ξ η ≔ (⊟ ξ η)
+negz2 ∶ ℤ² → ℤ²      ⍝ −(a, b)
+negz2 ξ ≔ (⊖ ξ)
+scalez2 ∶ ℤ → ℤ² → ℤ²      ⍝ k·(a, b) = (k a, k b): an integer times the Gaussian integer
+scalez2 ξ η ≔ (⊠ ξ η)
+eqz2 ∶ ℤ² → ℤ² → 𝔹      ⍝ (a, b) = (c, d)
+eqz2 ξ η ≔ (≐ ξ η)
+gaussian ∶ ℤ² → ℤ[i]      ⍝ the same binary string read as the Gaussian integer (the identity: the key changes, the string does not)
+gaussian ∶ 𝕊² → ℤ[i]
+gaussian ξ ≔ ξ
+⍝ ---- a pair (p, q) of integers as a fraction
+fracz ∶ ℤ² → ℚ      ⍝ the pair (a, b) decoded as the fraction a/b (0 for b = 0, as x ÷ 0 = 0)
+fracz ξ ≔ (÷ (ℜ ξ) (ℑ ξ))
+qpair ∶ ℚ → ℤ²      ⍝ the rational p/q in lowest terms with q > 0 encoded as the pair (p, q); fracz (qpair x) = x
+qpair ξ ≔ (pairz (numer ξ) (denom ξ))
+⍝ ---- strings as natural numbers: bijective numeration over the alphabet of the 1114112 code points, s = c₁ … cₖ ↦ Σ (cⱼ + 1)·Bᵏ⁻ʲ with B = 1114112
+⍝ (the empty string is 0, "\u0000" is 1, …): a bijection String ↔ ℕ
+strnat ∶ 𝕊 → ℕ      ⍝ the natural number that codes a string (bijective base 1114112; "" is 0)
+strnat ξ ≔ (foldl (a c ↦ (⊞ (⊠ a 10000000100000000000000000000000000000000) (⊞ c 1))) 0 ξ)
+natstr ∶ ℕ → 𝕊      ⍝ the string coded by a natural number (the inverse of strnat); the absolute value of an integer is taken first by strfst / strsnd
+natstr ξ ≔ ((≐ ξ 0) ⊥ ((qr ↦ (⧺ (natstr (⊗ (⊡ (◀ qr)) (◀ 1))) (∷ (chr (⊗ (⊡ (▶ qr)) (◀ 1))) ⊥))) (⫽ᶻ (↓ᶻ (⊟ ξ 1)) (◀ 10000000100000000000000000000000000000000))))
+⍝ ---- pairs of strings: the Gaussian integer a + b·i with a, b the codes of the two strings
+strpair ∶ 𝕊 → 𝕊 → 𝕊²      ⍝ strpair(s, t): the pair of strings (s, t) stored as one binary string, the Gaussian integer strnat(s) + strnat(t)·i
+strpair ξ η ≔ (pairz (strnat ξ) (strnat η))
+strfst ∶ 𝕊² → 𝕊      ⍝ the first string of a pair: the string coded by |real part|
+strfst ξ ≔ (natstr (abs (ℜ ξ)))
+strsnd ∶ 𝕊² → 𝕊      ⍝ the second string of a pair: the string coded by |imaginary part|
+strsnd ξ ≔ (natstr (abs (ℑ ξ)))
+⍝ ---- decoders, one per key: the human name `decode` takes the one that fits the class
+showz ∶ ℤ[i] → 𝕊      ⍝ the default key: a Gaussian integer as text, 1 - 6*i (an unascribed binary string is a Gaussian integer)
+showz ξ ≔ (showc ξ)
+showz2 ∶ ℤ² → 𝕊      ⍝ the pair as text:  (1, -6)
+showz2 ξ ≔ (⧺ "(" (⧺ (dec (ℜ ξ)) (⧺ ", " (⧺ (dec (ℑ ξ)) ")"))))
+showstr2 ∶ 𝕊² → 𝕊      ⍝ a pair of strings as text, each in double quotes (no escapes):  ("Hello, world!", "Welcome to i - 1!")
+showstr2 ξ ≔ (⧺ "(" (⧺ (∷ (chr 110000001100) (⧺ (strfst ξ) (∷ (chr 110000001100) ⊥))) (⧺ ", " (⧺ (∷ (chr 110000001100) (⧺ (strsnd ξ) (∷ (chr 110000001100) ⊥))) ")"))))
+parsebits ∶ 𝕊 → ℤ[i]      ⍝ the Gaussian integer written by a string of 1 and 0 (most significant digit first; `bits` is the inverse): "110101" is 1 − 6i
+parsebits ξ ≔ (⊗ (⊡ (reverse (⫶ (c ↦ (≐ c '1')) ξ))) (◀ 1))

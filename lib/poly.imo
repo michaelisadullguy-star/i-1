@@ -1,0 +1,701 @@
+⍝ lib/poly.imo — spec notation — trusted prelude, part 13: polynomials in one indeterminate over ℚ[i] (coefficient lists, lowest degree first)
+⍝ A polynomial is the list of its coefficients, lowest degree first: 3 + 2x² is [3, 0, 2].  Canonical form: every coefficient in the
+⍝ canonical form ⊜ and no trailing zero coefficient; the zero polynomial is the empty list.  Every public function accepts any list
+⍝ (non-canonical coefficients, trailing zeros) and returns canonical polynomials.  Overloads on 𝔏 ℤ, 𝔏 ℚ, 𝔏 ℤ[i] keep the class of the
+⍝ input where the operation preserves it.  Everything is computed here, on base-(i−1) digit strings; helpers end in _pl.
+ℚ[i][x] ∶ 𝒦      ⍝ polynomials over ℚ[i]: a polynomial is its coefficient list, lowest degree first, without trailing zeros
+(≣ ℚ[i][x] (𝔏 ℚ[i]))
+⍝ ---- coefficients.  cn_pl is ⊜ made cheaper for the usual case of a real denominator ν: the value is (ω/g)/(ν/g) with
+⍝ g = gcd(Re ω, Im ω, ν) and the sign of ν moved to the numerator — the same digit strings as ⊜ (one gcd chain, no conjugate products)
+cn_pl ∶ ℚ[i] → ℚ[i]
+cn_pl ξ ≔ ((ω ν ↦ ((realᶻ ν) ((ϕ ↦ ((⋚ʳ ν) (⊗ (⊡ (⊖ᶻ (◀ ϕ))) (⊡ (⊖ᶻ (▶ ϕ)))) ϕ ϕ)) ((χ ↦ (⊗ (⊡ (÷ᶻ ω χ)) (⊡ (÷ᶻ ν χ)))) ((realᶻ ω) (gcdᶻ ω ν) (gcdᶻ (gcdᶻ (ℜᶻ ω) (ℑᶻ ω)) ν)))) (⊜ ξ))) (◀ ξ) (▶ ξ))
+⍝ zero test (any form), negation of a canonical value (canonical), "is real" for a canonical value
+z_pl ∶ ℚ[i] → 𝔹
+z_pl ξ ≔ (∅ᶻ (◀ ξ))
+ng_pl ∶ ℚ[i] → ℚ[i]
+ng_pl ξ ≔ (⊗ (⊡ (⊖ᶻ (◀ ξ))) (▶ ξ))
+rl_pl ∶ ℚ[i] → 𝔹
+rl_pl ξ ≔ (realᶻ (◀ ξ))
+⍝ the sign of a real value whose numerator and denominator are real digit strings (no multiplication), and the sign as −1, 0, 1
+sg_pl ∶ ℚ → 𝔒
+sg_pl ξ ≔ ((θ ↦ ((⋚ʳ (▶ ξ)) (θ ⋗ ≖ ⋖) ≖ θ)) (⋚ʳ (◀ ξ)))
+sgn_pl ∶ 𝔒 → ℤ
+sgn_pl ξ ≔ (ξ 11101 0 1)
+⍝ ---- lists of coefficients
+trim_pl ∶ 𝔏 ℚ[i] → 𝔏 ℚ[i]
+trim_pl ξ ≔ (foldr (θ ι ↦ ((∧ (∅ ι) (z_pl θ)) ⊥ (∷ θ ι))) ⊥ ξ)
+poly ∶ 𝔏 ℤ → 𝔏 ℤ      ⍝ the canonical form of a polynomial: every coefficient canonical (⊜), trailing zeros removed
+poly ∶ 𝔏 ℚ → 𝔏 ℚ
+poly ∶ 𝔏 ℤ[i] → 𝔏 ℤ[i]
+poly ∶ ℚ[i][x] → ℚ[i][x]
+poly ξ ≔ (foldr (θ ι ↦ ((∧ (∅ ι) (z_pl θ)) ⊥ (∷ (cn_pl θ) ι))) ⊥ ξ)
+⍝ the constant polynomial c, x·p, length parity (true for an odd length, i.e. an even degree), degree of a canonical polynomial
+cp_pl ∶ ℚ[i] → 𝔏 ℚ[i]
+cp_pl ξ ≔ ((z_pl ξ) ⊥ (∷ ξ ⊥))
+xm_pl ∶ 𝔏 ℚ[i] → 𝔏 ℚ[i]
+xm_pl ξ ≔ ((∅ ξ) ⊥ (∷ 0 ξ))
+ol_pl ∶ 𝔏 α → 𝔹
+ol_pl ξ ≔ (ξ (θ ι ↦ (¬ (ol_pl ι))) ⊥)
+dg_pl ∶ 𝔏 ℚ[i] → ℤ
+dg_pl ξ ≔ (⊟ (ℓ ξ) 1)
+⍝ drop as many elements of η as ξ has
+dropl_pl ∶ 𝔏 α → 𝔏 β → 𝔏 β
+dropl_pl ξ η ≔ (ξ (θ ι ↦ (dropl_pl ι (⌄ η))) η)
+⍝ ---- ring operations on canonical polynomials (ad_pl: zip-longest sum with canonical coefficients; adr_pl: the same without ⊜)
+ad_pl ∶ 𝔏 ℚ[i] → 𝔏 ℚ[i] → 𝔏 ℚ[i]
+ad_pl ξ η ≔ (ξ (θ ι ↦ (η (θ′ ι′ ↦ (∷ (cn_pl (⊞ θ θ′)) (ad_pl ι ι′))) ξ)) η)
+adr_pl ∶ 𝔏 ℚ[i] → 𝔏 ℚ[i] → 𝔏 ℚ[i]
+adr_pl ξ η ≔ (ξ (θ ι ↦ (η (θ′ ι′ ↦ (∷ (⊞ θ θ′) (adr_pl ι ι′))) ξ)) η)
+add_pl ∶ 𝔏 ℚ[i] → 𝔏 ℚ[i] → 𝔏 ℚ[i]
+add_pl ξ η ≔ (trim_pl (ad_pl ξ η))
+neg_pl ∶ 𝔏 ℚ[i] → 𝔏 ℚ[i]
+neg_pl ξ ≔ (⫶ ng_pl ξ)
+sub_pl ∶ 𝔏 ℚ[i] → 𝔏 ℚ[i] → 𝔏 ℚ[i]
+sub_pl ξ η ≔ (add_pl ξ (neg_pl η))
+scl_pl ∶ ℚ[i] → 𝔏 ℚ[i] → 𝔏 ℚ[i]
+scl_pl ξ η ≔ ((z_pl ξ) ⊥ (⫶ (θ ↦ (cn_pl (⊠ ξ θ))) η))
+⍝ schoolbook product without reduction (one ⊜ per coefficient at the end, in mul_pl)
+mlr_pl ∶ 𝔏 ℚ[i] → 𝔏 ℚ[i] → 𝔏 ℚ[i]
+mlr_pl ξ η ≔ (ξ (θ ι ↦ ((z_pl θ) (∷ 0 (mlr_pl ι η)) (adr_pl (⫶ (⊠ θ) η) (∷ 0 (mlr_pl ι η))))) ⊥)
+mul_pl ∶ 𝔏 ℚ[i] → 𝔏 ℚ[i] → 𝔏 ℚ[i]
+mul_pl ξ η ≔ ((∨ (∅ ξ) (∅ η)) ⊥ (poly (mlr_pl ξ η)))
+⍝ long division on highest-first lists: σ counts the steps, ρ is the running remainder, η the divisor without its leading
+⍝ coefficient, ζ = 1 / lc;  fs_pl A B c = A − c·B on the first ℓ(B) entries
+fs_pl ∶ 𝔏 ℚ[i] → 𝔏 ℚ[i] → ℚ[i] → 𝔏 ℚ[i]
+fs_pl ξ η ζ ≔ (ξ (θ ι ↦ (η (θ′ ι′ ↦ (∷ (cn_pl (⊟ θ (⊠ ζ θ′))) (fs_pl ι ι′ ζ))) ξ)) ⊥)
+dv_pl ∶ 𝔏 ℚ[i] → 𝔏 ℚ[i] → 𝔏 ℚ[i] → ℚ[i] → 𝔓 (𝔏 ℚ[i]) (𝔏 ℚ[i])
+dv_pl σ ρ η ζ ≔ (σ (θ σ′ ↦ ((χ ↦ ((τ ↦ (⊗ (∷ χ (◀ τ)) (▶ τ))) (dv_pl σ′ ((z_pl χ) (⌄ ρ) (fs_pl (⌄ ρ) η χ)) η ζ))) (cn_pl (⊠ (hd ρ) ζ)))) (⊗ ⊥ ρ))
+⍝ quotient and remainder of canonical ξ by canonical η ≠ 0
+dvm_pl ∶ 𝔏 ℚ[i] → 𝔏 ℚ[i] → 𝔓 (𝔏 ℚ[i]) (𝔏 ℚ[i])
+dvm_pl ξ η ≔ ((ρ σ ↦ ((τ ↦ (⊗ (reverse (◀ τ)) (trim_pl (reverse (▶ τ))))) (dv_pl (dropl_pl (⌄ σ) ρ) ρ (⌄ σ) (cn_pl (÷ 1 (hd σ)))))) (reverse ξ) (reverse η))
+quo_pl ∶ 𝔏 ℚ[i] → 𝔏 ℚ[i] → 𝔏 ℚ[i]
+quo_pl ξ η ≔ (◀ (dvm_pl ξ η))
+rem_pl ∶ 𝔏 ℚ[i] → 𝔏 ℚ[i] → 𝔏 ℚ[i]
+rem_pl ξ η ≔ (▶ (dvm_pl ξ η))
+⍝ monic multiple (0 stays 0), derivative, Horner evaluation (no reduction)
+mon_pl ∶ 𝔏 ℚ[i] → 𝔏 ℚ[i]
+mon_pl ξ ≔ ((∅ ξ) ⊥ ((θ ↦ ((≐ θ 1) ξ (scl_pl (cn_pl (÷ 1 θ)) ξ))) (last ξ)))
+gcd_pl ∶ 𝔏 ℚ[i] → 𝔏 ℚ[i] → 𝔏 ℚ[i]
+dr_pl ∶ 𝔏 ℚ[i] → ℚ[i] → 𝔏 ℚ[i]
+dr_pl ξ κ ≔ (ξ (θ ι ↦ (∷ (cn_pl (⊠ κ θ)) (dr_pl ι (⊞ κ 1)))) ⊥)
+der_pl ∶ 𝔏 ℚ[i] → 𝔏 ℚ[i]
+der_pl ξ ≔ (dr_pl (⌄ ξ) 1)
+ev_pl ∶ 𝔏 ℚ[i] → ℚ[i] → ℚ[i]
+ev_pl ξ η ≔ (ξ (θ ι ↦ ((∅ ι) θ (⊞ θ (⊠ η (ev_pl ι η))))) 0)
+cmp_pl ∶ 𝔏 ℚ[i] → 𝔏 ℚ[i] → 𝔏 ℚ[i]
+cmp_pl ξ η ≔ (foldr (θ ι ↦ (add_pl (cp_pl θ) (mul_pl η ι))) ⊥ ξ)
+⍝ pⁿ by squaring on the digits of n (odd ⇔ last digit 1), and pⁿ mod m
+pw_pl ∶ 𝔏 ℚ[i] → 𝔇 → 𝔏 ℚ[i]
+pw_pl ξ ν ≔ ((∅ᶻ ν) (∷ 1 ⊥) ((⌃ ν) (mul_pl ξ (pw_pl ξ (⊟ᶻ ν (◀ 1)))) ((θ ↦ (mul_pl θ θ)) (pw_pl ξ (⊡ (½ᶻ ν))))))
+rm_pl ∶ 𝔏 ℚ[i] → 𝔏 ℚ[i] → 𝔏 ℚ[i]
+rm_pl ξ μ ≔ ((∅ μ) ξ (rem_pl ξ μ))
+pwm_pl ∶ 𝔏 ℚ[i] → 𝔇 → 𝔏 ℚ[i] → 𝔏 ℚ[i]
+pwm_pl ξ ν μ ≔ ((∅ᶻ ν) (rm_pl (∷ 1 ⊥) μ) ((⌃ ν) (rm_pl (mul_pl ξ (pwm_pl ξ (⊟ᶻ ν (◀ 1)) μ)) μ) ((θ ↦ (rm_pl (mul_pl θ θ) μ)) (pwm_pl ξ (⊡ (½ᶻ ν)) μ))))
+⍝ ---- public: construction, access, ring operations
+deg ∶ ℚ[i][x] → ℤ      ⍝ the degree (the zero polynomial has degree −1)
+deg ξ ≔ (dg_pl (trim_pl ξ))
+lc ∶ 𝔏 ℤ → ℤ      ⍝ the leading coefficient (0 for the zero polynomial)
+lc ∶ 𝔏 ℚ → ℚ
+lc ∶ 𝔏 ℤ[i] → ℤ[i]
+lc ∶ ℚ[i][x] → ℚ[i]
+lc ξ ≔ ((θ ↦ ((∅ θ) 0 (cn_pl (last θ)))) (trim_pl ξ))
+coeff ∶ 𝔏 ℤ → ℕ → ℤ      ⍝ coeff(p, k): the coefficient of xᵏ (0 beyond the degree)
+coeff ∶ 𝔏 ℚ → ℕ → ℚ
+coeff ∶ 𝔏 ℤ[i] → ℕ → ℤ[i]
+coeff ∶ ℚ[i][x] → ℕ → ℚ[i]
+coeff ξ κ ≔ ((θ ↦ ((∅ θ) 0 (cn_pl (hd θ)))) (drop κ ξ))
+polyx ∶ 𝔏 ℤ      ⍝ the polynomial x
+polyx ≔ (∷ 0 (∷ 1 ⊥))
+monomial ∶ ℤ → ℕ → 𝔏 ℤ      ⍝ monomial(c, n) = c·xⁿ
+monomial ∶ ℚ → ℕ → 𝔏 ℚ
+monomial ∶ ℤ[i] → ℕ → 𝔏 ℤ[i]
+monomial ∶ ℚ[i] → ℕ → ℚ[i][x]
+monomial ξ κ ≔ ((z_pl ξ) ⊥ (⧺ (replicate κ 0) (∷ (cn_pl ξ) ⊥)))
+polyadd ∶ 𝔏 ℤ → 𝔏 ℤ → 𝔏 ℤ      ⍝ sum of two polynomials
+polyadd ∶ 𝔏 ℚ → 𝔏 ℚ → 𝔏 ℚ
+polyadd ∶ 𝔏 ℤ[i] → 𝔏 ℤ[i] → 𝔏 ℤ[i]
+polyadd ∶ ℚ[i][x] → ℚ[i][x] → ℚ[i][x]
+polyadd ξ η ≔ (poly (adr_pl ξ η))
+polysub ∶ 𝔏 ℤ → 𝔏 ℤ → 𝔏 ℤ      ⍝ difference of two polynomials
+polysub ∶ 𝔏 ℚ → 𝔏 ℚ → 𝔏 ℚ
+polysub ∶ 𝔏 ℤ[i] → 𝔏 ℤ[i] → 𝔏 ℤ[i]
+polysub ∶ ℚ[i][x] → ℚ[i][x] → ℚ[i][x]
+polysub ξ η ≔ (poly (adr_pl ξ (⫶ ⊖ η)))
+polyneg ∶ 𝔏 ℤ → 𝔏 ℤ      ⍝ negated polynomial
+polyneg ∶ 𝔏 ℚ → 𝔏 ℚ
+polyneg ∶ 𝔏 ℤ[i] → 𝔏 ℤ[i]
+polyneg ∶ ℚ[i][x] → ℚ[i][x]
+polyneg ξ ≔ (poly (⫶ ⊖ ξ))
+polyscale ∶ ℤ → 𝔏 ℤ → 𝔏 ℤ      ⍝ polyscale(c, p) = c·p
+polyscale ∶ ℚ → 𝔏 ℚ → 𝔏 ℚ
+polyscale ∶ ℤ[i] → 𝔏 ℤ[i] → 𝔏 ℤ[i]
+polyscale ∶ ℚ[i] → ℚ[i][x] → ℚ[i][x]
+polyscale ξ η ≔ (poly (⫶ (θ ↦ (⊠ ξ θ)) η))
+polymul ∶ 𝔏 ℤ → 𝔏 ℤ → 𝔏 ℤ      ⍝ product of two polynomials (schoolbook, one reduction per coefficient)
+polymul ∶ 𝔏 ℚ → 𝔏 ℚ → 𝔏 ℚ
+polymul ∶ 𝔏 ℤ[i] → 𝔏 ℤ[i] → 𝔏 ℤ[i]
+polymul ∶ ℚ[i][x] → ℚ[i][x] → ℚ[i][x]
+polymul ξ η ≔ (poly (mlr_pl ξ η))
+polypow ∶ 𝔏 ℤ → ℕ → 𝔏 ℤ      ⍝ polypow(p, n) = pⁿ (by squaring; p⁰ = 1)
+polypow ∶ 𝔏 ℚ → ℕ → 𝔏 ℚ
+polypow ∶ 𝔏 ℤ[i] → ℕ → 𝔏 ℤ[i]
+polypow ∶ ℚ[i][x] → ℕ → ℚ[i][x]
+polypow ξ ν ≔ (pw_pl (poly ξ) (↓ᶻ ν))
+polydivmod ∶ 𝔏 ℚ → 𝔏 ℚ → 𝔓 (𝔏 ℚ) (𝔏 ℚ)      ⍝ polydivmod(p, q) = (quotient, remainder), deg r < deg q;  polydivmod(p, 0) = (0, p)
+polydivmod ∶ ℚ[i][x] → ℚ[i][x] → 𝔓 ℚ[i][x] ℚ[i][x]
+polydivmod ξ η ≔ ((θ ι ↦ ((∅ ι) (⊗ ⊥ θ) (dvm_pl θ ι))) (poly ξ) (poly η))
+polyquo ∶ 𝔏 ℚ → 𝔏 ℚ → 𝔏 ℚ      ⍝ quotient of the division with remainder (0 for division by 0)
+polyquo ∶ ℚ[i][x] → ℚ[i][x] → ℚ[i][x]
+polyquo ξ η ≔ (◀ (polydivmod ξ η))
+polyrem ∶ 𝔏 ℚ → 𝔏 ℚ → 𝔏 ℚ      ⍝ remainder of the division with remainder (p itself for division by 0)
+polyrem ∶ ℚ[i][x] → ℚ[i][x] → ℚ[i][x]
+polyrem ξ η ≔ (▶ (polydivmod ξ η))
+polypowmod ∶ 𝔏 ℚ → ℕ → 𝔏 ℚ → 𝔏 ℚ      ⍝ polypowmod(p, n, m) = pⁿ mod m (squaring, reduced at every step; m = 0: pⁿ)
+polypowmod ∶ ℚ[i][x] → ℕ → ℚ[i][x] → ℚ[i][x]
+polypowmod ξ ν μ ≔ ((θ ↦ (pwm_pl (rm_pl (poly ξ) θ) (↓ᶻ ν) θ)) (poly μ))
+polyeq ∶ ℚ[i][x] → ℚ[i][x] → 𝔹      ⍝ equality of polynomials (as values: trailing zeros and non-canonical coefficients do not matter)
+polyeq ξ η ≔ (∀ₗ z_pl (adr_pl ξ (⫶ ⊖ η)))
+⍝ ---- evaluation, composition, calculus, conjugation
+polyeval ∶ 𝔏 ℕ → ℕ → ℕ      ⍝ polyeval(p, z) = p(z) by Horner's rule
+polyeval ∶ 𝔏 ℤ → ℤ → ℤ
+polyeval ∶ 𝔏 ℚ → ℚ → ℚ
+polyeval ∶ 𝔏 ℤ[i] → ℤ[i] → ℤ[i]
+polyeval ∶ ℚ[i][x] → ℚ[i] → ℚ[i]
+polyeval ξ ζ ≔ (cn_pl (ev_pl ξ ζ))
+polyevalmany ∶ 𝔏 ℚ → 𝔏 ℚ → 𝔏 ℚ      ⍝ polyevalmany(p, zs) = the list of the values p(z) (Horner at every point)
+polyevalmany ∶ ℚ[i][x] → 𝔏 ℚ[i] → 𝔏 ℚ[i]
+polyevalmany ξ η ≔ (⫶ (θ ↦ (cn_pl (ev_pl ξ θ))) η)
+polyevalR ∶ 𝔏 ℚ → ℝ → ℝ      ⍝ polyevalR(p, x) for a lazy x: pointwise, element n is p(xₙ) (it converges to p(x); |p(xₙ) − p(x)| ≤ L·|xₙ − x|)
+polyevalR ∶ ℚ[i][x] → ℝ[i] → ℝ[i]
+polyevalR ξ ζ ≔ ((θ ↦ (⫶ (ι ↦ (ev_pl θ ι)) ζ)) (poly ξ))
+polycompose ∶ 𝔏 ℤ → 𝔏 ℤ → 𝔏 ℤ      ⍝ polycompose(p, q) = p(q(x)) (Horner in polynomials)
+polycompose ∶ 𝔏 ℚ → 𝔏 ℚ → 𝔏 ℚ
+polycompose ∶ 𝔏 ℤ[i] → 𝔏 ℤ[i] → 𝔏 ℤ[i]
+polycompose ∶ ℚ[i][x] → ℚ[i][x] → ℚ[i][x]
+polycompose ξ η ≔ (cmp_pl (poly ξ) (poly η))
+polyshift ∶ 𝔏 ℤ → ℤ → 𝔏 ℤ      ⍝ polyshift(p, a) = p(x + a)
+polyshift ∶ 𝔏 ℚ → ℚ → 𝔏 ℚ
+polyshift ∶ 𝔏 ℤ[i] → ℤ[i] → 𝔏 ℤ[i]
+polyshift ∶ ℚ[i][x] → ℚ[i] → ℚ[i][x]
+polyshift ξ ζ ≔ (cmp_pl (poly ξ) (poly (∷ ζ (∷ 1 ⊥))))
+polyderiv ∶ 𝔏 ℤ → 𝔏 ℤ      ⍝ the derivative
+polyderiv ∶ 𝔏 ℚ → 𝔏 ℚ
+polyderiv ∶ 𝔏 ℤ[i] → 𝔏 ℤ[i]
+polyderiv ∶ ℚ[i][x] → ℚ[i][x]
+polyderiv ξ ≔ (der_pl (poly ξ))
+ig_pl ∶ 𝔏 ℚ[i] → ℚ[i] → 𝔏 ℚ[i]
+ig_pl ξ κ ≔ (ξ (θ ι ↦ (∷ (cn_pl (÷ θ κ)) (ig_pl ι (⊞ κ 1)))) ⊥)
+polyinteg ∶ 𝔏 ℚ → 𝔏 ℚ      ⍝ the antiderivative with constant term 0
+polyinteg ∶ ℚ[i][x] → ℚ[i][x]
+polyinteg ξ ≔ ((θ ↦ ((∅ θ) ⊥ (∷ 0 (ig_pl θ 1)))) (poly ξ))
+polyconj ∶ ℚ[i][x] → ℚ[i][x]      ⍝ the polynomial with conjugated coefficients
+polyconj ξ ≔ (poly (⫶ ∗ ξ))
+⍝ ---- gcd and friends (over the field ℚ(i): monic results)
+polymonic ∶ 𝔏 ℚ → 𝔏 ℚ      ⍝ the monic multiple (leading coefficient 1; 0 stays 0)
+polymonic ∶ ℚ[i][x] → ℚ[i][x]
+polymonic ξ ≔ (mon_pl (poly ξ))
+polygcd ∶ 𝔏 ℚ → 𝔏 ℚ → 𝔏 ℚ      ⍝ the monic greatest common divisor (fraction-free primitive remainder sequence over ℤ, or over ℤ[i] for non-real coefficients); gcd(0, 0) = 0
+polygcd ∶ ℚ[i][x] → ℚ[i][x] → ℚ[i][x]
+polygcd ξ η ≔ (gcd_pl (poly ξ) (mon_pl (poly η)))
+polyegcd ∶ 𝔏 ℚ → 𝔏 ℚ → 𝔓 (𝔏 ℚ) (𝔓 (𝔏 ℚ) (𝔏 ℚ))      ⍝ polyegcd(p, q) = (g, (s, t)) with s·p + t·q = g = polygcd(p, q) (fraction-free: the extended subresultant sequence over ℤ or ℤ[i]); (0, (0, 0)) for p = q = 0
+polyegcd ∶ ℚ[i][x] → ℚ[i][x] → 𝔓 ℚ[i][x] (𝔓 ℚ[i][x] ℚ[i][x])
+polyegcd ξ η ≔ ((φ χ ↦ ((≻ (ℓ χ) (ℓ φ)) ((τ ↦ (⊗ (◀ τ) (⊗ (▶ (▶ τ)) (◀ (▶ τ))))) (egz_pl χ φ)) (egz_pl φ χ))) (poly ξ) (poly η))
+polylcm ∶ 𝔏 ℚ → 𝔏 ℚ → 𝔏 ℚ      ⍝ the monic least common multiple (0 if either is 0)
+polylcm ∶ ℚ[i][x] → ℚ[i][x] → ℚ[i][x]
+polylcm ξ η ≔ ((θ ι ↦ ((∨ (∅ θ) (∅ ι)) ⊥ (mon_pl (quo_pl (mul_pl θ ι) (gcd_pl θ (mon_pl ι)))))) (poly ξ) (poly η))
+⍝ ---- content and primitive part of a real polynomial: G = gcd of the numerators, L = lcm of the denominators (canonical
+⍝ coefficients); ppos_pl is p·L/G (a positive factor), pp_pl also makes the leading coefficient positive
+ctg_pl ∶ 𝔏 ℚ → 𝔇
+ctg_pl ξ ≔ (foldl (θ ι ↦ (gcdᶻ θ (◀ ι))) ⊥ ξ)
+ctl_pl ∶ 𝔏 ℚ → 𝔇
+ctl_pl ξ ≔ (foldl (θ ι ↦ (÷ᶻ (⊠ᶻ θ (▶ ι)) (gcdᶻ θ (▶ ι)))) (◀ 1) ξ)
+ppos_pl ∶ 𝔏 ℚ → 𝔏 ℤ
+ppos_pl ξ ≔ ((γ′ λ′ ↦ (⫶ (θ ↦ (⊗ (⊡ (÷ᶻ (⊠ᶻ (◀ θ) (÷ᶻ λ′ (▶ θ))) γ′)) (◀ 1))) ξ)) (ctg_pl ξ) (ctl_pl ξ))
+pp_pl ∶ 𝔏 ℚ → 𝔏 ℤ
+pp_pl ξ ≔ ((θ ↦ ((∅ θ) θ ((⋚ʳ (◀ (last θ))) (neg_pl θ) θ θ))) (ppos_pl ξ))
+polycontent ∶ 𝔏 ℚ → ℚ      ⍝ the content: a positive rational c with p = ±c·polyprimitive(p) (0 for the zero polynomial)
+polycontent ξ ≔ ((θ ↦ (⊗ (ctg_pl θ) (ctl_pl θ))) (poly ξ))
+polyprimitive ∶ 𝔏 ℚ → 𝔏 ℤ      ⍝ the primitive part: coprime integer coefficients, positive leading coefficient
+polyprimitive ξ ≔ (pp_pl (poly ξ))
+⍝ ---- integer polynomials as lists of digit strings (lowest degree first; highest first inside the pseudo-division).  For real
+⍝ polynomials the remainder sequences run here, fraction-free: pseudo-remainders and contents, no rational arithmetic.
+⍝ qz_pl: the positive primitive part of a real canonical polynomial as digit strings; zq_pl back to canonical numbers
+qz_pl ∶ 𝔏 ℚ → 𝔏 𝔇
+qz_pl ξ ≔ (⫶ ◀ (ppos_pl ξ))
+zq_pl ∶ 𝔏 𝔇 → 𝔏 ℤ
+zq_pl ξ ≔ (⫶ (θ ↦ (⊗ (⊡ θ) (◀ 1))) ξ)
+⍝ trailing zero entries removed; derivative; content (gcd of the entries, stopping at 1) and positive primitive part
+trz_pl ∶ 𝔏 𝔇 → 𝔏 𝔇
+trz_pl ξ ≔ (foldr (θ ι ↦ ((∧ (∅ ι) (∅ᶻ θ)) ⊥ (∷ θ ι))) ⊥ ξ)
+drz_pl ∶ 𝔏 𝔇 → 𝔇 → 𝔏 𝔇
+drz_pl ξ κ ≔ (ξ (θ ι ↦ (∷ (⊡ (⊠ᶻ κ θ)) (drz_pl ι (⊡ (⊞ᶻ κ (◀ 1)))))) ⊥)
+ctz_pl ∶ 𝔇 → 𝔏 𝔇 → 𝔇
+ctz_pl γ′ ξ ≔ ((≡ γ′ (◀ 1)) γ′ (ξ (θ ι ↦ (ctz_pl (gcdᶻ γ′ θ) ι)) γ′))
+prz_pl ∶ 𝔏 𝔇 → 𝔏 𝔇
+prz_pl ξ ≔ ((γ′ ↦ ((≡ γ′ (◀ 1)) ξ (⫶ (θ ↦ (⊡ (÷ᶻ θ γ′))) ξ))) (ctz_pl ⊥ ξ))
+⍝ pseudo-division: one step b·A′ − a·B′ (A′, B′ the tails), δ + 1 steps (σ counts them); the result is highest first, length deg B
+pst_pl ∶ 𝔏 𝔇 → 𝔏 𝔇 → 𝔇 → 𝔇 → 𝔏 𝔇
+pst_pl ξ η β α ≔ (ξ (θ ι ↦ (η (θ′ ι′ ↦ (∷ (⊡ (⊟ᶻ (⊠ᶻ β θ) (⊠ᶻ α θ′))) (pst_pl ι ι′ β α))) (⫶ (θ′ ↦ (⊡ (⊠ᶻ β θ′))) ξ))) ⊥)
+psr_pl ∶ 𝔏 α → 𝔏 𝔇 → 𝔏 𝔇 → 𝔇 → 𝔏 𝔇
+psr_pl σ ξ η β ≔ (σ (θ σ′ ↦ (psr_pl σ′ (pst_pl (⌄ ξ) η β (hd ξ)) η β)) ξ)
+⍝ the next element of a Sturm sequence: −rem(A, B) times a positive factor, primitive:  −prem·sign(lc(B)^(δ+1))  (lowest first, B ≠ 0)
+nsr_pl ∶ 𝔏 𝔇 → 𝔏 𝔇 → 𝔏 𝔇
+nsr_pl ξ η ≔ ((ρ σ ↦ ((τ ↦ ((ω ↦ ((∅ ω) ⊥ (prz_pl ((∧ ((⋚ʳ (hd σ)) ⊤ ⊥ ⊥) (ol_pl τ)) ω (⫶ ⊖ᶻ ω))))) (trz_pl (reverse (psr_pl τ ρ (⌄ σ) (hd σ)))))) (dropl_pl (⌄ σ) ρ))) (reverse ξ) (reverse η))
+⍝ exact quotient A / B of integer polynomials when B divides A and B is primitive (Gauss: the quotient is integral)
+es_pl ∶ 𝔏 𝔇 → 𝔏 𝔇 → 𝔇 → 𝔏 𝔇
+es_pl ξ η χ ≔ (ξ (θ ι ↦ (η (θ′ ι′ ↦ (∷ (⊡ (⊟ᶻ θ (⊠ᶻ χ θ′))) (es_pl ι ι′ χ))) ξ)) ⊥)
+edv_pl ∶ 𝔏 α → 𝔏 𝔇 → 𝔏 𝔇 → 𝔇 → 𝔏 𝔇
+edv_pl σ ρ η β ≔ (σ (θ σ′ ↦ ((χ ↦ (∷ χ (edv_pl σ′ (es_pl (⌄ ρ) η χ) η β))) (⊡ (÷ᶻ (hd ρ) β)))) ⊥)
+edz_pl ∶ 𝔏 𝔇 → 𝔏 𝔇 → 𝔏 𝔇
+edz_pl ξ η ≔ ((ρ σ ↦ (reverse (edv_pl (dropl_pl (⌄ σ) ρ) ρ (⌄ σ) (hd σ)))) (reverse ξ) (reverse η))
+⍝ gcd of integer polynomials by the primitive remainder sequence
+gz_pl ∶ 𝔏 𝔇 → 𝔏 𝔇 → 𝔏 𝔇
+gz_pl ξ η ≔ ((∅ η) ξ (gz_pl η (nsr_pl ξ η)))
+⍝ the same over ℤ[i] for polynomials with non-real coefficients, by the subresultant sequence (Collins, Brown): P = L·p (L the lcm of
+⍝ the denominators) has entries in ℤ[i]; with δ = deg A − deg B the next element is prem(A, B)/(g·h^δ), then g ← lc B, h ← g^δ/h^(δ−1)
+⍝ (g = h = 1 at the start); every division is exact in ℤ[i] and the coefficients grow only linearly (no gcd of Gaussian integers).
+⍝ Lists are highest first here; dlz_pl drops leading zero entries, pwl_pl χ τ is χ^(ℓ τ)
+qzi_pl ∶ 𝔏 ℚ[i] → 𝔏 𝔇
+qzi_pl ξ ≔ ((λ′ ↦ (⫶ (gi_pl λ′) ξ)) (ctl_pl ξ))
+dlz_pl ∶ 𝔏 𝔇 → 𝔏 𝔇
+dlz_pl ξ ≔ (ξ (θ ι ↦ ((∅ᶻ θ) (dlz_pl ι) ξ)) ⊥)
+pwl_pl ∶ 𝔇 → 𝔏 α → 𝔇
+pwl_pl χ ξ ≔ (foldl (θ ι ↦ (⊠ᶻ θ χ)) (◀ 1) ξ)
+srs_pl ∶ 𝔏 𝔇 → 𝔏 𝔇 → 𝔇 → 𝔇 → 𝔏 𝔇
+srs_pl ρ σ γ χ ≔ ((∅ σ) ρ ((τ ↦ ((ω ↦ ((∅ ω) σ ((λ′ ↦ (srs_pl σ (⫶ (θ ↦ (⊡ (÷ᶻ θ λ′))) ω) (hd σ) (⊡ (÷ᶻ (pwl_pl (hd σ) (⌄ τ)) (pwl_pl χ (⌄ (⌄ τ))))))) (⊠ᶻ γ (pwl_pl χ (⌄ τ)))))) (dlz_pl (psr_pl τ ρ (⌄ σ) (hd σ))))) (dropl_pl (⌄ σ) ρ)))
+⍝ the gcd of two Gaussian-integer polynomials (lowest first) up to a constant factor: the larger degree first
+gzi_pl ∶ 𝔏 𝔇 → 𝔏 𝔇 → 𝔏 𝔇
+gzi_pl ξ η ≔ ((≻ (ℓ η) (ℓ ξ)) (gzi_pl η ξ) ((∅ η) ξ (reverse (srs_pl (reverse ξ) (reverse η) (◀ 1) (◀ 1)))))
+⍝ pseudo-division with quotient (highest first; B = b·xⁿ + B′ given by its tail η and b): the δ + 1 steps of pst_pl, the quotient
+⍝ accumulated (each step multiplies the earlier quotient entries by b), so that b^(δ+1)·A = Q·B + R; the result is (Q lowest first,
+⍝ R highest first with deg B entries)
+pdq_pl ∶ 𝔏 α → 𝔏 𝔇 → 𝔏 𝔇 → 𝔇 → 𝔏 𝔇 → 𝔓 (𝔏 𝔇) (𝔏 𝔇)
+pdq_pl σ ξ η β κ ≔ (σ (θ σ′ ↦ (pdq_pl σ′ (pst_pl (⌄ ξ) η β (hd ξ)) η β (∷ (hd ξ) (⫶ (θ′ ↦ (⊡ (⊠ᶻ β θ′))) κ)))) (⊗ κ ξ))
+⍝ the extended subresultant sequence on integer polynomials (lowest first), deg A ≥ deg B: triples (r, s, t) with s·A + t·B = r; with
+⍝ δ = deg r − deg r′, b = lc r′ and (q, R) the pseudo-division of r by r′, the next triple is (b^(δ+1)·(r, s, t) − q·(r′, s′, t′))/(g·h^δ),
+⍝ then g ← b, h ← g^δ/h^(δ−1), as in srs_pl.  Every division is exact: the r are the subresultants of A and B (determinants), and the
+⍝ s, t their cofactors — determinants as well, and the only cofactors within the degree bounds deg s < deg B − deg r′,
+⍝ deg t < deg A − deg r′ that the sequence keeps.  The last triple with r ≠ 0 is returned
+xeg_pl ∶ 𝔏 𝔇 → 𝔏 𝔇 → 𝔏 𝔇 → 𝔏 𝔇 → 𝔏 𝔇 → 𝔏 𝔇 → 𝔇 → 𝔇 → 𝔓 (𝔏 𝔇) (𝔓 (𝔏 𝔇) (𝔏 𝔇))
+xeg_pl ρ σ τ ρ′ σ′ τ′ γ χ ≔ ((∅ ρ′) (⊗ ρ (⊗ σ τ)) ((ϖ ϑ ↦ ((ϰ ↦ ((ζ ε λ′ ↦ ((δ ↦ (xeg_pl ρ′ σ′ τ′ (δ (trz_pl (reverse (▶ ζ)))) (δ (trz_pl (sbz_pl (scz_pl ε σ) (mlz_pl (◀ ζ) σ′)))) (δ (trz_pl (sbz_pl (scz_pl ε τ) (mlz_pl (◀ ζ) τ′)))) (hd ϑ) (⊡ (÷ᶻ (pwl_pl (hd ϑ) (⌄ ϰ)) (pwl_pl χ (⌄ (⌄ ϰ))))))) (θ ↦ (⫶ (ι ↦ (⊡ (÷ᶻ ι λ′))) θ)))) (pdq_pl ϰ ϖ (⌄ ϑ) (hd ϑ) ⊥) (pwl_pl (hd ϑ) ϰ) (⊠ᶻ γ (pwl_pl χ (⌄ ϰ))))) (dropl_pl (⌄ ϑ) ϖ))) (reverse ρ) (reverse ρ′)))
+⍝ (g, (s, t)) for canonical p, q with deg p ≥ deg q: the sequence for P = L·p, Q = L′·q (L, L′ the lcms of the denominators), then
+⍝ g = r/lc(r), s = L·s/lc(r), t = L′·t/lc(r)
+egz_pl ∶ 𝔏 ℚ[i] → 𝔏 ℚ[i] → 𝔓 (𝔏 ℚ[i]) (𝔓 (𝔏 ℚ[i]) (𝔏 ℚ[i]))
+egz_pl φ χ ≔ ((λ′ λ″ ↦ ((τ ↦ ((∅ (◀ τ)) (⊗ ⊥ (⊗ ⊥ ⊥)) ((κ ↦ (⊗ (scl_pl κ (zq_pl (◀ τ))) (⊗ (scl_pl (cn_pl (⊠ κ (⊗ λ′ (◀ 1)))) (zq_pl (◀ (▶ τ)))) (scl_pl (cn_pl (⊠ κ (⊗ λ″ (◀ 1)))) (zq_pl (▶ (▶ τ))))))) (cn_pl (÷ 1 (⊗ (last (◀ τ)) (◀ 1))))))) (xeg_pl (⫶ (gi_pl λ′) φ) (∷ (◀ 1) ⊥) ⊥ (⫶ (gi_pl λ″) χ) ⊥ (∷ (◀ 1) ⊥) (◀ 1) (◀ 1)))) (ctl_pl φ) (ctl_pl χ))
+⍝ the resultant by the subresultant algorithm (Cohen, A Course in Computational Algebraic Number Theory, Algorithm 3.3.7) on integer
+⍝ polynomials, highest first, deg A ≥ deg B ≥ 1: κ = ⊤ when the sign s is −1 (s flips when deg A and deg B are both odd), g and h as
+⍝ in srs_pl; when B becomes a constant, Res = s·lc(B)^(deg A)/h^(deg A − 1); 0 when a remainder vanishes
+rsz_pl ∶ 𝔏 𝔇 → 𝔏 𝔇 → 𝔇 → 𝔇 → 𝔹 → 𝔇
+rsz_pl ρ σ γ χ κ ≔ ((τ κ′ ↦ ((ω ↦ ((∅ ω) ⊥ ((β γ′ ↦ ((χ′ ↦ ((∅ (⌄ β)) ((ν ↦ (κ′ (⊡ (⊖ᶻ ν)) ν)) (⊡ (÷ᶻ (pwl_pl (hd β) (⌄ σ)) (pwl_pl χ′ (⌄ (⌄ σ)))))) (rsz_pl σ β γ′ χ′ κ′))) (⊡ (÷ᶻ (pwl_pl γ′ (⌄ τ)) (pwl_pl χ (⌄ (⌄ τ))))))) ((λ′ ↦ (⫶ (θ ↦ (⊡ (÷ᶻ θ λ′))) ω)) (⊠ᶻ γ (pwl_pl χ (⌄ τ)))) (hd σ)))) (dlz_pl (psr_pl τ ρ (⌄ σ) (hd σ))))) (dropl_pl (⌄ σ) ρ) ((∧ (¬ (ol_pl ρ)) (¬ (ol_pl σ))) (¬ κ) κ))
+⍝ Res(p, q) for canonical p, q of degree ≥ 1: Res(L·p, L′·q) = L^(deg q)·L′^(deg p)·Res(p, q) with L, L′ the lcms of the denominators
+rsf_pl ∶ 𝔏 ℚ[i] → 𝔏 ℚ[i] → ℚ[i]
+rsf_pl ξ η ≔ ((λ′ λ″ ↦ ((ϖ ϑ ↦ (cn_pl (⊗ ((≻ (ℓ ϑ) (ℓ ϖ)) (rsz_pl ϑ ϖ (◀ 1) (◀ 1) (∧ (¬ (ol_pl ϖ)) (¬ (ol_pl ϑ)))) (rsz_pl ϖ ϑ (◀ 1) (◀ 1) ⊥)) (⊡ (⊠ᶻ (pwl_pl λ′ (⌄ η)) (pwl_pl λ″ (⌄ ξ))))))) (reverse (⫶ (gi_pl λ′) ξ)) (reverse (⫶ (gi_pl λ″) η)))) (ctl_pl ξ) (ctl_pl η))
+⍝ the monic gcd: fraction-free primitive remainder sequences, over ℤ for real polynomials and over ℤ[i] otherwise
+gcd_pl ξ η ≔ (mon_pl (zq_pl ((∧ (∀ₗ rl_pl ξ) (∀ₗ rl_pl η)) (gz_pl (qz_pl ξ) (qz_pl η)) (gzi_pl (qzi_pl ξ) (qzi_pl η)))))
+⍝ ---- square-free part and Yun's square-free factorisation
+polysqfree_pl ∶ 𝔏 ℚ[i] → 𝔏 ℚ[i]
+polysqfree_pl ξ ≔ ((∅ ξ) ⊥ (mon_pl (quo_pl ξ (gcd_pl ξ (mon_pl (der_pl ξ))))))
+sqfree ∶ 𝔏 ℚ → 𝔏 ℚ      ⍝ the square-free part p / gcd(p, p′), monic (0 stays 0)
+sqfree ∶ ℚ[i][x] → ℚ[i][x]
+sqfree ξ ≔ (polysqfree_pl (poly ξ))
+yl_pl ∶ 𝔏 ℚ[i] → 𝔏 ℚ[i] → ℕ → 𝔏 (𝔓 (𝔏 ℚ[i]) ℕ)
+yl_pl ξ η ι ≔ ((∅ (⌄ ξ)) ⊥ ((θ ↦ ((ξ′ η′ ↦ ((ρ ↦ ((∅ (⌄ θ)) ρ (∷ (⊗ θ ι) ρ))) (yl_pl ξ′ (sub_pl η′ (der_pl ξ′)) (⊞ ι 1)))) (quo_pl ξ θ) (quo_pl η θ))) (gcd_pl ξ (mon_pl η))))
+yun_pl ∶ 𝔏 ℚ[i] → 𝔏 (𝔓 (𝔏 ℚ[i]) ℕ)
+yun_pl ξ ≔ ((∨ (∅ ξ) (∅ (⌄ ξ))) ⊥ ((φ ↦ ((θ ↦ ((ξ′ η′ ↦ (yl_pl ξ′ (sub_pl η′ (der_pl ξ′)) 1)) (quo_pl ξ θ) (quo_pl φ θ))) (gcd_pl ξ (mon_pl φ)))) (der_pl ξ)))
+sqfreefactor ∶ 𝔏 ℚ → 𝔏 (𝔓 (𝔏 ℚ) ℕ)      ⍝ Yun's square-free factorisation: pairs (factor, multiplicity), factors monic, square-free, coprime; p = lc·Π fᵏ
+sqfreefactor ∶ ℚ[i][x] → 𝔏 (𝔓 ℚ[i][x] ℕ)
+sqfreefactor ξ ≔ (yun_pl (poly ξ))
+⍝ ---- resultant (fraction-free, rsf_pl;  Res(A, b) = bᵐ, Res(a, B) = aⁿ for constants) and discriminant
+res_pl ∶ 𝔏 ℚ[i] → 𝔏 ℚ[i] → ℚ[i]
+res_pl ξ η ≔ ((∅ (⌄ η)) (^ (last η) (dg_pl ξ)) ((∅ (⌄ ξ)) (^ (last ξ) (dg_pl η)) (rsf_pl ξ η)))
+resultant ∶ 𝔏 ℤ → 𝔏 ℤ → ℤ      ⍝ the resultant Res(p, q) (subresultant algorithm on integer polynomials over ℤ or ℤ[i], fraction-free; 0 if either is 0; Res of two non-zero constants is 1)
+resultant ∶ 𝔏 ℚ → 𝔏 ℚ → ℚ
+resultant ∶ 𝔏 ℤ[i] → 𝔏 ℤ[i] → ℤ[i]
+resultant ∶ ℚ[i][x] → ℚ[i][x] → ℚ[i]
+resultant ξ η ≔ ((θ ι ↦ ((∨ (∅ θ) (∅ ι)) 0 (cn_pl (res_pl θ ι)))) (poly ξ) (poly η))
+discriminant ∶ 𝔏 ℤ → ℤ      ⍝ the discriminant (−1)^(n(n−1)/2)·Res(p, p′)/lc(p); 1 for degree 1, 0 for a constant
+discriminant ∶ 𝔏 ℚ → ℚ
+discriminant ∶ 𝔏 ℤ[i] → ℤ[i]
+discriminant ∶ ℚ[i][x] → ℚ[i]
+discriminant ξ ≔ ((θ ↦ ((∨ (∅ θ) (∅ (⌄ θ))) 0 ((ν ↦ (cn_pl (⊠ (^ 11101 (div (⊠ ν (⊟ ν 1)) 1100)) (÷ (res_pl θ (der_pl θ)) (last θ))))) (dg_pl θ)))) (poly ξ))
+⍝ ---- Sturm sequences of real polynomials.  pchain_pl: p, p′ and the negated remainders, each made a primitive integer polynomial
+⍝ by a POSITIVE factor (sign variations unchanged, and integer coefficients make evaluation cheap).  sqchain_pl divides every
+⍝ element by the last one, gcd(p, p′): a Sturm sequence of the square-free part, valid at every point (roots included)
+chz_pl ∶ 𝔏 𝔇 → 𝔏 𝔇 → 𝔏 (𝔏 𝔇)
+chz_pl ξ η ≔ ((∅ η) (∷ ξ ⊥) (∷ ξ (chz_pl η (nsr_pl ξ η))))
+pchain_pl ∶ 𝔏 ℚ → 𝔏 (𝔏 ℚ)
+pchain_pl ξ ≔ ((∅ ξ) ⊥ ((θ ↦ (⫶ zq_pl (chz_pl θ (prz_pl (trz_pl (drz_pl (⌄ θ) (◀ 1))))))) (qz_pl ξ)))
+sqchain_pl ∶ 𝔏 ℚ → 𝔏 (𝔏 ℚ)
+sqchain_pl ξ ≔ ((∅ ξ) ⊥ ((σ ↦ ((γ′ ↦ ((∅ (⌄ γ′)) (⫶ zq_pl σ) (⫶ (θ ↦ (zq_pl (edz_pl θ γ′))) σ))) (last σ))) ((θ ↦ (chz_pl θ (prz_pl (trz_pl (drz_pl (⌄ θ) (◀ 1)))))) (qz_pl ξ))))
+⍝ the square-free primitive part (integer coefficients, the sign of p's leading coefficient)
+sqp_pl ∶ 𝔏 ℚ → 𝔏 ℤ
+sqp_pl ξ ≔ (hd (sqchain_pl ξ))
+⍝ sign variations of a list of signs (zeros skipped); at a rational point; at +∞ and −∞
+vr_pl ∶ 𝔏 𝔒 → 𝔒 → ℕ → ℕ
+vr_pl ξ υ ν ≔ (ξ (θ ι ↦ (θ (vr_pl ι ⋖ (υ ν ν (⊞ ν 1))) (vr_pl ι υ ν) (vr_pl ι ⋗ (υ (⊞ ν 1) ν ν)))) ν)
+vat_pl ∶ 𝔏 (𝔏 ℚ) → ℚ → ℕ
+vat_pl σ ξ ≔ (vr_pl (⫶ (θ ↦ (sg_pl (ev_pl θ ξ))) σ) ≖ 0)
+vpi_pl ∶ 𝔏 (𝔏 ℚ) → ℕ
+vpi_pl σ ≔ (vr_pl (⫶ (θ ↦ (sg_pl (last θ))) σ) ≖ 0)
+vmi_pl ∶ 𝔏 (𝔏 ℚ) → ℕ
+vmi_pl σ ≔ (vr_pl (⫶ (θ ↦ ((ι ↦ ((ol_pl θ) ι (ι ⋗ ≖ ⋖))) (sg_pl (last θ)))) σ) ≖ 0)
+sturm ∶ 𝔏 ℚ → 𝔏 (𝔏 ℤ)      ⍝ the Sturm sequence p, p′, −rem(p, p′), …, each scaled by a positive factor to a primitive integer polynomial
+sturm ξ ≔ (pchain_pl (poly ξ))
+nrealroots ∶ 𝔏 ℚ → ℕ      ⍝ the number of distinct real roots (Sturm: V(−∞) − V(+∞)); 0 for the zero polynomial
+nrealroots ξ ≔ ((σ ↦ (⊟ (vmi_pl σ) (vpi_pl σ))) (pchain_pl (poly ξ)))
+countroots ∶ 𝔏 ℚ → ℚ → ℚ → ℕ      ⍝ countroots(p, a, b): the number of distinct real roots in (a, b] (Sturm on the square-free part); 0 if a ≥ b or p = 0
+countroots ξ ζ θ ≔ ((⩾ ζ θ) 0 ((σ ↦ (⊟ (vat_pl σ ζ) (vat_pl σ θ))) (sqchain_pl (poly ξ))))
+⍝ ---- real root isolation by bisection of (−M, M], M the power of two above Cauchy's bound 1 + max |aᵢ/aₙ|
+p2_pl ∶ ℚ → ℚ → ℚ
+p2_pl ξ η ≔ ((⩾ η ξ) η (p2_pl ξ (⊠ η 1100)))
+cb_pl ∶ 𝔏 ℚ → ℚ
+cb_pl ξ ≔ ((λ′ ↦ (p2_pl (⊞ 1 (foldl (θ ι ↦ (max θ (abs (÷ ι λ′)))) 0 (reverse (⌄ (reverse ξ))))) 1)) (last ξ))
+⍝ the bisections below keep the two endpoints of an interval over ONE denominator and never reduce inside the loop (a gcd per step
+⍝ would cost more than the evaluations): cmd_pl brings two values to a common denominator, mdp_pl is the midpoint and up_pl the same
+⍝ value, both over the doubled denominator, hv_pl halves a width; endpoints are put in canonical form only when they are returned
+cmd_pl ∶ ℚ → ℚ → 𝔓 ℚ ℚ
+cmd_pl ξ η ≔ ((≡ (▶ ξ) (▶ η)) (⊗ ξ η) ((δ ↦ (⊗ (⊗ (⊠ᶻ (◀ ξ) (▶ η)) δ) (⊗ (⊠ᶻ (◀ η) (▶ ξ)) δ))) (⊠ᶻ (▶ ξ) (▶ η))))
+mdp_pl ∶ ℚ → ℚ → ℚ
+mdp_pl ξ η ≔ (⊗ (⊞ᶻ (◀ ξ) (◀ η)) (⊞ᶻ (▶ ξ) (▶ ξ)))
+up_pl ∶ ℚ → ℚ
+up_pl ξ ≔ (⊗ (⊞ᶻ (◀ ξ) (◀ ξ)) (⊞ᶻ (▶ ξ) (▶ ξ)))
+hv_pl ∶ ℚ → ℚ
+hv_pl ξ ≔ (⊗ (◀ ξ) (⊞ᶻ (▶ ξ) (▶ ξ)))
+cpr_pl ∶ ℚ → ℚ → 𝔓 ℚ ℚ
+cpr_pl ξ η ≔ (⊗ (cn_pl ξ) (cn_pl η))
+⍝ iso_pl S f l r V(l) V(r): the isolating intervals of the roots in (l, r] (l, r over one denominator); a root met at a bisection point
+⍝ is returned as (r, r)
+iso_pl ∶ 𝔏 (𝔏 ℚ) → 𝔏 ℚ → ℚ → ℚ → ℕ → ℕ → 𝔏 (𝔓 ℚ ℚ)
+iso_pl σ φ λ ρ υ ψ ≔ ((χ ↦ ((≐ χ 0) ⊥ ((≐ χ 1) (∷ ((z_pl (ev_pl φ ρ)) ((θ ↦ (⊗ θ θ)) (cn_pl ρ)) (cpr_pl λ ρ)) ⊥) ((μ λ′ ρ′ ↦ ((ω ↦ (⧺ (iso_pl σ φ λ′ μ υ ω) (iso_pl σ φ μ ρ′ ω ψ))) (vat_pl σ μ))) (mdp_pl λ ρ) (up_pl λ) (up_pl ρ))))) (⊟ υ ψ))
+isol_pl ∶ 𝔏 (𝔏 ℚ) → 𝔏 (𝔓 ℚ ℚ)
+isol_pl σ ≔ ((φ ↦ ((∨ (∅ φ) (∅ (⌄ φ))) ⊥ ((μ ↦ ((ν ↦ (iso_pl σ φ ν μ (vat_pl σ ν) (vat_pl σ μ))) (ng_pl μ))) (cb_pl φ)))) (hd σ))
+isolate ∶ 𝔏 ℚ → 𝔏 (𝔓 ℚ ℚ)      ⍝ isolating intervals of the distinct real roots, sorted: pairs (a, b), a < b, one root in (a, b), none at b — or (r, r) for a rational root r met exactly
+isolate ξ ≔ (isol_pl (sqchain_pl (poly ξ)))
+⍝ bisection of (λ, ρ] (one denominator, width ω) containing the single simple root of the square-free f, f(ρ) of sign σ ≠ 0: the root
+⍝ is in the half where f has the other sign; stops at width ≤ ε, or at a bisection point that is the root (returned as (m, m), width 0).
+⍝ The result is the triple (λ′, (ρ′, ω′)), unreduced
+rf_pl ∶ 𝔏 ℚ → 𝔒 → ℚ → ℚ → ℚ → ℚ → 𝔓 ℚ (𝔓 ℚ ℚ)
+rf_pl φ σ λ ρ ω ε ≔ ((⩾ ε ω) (⊗ λ (⊗ ρ ω)) ((μ λ′ ρ′ ω′ ↦ ((τ ↦ (τ (σ (rf_pl φ σ λ′ μ ω′ ε) (rf_pl φ σ μ ρ′ ω′ ε) (rf_pl φ σ μ ρ′ ω′ ε)) (⊗ μ (⊗ μ 0)) (σ (rf_pl φ σ μ ρ′ ω′ ε) (rf_pl φ σ μ ρ′ ω′ ε) (rf_pl φ σ λ′ μ ω′ ε)))) (sg_pl (ev_pl φ μ)))) (mdp_pl λ ρ) (up_pl λ) (up_pl ρ) (hv_pl ω)))
+⍝ the same from canonical endpoints λ < ρ with f(ρ) ≠ 0, returning the canonical pair
+rfc_pl ∶ 𝔏 ℚ → 𝔒 → ℚ → ℚ → ℚ → 𝔓 ℚ ℚ
+rfc_pl φ σ λ ρ ε ≔ ((ζ ↦ ((τ ↦ (cpr_pl (◀ τ) (◀ (▶ τ)))) (rf_pl φ σ (◀ ζ) (▶ ζ) (cn_pl (⊟ ρ λ)) ε))) (cmd_pl λ ρ))
+refine ∶ 𝔏 ℚ → ℚ → ℚ → ℕ → 𝔓 ℚ ℚ      ⍝ refine(p, a, b, n): bisect the interval (a, b] isolating one real root of p until its width is ≤ 2⁻ⁿ (a root hit exactly gives (r, r)); (a, b) unchanged if (a, b] does not contain exactly one distinct root
+refine ξ ζ θ ν ≔ ((σ λ ρ ↦ ((∨ (≐ λ ρ) (¬ (≐ (⊟ (vat_pl σ λ) (vat_pl σ ρ)) 1))) (⊗ λ ρ) ((φ ↦ ((ω ↦ (ω (rfc_pl φ ω λ ρ (÷ 1 (^ 1100 ν))) (⊗ ρ ρ) (rfc_pl φ ω λ ρ (÷ 1 (^ 1100 ν))))) (sg_pl (ev_pl φ ρ)))) (hd σ)))) (sqchain_pl (poly ξ)) (cn_pl ζ) (cn_pl θ))
+⍝ the lazy real root in an isolating interval: element n is the midpoint of the interval refined to width ≤ 2⁻ⁿ (within 2⁻ⁿ⁻¹)
+rs_pl ∶ 𝔏 ℚ → 𝔒 → ℚ → ℚ → ℚ → ℚ → ℝ
+rs_pl φ σ λ ρ ω ε ≔ ((τ ↦ ((λ′ ρ′ ↦ (∷ (mdp_pl λ′ ρ′) (rs_pl φ σ λ′ ρ′ (▶ (▶ τ)) (hv_pl ε)))) (◀ τ) (◀ (▶ τ)))) (rf_pl φ σ λ ρ ω ε))
+rt_pl ∶ 𝔏 ℚ → 𝔓 ℚ ℚ → ℝ
+rt_pl φ ζ ≔ ((λ ρ ↦ ((≐ λ ρ) (⁂ λ) ((σ ↦ (σ (rsc_pl φ σ λ ρ) (⁂ ρ) (rsc_pl φ σ λ ρ))) (sg_pl (ev_pl φ ρ))))) (◀ ζ) (▶ ζ))
+rsc_pl ∶ 𝔏 ℚ → 𝔒 → ℚ → ℚ → ℝ
+rsc_pl φ σ λ ρ ≔ ((ζ ↦ (rs_pl φ σ (◀ ζ) (▶ ζ) (cn_pl (⊟ ρ λ)) 1)) (cmd_pl λ ρ))
+root ∶ 𝔏 ℚ → ℕ → ℝ      ⍝ root(p, k): the k-th distinct real root of p in increasing order (k ≥ 1) as a lazy real, element n within 2⁻ⁿ; 0 if there is no such root
+root ξ κ ≔ ((σ ↦ ((ι ↦ ((∨ (⩾ 0 κ) (≻ κ (ℓ ι))) (⁂ 0) (rt_pl (hd σ) (nth ι (⊟ κ 1))))) (isol_pl σ))) (sqchain_pl (poly ξ)))
+realroots ∶ 𝔏 ℚ → 𝔏 ℝ      ⍝ all distinct real roots as lazy reals, in increasing order (element n within 2⁻ⁿ)
+realroots ξ ≔ ((σ ↦ (⫶ (rt_pl (hd σ)) (isol_pl σ))) (sqchain_pl (poly ξ)))
+⍝ ---- the sign of q at an algebraic root.  q(r) = 0 iff g = gcd(f, q) has its root in (a, b] (g divides the square-free f, so it
+⍝ is square-free and its Sturm count decides); otherwise bisect until q has no root in [a, b] (q(a), q(b) ≠ 0 and equal Sturm counts).
+⍝ sl_pl q S_q f σ λ ρ q(λ) q(ρ) V(λ) V(ρ): σ the sign of f(ρ), λ and ρ over one denominator
+sl_pl ∶ 𝔏 ℚ → 𝔏 (𝔏 ℚ) → 𝔏 ℚ → 𝔒 → ℚ → ℚ → ℚ → ℚ → ℕ → ℕ → ℤ
+sl_pl ψ τ φ σ λ ρ υ ω α β ≔ ((∧ (¬ (z_pl υ)) (∧ (¬ (z_pl ω)) (≐ α β))) (sgn_pl (sg_pl ω)) ((μ λ′ ρ′ ↦ ((χ ↦ (χ (σ (slm_pl ψ τ φ σ λ′ μ υ ω α β ⊤) (slm_pl ψ τ φ σ μ ρ′ υ ω α β ⊥) (slm_pl ψ τ φ σ μ ρ′ υ ω α β ⊥)) (sgn_pl (sg_pl (ev_pl ψ μ))) (σ (slm_pl ψ τ φ σ μ ρ′ υ ω α β ⊥) (slm_pl ψ τ φ σ μ ρ′ υ ω α β ⊥) (slm_pl ψ τ φ σ λ′ μ υ ω α β ⊤)))) (sg_pl (ev_pl φ μ)))) (mdp_pl λ ρ) (up_pl λ) (up_pl ρ)))
+⍝ continue on the left half (λ, μ] (κ = ⊤) or the right half (μ, ρ] (κ = ⊥): the values at the new endpoint μ are computed once
+slm_pl ∶ 𝔏 ℚ → 𝔏 (𝔏 ℚ) → 𝔏 ℚ → 𝔒 → ℚ → ℚ → ℚ → ℚ → ℕ → ℕ → 𝔹 → ℤ
+slm_pl ψ τ φ σ λ ρ υ ω α β κ ≔ (κ ((θ ↦ (sl_pl ψ τ φ σ λ ρ υ (ev_pl ψ ρ) α θ)) (vat_pl τ ρ)) ((θ ↦ (sl_pl ψ τ φ σ λ ρ (ev_pl ψ λ) ω θ β)) (vat_pl τ λ)))
+sa_pl ∶ 𝔏 ℚ → 𝔏 (𝔏 ℚ) → 𝔒 → ℚ → ℚ → ℤ
+sa_pl ψ σ ω λ ρ ≔ ((φ ↦ ((γ′ ↦ ((∧ (¬ (∅ (⌄ γ′))) ((τ ↦ (≻ (⊟ (vat_pl τ λ) (vat_pl τ ρ)) 0)) (sqchain_pl γ′))) 0 ((τ ζ ↦ ((λ′ ρ′ ↦ (sl_pl ψ τ φ ω λ′ ρ′ (ev_pl ψ λ′) (ev_pl ψ ρ′) (vat_pl τ λ′) (vat_pl τ ρ′))) (◀ ζ) (▶ ζ))) (pchain_pl ψ) (cmd_pl λ ρ)))) (gcd_pl φ (mon_pl ψ)))) (hd σ))
+signat ∶ 𝔏 ℚ → 𝔏 ℚ → ℚ → ℚ → ℤ      ⍝ signat(q, p, a, b): the sign −1/0/1 of q at the root of p isolated by (a, b] (exact: gcd and Sturm counts decide q(root) = 0); a = b stands for the rational root a; 0 if (a, b] does not isolate one root of p (or p(a) ≠ 0 for a = b)
+signat ψ ξ ζ θ ≔ ((ψ′ λ ρ ↦ ((∅ ψ′) 0 ((≐ λ ρ) ((z_pl (ev_pl ξ λ)) (sgn_pl (sg_pl (ev_pl ψ′ λ))) 0) ((σ ↦ ((≐ (⊟ (vat_pl σ λ) (vat_pl σ ρ)) 1) ((ω ↦ (ω (sa_pl ψ′ σ ω λ ρ) (sgn_pl (sg_pl (ev_pl ψ′ ρ))) (sa_pl ψ′ σ ω λ ρ))) (sg_pl (ev_pl (hd σ) ρ))) 0)) (sqchain_pl (poly ξ)))))) (poly ψ) (cn_pl ζ) (cn_pl θ))
+⍝ ---- divisors and Kronecker-style searches.  dvs_pl: the positive divisors of a natural n > 0 (trial division up to √n), increasing
+dvs′_pl ∶ 𝔇 → 𝔇 → 𝔏 𝔇 → 𝔏 𝔇 → 𝔏 𝔇
+dvs′_pl ν δ λ ρ ≔ ((τ ↦ ((⩾ᶻ (◀ τ) δ) ((∅ᶻ (▶ τ)) ((≡ (◀ τ) δ) (⧺ (reverse (∷ δ λ)) ρ) (dvs′_pl ν (⊡ (⊞ᶻ δ (◀ 1))) (∷ δ λ) (∷ (⊡ (◀ τ)) ρ))) (dvs′_pl ν (⊡ (⊞ᶻ δ (◀ 1))) λ ρ)) (⧺ (reverse λ) ρ))) (⫽ᶻ ν δ))
+dvs_pl ∶ 𝔇 → 𝔏 𝔇
+dvs_pl ν ≔ (dvs′_pl ν (◀ 1) ⊥ ⊥)
+⍝ the positive divisors of |v| for a non-zero integer v, as numbers
+dvn_pl ∶ ℤ → 𝔏 ℕ
+dvn_pl ξ ≔ (⫶ (θ ↦ (⊗ θ (◀ 1))) (dvs_pl (⊡ (absᶻ (↓ᶻ ξ)))))
+⍝ divisibility of an integer value by a natural (digits)
+dq_pl ∶ ℤ → 𝔇 → 𝔹
+dq_pl ξ δ ≔ (∅ᶻ (▶ (⫽ᶻ (⊡ (absᶻ (↓ᶻ ξ))) δ)))
+⍝ every element with the list of the others, Π (x − r)
+ot_pl ∶ 𝔏 α → 𝔏 α → 𝔏 (𝔓 α (𝔏 α))
+ot_pl ξ η ≔ (η (θ ι ↦ (∷ (⊗ θ (⧺ ξ ι)) (ot_pl (∷ θ ξ) ι))) ⊥)
+fr_pl ∶ 𝔏 ℚ[i] → 𝔏 ℚ[i]
+fr_pl ξ ≔ (foldl (θ ρ ↦ (mul_pl θ (∷ (ng_pl ρ) (∷ 1 ⊥)))) (∷ 1 ⊥) ξ)
+⍝ ---- rational roots of a real polynomial.  For the square-free primitive f with leading coefficient aₙ every rational root r has
+⍝ aₙ·r ∈ ℤ: its isolating interval is refined to width ≤ 1/(2|aₙ|) and the one candidate ⌊|aₙ|·b⌋/|aₙ| is tested exactly
+cd_pl ∶ 𝔏 ℤ → ℚ → 𝔓 ℚ ℚ → 𝔏 ℚ
+cd_pl φ ν ζ ≔ ((λ ρ ↦ ((≐ λ ρ) (∷ λ ⊥) ((τ ↦ ((≐ (◀ τ) (▶ τ)) (∷ (◀ τ) ⊥) ((ρ′ ↦ ((∧ (≻ ρ′ (◀ τ)) (z_pl (ev_pl φ ρ′))) (∷ (cn_pl ρ′) ⊥) ⊥)) (÷ (⌊ (⊠ ν (▶ τ))) ν)))) (rfc_pl φ (sg_pl (ev_pl φ ρ)) λ ρ (÷ 1 (⊠ 1100 ν)))))) (◀ ζ) (▶ ζ))
+rq_pl ∶ 𝔏 (𝔏 ℚ) → 𝔏 ℚ
+rq_pl σ ≔ ((φ ↦ ((∨ (∅ φ) (∅ (⌄ φ))) ⊥ (concat (⫶ (cd_pl φ (abs (last φ))) (isol_pl σ))))) (hd σ))
+dvr_pl ∶ 𝔏 ℚ → ℚ → 𝔏 ℚ
+dvr_pl ξ ρ ≔ (quo_pl ξ (∷ (ng_pl ρ) (∷ 1 ⊥)))
+⍝ non-real roots in ℚ(i) of a real h without rational roots come in pairs z, z̄ with k(x − z)(x − z̄) = kx² + lx + m a primitive
+⍝ integer factor of h, positive on ℝ (k, m > 0): k divides lc h, m divides h(0) and k + l + m divides h(1) ≠ 0 (Kronecker with the
+⍝ nodes ∞, 0, 1); a candidate is kept when 4km − l² is a non-zero square s², k − l + m divides h(−1), gcd(k, l, m) = 1, and
+⍝ h((−l + s·i)/(2k)) = 0.  qa_pl h h(−1) k m d tests the candidate with k + l + m = d
+qa_pl ∶ 𝔏 ℤ → ℤ → ℤ → ℤ → ℤ → 𝔏 ℚ[i]
+qa_pl φ ω κ μ δ ≔ ((λ′ ↦ ((ν ↦ ((∧ (≻ ν 0) (dq_pl ω (↓ᶻ (⊟ (⊞ κ μ) λ′)))) ((σ ↦ ((∧ (≐ (⊠ σ σ) ν) (≐ (gcd (gcd κ λ′) μ) 1)) ((ζ ↦ ((z_pl (ev_pl φ ζ)) (∷ ζ (∷ (cn_pl (∗ ζ)) ⊥)) ⊥)) (cn_pl (÷ (⊞ (⊖ λ′) (⊠ σ 11)) (⊠ 1100 κ)))) ⊥)) (isqrt ν)) ⊥)) (⊟ (⊠ 111010000 (⊠ κ μ)) (⊠ λ′ λ′)))) (⊟ (⊟ δ κ) μ))
+qs_pl ∶ 𝔏 ℤ → 𝔏 ℚ[i]
+qs_pl φ ≔ ((ω ↦ (concat (⫶ (κ ↦ (concat (⫶ (μ ↦ (concat (⫶ (δ ↦ (qa_pl φ ω κ μ δ)) (dvn_pl (ev_pl φ 1))))) (dvn_pl (hd φ))))) (dvn_pl (last φ))))) (ev_pl φ 11101))
+⍝ the roots in ℚ(i) of a non-zero real polynomial: the rational ones, then the non-real ones
+rr_pl ∶ 𝔏 ℚ → 𝔏 ℚ[i]
+rr_pl ξ ≔ ((σ ↦ ((φ ↦ ((∨ (∅ φ) (∅ (⌄ φ))) ⊥ ((ρ ↦ ((η ↦ (⧺ ρ ((∅ (⌄ (⌄ η))) ⊥ (qs_pl η)))) (pp_pl (foldl dvr_pl φ ρ)))) (rq_pl σ)))) (hd σ))) (sqchain_pl ξ))
+⍝ (Re, Im) order
+ltc_pl ∶ ℚ[i] → ℚ[i] → 𝔹
+ltc_pl ξ η ≔ ((⋚ (ℜ ξ) (ℜ η)) ⊤ (≺ (ℑ ξ) (ℑ η)) ⊥)
+⍝ insertion in (Re, Im) order, an element equal to one already present dropped
+isd_pl ∶ ℚ[i] → 𝔏 ℚ[i] → 𝔏 ℚ[i]
+isd_pl ξ η ≔ (η (θ ι ↦ ((ltc_pl θ ξ) (∷ θ (isd_pl ξ ι)) ((≐ θ ξ) η (∷ ξ η)))) (∷ ξ ⊥))
+⍝ ---- roots in ℚ(i) of a polynomial with non-real coefficients.  P = L·p (L the lcm of the denominators) has coefficients in ℤ[i];
+⍝ a root u/v in lowest terms has u | P(0) and v | lc(P) in the factorial ring ℤ[i] (the rational root theorem), so the candidates are
+⍝ ε·u/v with ε a unit and u, v Gaussian divisors, each tested exactly.  gdv_pl w: one Gaussian divisor of w ≠ 0 from each associate
+⍝ class (Re > 0, Im ≥ 0), from the Gaussian primes dividing w: above each prime q of N(w) (trial division) lie 1 + i (q = 2), q itself
+⍝ (q ≡ 3 mod 4) or x + yi and x − yi with x² + y² = q (q ≡ 1 mod 4, x = 1, 2, … until q − x² is a square); every divisor is a
+⍝ product of powers πᵏ dividing w, normalised by ⌜ᶻ, and comes with the list of the primes π it contains
+tsq_pl ∶ ℕ → ℕ → 𝔏 𝔇
+tsq_pl κ ξ ≔ ((ρ ↦ ((η ↦ ((≐ (⊠ η η) ρ) (∷ (↓ᶻ (⊞ ξ (⊠ η 11))) (∷ (↓ᶻ (⊟ ξ (⊠ η 11))) ⊥)) (tsq_pl κ (⊞ ξ 1)))) (isqrt ρ))) (⊟ κ (⊠ ξ ξ)))
+gpq_pl ∶ ℕ → 𝔏 𝔇
+gpq_pl κ ≔ ((≐ κ 1100) (∷ (◀ 1110) ⊥) ((≐ (mod κ 111010000) 1101) (∷ (↓ᶻ κ) ⊥) (tsq_pl κ 1)))
+gpw_pl ∶ 𝔇 → 𝔇 → 𝔇 → 𝔏 𝔇
+gpw_pl ω π μ ≔ (∷ μ ((θ ↦ ((∅ᶻ (remᶻ ω θ)) (gpw_pl ω π θ) ⊥)) (⊠ᶻ μ π)))
+gdv_pl ∶ 𝔇 → 𝔏 (𝔓 𝔇 (𝔏 𝔇))
+gdv_pl ω ≔ (⫶ (θ ↦ (⊗ (⌜ᶻ (◀ θ)) (▶ θ))) (foldl (Λ π ↦ (concat (⫶ (μ ↦ ((≡ μ (◀ 1)) Λ (⫶ (δ ↦ (⊗ (⊠ᶻ (◀ δ) μ) (∷ π (▶ δ)))) Λ))) (gpw_pl ω π (◀ 1))))) (∷ (⊗ (◀ 1) ⊥) ⊥) (concat (⫶ gpq_pl (pf′_pl (nz_pl ω) 1100)))))
+⍝ L·c as a Gaussian integer;  sz_pl: a non-zero polynomial without its zero coefficients at the low end (the factor x^k)
+gi_pl ∶ 𝔇 → ℚ[i] → 𝔇
+gi_pl λ′ ξ ≔ (÷ᶻ (⊠ᶻ (◀ ξ) λ′) (▶ ξ))
+sz_pl ∶ 𝔏 ℚ[i] → 𝔏 ℚ[i]
+sz_pl ξ ≔ ((z_pl (hd ξ)) (sz_pl (⌄ ξ)) ξ)
+⍝ a bound C² on N(r) for every root r (|r| ≤ max(1, Σ_{i<n} |aᵢ|/|aₙ|), with |a| ≤ |Re a| + |Im a| and |aₙ| ≥ max(|Re aₙ|, |Im aₙ|)),
+⍝ used rounded up to an integer (comparisons of digit strings, not of the large unreduced fraction), and N(g)
+rb_pl ∶ 𝔏 ℚ[i] → ℚ
+rb_pl φ ≔ ((θ ↦ (⊠ θ θ)) (max 1 (÷ (foldl (θ ι ↦ (⊞ θ (⊞ (abs (ℜ ι)) (abs (ℑ ι))))) 0 (reverse (⌄ (reverse φ)))) (max (abs (ℜ (last φ))) (abs (ℑ (last φ)))))))
+nz_pl ∶ 𝔇 → ℚ
+nz_pl ξ ≔ (⊗ (⊠ᶻ ξ (∗ᶻ ξ)) (◀ 1))
+⍝ the candidates w/v, v from the divisors ψ of lc P, w = ε·u for u from the divisors υ of P(0) coprime to v (no common Gaussian
+⍝ prime: only lowest terms are tried) with N(u) ≤ C²·N(v) and
+⍝ N(v) ≤ C′²·N(u) (C′ the same bound for the reversed polynomial, whose roots are the 1/r): for w/v in lowest terms, P = (vx − w)·S
+⍝ with S over ℤ[i] (Gauss), so v − w divides P(1) = α and v + w divides P(−1) = β.  These are tested first through the norms (real
+⍝ divisions: N(v ∓ w) = N(v) + N(u) ∓ 2·Re(v·w̄), and Re(v·w̄) is ±Re(v·ū) or ±Im(v·ū) for the four units), then in ℤ[i], then the
+⍝ value is evaluated exactly
+ndv_pl ∶ 𝔇 → 𝔇 → 𝔹
+ndv_pl δ ν ≔ ((∅ᶻ δ) (∅ᶻ ν) (∅ᶻ (▶ (⫽ᶻ ν δ))))
+rgt_pl ∶ 𝔏 ℚ[i] → 𝔇 → 𝔇 → 𝔇 → 𝔇 → 𝔇 → 𝔇 → 𝔇 → 𝔇 → 𝔏 ℚ[i]
+rgt_pl φ α β α′ β′ ν σ τ ω ≔ ((∧ (ndv_pl (⊡ (⊟ᶻ σ (⊞ᶻ τ τ))) α′) (∧ (ndv_pl (⊡ (⊞ᶻ σ (⊞ᶻ τ τ))) β′) (∧ (∅ᶻ (remᶻ α (⊟ᶻ ν ω))) (∅ᶻ (remᶻ β (⊞ᶻ ν ω)))))) ((ζ ↦ ((z_pl (ev_pl φ ζ)) (∷ ζ ⊥) ⊥)) (cn_pl (⊗ ω ν))) ⊥)
+rgc_pl ∶ 𝔏 ℚ[i] → 𝔏 (𝔓 𝔇 (𝔏 𝔇)) → 𝔏 (𝔓 𝔇 (𝔏 𝔇)) → 𝔇 → 𝔇 → 𝔇 → 𝔇 → 𝔏 ℚ[i]
+rgc_pl φ υ ψ α β γ γ′ ≔ ((α′ β′ ↦ (concat (⫶ (ν′ ↦ ((ν ↦ ((η ↦ (concat (⫶ (μ′ ↦ ((μ ↦ ((η′ ↦ ((∧ (∀ₗ (π ↦ (¬ (∃ₗ (≡ π) (▶ ν′)))) (▶ μ′)) (∧ (⩾ᶻ (⊠ᶻ γ η) η′) (⩾ᶻ (⊠ᶻ γ′ η′) η))) ((σ χ ↦ ((ρ ι ↦ (⧺ (rgt_pl φ α β α′ β′ ν σ ρ μ) (⧺ (rgt_pl φ α β α′ β′ ν σ ι (⊡ (⊠ᶻ (◀ 11) μ))) (⧺ (rgt_pl φ α β α′ β′ ν σ (⊖ᶻ ρ) (⊡ (⊖ᶻ μ))) (rgt_pl φ α β α′ β′ ν σ (⊖ᶻ ι) (⊡ (⊠ᶻ (◀ 111) μ))))))) (ℜᶻ χ) (ℑᶻ χ))) (⊞ᶻ η η′) (⊠ᶻ ν (∗ᶻ μ))) ⊥)) (◀ (nz_pl μ)))) (◀ μ′))) υ))) (◀ (nz_pl ν)))) (◀ ν′))) ψ))) (◀ (nz_pl α)) (◀ (nz_pl β)))
+⍝ the roots in ℚ(i) of a polynomial with non-real coefficients: 0 if p(0) = 0, then the candidates for p/x^k, with P = L·p/x^k divided
+⍝ by its Gaussian content (the gcd in ℤ[i] of the entries: fewer divisors to try)
+rgp_pl ∶ 𝔏 𝔇 → 𝔏 𝔇
+rgp_pl ξ ≔ ((γ′ ↦ ((≡ γ′ (◀ 1)) ξ (⫶ (θ ↦ (⊡ (÷ᶻ θ γ′))) ξ))) (foldl (θ ι ↦ ((≡ θ (◀ 1)) θ (ggcdᶻ θ ι))) ⊥ ξ))
+rg_pl ∶ 𝔏 ℚ[i] → 𝔏 ℚ[i]
+rg_pl ξ ≔ ((φ ↦ (⧺ ((z_pl (hd ξ)) (∷ 0 ⊥) ⊥) ((∅ (⌄ φ)) ⊥ ((Π ↦ (rgc_pl φ (gdv_pl (hd Π)) (gdv_pl (last Π)) (⊡ (foldl ⊞ᶻ ⊥ Π)) (⊡ (foldr (θ ι ↦ (⊟ᶻ θ ι)) ⊥ Π)) (↓ᶻ (⌈ (rb_pl φ))) (↓ᶻ (⌈ (rb_pl (reverse φ)))))) (rgp_pl ((λ′ ↦ (⫶ (gi_pl λ′) φ)) (ctl_pl φ))))))) (sz_pl ξ))
+ratroots ∶ ℚ[i][x] → 𝔏 ℚ[i]      ⍝ the distinct roots of p in ℚ(i), sorted by (Re, Im): exact (Sturm isolation + aₙ·r ∈ ℤ for the rational ones, positive Kronecker quadratics for the non-real ones; non-real coefficients: the rational root theorem in ℤ[i] over Gaussian divisors of P(0) and lc P); [] for p = 0
+ratroots ξ ≔ ((φ ↦ ((∅ φ) ⊥ (foldr isd_pl ⊥ ((∀ₗ rl_pl φ) (rr_pl φ) (rg_pl φ))))) (poly ξ))
+⍝ ---- factorisation over ℚ (Zassenhaus).  The square-free primitive h is factored modulo small odd primes p (p ∤ lc h, h mod p
+⍝ square-free; the first three such primes) by distinct-degree factorisation; the degrees of the factors over ℤ must be subset sums of
+⍝ the modular factor degrees for EVERY prime (degree sieve: when only 0 and n survive, h is irreducible and nothing is lifted).
+⍝ Otherwise, for the prime with the fewest modular factors, Cantor–Zassenhaus splitting gives the monic modular factors; they are lifted,
+⍝ two at a time, by quadratic Hensel steps to M = p^(2^j) > 2B, B = 2ⁿ·Σ|hᵢ| (Mignotte: for every factor g of h, lc(h)/lc(g)·g has
+⍝ coefficients ≤ B); the factors over ℤ are recombined from subsets of the lifted factors, smallest first, whose degree passes the
+⍝ sieve: lc(h)·Π mod M in the symmetric range, primitive part, exact division.  All modular arithmetic runs on digit strings 𝔇.
+⍝ integers modulo m (m > 0): the residue in [0, m) of any real integer, the symmetric residue in (−m/2, m/2], the extended Euclid
+⍝ algorithm on naturals ((x, y) with a·x + b·y = gcd(a, b)), the inverse modulo m
+rd_pl ∶ 𝔇 → 𝔇 → 𝔇
+rd_pl μ ξ ≔ ((⋚ʳ ξ) ((ρ ↦ ((∅ᶻ ρ) ⊥ (⊟ᶻ μ ρ))) (▶ (⫽ᶻ (⊖ᶻ ξ) μ))) ⊥ (▶ (⫽ᶻ ξ μ)))
+sy_pl ∶ 𝔇 → 𝔇 → 𝔇
+sy_pl μ ξ ≔ ((ρ ↦ ((⩾ᶻ μ (⊞ᶻ ρ ρ)) ρ (⊟ᶻ ρ μ))) (rd_pl μ ξ))
+ieg_pl ∶ 𝔇 → 𝔇 → 𝔓 𝔇 𝔇
+ieg_pl ξ η ≔ ((∅ᶻ η) (⊗ (◀ 1) ⊥) ((θ ↦ ((τ ↦ (⊗ (▶ τ) (⊟ᶻ (◀ τ) (⊠ᶻ (◀ θ) (▶ τ))))) (ieg_pl η (▶ θ)))) (⫽ᶻ ξ η)))
+inv_pl ∶ 𝔇 → 𝔇 → 𝔇
+inv_pl μ ξ ≔ (rd_pl μ (◀ (ieg_pl (rd_pl μ ξ) μ)))
+⍝ integer polynomials as digit-string lists, not reduced: sum, difference, product, scalar multiple
+adz_pl ∶ 𝔏 𝔇 → 𝔏 𝔇 → 𝔏 𝔇
+adz_pl ξ η ≔ (ξ (θ ι ↦ (η (θ′ ι′ ↦ (∷ (⊞ᶻ θ θ′) (adz_pl ι ι′))) ξ)) η)
+sbz_pl ∶ 𝔏 𝔇 → 𝔏 𝔇 → 𝔏 𝔇
+sbz_pl ξ η ≔ (ξ (θ ι ↦ (η (θ′ ι′ ↦ (∷ (⊟ᶻ θ θ′) (sbz_pl ι ι′))) ξ)) (⫶ ⊖ᶻ η))
+mlz_pl ∶ 𝔏 𝔇 → 𝔏 𝔇 → 𝔏 𝔇
+mlz_pl ξ η ≔ (ξ (θ ι ↦ ((∅ᶻ θ) (∷ ⊥ (mlz_pl ι η)) (adz_pl (⫶ (⊠ᶻ θ) η) (∷ ⊥ (mlz_pl ι η))))) ⊥)
+scz_pl ∶ 𝔇 → 𝔏 𝔇 → 𝔏 𝔇
+scz_pl ξ η ≔ (⫶ (⊠ᶻ ξ) η)
+⍝ polynomials modulo m, reduced (coefficients in [0, m), no trailing zero): reduction, product, sum, difference, scalar multiple,
+⍝ monic multiple (lc invertible mod m)
+zm_pl ∶ 𝔇 → 𝔏 𝔇 → 𝔏 𝔇
+zm_pl μ ξ ≔ (trz_pl (⫶ (rd_pl μ) ξ))
+mlm_pl ∶ 𝔇 → 𝔏 𝔇 → 𝔏 𝔇 → 𝔏 𝔇
+mlm_pl μ ξ η ≔ ((∨ (∅ ξ) (∅ η)) ⊥ (zm_pl μ (mlz_pl ξ η)))
+adm_pl ∶ 𝔇 → 𝔏 𝔇 → 𝔏 𝔇 → 𝔏 𝔇
+adm_pl μ ξ η ≔ (zm_pl μ (adz_pl ξ η))
+sbm_pl ∶ 𝔇 → 𝔏 𝔇 → 𝔏 𝔇 → 𝔏 𝔇
+sbm_pl μ ξ η ≔ (zm_pl μ (sbz_pl ξ η))
+scm_pl ∶ 𝔇 → 𝔇 → 𝔏 𝔇 → 𝔏 𝔇
+scm_pl μ ξ η ≔ (zm_pl μ (scz_pl ξ η))
+mnm_pl ∶ 𝔇 → 𝔏 𝔇 → 𝔏 𝔇
+mnm_pl μ ξ ≔ ((∅ ξ) ⊥ ((θ ↦ ((∅ᶻ (⊟ᶻ θ (◀ 1))) ξ (scm_pl μ (inv_pl μ θ) ξ))) (last ξ)))
+⍝ quotient and remainder mod m of ξ (any integer coefficients) by a MONIC reduced η: long division on highest-first lists, no inverse
+⍝ needed; only the leading entry is reduced at each step (the others grow by less than m² per step), the remainder once at the end
+fsm_pl ∶ 𝔏 𝔇 → 𝔏 𝔇 → 𝔇 → 𝔏 𝔇
+fsm_pl ξ η ζ ≔ (ξ (θ ι ↦ (η (θ′ ι′ ↦ (∷ (⊟ᶻ θ (⊠ᶻ ζ θ′)) (fsm_pl ι ι′ ζ))) ξ)) ⊥)
+dvq_pl ∶ 𝔇 → 𝔏 α → 𝔏 𝔇 → 𝔏 𝔇 → 𝔓 (𝔏 𝔇) (𝔏 𝔇)
+dvq_pl μ σ ρ η ≔ (σ (θ σ′ ↦ ((χ ↦ ((τ ↦ (⊗ (∷ χ (◀ τ)) (▶ τ))) (dvq_pl μ σ′ ((∅ᶻ χ) (⌄ ρ) (fsm_pl (⌄ ρ) η χ)) η))) (rd_pl μ (hd ρ)))) (⊗ ⊥ ρ))
+dmm_pl ∶ 𝔇 → 𝔏 𝔇 → 𝔏 𝔇 → 𝔓 (𝔏 𝔇) (𝔏 𝔇)
+dmm_pl μ ξ η ≔ ((ρ σ ↦ ((τ ↦ (⊗ (trz_pl (reverse (◀ τ))) (zm_pl μ (reverse (▶ τ))))) (dvq_pl μ (dropl_pl (⌄ σ) ρ) ρ (⌄ σ)))) (reverse ξ) (reverse η))
+rmm_pl ∶ 𝔇 → 𝔏 𝔇 → 𝔏 𝔇 → 𝔏 𝔇
+rmm_pl μ ξ η ≔ (▶ (dmm_pl μ ξ η))
+⍝ modulo a prime p: the monic gcd of ξ and a monic (or zero) η; αᵉ mod (p, monic φ) by squaring on the digits of e
+gcp_pl ∶ 𝔇 → 𝔏 𝔇 → 𝔏 𝔇 → 𝔏 𝔇
+gcp_pl π ξ η ≔ ((∅ η) (mnm_pl π ξ) (gcp_pl π η (mnm_pl π (rmm_pl π ξ η))))
+pwq_pl ∶ 𝔇 → 𝔏 𝔇 → 𝔇 → 𝔏 𝔇 → 𝔏 𝔇
+pwq_pl π α ν φ ≔ ((∅ᶻ ν) (rmm_pl π (∷ (◀ 1) ⊥) φ) ((⌃ ν) (rmm_pl π (mlz_pl α (pwq_pl π α (⊟ᶻ ν (◀ 1)) φ)) φ) ((θ ↦ (rmm_pl π (mlz_pl θ θ) φ)) (pwq_pl π α (⊡ (½ᶻ ν)) φ))))
+⍝ extended Euclid mod p: (r, (s, t)) with s·u + t·v ≡ r (monic gcd; v monic); every new remainder made monic with its s and t
+egm_pl ∶ 𝔇 → 𝔏 𝔇 → 𝔏 𝔇 → 𝔏 𝔇 → 𝔏 𝔇 → 𝔏 𝔇 → 𝔏 𝔇 → 𝔓 (𝔏 𝔇) (𝔓 (𝔏 𝔇) (𝔏 𝔇))
+egm_pl π ρ σ τ ρ′ σ′ τ′ ≔ ((∅ ρ′) (⊗ ρ (⊗ σ τ)) ((θ ↦ ((ρ₂ σ₂ τ₂ ↦ ((∅ ρ₂) (⊗ ρ′ (⊗ σ′ τ′)) ((λ′ ↦ (egm_pl π ρ′ σ′ τ′ (scm_pl π λ′ ρ₂) (scm_pl π λ′ σ₂) (scm_pl π λ′ τ₂))) (inv_pl π (last ρ₂))))) (▶ θ) (sbm_pl π σ (mlz_pl (◀ θ) σ′)) (sbm_pl π τ (mlz_pl (◀ θ) τ′)))) (dmm_pl π ρ ρ′)))
+⍝ distinct-degree factorisation of a monic square-free φ mod p: pairs (the product of the irreducible factors of degree d, d);
+⍝ γ = x^(p^(d−1)) mod φ;  ddh_pl p h: the same for h mod p made monic;  nfc_pl: the number of irreducible factors
+ddf_pl ∶ 𝔇 → 𝔏 𝔇 → 𝔏 𝔇 → ℕ → 𝔏 (𝔓 (𝔏 𝔇) ℕ)
+ddf_pl π φ γ κ ≔ ((∅ (⌄ φ)) ⊥ ((≻ (⊠ 1100 κ) (dg_pl φ)) (∷ (⊗ φ (dg_pl φ)) ⊥) ((γ′ ↦ ((η ↦ ((∅ (⌄ η)) (ddf_pl π φ γ′ (⊞ κ 1)) ((φ′ ↦ (∷ (⊗ η κ) (ddf_pl π φ′ (rmm_pl π γ′ φ′) (⊞ κ 1)))) (◀ (dmm_pl π φ η))))) (gcp_pl π φ (mnm_pl π (sbm_pl π γ′ (∷ ⊥ (∷ (◀ 1) ⊥))))))) (pwq_pl π γ π φ))))
+ddh_pl ∶ 𝔇 → 𝔏 𝔇 → 𝔏 (𝔓 (𝔏 𝔇) ℕ)
+ddh_pl π φ ≔ ((ψ ↦ (ddf_pl π ψ (rmm_pl π (∷ ⊥ (∷ (◀ 1) ⊥)) ψ) 1)) (mnm_pl π (zm_pl π φ)))
+nfc_pl ∶ 𝔏 (𝔓 (𝔏 𝔇) ℕ) → ℕ
+nfc_pl δ ≔ (foldl (θ ι ↦ (⊞ θ (div (dg_pl (◀ ι)) (▶ ι)))) 0 δ)
+⍝ the degree sieve: the subset sums of the modular factor degrees of one distinct-degree factorisation, as Booleans indexed 0 … n
+dgs_pl ∶ ℕ → 𝔏 (𝔓 (𝔏 𝔇) ℕ) → 𝔏 𝔹
+dgs_pl ν δ ≔ (foldl (θ ι ↦ (foldl (ρ κ ↦ (⫴ ∨ ρ (take (⊞ ν 1) (⧺ (replicate (▶ ι) ⊥) ρ)))) θ (replicate (div (dg_pl (◀ ι)) (▶ ι)) 0))) (∷ ⊤ (replicate ν ⊥)) δ)
+⍝ equal-degree splitting (Cantor–Zassenhaus, p odd) of a monic φ whose irreducible factors all have degree d: the splitting
+⍝ candidates are the monic a of degree 1 … deg φ − 1 in turn (one of them always splits: by the Chinese remainder theorem the monic a
+⍝ of degree deg φ − 1 meet every hyperplane, so some a has a ≡ 0 modulo one factor and not modulo another); eds_pl gives the factor
+⍝ gcd(a, φ) or gcd(a^((p^d − 1)/2) − 1, φ) when it is proper, else []
+mpl_pl ∶ 𝔇 → ℕ → 𝔏 (𝔏 𝔇)
+mpl_pl π κ ≔ ((≐ κ 0) (∷ (∷ (◀ 1) ⊥) ⊥) (concat (⫶ (θ ↦ (⫶ (ι ↦ (∷ ι θ)) (⫶ ↓ᶻ (⍳ (⊗ π (◀ 1)))))) (mpl_pl π (⊟ κ 1)))))
+eds_pl ∶ 𝔇 → 𝔏 𝔇 → 𝔇 → 𝔏 𝔇 → 𝔏 𝔇
+eds_pl π φ ε α ≔ ((ν ↦ ((η ↦ ((∧ (¬ (∅ (⌄ η))) (≻ ν (dg_pl η))) η ((η′ ↦ ((∧ (¬ (∅ (⌄ η′))) (≻ ν (dg_pl η′))) η′ ⊥)) (gcp_pl π φ (mnm_pl π (sbm_pl π (pwq_pl π α ε φ) (∷ (◀ 1) ⊥))))))) (gcp_pl π φ (mnm_pl π (rmm_pl π α φ))))) (dg_pl φ))
+edf_pl ∶ 𝔇 → 𝔏 𝔇 → ℕ → 𝔏 (𝔏 𝔇)
+edf_pl π φ κ ≔ ((≐ (dg_pl φ) κ) (∷ φ ⊥) ((ε ↦ ((η ↦ (⧺ (edf_pl π η κ) (edf_pl π (◀ (dmm_pl π φ η)) κ))) (hd (filter (θ ↦ (¬ (∅ θ))) (⫶ (eds_pl π φ ε) (concat (⫶ (mpl_pl π) (upto 1 (⊟ (dg_pl φ) 1))))))))) (↓ᶻ (div (⊟ (^ (⊗ π (◀ 1)) κ) 1) 1100))))
+mfac_pl ∶ 𝔇 → 𝔏 (𝔓 (𝔏 𝔇) ℕ) → 𝔏 (𝔏 𝔇)
+mfac_pl π δ ≔ (concat (⫶ (θ ↦ (edf_pl π (◀ θ) (▶ θ))) δ))
+⍝ the odd primes from ν on (trial division), and "p is good for h": p ∤ lc h and gcd(h, h′) = 1 mod p
+ipr_pl ∶ ℕ → ℕ → 𝔹
+ipr_pl ν δ ≔ ((≻ (⊠ δ δ) ν) ⊤ ((≐ (mod ν δ) 0) ⊥ (ipr_pl ν (⊞ δ 1100))))
+opr_pl ∶ ℕ → 𝔏 ℕ
+opr_pl ν ≔ ((ipr_pl ν 1101) (∷ ν (opr_pl (⊞ ν 1100))) (opr_pl (⊞ ν 1100)))
+gpr_pl ∶ 𝔏 𝔇 → 𝔇 → 𝔹
+gpr_pl φ π ≔ (∧ (¬ (∅ᶻ (rd_pl π (last φ)))) ((ψ ↦ (∅ (⌄ (gcp_pl π ψ (mnm_pl π (zm_pl π (drz_pl (⌄ ψ) (◀ 1)))))))) (mnm_pl π (zm_pl π φ))))
+⍝ one quadratic Hensel step (von zur Gathen–Gerhard, Modern Computer Algebra, Algorithm 15.10), all modulo the new modulus m²:
+⍝ from f ≡ g·h and s·g + t·h ≡ 1 (mod m), h monic, to (g*, (h*, (s*, t*))) with the same properties mod m²
+hs_pl ∶ 𝔇 → 𝔏 𝔇 → 𝔏 𝔇 → 𝔏 𝔇 → 𝔏 𝔇 → 𝔏 𝔇 → 𝔓 (𝔏 𝔇) (𝔓 (𝔏 𝔇) (𝔓 (𝔏 𝔇) (𝔏 𝔇)))
+hs_pl μ φ γ η σ τ ≔ ((ε ↦ ((ϙ ↦ ((γ′ η′ ↦ ((β ↦ ((ϛ ↦ (⊗ γ′ (⊗ η′ (⊗ (sbm_pl μ σ (▶ ϛ)) (sbm_pl μ (sbz_pl τ (mlz_pl τ β)) (mlz_pl (◀ ϛ) γ′)))))) (dmm_pl μ (mlz_pl σ β) η′))) (sbm_pl μ (adz_pl (mlz_pl σ γ′) (mlz_pl τ η′)) (∷ (◀ 1) ⊥)))) (adm_pl μ γ (adz_pl (mlz_pl τ ε) (mlz_pl (◀ ϙ) γ))) (adm_pl μ η (▶ ϙ)))) (dmm_pl μ (mlz_pl σ ε) η))) (sbm_pl μ φ (mlz_pl γ η)))
+⍝ Hensel steps from the modulus m up to κ = m^(2^j): the lifted pair (g, h)
+hl_pl ∶ 𝔇 → 𝔇 → 𝔏 𝔇 → 𝔏 𝔇 → 𝔏 𝔇 → 𝔏 𝔇 → 𝔏 𝔇 → 𝔓 (𝔏 𝔇) (𝔏 𝔇)
+hl_pl μ κ φ γ η σ τ ≔ ((⩾ᶻ μ κ) (⊗ γ η) ((μ′ ↦ ((θ ↦ (hl_pl μ′ κ φ (◀ θ) (◀ (▶ θ)) (◀ (▶ (▶ θ))) (▶ (▶ (▶ θ))))) (hs_pl μ′ (zm_pl μ′ φ) γ η σ τ))) (⊠ᶻ μ μ)))
+⍝ h ≡ lc(h)·u₁⋯u_r (mod p), uⱼ monic: the monic lifts of the uⱼ mod κ — u₁ against u₂⋯u_r, then the lifted cofactor against the rest
+hla_pl ∶ 𝔇 → 𝔇 → 𝔏 𝔇 → 𝔏 (𝔏 𝔇) → 𝔏 (𝔏 𝔇)
+hla_pl π κ φ υ ≔ ((∅ (⌄ υ)) (∷ (mnm_pl κ (zm_pl κ φ)) ⊥) ((γ η ↦ ((τ ↦ ((λ ↦ (∷ (mnm_pl κ (◀ λ)) (hla_pl π κ (▶ λ) (⌄ υ)))) (hl_pl π κ φ γ η (◀ (▶ τ)) (▶ (▶ τ))))) (egm_pl π γ (∷ (◀ 1) ⊥) ⊥ η ⊥ (∷ (◀ 1) ⊥)))) (scm_pl π (last φ) (hd υ)) (foldl (mlm_pl π) (∷ (◀ 1) ⊥) (⌄ υ))))
+⍝ B = 2ⁿ·Σ|hᵢ|, and the first p^(2^j) > 2B
+mb_pl ∶ 𝔏 ℤ → ℤ
+mb_pl φ ≔ (⊠ (^ 1100 (dg_pl φ)) (foldl (θ ι ↦ (⊞ θ (abs ι))) 0 φ))
+mm_pl ∶ 𝔇 → 𝔇 → 𝔇
+mm_pl μ β ≔ ((⩾ᶻ (⊞ᶻ β β) μ) (mm_pl (⊠ᶻ μ μ) β) μ)
+⍝ the k-element subsets of a list, each paired with the rest
+cmb_pl ∶ ℕ → 𝔏 α → 𝔏 (𝔓 (𝔏 α) (𝔏 α))
+cmb_pl κ ξ ≔ ((≐ κ 0) (∷ (⊗ ⊥ ξ) ⊥) (ξ (θ ι ↦ (⧺ (⫶ (λ ↦ (⊗ (∷ θ (◀ λ)) (▶ λ))) (cmb_pl (⊟ κ 1) ι)) (⫶ (λ ↦ (⊗ (◀ λ) (∷ θ (▶ λ)))) (cmb_pl κ ι)))) ⊥))
+⍝ the candidate of a subset: ψ = the primitive part of lc(h)·Π (mod M, symmetric), kept when deg ψ ≥ 1 and ψ divides h (the
+⍝ constant terms are compared first)
+rcd_pl ∶ 𝔇 → 𝔏 ℤ → 𝔏 (𝔏 𝔇) → 𝔏 ℤ
+rcd_pl κ φ υ ≔ ((ψ ↦ ((∧ (¬ (∅ (⌄ ψ))) (∧ (∨ (z_pl (hd φ)) (∧ (¬ (z_pl (hd ψ))) (dq_pl (hd φ) (⊡ (absᶻ (↓ᶻ (hd ψ))))))) (∅ (rem_pl φ ψ)))) ψ ⊥)) (pp_pl (poly (⫶ (θ ↦ (⊗ (sy_pl κ θ) (◀ 1))) (foldl (mlm_pl κ) (∷ (rd_pl κ (↓ᶻ (last φ))) ⊥) υ)))))
+⍝ recombination: subsets of ν lifted factors (whose degree passes the sieve ω′), ν = 1, 2, … while 2ν ≤ their number; what remains
+⍝ is irreducible
+rc_pl ∶ 𝔇 → 𝔏 ℤ → 𝔏 (𝔏 𝔇) → ℕ → 𝔏 𝔹 → 𝔏 (𝔏 ℤ)
+rc_pl κ φ υ ν ω′ ≔ ((≻ (⊠ 1100 ν) (ℓ υ)) ((∅ (⌄ φ)) ⊥ (∷ φ ⊥)) ((λ ↦ ((∅ λ) (rc_pl κ φ υ (⊞ ν 1) ω′) ((θ ↦ (∷ (◀ θ) (rc_pl κ (pp_pl (quo_pl φ (◀ θ))) (▶ θ) ν ω′))) (hd λ)))) (filter (θ ↦ (¬ (∅ (◀ θ)))) (⫶ (θ ↦ (⊗ (rcd_pl κ φ (◀ θ)) (▶ θ))) (filter (θ ↦ (nth ω′ (foldl (ρ ι ↦ (⊞ ρ (dg_pl ι))) 0 (◀ θ)))) (cmb_pl ν υ))))))
+⍝ the irreducible factors of a square-free primitive h with positive leading coefficient, from the chosen (p, distinct-degree
+⍝ factorisation) and the sieve
+zf_pl ∶ 𝔏 ℤ → 𝔓 𝔇 (𝔏 (𝔓 (𝔏 𝔇) ℕ)) → 𝔏 𝔹 → 𝔏 (𝔏 ℤ)
+zf_pl φ ζ ω′ ≔ ((π ↦ ((υ ↦ ((∅ (⌄ υ)) (∷ φ ⊥) ((κ ↦ (rc_pl κ φ (hla_pl π κ (⫶ ↓ᶻ φ) υ) 1 ω′)) (mm_pl π (↓ᶻ (mb_pl φ)))))) (mfac_pl π (▶ ζ)))) (◀ ζ))
+zs_pl ∶ 𝔏 ℤ → 𝔏 (𝔏 ℤ)
+zs_pl φ ≔ ((∅ (⌄ (⌄ φ))) (∷ φ ⊥) ((φ′ ↦ ((λ ↦ ((ω′ ↦ ((∃ₗ (θ ↦ θ) (take (⊟ (dg_pl φ) 1) (⌄ ω′))) (zf_pl φ (foldl (θ ι ↦ ((≻ (nfc_pl (▶ θ)) (nfc_pl (▶ ι))) ι θ)) (hd λ) (⌄ λ)) ω′) (∷ φ ⊥))) (foldl (θ ι ↦ (⫴ ∧ θ (dgs_pl (dg_pl φ) (▶ ι)))) (replicate (⊞ (dg_pl φ) 1) ⊤) λ))) (⫶ (π ↦ (⊗ π (ddh_pl π φ′))) (take 1101 (filter (gpr_pl φ′) (⫶ ↓ᶻ (opr_pl 1101))))))) (⫶ ↓ᶻ φ)))
+⍝ the primitive linear factor of a rational root, and the irreducible factors of a square-free primitive integer polynomial
+lin_pl ∶ ℚ → 𝔏 ℤ
+lin_pl ρ ≔ (∷ (ng_pl (⊗ (◀ ρ) (◀ 1))) (∷ (⊗ (▶ ρ) (◀ 1)) ⊥))
+fsf_pl ∶ 𝔏 ℤ → 𝔏 (𝔏 ℤ)
+fsf_pl φ ≔ ((ρ ↦ ((η ↦ (⧺ (⫶ lin_pl ρ) ((∅ (⌄ η)) ⊥ (zs_pl η)))) (pp_pl (foldl dvr_pl φ ρ)))) (rq_pl (pchain_pl φ)))
+polyfactor ∶ 𝔏 ℚ → 𝔓 ℚ (𝔏 (𝔓 (𝔏 ℤ) ℕ))      ⍝ complete factorisation over ℚ: (c, [(f, k)]) with p = c·Π fᵏ, every f irreducible, primitive, with positive leading coefficient (Yun + rational roots + Zassenhaus: distinct-degree factorisation mod three small primes with a degree sieve, Cantor–Zassenhaus splitting, Hensel lifting, recombination of subsets — exponential only in the number of modular factors)
+polyfactor ξ ≔ ((φ ↦ ((∨ (∅ φ) (∅ (⌄ φ))) (⊗ ((∅ φ) 0 (hd φ)) ⊥) ((Λ ↦ (⊗ (cn_pl (÷ (last φ) (foldl (θ ι ↦ (⊠ θ (^ (last (◀ ι)) (▶ ι)))) 1 Λ))) Λ)) (concat (⫶ (θ ↦ (⫶ (ψ ↦ (⊗ ψ (▶ θ))) (fsf_pl (pp_pl (◀ θ))))) (yun_pl φ)))))) (poly ξ))
+isirreducible ∶ 𝔏 ℚ → 𝔹      ⍝ irreducible over ℚ (degree ≥ 1 and no factorisation; constants are not irreducible)
+isirreducible ξ ≔ ((θ ↦ (∧ (¬ (∅ θ)) (∧ (∅ (⌄ θ)) (≐ (▶ (hd θ)) 1)))) (▶ (polyfactor ξ)))
+⍝ ---- interpolation (Newton's divided differences; a repeated node is ignored, the first value counts)
+lv_pl ∶ 𝔏 ℚ[i] → 𝔏 ℚ[i] → 𝔏 ℚ[i] → 𝔏 ℚ[i]
+lv_pl ψ ξ η ≔ (ψ (θ ψ′ ↦ (ψ′ (θ′ ψ″ ↦ (ξ (ι ξ′ ↦ (η (ι′ η′ ↦ (∷ (cn_pl (÷ (⊟ θ′ θ) (⊟ ι′ ι))) (lv_pl ψ′ ξ′ η′))) ⊥)) ⊥)) ⊥)) ⊥)
+nc_pl ∶ 𝔏 ℚ[i] → 𝔏 ℚ[i] → 𝔏 ℚ[i] → 𝔏 ℚ[i]
+nc_pl ψ ξ η ≔ ((∅ ψ) ⊥ (∷ (hd ψ) (nc_pl (lv_pl ψ ξ (⌄ η)) ξ (⌄ η))))
+ip_pl ∶ 𝔏 ℚ[i] → 𝔏 ℚ[i] → 𝔏 ℚ[i]
+ip_pl ψ ξ ≔ (ψ (θ ι ↦ (add_pl (cp_pl θ) (mul_pl (∷ (ng_pl (hd ξ)) (∷ 1 ⊥)) (ip_pl ι (⌄ ξ))))) ⊥)
+ddp_pl ∶ 𝔏 (𝔓 ℚ[i] ℚ[i]) → 𝔏 (𝔓 ℚ[i] ℚ[i])
+ddp_pl ξ ≔ (ξ (θ ι ↦ (∷ θ (ddp_pl (filter (φ ↦ (¬ (≐ (◀ φ) (◀ θ)))) ι)))) ⊥)
+interpolate ∶ 𝔏 ℚ → 𝔏 ℚ → 𝔏 ℚ      ⍝ interpolate(xs, ys): the polynomial of degree < n through the n points (xⱼ, yⱼ) (Newton's divided differences; a repeated node is ignored)
+interpolate ∶ 𝔏 ℚ[i] → 𝔏 ℚ[i] → ℚ[i][x]
+interpolate ξ η ≔ ((ζ ↦ ((χ ψ ↦ (ip_pl (nc_pl ψ χ χ) χ)) (⫶ ◀ ζ) (⫶ ▶ ζ))) (ddp_pl (⫴ ⊗ (⫶ cn_pl ξ) (⫶ cn_pl η))))
+polyfromroots ∶ 𝔏 ℤ → 𝔏 ℤ      ⍝ polyfromroots(rs) = Π (x − r)  (1 for the empty list)
+polyfromroots ∶ 𝔏 ℚ → 𝔏 ℚ
+polyfromroots ∶ 𝔏 ℤ[i] → 𝔏 ℤ[i]
+polyfromroots ∶ 𝔏 ℚ[i] → ℚ[i][x]
+polyfromroots ξ ≔ (fr_pl (⫶ cn_pl ξ))
+⍝ ---- special polynomials.  cyclotomic: Φ₁ = x − 1, Φₘₚ(x) = Φₘ(xᵖ)/Φₘ(x) for the distinct primes p of n, then Φₙ(x) = Φ_rad(n)(x^(n/rad n))
+pf′_pl ∶ ℕ → ℕ → 𝔏 ℕ
+pf′_pl ν δ ≔ ((≻ (⊠ δ δ) ν) ((≻ ν 1) (∷ ν ⊥) ⊥) ((≐ (mod ν δ) 0) (∷ δ (pf′_pl (rmv_pl ν δ) (⊞ δ 1))) (pf′_pl ν (⊞ δ 1))))
+rmv_pl ∶ ℕ → ℕ → ℕ
+rmv_pl ν δ ≔ ((≐ (mod ν δ) 0) (rmv_pl (div ν δ) δ) ν)
+spr_pl ∶ 𝔏 ℚ[i] → ℕ → 𝔏 ℚ[i]
+spr_pl ξ κ ≔ (ξ (θ ι ↦ (∷ θ ((∅ ι) ⊥ (⧺ (replicate (⊟ κ 1) 0) (spr_pl ι κ))))) ⊥)
+cyclotomic ∶ ℕ → 𝔏 ℤ      ⍝ the cyclotomic polynomial Φₙ (cyclotomic(0) = 1)
+cyclotomic ν ≔ ((≐ ν 0) (∷ 1 ⊥) ((ρ ↦ (spr_pl (foldl (θ ι ↦ (quo_pl (spr_pl θ ι) θ)) (∷ 11101 (∷ 1 ⊥)) ρ) (div ν (prodof ρ)))) (pf′_pl ν 1100)))
+⍝ three-term recurrences: P(k+1) = φ k P(k) P(k−1)
+olp_pl ∶ (ℕ → 𝔏 ℚ → 𝔏 ℚ → 𝔏 ℚ) → 𝔏 ℚ → 𝔏 ℚ → ℕ → ℕ → 𝔏 ℚ
+olp_pl φ ξ η κ ν ≔ ((≐ κ ν) η (olp_pl φ η (φ κ η ξ) (⊞ κ 1) ν))
+orth_pl ∶ (ℕ → 𝔏 ℚ → 𝔏 ℚ → 𝔏 ℚ) → 𝔏 ℚ → 𝔏 ℚ → ℕ → 𝔏 ℚ
+orth_pl φ ξ η ν ≔ ((≐ ν 0) ξ (olp_pl φ ξ η 1 ν))
+chebyshevT ∶ ℕ → 𝔏 ℤ      ⍝ the Chebyshev polynomial Tₙ (T₀ = 1, T₁ = x, Tₙ₊₁ = 2x·Tₙ − Tₙ₋₁)
+chebyshevT ν ≔ (orth_pl (κ η ξ ↦ (sub_pl (xm_pl (scl_pl 1100 η)) ξ)) (∷ 1 ⊥) (∷ 0 (∷ 1 ⊥)) ν)
+chebyshevU ∶ ℕ → 𝔏 ℤ      ⍝ the Chebyshev polynomial of the second kind Uₙ (U₀ = 1, U₁ = 2x, same recurrence)
+chebyshevU ν ≔ (orth_pl (κ η ξ ↦ (sub_pl (xm_pl (scl_pl 1100 η)) ξ)) (∷ 1 ⊥) (∷ 0 (∷ 1100 ⊥)) ν)
+legendreP ∶ ℕ → 𝔏 ℚ      ⍝ the Legendre polynomial Pₙ ((n+1)Pₙ₊₁ = (2n+1)x·Pₙ − n·Pₙ₋₁)
+legendreP ν ≔ (orth_pl (κ η ξ ↦ (scl_pl (cn_pl (÷ 1 (⊞ κ 1))) (sub_pl (xm_pl (scl_pl (⊞ (⊠ 1100 κ) 1) η)) (scl_pl κ ξ)))) (∷ 1 ⊥) (∷ 0 (∷ 1 ⊥)) ν)
+hermiteH ∶ ℕ → 𝔏 ℤ      ⍝ the (physicists') Hermite polynomial Hₙ (H₀ = 1, H₁ = 2x, Hₙ₊₁ = 2x·Hₙ − 2n·Hₙ₋₁)
+hermiteH ν ≔ (orth_pl (κ η ξ ↦ (sub_pl (xm_pl (scl_pl 1100 η)) (scl_pl (⊠ 1100 κ) ξ))) (∷ 1 ⊥) (∷ 0 (∷ 1100 ⊥)) ν)
+laguerreL ∶ ℕ → 𝔏 ℚ      ⍝ the Laguerre polynomial Lₙ ((n+1)Lₙ₊₁ = (2n+1−x)·Lₙ − n·Lₙ₋₁)
+laguerreL ν ≔ (orth_pl (κ η ξ ↦ (scl_pl (cn_pl (÷ 1 (⊞ κ 1))) (sub_pl (sub_pl (scl_pl (⊞ (⊠ 1100 κ) 1) η) (xm_pl η)) (scl_pl κ ξ)))) (∷ 1 ⊥) (∷ 1 (∷ 11101 ⊥)) ν)
+companion ∶ 𝔏 ℚ → 𝔏 (𝔏 ℚ)      ⍝ the companion matrix (list of rows: ones below the diagonal, last column −c₀ … −cₙ₋₁) of the monic multiple of p: its characteristic polynomial is polymonic(p); [] for degree ≤ 0
+companion ∶ ℚ[i][x] → 𝔏 (𝔏 ℚ[i])
+companion ξ ≔ ((φ ↦ ((∨ (∅ φ) (∅ (⌄ φ))) ⊥ ((ν ↦ (⫴ (ι θ ↦ (⧺ (⫶ (κ ↦ ((≐ κ (⊟ ι 1)) 1 0)) (⍳ (⊟ ν 1))) (∷ (ng_pl θ) ⊥))) (⍳ ν) (reverse (⌄ (reverse φ))))) (dg_pl φ)))) (mon_pl (poly ξ)))
+⍝ ---- text: "x^2 - 2*x + 1", "(1 + i)*x + 3" (highest degree first; coefficients ±1 omitted; non-real coefficients parenthesised)
+xs_pl ∶ ℕ → 𝕊
+xs_pl κ ≔ ((≐ κ 1) "x" (⧺ "x^" (dec κ)))
+tm_pl ∶ ℚ[i] → ℕ → 𝔹 → 𝕊
+tm_pl θ κ ρ ≔ ((rl_pl θ) ((τ μ ↦ (⧺ (ρ (τ "-" ⊥) (τ " - " " + ")) ((≐ κ 0) (showq μ) ((≐ μ 1) (xs_pl κ) (⧺ (showq μ) (∷ '*' (xs_pl κ))))))) (≺ θ 0) (abs θ)) (⧺ (ρ ⊥ " + ") (∷ '(' (⧺ (showc θ) (∷ ')' ((≐ κ 0) ⊥ (∷ '*' (xs_pl κ))))))))
+ps_pl ∶ 𝔏 (𝔓 ℚ[i] ℕ) → 𝔹 → 𝕊
+ps_pl ξ ρ ≔ (ξ (θ ι ↦ ((z_pl (◀ θ)) (ps_pl ι ρ) (⧺ (tm_pl (◀ θ) (▶ θ) ρ) (ps_pl ι ⊥)))) ⊥)
+polystr ∶ ℚ[i][x] → 𝕊      ⍝ the polynomial in human notation, highest degree first: "x^2 - 2*x + 1", "(1 + i)*x + 3", "0"
+polystr ξ ≔ ((φ ↦ ((∅ φ) "0" (ps_pl (reverse (⫴ ⊗ φ (⍳ (ℓ φ)))) ⊤))) (poly ξ))
+⍝ ---- complex roots, numerically: Weierstrass (Durand–Kerner) iteration on each monic square-free factor of Yun's decomposition, in fixed
+⍝ point base i − 1: a value v is the Gaussian integer v·bᶠ (b = i − 1, F = ℓ(υ) for a list υ of F zero digits); products are truncated
+⍝ (error < 2.5·|b|⁻ᶠ).  Element n of the stream works with F = 2n + 24 digits (|b|⁻ᶠ = 2⁻ⁿ⁻¹²) and iterates until every correction
+⍝ has |W| ≤ 2⁻ⁿ⁻³/d (by Gerschgorin's theorem for the Weierstrass matrix the root is then within (d − 1)|W|), at most 48 times.
+fxm_pl ∶ 𝔏 𝔹 → 𝔇 → 𝔇 → 𝔇
+fxm_pl υ ξ η ≔ (dropl_pl υ (⊠ᶻ ξ η))
+fxc_pl ∶ 𝔏 𝔹 → ℚ[i] → 𝔇
+fxc_pl υ ξ ≔ (quoᶻ (⧺ υ (◀ ξ)) (▶ ξ))
+fxq_pl ∶ 𝔏 𝔹 → 𝔇 → ℚ[i]
+fxq_pl υ ξ ≔ (⊗ (⊡ ξ) (⧺ υ (∷ ⊤ ⊥)))
+hfx_pl ∶ 𝔏 𝔹 → 𝔏 𝔇 → 𝔇 → 𝔇
+hfx_pl υ ξ ζ ≔ (ξ (θ ι ↦ ((∅ ι) θ (⊞ᶻ θ (fxm_pl υ ζ (hfx_pl υ ι ζ))))) ⊥)
+⍝ one Jacobi step: for every approximation (new value, correction W = g(z)/Π(z − zⱼ))
+dk_pl ∶ 𝔏 𝔹 → 𝔏 𝔇 → 𝔏 𝔇 → 𝔏 (𝔓 𝔇 𝔇)
+dk_pl υ ξ ζ ≔ (⫶ (θ ↦ ((ω ↦ (⊗ (⊡ (⊟ᶻ (◀ θ) ω)) ω)) (quoᶻ (⧺ υ (hfx_pl υ ξ (◀ θ))) (foldl (ρ ι ↦ (fxm_pl υ ρ (⊟ᶻ (◀ θ) ι))) (⧺ υ (∷ ⊤ ⊥)) (▶ θ))))) (ot_pl ⊥ ζ))
+it_pl ∶ 𝔏 𝔹 → 𝔏 𝔇 → 𝔇 → 𝔏 𝔇 → ℕ → 𝔏 𝔇
+it_pl υ ξ δ ζ κ ≔ ((ρ ↦ ((ζ′ ↦ ((∨ (≐ κ 0) (∀ₗ (θ ↦ (⩾ᶻ δ (⊠ᶻ (▶ θ) (∗ᶻ (▶ θ))))) ρ)) ζ′ (it_pl υ ξ δ ζ′ (⊟ κ 1)))) (⫶ ◀ ρ))) (dk_pl υ ξ ζ))
+dks_pl ∶ 𝔏 ℚ[i] → 𝔇 → 𝔏 𝔹 → 𝔏 𝔇 → 𝔖 (𝔏 ℚ[i])
+dks_pl φ δ υ ζ ≔ ((ζ′ ↦ (∷ (⫶ (fxq_pl υ) ζ′) (dks_pl φ δ (∷ ⊥ (∷ ⊥ υ)) (⫶ (θ ↦ (∷ ⊥ (∷ ⊥ θ))) ζ′)))) (it_pl υ (⫶ (fxc_pl υ) φ) δ ζ 110100000000))
+⍝ the starting values (0.4 + 0.9i)ᵏ, k = 0 … d − 1
+st_pl ∶ 𝔏 𝔹 → 𝔇 → 𝔇 → ℕ → 𝔏 𝔇
+st_pl υ σ ζ κ ≔ ((≐ κ 0) ⊥ (∷ ζ (st_pl υ σ (fxm_pl υ ζ σ) (⊟ κ 1))))
+⍝ the roots of a monic square-free factor: exact for degree 1, otherwise the iteration (the threshold δ = 2¹⁸/d² on N(W·bᶠ))
+crf_pl ∶ 𝔏 ℚ[i] → 𝔏 ℝ[i]
+crf_pl φ ≔ ((ν ↦ ((≐ ν 1) (∷ (⁂ (ng_pl (hd φ))) ⊥) ((υ ↦ ((σ ↦ (⫶ (κ ↦ (⫶ (θ ↦ (nth θ κ)) σ)) (⍳ ν))) (dks_pl φ (◀ (⫽ᶻ (◀ 11101000000000000000000000000000000000000) (⊡ (⊠ᶻ (↓ᶻ ν) (↓ᶻ ν))))) υ (st_pl υ (fxc_pl υ (÷ 111010010011 111001100)) (⧺ υ (∷ ⊤ ⊥)) ν)))) (replicate 110011000000 ⊥)))) (dg_pl φ))
+croots ∶ ℚ[i][x] → 𝔏 ℝ[i]      ⍝ all complex roots with multiplicity, as lazy complex numbers (numerical: Weierstrass/Durand–Kerner iteration in fixed point on Yun's square-free factors, simple roots first; element n within about 2⁻ⁿ once converged, see lib/poly.imo)
+croots ξ ≔ ((φ ↦ (concat (⫶ (θ ↦ (concat (replicate (▶ θ) (crf_pl (◀ θ))))) (yun_pl φ)))) (poly ξ))

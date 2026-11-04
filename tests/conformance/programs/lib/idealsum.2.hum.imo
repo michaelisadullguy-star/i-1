@@ -1,0 +1,1 @@
+main in \NN := idealsum(4, -2)

@@ -1,0 +1,18 @@
+core: Rustimo
+PASS  the test program passes the class checker [] 
+PASS  fpadd, fpsub, fpmul, fpdivmod, fpquo, fprem, fpgcd, fpegcd (s f + t g = gcd), fppowmod, fpderiv, fpeval, fproots, fpneg, fpmonic over GF(2), GF(3), GF(5), GF(7): 8 random pairs [] 
+PASS  fpoly reduces coefficients (negative, large); trailing zeros vanish; degree; division by 0 gives (0, f); gcd of zeros 
+PASS  fpscale c·f 
+PASS  fpirreducible against trial division: 42 polynomials over GF(2), GF(3), GF(5) (degrees 1 to 4, constants and zero) [] 
+PASS  fpfactor: 21 polynomials over GF(2), GF(3), GF(5), GF(7) — repeated factors, p-th powers (x^6 + 1 = (x^2 + 1)^3 over GF(3)), irreducible and reducible, constants, zero — equal to trial division [] 
+PASS  irreduciblepoly, primitivepoly (first in the order of the coefficient vector) and numirreducible (Gauss's formula = the brute-force count for n <= 3) for 11 pairs (p, n) [] 
+PASS  numirreducible: 3, 6, 8, 10, 21 irreducible polynomials of degrees 4, 5 over GF(2), 3 over GF(3), 2 over GF(5), GF(7) 
+PASS  isprimitivepoly: x^4 + x + 1 yes; x^4 + x^3 + x^2 + x + 1 (x has order 5) no; x^2 + 1 (not irreducible) no; x^2 + x + 2 over GF(3) yes; the zero polynomial and x no 
+PASS  GF(p^n) for 8 fields (GF(8), GF(16), GF(9), GF(27), GF(25), GF(7); also GF(8) with the modulus x^3 + x + 1 and GF(9) with x^2 + 1, where x is not primitive): add, sub, mul, neg, inv, div, pow (also negative), elements, order, isprimitive, primitive, log, frobenius, trace, norm, conjugates, minpoly, sqrt, issquare, roots [] 
+PASS  gfchar, gfmodulus, gfdegree, gfsize, gfelement (reduces modulo p and the modulus), gfsubfields, 0^0 = 1, inverse and quotient by 0 are [], log of 0 is -1 
+PASS  nfmatrix, nfcharpoly, nfminpoly, nfdegree, nftrace, nfnorm (determinant = resultant formula), nfisintegral, nfdiscriminant in 9 number fields (quadratic, cubic, quartic; elements with denominators; a reducible modulus) [] 
+PASS  algsum, algdiff, algprod, algquot, algneg, alginv, algpow, algroot: the roots of the returned factors are exactly the combinations of the numerical roots of f and g (7 pairs, 5 single polynomials; every factor monic) [] 
+PASS  known minimal polynomials: sqrt 2 + sqrt 3: x^4 - 10 x^2 + 1;  sqrt 2 * sqrt 3: x^2 - 6;  -sqrt 2: x^2 - 2;  1/sqrt 2: x^2 - 1/2;  (cbrt 2)^2: x^3 - 4;  2^(1/4): x^4 - 2;  sqrt 2 + sqrt 2: x, x^2 - 8 
+PASS  algprod with a factor having the root 0 is [x] 
+
+15/15 passed  (8.5s)

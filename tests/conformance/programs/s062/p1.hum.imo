@@ -1,0 +1,2 @@
+f in \QQ -> \QQ
+main in Prop := true

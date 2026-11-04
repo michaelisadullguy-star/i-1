@@ -1,0 +1,106 @@
+⍝ lib/list.imo — spec notation — trusted prelude, part 7: lists and streams, more Boolean connectives, digit-wise ("bitwise")
+⍝ operations on the base i−1 representation, characters
+⍝ ---- Booleans
+⇒ ∶ 𝔹 → 𝔹 → 𝔹
+⇒ ξ η ≔ (ξ η ⊤)
+⇔ ∶ 𝔹 → 𝔹 → 𝔹
+⇔ ξ η ≔ (ξ η (¬ η))
+⍝ ---- lists (the head of an empty list is ⊥, i.e. false / 0-digit / nil)
+hd ∶ 𝔏 α → α
+hd ξ ≔ (ξ (η ζ ↦ η) ⊥)
+foldr ∶ (α → β → β) → β → 𝔏 α → β
+foldr ξ ζ η ≔ (η (θ ι ↦ (ξ θ (foldr ξ ζ ι))) ζ)
+foldl ∶ (β → α → β) → β → 𝔏 α → β
+foldl ξ ζ η ≔ (η (θ ι ↦ (foldl ξ (ξ ζ θ) ι)) ζ)
+filter ∶ (α → 𝔹) → 𝔏 α → 𝔏 α
+filter ξ η ≔ (η (θ ι ↦ ((ξ θ) (∷ θ (filter ξ ι)) (filter ξ ι))) ⊥)
+take′ ∶ 𝔇 → 𝔏 α → 𝔏 α
+take′ ν η ≔ ((∅ᶻ ν) ⊥ (η (θ ι ↦ (∷ θ (take′ (⊟ᶻ ν (◀ 1)) ι))) ⊥))
+take ∶ ℕ → 𝔏 α → 𝔏 α
+take ∶ ℕ → 𝔖 α → 𝔏 α
+take ξ η ≔ (take′ (↓ᶻ ξ) η)
+drop′ ∶ 𝔇 → 𝔏 α → 𝔏 α
+drop′ ν η ≔ ((∅ᶻ ν) η (drop′ (⊟ᶻ ν (◀ 1)) (⌄ η)))
+drop ∶ ℕ → 𝔏 α → 𝔏 α
+drop ∶ ℕ → 𝔖 α → 𝔖 α
+drop ξ η ≔ (drop′ (↓ᶻ ξ) η)
+nth ∶ 𝔏 α → ℕ → α
+nth ∶ 𝔖 α → ℕ → α
+nth ξ η ≔ (hd (drop η ξ))
+last ∶ 𝔏 α → α
+last ξ ≔ (ξ (η ζ ↦ ((∅ ζ) η (last ζ))) ⊥)
+reverse ∶ 𝔏 α → 𝔏 α
+reverse ξ ≔ (foldl (η θ ↦ (∷ θ η)) ⊥ ξ)
+concat ∶ 𝔏 (𝔏 α) → 𝔏 α
+concat ξ ≔ (foldr ⧺ ⊥ ξ)
+zip ∶ 𝔏 α → 𝔏 β → 𝔏 (𝔓 α β)
+zip ξ η ≔ (⫴ ⊗ ξ η)
+zipwith ∶ (α → β → γ) → 𝔏 α → 𝔏 β → 𝔏 γ
+zipwith ∶ (α → β → γ) → 𝔖 α → 𝔖 β → 𝔖 γ
+zipwith ≔ ⫴
+replicate ∶ ℕ → α → 𝔏 α
+replicate ξ η ≔ (take ξ (⁂ η))
+iterate ∶ (α → α) → α → 𝔖 α
+iterate ξ η ≔ (∷ η (iterate ξ (ξ η)))
+⍝ the sequence f(0), f(1), f(2), …  as a stream (a real or complex number is such a sequence of approximants)
+tabulate ∶ (ℕ → α) → 𝔖 α
+tabulate ξ ≔ (⫶ ξ (iterate (η ↦ (⊞ η 1)) 0))
+sumof ∶ 𝔏 ℕ → ℕ
+sumof ∶ 𝔏 ℤ → ℤ
+sumof ∶ 𝔏 ℚ → ℚ
+sumof ∶ 𝔏 ℚ[i] → ℚ[i]
+sumof ξ ≔ (foldl ⊞ 0 ξ)
+prodof ∶ 𝔏 ℕ → ℕ
+prodof ∶ 𝔏 ℤ → ℤ
+prodof ∶ 𝔏 ℚ → ℚ
+prodof ∶ 𝔏 ℚ[i] → ℚ[i]
+prodof ξ ≔ (foldl ⊠ 1 ξ)
+elem ∶ ℚ[i] → 𝔏 ℚ[i] → 𝔹
+elem ξ η ≔ (∃ₗ (θ ↦ (≐ ξ θ)) η)
+⍝ a, a + 1, …, b
+upto ∶ ℕ → ℕ → 𝔏 ℕ
+upto ∶ ℤ → ℤ → 𝔏 ℤ
+upto ξ η ≔ ((⩾ η ξ) (∷ ξ (upto (⊞ ξ 1) η)) ⊥)
+⍝ insertion sort on ℚ, ascending and stable
+ins′ ∶ ℚ → 𝔏 ℚ → 𝔏 ℚ
+ins′ ξ η ≔ (η (θ ι ↦ ((⩾ θ ξ) (∷ ξ η) (∷ θ (ins′ ξ ι)))) (∷ ξ ⊥))
+sort ∶ 𝔏 ℕ → 𝔏 ℕ
+sort ∶ 𝔏 ℤ → 𝔏 ℤ
+sort ∶ 𝔏 ℚ → 𝔏 ℚ
+sort ξ ≔ (foldr ins′ ⊥ ξ)
+⍝ equality of lists, given an equality of elements;  equality of strings
+eqlist ∶ (α → α → 𝔹) → 𝔏 α → 𝔏 α → 𝔹
+eqlist ε ξ η ≔ (ξ (θ ι ↦ (η (θ′ ι′ ↦ (∧ (ε θ θ′) (eqlist ε ι ι′))) ⊥)) (∅ η))
+≐ˢ ∶ 𝕊 → 𝕊 → 𝔹
+≐ˢ ≔ (eqlist ≐)
+⍝ ---- digit-wise operations on the base i−1 digits of Gaussian integers.  They are well defined on values because the expansion is
+⍝ unique (trailing zeros give trailing zeros); they are what "bitwise and / or / xor" and "shifts" are in this number system.
+∧ᵈ ∶ 𝔇 → 𝔇 → 𝔇
+∧ᵈ ξ η ≔ ((∨ (∅ ξ) (∅ η)) ⊥ (∷ (∧ (⌃ ξ) (⌃ η)) (∧ᵈ (⌄ ξ) (⌄ η))))
+∨ᵈ ∶ 𝔇 → 𝔇 → 𝔇
+∨ᵈ ξ η ≔ ((∧ (∅ ξ) (∅ η)) ⊥ (∷ (∨ (⌃ ξ) (⌃ η)) (∨ᵈ (⌄ ξ) (⌄ η))))
+⊻ᵈ ∶ 𝔇 → 𝔇 → 𝔇
+⊻ᵈ ξ η ≔ ((∧ (∅ ξ) (∅ η)) ⊥ (∷ (⊻ (⌃ ξ) (⌃ η)) (⊻ᵈ (⌄ ξ) (⌄ η))))
+band ∶ ℤ[i] → ℤ[i] → ℤ[i]
+band ξ η ≔ (⊗ (⊡ (∧ᵈ (↓ᶻ ξ) (↓ᶻ η))) (◀ 1))
+bor ∶ ℤ[i] → ℤ[i] → ℤ[i]
+bor ξ η ≔ (⊗ (∨ᵈ (↓ᶻ ξ) (↓ᶻ η)) (◀ 1))
+bxor ∶ ℤ[i] → ℤ[i] → ℤ[i]
+bxor ξ η ≔ (⊗ (⊡ (⊻ᵈ (↓ᶻ ξ) (↓ᶻ η))) (◀ 1))
+⍝ shifts: z·bⁿ (prepend n zeros) and the inverse that drops the n lowest digits
+shl ∶ ℤ[i] → ℕ → ℤ[i]
+shl ξ η ≔ (⊗ (⧺ (take η (⁂ ⊥)) (↓ᶻ ξ)) (◀ 1))
+shr ∶ ℤ[i] → ℕ → ℤ[i]
+shr ξ η ≔ (⊗ (drop η (↓ᶻ ξ)) (◀ 1))
+⍝ number of digits of the expansion, and the digit at a position
+ndigits ∶ ℤ[i] → ℕ
+ndigits ξ ≔ (ℓ (⊡ (↓ᶻ ξ)))
+digit ∶ ℤ[i] → ℕ → 𝔹
+digit ξ η ≔ (nth (↓ᶻ ξ) η)
+⍝ ---- characters.  𝕔 n is the character with code point n, unchecked: it is how the binary notation writes a Char literal
+⍝ ('λ' is (𝕔 1110100000001000011001101)), so that a literal keeps its class 𝕮 in bin as in spec and hum
+𝕔 ∶ ℕ → 𝕮
+𝕔 ξ ≔ ξ
+⍝ chr is total — a number that is not a Unicode scalar value (above U+10FFFF, or a surrogate) gives U+FFFD
+chr ∶ ℕ → 𝕮
+chr ξ ≔ ((∧ (⩽ ξ 10000000100000000000000000000000000011101) (¬ (∧ (⩾ ξ 100011100110000000000000000000000) (⩽ ξ 100011100000000000000000000011101)))) ξ 100000000000000000000000000010001)

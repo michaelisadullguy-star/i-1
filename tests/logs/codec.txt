@@ -1,0 +1,13 @@
+PASS  the test program passes the class checker [] 
+PASS  110101 decoded as Z[i] is 1 - 6i; as Z^2 the pair (1, -6); as a fraction -1/6; as String^2 the pair of the strings coded by 1 and 6 (the same digits, four decoding keys) '1 - 6*i' '(1, -6)' -1/6 
+PASS  parsebits and bits: the digits 110101 give the Gaussian integer 1 - 6i and back; an unascribed number decodes by the default key, 5 as a pair is (5, 0), a fraction decodes as itself 1/2 + 1/3*i 
+PASS  17 Gaussian integers: parsebits against the python base-(i-1) twin, bits, pairz / fstz / sndz (a + b·i is the pair (a, b)), decode in the key Z^2 [] 
+PASS  the operations on pairs are those of the Gaussian integers: (a, b) + (c, d), (a, b) - (c, d), -(a, b), k·(a, b), == — through the human + - * == [] 
+PASS  qpair writes p/q as the pair (p, q) in lowest terms, fracz reads a pair (a, b) as a/b: fracz(qpair x) = x for 6 fractions; fracz of (a, 0) is 0 (total division) [] 
+PASS  strnat is the bijective numeration over the 1114112 code points (python integer arithmetic) and natstr inverts it, for 8 strings with accents and a non-BMP character [] 
+PASS  natstr 0 is the empty string, natstr 1 is the string of the code point 0, natstr 2 that of the code point 1, strnat of the empty string is 0 
+PASS  strpair("Hi", "yo") is the Gaussian integer strnat(Hi) + strnat(yo)·i; strfst, strsnd, decode and bits read it; ("", "a") is purely imaginary; the numbers 2 and -1 decode as String^2 by |real| and |imaginary| part ("Hi", "yo") 
+PASS  the example pair ("Hello, world!", "Welcome to i - 1!") is ONE binary string of 658 digits — the Gaussian integer 75-digit + 99-digit·i, equal to the python base-(i-1) expansion — and String^2 decodes it back 1100000100010000000111010001110111011100... 
+PASS  the class checker keeps the keys apart: a String^2 is not a Z^2, a Z^2 is not a String^2, fstz does not read a string pair (gaussian changes the key), strfst does not read a plain string [] 
+
+11/11 passed  (66.3s)

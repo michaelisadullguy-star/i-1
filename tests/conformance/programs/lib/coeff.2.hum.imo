@@ -1,0 +1,1 @@
+main in \ZZ := coeff([4, 9, -2], 3)

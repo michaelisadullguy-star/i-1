@@ -1,0 +1,45 @@
+cabal-version:      2.4
+name:               haskimo
+version:            1.0.0
+synopsis:           Haskimo, the Haskell interpreter of i-1: a language whose every value is a digit string of a Gaussian integer in base i-1
+description:
+  Haskimo, the Haskell interpreter of the i-1 language.  It reads the same three notations (bin, spec, hum), runs the same
+  prelude (lib/*.imo) and prints the same output as Pymo, the Python reference interpreter (pymo/).  See README.md, section
+  "Two interpreters".
+license:            LicenseRef-i-1-1.0
+license-file:       LICENSE
+author:             Yinhao Wang
+maintainer:         yinhao.wang@outlook.com
+category:           Language
+build-type:         Simple
+extra-source-files:
+  LICENSE
+  lib/*.imo
+  docs/doc1.sbl
+  docs/doc2.sbl
+
+executable haskimo
+  main-is:          Main.hs
+  hs-source-dirs:   haskimo/app haskimo/src
+  other-modules:
+    I1.Base
+    I1.Syntax
+    I1.Layers
+    I1.Core
+    I1.Hum
+    I1.Types
+    I1.Quote
+    I1.Program
+    I1.Output
+    I1.Serve
+    I1.EmbedTH
+    I1.Data
+  build-depends:
+    base >=4.14 && <5,
+    containers,
+    mtl,
+    template-haskell,
+    directory,
+    filepath
+  default-language: Haskell2010
+  ghc-options:      -O1 -rtsopts "-with-rtsopts=-K2g -A128m"

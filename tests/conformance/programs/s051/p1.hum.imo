@@ -1,0 +1,1 @@
+main in Stream(String) := seq(k in \NN |-> str(2 ^ k))

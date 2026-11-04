@@ -1,0 +1,1 @@
+main in Pair(\QQ, List(Pair(List(\ZZ), \NN))) := polyfactor([3/4, -5/2, 7/3])

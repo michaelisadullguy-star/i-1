@@ -1,0 +1,1 @@
+main in List(List(\Q)) := identity(12)

@@ -1,0 +1,1 @@
+main in Pair(\NN, Pair(\ZZ, \ZZ)) := egcd(-7, 9)

@@ -1,0 +1,1 @@
+main in \NN := gfnorm(pair(5, [7, 3, 9]), [-2, 6, -3])

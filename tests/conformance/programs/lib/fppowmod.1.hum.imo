@@ -1,0 +1,1 @@
+main in List(\NN) := fppowmod(12, [9, -2, 6], 9, [-7, 4, 9])

@@ -1,0 +1,1 @@
+main in List(Bool) := [true, false, 3 lt 4, 4 lt 3, 2 + 2 == 4 and not (1 == 2), 7 mod 2 == 1 or false, forall(k in \NN |-> k lt 5, range(5))]

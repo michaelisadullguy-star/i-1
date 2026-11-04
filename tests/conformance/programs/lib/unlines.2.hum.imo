@@ -1,0 +1,1 @@
+main in List(Char) := unlines([['z', 'Q', '7'], ['Q', '7', 'a'], ['7', 'a', 'z']])

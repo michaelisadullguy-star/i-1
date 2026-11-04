@@ -1,0 +1,1 @@
+main in \ZZ := polyeval([4, 9, -2], -2)

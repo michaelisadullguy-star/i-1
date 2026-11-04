@@ -1,0 +1,1 @@
+main in \Z := bxor(1 - i, 3)

@@ -1,0 +1,19 @@
+core: Haskimo
+PASS  the carry tables in lib/number.imo are exactly the transitions derived from first principles (pymo/mkcarry.py --check) 
+PASS  ℤ[i] subtraction (its own serial transducer, 47 carry numerals) is exact on ALL 3969 pairs of length ≤ 5 
+PASS  sign of Re and Im (one pass over the digits) exact on ALL 4095 digit strings of length ≤ 11; Re, Im, conjugation and canonical digits on all of length ≤ 8 
+PASS  the sign rule  sign Re z = sign(r_J)·(−1)^J  (python twin of the automaton) holds on all 524287 digit strings of length ≤ 18 
+PASS  the numeral 1.11 is 1/2: it is ≐ to the pairs (1, 2), (2, 4) and (1·k, 2·k) for a complex k 
+PASS  ≐ is reflexive, symmetric and transitive on 16 pairs representing 8 values (with total division no pair has denominator 0) 
+PASS  ≐ is a congruence: ⊞ ⊠ ÷ ⊖ ∗ give ≐ results on ≐ arguments (all pairs of the sample, two representations each) 
+PASS  associativity of ⊞ and ⊠, distributivity: all 512 triples of the sample 
+PASS  commutativity, 0 and 1, additive inverses, x·x⁻¹ = 1 for x ≠ 0, and 0 ≠ 1 
+PASS  total division (a meadow, Bergstra–Tucker): 0⁻¹ = 0,  (x⁻¹)⁻¹ = x,  x·(x·x⁻¹) = x  for every x of the sample 
+PASS  the field operations agree with exact Gaussian rationals on 20 random triples 
+PASS  conjugation is an involution, additive and multiplicative, fixes exactly the real elements, and ī = −i 
+PASS  ⩾ on ℚ is a total order (total, antisymmetric modulo ≐, transitive), compatible with + and with · of non-negatives 
+PASS  three-way comparison ⋚ agrees with exact comparison on 40 random pairs of size up to 10¹²  (no search: linear in the digits) 
+PASS  ⊜ (canonical form z/m, m the least natural with m·x ∈ ℤ[i]): x ≐ y ⇔ ⊜x and ⊜y are the same digit strings; ⊜ is idempotent 
+PASS  x = Re x + i·Im x and N(x) = x·x̄ on the sample 
+
+16/16 passed  (4.5s)

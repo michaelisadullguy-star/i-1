@@ -1,0 +1,1 @@
+main in List(\ZZ) := polyshift([-7, 4, 9], 9)

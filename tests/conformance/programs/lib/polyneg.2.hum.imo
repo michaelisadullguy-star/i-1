@@ -1,0 +1,1 @@
+main in List(\ZZ) := polyneg([4, 9, -2])

@@ -1,0 +1,1 @@
+main in List(\NN) := frobeniuspattern([4, 9, -2], 3)

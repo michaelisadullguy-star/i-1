@@ -1,0 +1,1 @@
+main in List(\ZZ) := cyclotomic(12)

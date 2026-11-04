@@ -1,0 +1,1 @@
+main in List(\NN) := fpscale(5, -2, [-3, -7, 4])

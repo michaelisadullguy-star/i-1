@@ -1,0 +1,1 @@
+main in List(Pair(List(\Q), \NN)) := sqfreefactor([1/2 + 3/4*i, 2 - 1/3*i, 3/5])

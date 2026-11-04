@@ -1,0 +1,1 @@
+main in \Z := nextgaussprime(2 + 3*i)

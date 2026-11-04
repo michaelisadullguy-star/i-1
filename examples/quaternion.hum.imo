@@ -1,0 +1,4 @@
+q1 in \D := j * j
+q2 in \D := j * k + 1
+q3 in \D := (1 + 2 * i) * j
+q4 in \D := conj(q3)

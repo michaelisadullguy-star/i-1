@@ -1,0 +1,1 @@
+main in Pair(List(\NN), List(\NN)) := fpdivmod(5, [-2, 6, -3], [-3, -7, 4])

@@ -1,0 +1,3 @@
+-- lists, lambdas and higher-order functions
+sq in \NN -> \NN := n in \NN |-> n * n
+main in List(\NN) := map(sq, filter(n in \NN |-> n mod 3 == 0, range(20)))

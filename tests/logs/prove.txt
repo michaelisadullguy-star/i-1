@@ -1,0 +1,34 @@
+PASS  every relation passes the class checker; relations on ℝ[i] are compiled to  simplify′ ε⌜⌝ ⌜φ⌝ [] 
+PASS  the code of a relation names symbols by their doc 1 codes (⊕ is 𝔮ˢ (↓ᶻ 1011011)) 
+PASS  the symbol codes inside lib/prove.imo agree with doc 1 (pymo/mkprove.py --check) 
+PASS  ring normal form: pi + e - pi == e  →  true 
+PASS  ring normal form (products): (pi + e) * (pi + e) == pi * pi + 2 * pi * e + e * e  →  true 
+PASS  conjugation of series: z * conj(z) == pi * pi + e * e  →  true 
+PASS  a ℚ[i] relation is evaluated: 1/3 + 1/6 == 1/2  →  true;  2 == 3  →  false 
+PASS  logical expansion of exp + isomorphism of series: exp(1) == e  →  true 
+PASS  isomorphism: the same ratio written differently: sum(2, j in \QQ |-> j / (1 + 2 * j)) == pi  →  true 
+PASS  Euler's arctangent series at 1 is π's series (β-reduction of atan): 4 * atan(1) == pi  →  true 
+PASS  rule exp a · exp b = exp(a + b): e * e == exp(2)  →  true 
+PASS  sine and cosine series are exponentials: sin(1/2) * sin(1/2) + cos(1/2) * cos(1/2) == 1  →  true 
+PASS  Euler's formula: exp(i / 2) == cos(1/2) + i * sin(1/2)  →  true 
+PASS  hyperbolic series are exponentials: cosh(1/3) * cosh(1/3) - sinh(1/3) * sinh(1/3) == 1  →  true 
+PASS  rule (√c)² = c: sqrt(2) * sqrt(2) == 2  →  true 
+PASS  an exact root in ℚ(i): sqrt(9/4) == 3/2  →  true 
+PASS  rule √a·√b = √(ab), a, b ≥ 0: sqrt(3) * sqrt(2) == sqrt(6)  →  true 
+PASS  certified discs refute =: pi == e  →  false 
+PASS  certified discs decide <: pi gt 3  →  true 
+PASS  certified discs decide < (Archimedes): pi lt 22 / 7  →  true 
+PASS  the modulus of √ decides <: sqrt(2) lt 1.414  →  false 
+PASS  discs of products: pi * pi == 10  →  false 
+PASS  connectives: and = min, not, !=: (pi != e) and (e lt pi)  →  true 
+PASS  or = max over a decided and an evaluated relation: pi + 0 == pi or 1 gt 2  →  true 
+PASS  implies: not (pi == e) implies (e lt 3)  →  true 
+PASS  an unknown x: x + x = 2x holds for every x: twice(pi)  →  true 
+PASS  an unknown x: x = x + 1 is refuted for every x (the difference is the constant −1): shifted(e)  →  false 
+PASS  undetermined, not guessed: sqrt(8) == 2 * sqrt(2)  (true, but no rule extracts square factors yet) 
+PASS  running a program whose main is undetermined reports it (exit code 1), it does not print true or false error: undetermined: this truth value is neither proved nor refuted — a statemen 
+PASS  examples/prove.bin.imo (only 1 0 . space ( ) newline) with lib/prelude.bin.imo decides exactly as examples/prove.hum.imo (21725 characters) 
+PASS  the expected answers of the numeric cases agree with floating point 
+PASS  one system: ⊤/⊥ are 1/0 (iverson), or = max = + on truth values, and = min = ×, supp(m + n) = supp m or supp n, union = or of the tests = + on sets — 59 laws evaluated in the language [] 
+
+32/32 passed  (47.9s)

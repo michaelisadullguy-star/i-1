@@ -1,0 +1,1 @@
+main in List(\NN) := upto(5, 3)

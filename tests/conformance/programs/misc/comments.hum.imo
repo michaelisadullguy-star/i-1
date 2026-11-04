@@ -1,0 +1,6 @@
+-- a comment line
+x in \NN := 1 + 2   -- a trailing comment
+y in \NN := x * (   -- a parenthesis open across lines
+  4 +
+  5)
+main in \NN := y

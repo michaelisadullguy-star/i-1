@@ -1,0 +1,1 @@
+main in \NN := addmod(4, -2, 2)

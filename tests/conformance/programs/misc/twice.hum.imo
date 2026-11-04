@@ -1,0 +1,3 @@
+x in \NN := 1
+x in \NN := 2
+main in \NN := x

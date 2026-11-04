@@ -1,0 +1,32 @@
+core: Rustimo
+PASS  every statement of the polynomial test program passes the class checker 
+PASS  poly: canonical form (trailing zeros removed, 2/4 → 1/2, i − i → nothing), every coefficient in canonical digit form 
+PASS  deg: −1 for the zero polynomial (also with trailing zeros), 3 for a complex cubic 
+PASS  lc, coeff (beyond the degree: 0), polyx, monomial (0·xⁿ is the zero polynomial) 
+PASS  polyeq: equal as values (trailing zeros, non-canonical coefficients), unequal, zero 
+PASS  polyadd, polysub, polyneg, polyscale, polymul, polypow over ℚ(i) (exact, canonical, cancellation to 0, p⁰ = 1, binomial (1 − x)⁷) 
+PASS  polydivmod: p = q·quo + rem with deg rem < deg q (real, complex, constant divisor, divisor of higher degree, 0 / q); polydivmod(p, 0) = (0, p); polyquo, polyrem 
+PASS  polypowmod: x¹⁰ mod (x² + 1) = −1, a complex base modulo a real quadratic, modulus 0 
+PASS  polyeval (Horner) at complex and rational points, of the zero polynomial; polyevalmany 
+PASS  polyevalR: x² − 2 at √2 tends to 0, x² + 1 at √−1 = i is 0, a polynomial at a lazy constant 
+PASS  polycompose, polyshift p(x + a), polyderiv, polyinteg (constant term 0, derivative gives p back), polyconj, polymonic 
+PASS  polygcd (monic; gcd(0, 0) = 0; complex), polyegcd (s·p + t·q = g), polylcm, polycontent and polyprimitive (positive content, coprime integer coefficients, positive leading coefficient) 
+PASS  sqfree and sqfreefactor (Yun): 5x(x + 1)³(x² − 2)², a complex (x − i)²(1 + (1 + i)x); factors monic, multiplicities, product rebuilds p 
+PASS  resultant = Sylvester determinant (complex, rational, common root → 0, constants), discriminant: b² − 4c, −4p³ − 27q², degree 5 and complex against (−1)^(n(n−1)/2)·Res(p, p′)/lc 
+PASS  sturm: p, p′, −rem, … each a primitive integer polynomial times a positive factor (square-free and with multiple roots) 
+PASS  nrealroots, countroots on (a, b] (distinct roots; a root at b counts, at a does not; a ≥ b gives 0), against brute-force sign changes and the python Sturm count 
+PASS  isolate: sorted disjoint intervals, one distinct root in each (multiple and rational roots, a root at a bisection point as (r, r)); none for x² + 1 and for 0 
+PASS  refine: width ≤ 2⁻ⁿ around √2 and ∛3 (a degree-6 polynomial), a root hit exactly gives (r, r), a non-dyadic root; a non-isolating interval is returned unchanged 
+PASS  signat: sign of q at an algebraic root (negative, zero by a common factor, at √2 and at ∛3 of a degree-6 polynomial, rational roots, not one root in (a, b] → 0; a degenerate (r, r): q(r) if p(r) = 0, else 0) 
+PASS  ratroots: all distinct roots in ℚ(i) sorted by (Re, Im) — rational, Gaussian (complex coefficients; Gaussian denominators 3, 1 + i, 2 + i), multiple, non-real roots of a real polynomial with lc 4, a zero root of a complex polynomial, none 
+PASS  root(p, k): element n within 2⁻ⁿ of the k-th real root (∛2, √2 of a degree-6 polynomial, a rational root exactly); 0 for k out of range; realroots 
+PASS  croots: all complex roots with multiplicity (Durand–Kerner), element n within 2⁻ⁿ: ±i, a double root and i, the three cube roots of 2 
+PASS  interpolate (through the points, complex nodes, a repeated node ignored, no points → 0), polyfromroots 
+PASS  polyfactor: complete factorisations over ℚ (x⁴ − 1, x⁴ + 4, x⁴ + x² + 1, 2x⁶ − 2, a product of two cubics, multiplicities and a rational content, irreducible quartic and sextic, x³, non-monic factors (3x² + 1)(5x³ − 2), (x² + 1)(x² + 2)(x² + 3), x⁴ + 1 (reducible modulo every prime), constants, 0); the product rebuilds p 
+PASS  isirreducible: Φ₅ yes, x⁴ + x² + 1 no, constants no, linear yes, x² no, x⁶ − 3x⁵ + 7 yes 
+PASS  cyclotomic Φₙ (n = 0, 1, 2, 6, 8, 12, 15, 30) against (xⁿ − 1)/Π_{d|n, d<n} Φ_d 
+PASS  chebyshevT, chebyshevU, legendreP, hermiteH (physicists'), laguerreL against their explicit sums 
+PASS  companion: the characteristic polynomial of the companion matrix is the monic p (real, complex); [] for a constant 
+PASS  polystr: human notation, highest degree first, coefficients ±1 omitted, non-real coefficients parenthesised 
+
+29/29 passed  (4.5s)

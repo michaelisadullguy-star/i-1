@@ -1,0 +1,57 @@
+PASS  the test program (unknowns, statements, Prop/Bool coercions, lists, pairs, streams) passes the class checker [] 
+PASS  hum: a statement  name in Class  without := declares an unknown; its domain code is 0 ℂ, 1 ℝ, 2 ℚ(i), 5 ℤ {'x': 1, 'z': 0, 'y': 0, 'n': 5, 'w': 2} 
+PASS  the definitions table lists the unknowns first, in DECLARATION order (x, z, y, n, w): the order in which solutions list them ['x', 'z', 'n', 'w', 'π', '𝕖'] 
+PASS  the definitions table holds (code of x, ⌜𝔲 k⌝) for every unknown a statement mentions: x ↦ 𝔲 1, z ↦ 𝔲 0, n ↦ 𝔲 5, w ↦ 𝔲 2 
+PASS  spec: a declaration  x ∶ ℝ  with no ≔ line declares an unknown (ℕ has domain 6) [] 
+PASS  spec: the statement about the unknowns prints in hum as  x lt 1 and m == 2  (already in its simplest form) x lt 1 and m == 2 
+PASS  the domains of the eight human number classes: \NN 6, \ZZ 5, \QQ 3, \Z 4, \Q 2, \RR 1, \CC 0, \R 0 [] 
+PASS  class error: an unknown of class Prop — an unknown must be a number [('t.hum.imo', 'p', 'p is declared but never defined, so it is an unknown; an unknown must be a number (a class below ℕ ℤ ℚ ℤ[i] ℚ[i] ℝ ℝ[i] — human \\NN \\ZZ \\QQ \\Z \\Q \\RR \\CC), not Ω')] 
+PASS  class error: an unknown of class String — an unknown must be a number [('t.hum.imo', 's', 's is declared but never defined, so it is an unknown; an unknown must be a number (a class below ℕ ℤ ℚ ℤ[i] ℚ[i] ℝ ℝ[i] — human \\NN \\ZZ \\QQ \\Z \\Q \\RR \\CC), not 𝕊')] 
+PASS  class error: an unknown function — an unknown must be a number [('t.hum.imo', 'f', 'f is declared but never defined, so it is an unknown; an unknown must be a number (a class below ℕ ℤ ℚ ℤ[i] ℚ[i] ℝ ℝ[i] — human \\NN \\ZZ \\QQ \\Z \\Q \\RR \\CC), not ℚ → ℚ')] 
+PASS  class error: an unknown list — an unknown must be a number [('t.hum.imo', 't', 't is declared but never defined, so it is an unknown; an unknown must be a number (a class below ℕ ℤ ℚ ℤ[i] ℚ[i] ℝ ℝ[i] — human \\NN \\ZZ \\QQ \\Z \\Q \\RR \\CC), not (𝔏 ℤ)')] 
+PASS  class error: an unknown declared with two classes [('t.spec.imo', 'u', 'u is declared but never defined, so it is an unknown, and an unknown has one class')] 
+PASS  hum: a declaration without := takes no parameters (syntax error) 
+PASS  run time: evaluating an unknown as a number raises  'w is an unknown'  (a definition may still mention it) w is an unknown (it is declared and never defined, so it has 
+PASS  ... while a statement about it is simplified, not evaluated:  w + 1 == 2  is  w == 1 w == 1 
+PASS  i1.py run: a main that needs the value of an unknown reports  'error: x is an unknown'  (exit code 1) error: x is an unknown (it is declared and never defined, so it has no 
+PASS  i1.py run: a Bool main that is undetermined (decide of an undecided statement) still reports undetermined error: undetermined: this truth value is neither proved nor refuted — 
+PASS  classes of 33 terms: a relation about an unknown or on ℝ[i] is Ω (a statement), a closed ℚ[i] relation stays 𝔹, and/or/not/implies/iff/+/*/max/min with an Ω operand are ONE Ω statement, prop/decide convert, no ambiguity [] 
+PASS  mixed and: the 𝔹 operand is made a statement (prop, cost 1), not the statement a Boolean (decide, cost 2) 
+PASS  a closed relation on ℚ[i] is evaluated (no code is built): c3 in Bool := 2 == 2 
+PASS  name in Bool := statement  means decide of the statement (d1, d3); a Prop definition holds the statement itself (s1) 
+PASS  decided closed relations become true / false: 1/3 + 1/6 == 1/2 is true, 2 == 3 is false (class Prop) true, false 
+PASS  relations on ℝ[i] are statements too: pi + e - pi == e is true, pi == e is false (printed as statements) 
+PASS  a parenthesised relation is the same statement: (pi + e - pi == e) is true, (2 == 3) as a Bool is false 
+PASS  decide: Bool d2 := pi + e - pi == e is ⊤; decide(c1) ⊤; decide(prop(false)) ⊥; prop(true) is the statement true 
+PASS  decide of a statement that is neither true nor false is ⍰ (undetermined): d1 := n^2 lt 10, d3 := n == 1 and true 
+PASS  lists of statements: [n == 1, false, 2 == 2] — the Booleans are made statements (prop); [1 == 1, 2 == 3] fits List(Prop) [n == 1, false, true] [true, false] [false, n == 1] 
+PASS  pairs, maps and streams of statements print their statements: pair(n == 1, 3), map(k |-> n lt k, [1, 2]), seq(k |-> n lt k) pair(n == 1, 3) [n leq 0, n leq 1] n leq 9   -- element 10 of the stream 
+PASS  + on statements is or: (n == 1) + (n == 2) is  1 leq n and n leq 2  for an integer n 1 leq n and n leq 2 
+PASS  a statement passed to a function (s and n lt 3) is spliced in as its code: f(n gt 1) is  n == 2  for an integer n n == 2 
+PASS  a predicate of the program applied to a number is evaluated: g(2) is ⊤ 
+PASS  ... applied to an unknown it is a statement, expanded by the simplifier: g(n) is  n == -2 or n == 2 n == -2 or n == 2 
+PASS  a definition that needs an unknown (q := n + 1) is quoted as its symbol, expanded by the simplifier: q == 2 is  n == 1 n == 1 
+PASS  statements about unknowns are simplified: n^2 lt 10 · n == 1 or n == 2 · not n == 2 · x^2 gt 7 and x^3 lt 27 · z*conj(z) + 1 == 0 · w*w == -1 and true ['-3 leq n and n leq 3', '1 leq n and n leq 2', 'n != 2', 'x lt -sqrt(7) or (sqrt(7) lt x and x lt 3)', 'false', 'w == -i or w == i'] 
+PASS  12 statements × 3 notations: the printed statement reads back (spec / bin through the checker) as the same statement [] 
+PASS  spec output is the checked term: the checker chose ≻ᴿ ≺ᴿ ^ᴿ, inserted ⇡ and ∧Ω:  (∨Ω (≺ᴿ x (⊖ᴿ (√ 111011101))) (∧Ω (≺ᴿ (√ 111011101) x) (≺ᴿ x (⇡ 1101)))) 
+PASS  bin output uses only 1 0 . ( ) and the unknowns' local codes (.10010110100. (.1000110. (.111100. 1101) .10100011111.) (.1 
+PASS  the spelling rules on 49 hand-made codes (precedences, parentheses, numbers by showc, root, sqrt, conj, re, im, ℝ-level symbols, unknowns and program symbols by name) [] 
+PASS  ... and each of them (but root, which lib/poly.imo declares) reads back through the checker as a spec term [] 
+PASS  examples/predicates.hum.imo passes the class checker (main in List(Prop)) [] 
+PASS  the example evaluates to a list of 9 statements 9 
+PASS  end-to-end: x^2 gt 7 and x^3 lt 27  →  x lt -sqrt(7) or (sqrt(7) lt x and x lt 3) 
+PASS  end-to-end: z * conj(z) + 1 == 0  →  false 
+PASS  end-to-end: x^2 + 1 == 0  →  false 
+PASS  end-to-end: y^2 + 1 == 0  →  y == -i or y == i 
+PASS  end-to-end: y^2 + y + 1 == 0  →  y == -1/2 - 1/2*sqrt(-3) or y == -1/2 + 1/2*sqrt(-3) 
+PASS  end-to-end: x^2 - 2 geq 0  →  x leq -sqrt(2) or sqrt(2) leq x 
+PASS  end-to-end: x^3 == 2  →  x == root([-2, 0, 0, 1], 1) 
+PASS  end-to-end: n in \ZZ: n^2 lt 10  →  -3 leq n and n leq 3 
+PASS  end-to-end: pi + e - pi == e  →  true 
+PASS  i1.py run examples/predicates.hum.imo prints the list of statements in hum [x lt -sqrt(7) or (sqrt(7) lt x and x lt 3), false, false, y == -i or y == i, y 
+PASS  ... exactly the expected simplest forms [x lt -sqrt(7) or (sqrt(7) lt x and x lt 3), false, false, y == -i or y == i, y == -1/2 - 1/2*sqrt(-3) or y == -1/2 + 1/ 
+PASS  every statement of the example, printed in spec and in bin, reads back (in the example's context) as the same statement [] 
+PASS  the example translated to pure binary (with lib/prelude.bin.imo) prints the same bin output as the hum program --out bin ('(.101000. (.10010110101. (.101110110. .1', '(.101000. (.10010110101. (.101110110. .1') 
+PASS  the example re-spelled in spec (translate --to spec: its codes name the unknowns by number) prints the same statements [x lt -sqrt(7) or (sqrt(7) lt x and x lt 3), false, false, y 
+
+55/55 passed  (178.8s)

@@ -1,0 +1,12 @@
+-- a program with an entry point:  python3 pymo/i1.py examples/main.hum.imo
+pi in \RR := sum(2, k in \QQ |-> k / (2 * k + 1))
+x in \Q := (1 + 2 * i) / (3 - i)
+main in String := unlines([
+  "x        = " ++ str(x),
+  "|x|^2    = " ++ str(norm(x)),
+  "x in base i-1: numerator " ++ bits(numer(x)) ++ ", denominator " ++ bits(denom(x)),
+  "pi_20    = " ++ str(nth(pi, 20)),
+  "         ~ " ++ decimals(nth(pi, 20), 12),
+  "sqrt 2   ~ " ++ decimals(nth(sqrt(2), 40), 12),
+  "100!     = " ++ str(factorial(100)),
+  "gcd(84, 36) = " ++ str(gcd(84, 36)) ++ ",  2^64 = " ++ str(2 ^ 64)])

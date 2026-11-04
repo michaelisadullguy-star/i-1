@@ -1,0 +1,1 @@
+main in Stream(\QQ) := abs(2 - 1/3*i)

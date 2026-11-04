@@ -1,0 +1,4 @@
+ex in \R := exp(1)
+s in \RR := sin(1 / 2)
+c in \RR := cos(1 / 2)
+euler in \R := exp(i / 2)

@@ -1,0 +1,1 @@
+main in List(Char) := bits(1 - i)

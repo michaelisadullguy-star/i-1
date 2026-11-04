@@ -1,0 +1,2 @@
+z in \Z := (3 + 4 * i) * (1 - 2 * i)
+main in List(\Z) := [z, conj(z), z * z]

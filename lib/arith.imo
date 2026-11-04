@@ -1,0 +1,150 @@
+⍝ lib/arith.imo — spec notation — trusted prelude, part 6: exact integer arithmetic in base i−1 and the canonical form of ℚ[i]
+⍝ everything here is computed on digit strings with the operations of part 2 (addition, multiplication by short numerals,
+⍝ the sign automaton); there is no search over values anywhere.
+⍝ ---- digit strings
+⍝ canonical digit string: trailing zeros removed (the unique expansion of Penney / Knuth)
+⍝ (one pass: ⊡′ returns whether the rest is all zeros, together with the rest without its trailing zeros)
+⊡′ ∶ 𝔇 → 𝔓 𝔹 𝔇
+⊡′ ξ ≔ (ξ (η ζ ↦ ((θ ↦ ((ι ↦ (⊗ ι (ι ⊥ (∷ η (▶ θ))))) (∧ (◀ θ) (¬ η)))) (⊡′ ζ))) (⊗ ⊤ ⊥))
+⊡ ∶ 𝔇 → 𝔇
+⊡ ξ ≔ (▶ (⊡′ ξ))
+⍝ z/2 for a z that 2 divides:  2 = i·b²,  so  z/2 = (z/b²)·(−i)  (111 is −i)
+½ᶻ ∶ 𝔇 → 𝔇
+½ᶻ ξ ≔ (⊠ᶻ (⌄ (⌄ ξ)) (◀ 111))
+⍝ |z| for a real z
+absᶻ ∶ 𝔇 → 𝔇
+absᶻ ξ ≔ ((⋚ʳ ξ) (⊖ᶻ ξ) ξ ξ)
+realᶻ ∶ 𝔇 → 𝔹
+realᶻ ξ ≔ ((⋚ⁱ ξ) ⊥ ⊤ ⊥)
+⍝ 4·z = −b⁴·z
+⁴ᶻ ∶ 𝔇 → 𝔇
+⁴ᶻ ξ ≔ (⊖ᶻ (𝕓⁴ ξ))
+⩾⁰ ∶ 𝔇 → 𝔹
+⩾⁰ ξ ≔ ((⋚ʳ ξ) ⊥ ⊤ ⊤)
+⍝ ---- exact division ω / ξ in ℤ[i]  (ξ must divide ω; ω / 0 = 0).  Common factors b are stripped; then ξ is odd (last digit 1), so the
+⍝ quotient can be read off from the low end (Hensel division): its next digit is the last digit of ω, and ω ← (ω − digit·ξ)/b.
+÷ᴴ ∶ 𝔇 → 𝔇 → 𝔇
+÷ᴴ ω ν ≔ ((∅ᶻ ω) ⊥ ((⌃ ω) (∷ ⊤ (÷ᴴ (⌄ (⊞ᶻ ω ν)) ν)) (∷ ⊥ (÷ᴴ (⌄ ω) ν))))
+÷ᶻ ∶ 𝔇 → 𝔇 → 𝔇
+÷ᶻ ω ξ ≔ ((∅ᶻ ξ) ⊥ ((⌃ ξ) (÷ᴴ ω (⊖ᶻ ξ)) (÷ᶻ (⌄ ω) (⌄ ξ))))
+⍝ ---- binary gcd of two natural numbers (Stein): for a real integer, "even" is "last digit 0" and halving is ½ᶻ
+gcdᶻ′ ∶ 𝔇 → 𝔇 → 𝔇
+gcdᶻ′ ξ η ≔ ((∅ᶻ ξ) η ((∅ᶻ η) ξ ((⌃ ξ) ((⌃ η) ((δ ↦ ((⋚ʳ δ) (gcdᶻ′ ξ (⊡ (½ᶻ (⊖ᶻ δ)))) η (gcdᶻ′ (⊡ (½ᶻ δ)) η))) (⊟ᶻ ξ η)) (gcdᶻ′ ξ (⊡ (½ᶻ η)))) ((⌃ η) (gcdᶻ′ (⊡ (½ᶻ ξ)) η) (⊠ᶻ (gcdᶻ′ (⊡ (½ᶻ ξ)) (⊡ (½ᶻ η))) (◀ 1100))))))
+⍝ gcd of two real integers, as a natural
+gcdᶻ ∶ 𝔇 → 𝔇 → 𝔇
+gcdᶻ ξ η ≔ (⊡ (gcdᶻ′ (⊡ (absᶻ ξ)) (⊡ (absᶻ η))))
+⍝ ---- division with remainder of naturals:  ⫽ᶻ ξ η = (q, r),  ξ = q·η + r,  0 ≤ r < η  (η > 0).  Long division in base 4 = 111010000:
+⍝ the multiples η·4ᵏ are visited from the largest down; at each level the next quotient digit (0 … 3) is found with two subtractions and two signs.
+⫽ᶻ′ ∶ 𝔇 → 𝔇 → 𝔇 → 𝔇 → 𝔓 𝔇 𝔇
+⫽ᶻ′ κ ρ η μ ≔ ((ϰ τ ↦ ((⩾⁰ τ) ((υ ↦ ((⩾⁰ υ) (⊗ (⊞ᶻ ϰ (◀ 1101)) (⊡ υ)) (⊗ (⊞ᶻ ϰ (◀ 1100)) (⊡ τ)))) (⊟ᶻ τ η)) ((υ ↦ ((⩾⁰ υ) (⊗ (⊞ᶻ ϰ (◀ 1)) (⊡ υ)) (⊗ ϰ ρ))) (⊟ᶻ ρ η)))) (⁴ᶻ κ) (⊟ᶻ ρ μ))
+⫽ᶻ ∶ 𝔇 → 𝔇 → 𝔓 𝔇 𝔇
+⫽ᶻ ξ η ≔ ((⩾ᶻ ξ η) ((θ ↦ (⫽ᶻ′ (◀ θ) (▶ θ) η (⊞ᶻ η η))) (⫽ᶻ ξ (⁴ᶻ η))) (⊗ ⊥ ξ))
+⍝ ⌊ ξ / η ⌋ for a real integer ξ and a natural η > 0
+⌊ᶻ ∶ 𝔇 → 𝔇 → 𝔇
+⌊ᶻ ξ η ≔ ((⋚ʳ ξ) ((θ ↦ ((∅ᶻ (▶ θ)) (⊖ᶻ (◀ θ)) (⊖ᶻ (⊞ᶻ (◀ θ) (◀ 1))))) (⫽ᶻ (⊖ᶻ ξ) η)) ⊥ (◀ (⫽ᶻ ξ η)))
+⍝ the Gaussian integer of an integral ℚ[i] value p/q  (q divides p)
+↓ᶻ ∶ ℚ[i] → 𝔇
+↓ᶻ ξ ≔ (÷ᶻ (◀ ξ) (▶ ξ))
+⍝ ---- the canonical form of ℚ[i].  x = p/q = (p q̄)/N(q); with g = gcd(Re p q̄, Im p q̄, N(q)) the canonical form is z/m, z = p q̄/g, m = N(q)/g:
+⍝ m is the least natural number with m·x ∈ ℤ[i], and z, m are written without trailing zeros, so equal values have identical canonical forms.
+⊜ ∶ ℕ → ℕ
+⊜ ∶ ℤ → ℤ
+⊜ ∶ ℚ → ℚ
+⊜ ∶ ℤ[i] → ℤ[i]
+⊜ ∶ ℚ[i] → ℚ[i]
+⊜ ξ ≔ ((ω ν ↦ ((χ ↦ (⊗ (⊡ (÷ᶻ ω χ)) (⊡ (÷ᶻ ν χ)))) (gcdᶻ (gcdᶻ (ℜᶻ ω) (ℑᶻ ω)) ν))) (⊠ᶻ (◀ ξ) (∗ᶻ (▶ ξ))) (⊠ᶻ (▶ ξ) (∗ᶻ (▶ ξ))))
+numer ∶ ℚ → ℤ
+numer ∶ ℚ[i] → ℤ[i]
+numer ξ ≔ (⊗ (◀ (⊜ ξ)) (◀ 1))
+denom ∶ ℚ[i] → ℕ
+denom ξ ≔ (⊗ (▶ (⊜ ξ)) (◀ 1))
+⍝ ---- real part, imaginary part, norm  (for a real denominator q, Re(p/q) = Re(p)/q: no multiplication)
+ℜ ∶ ℚ[i] → ℚ
+ℜ ξ ≔ ((realᶻ (▶ ξ)) (⊗ (ℜᶻ (◀ ξ)) (▶ ξ)) (⊗ (ℜᶻ (⊠ᶻ (◀ ξ) (∗ᶻ (▶ ξ)))) (⊠ᶻ (▶ ξ) (∗ᶻ (▶ ξ)))))
+ℑ ∶ ℚ[i] → ℚ
+ℑ ξ ≔ ((realᶻ (▶ ξ)) (⊗ (ℑᶻ (◀ ξ)) (▶ ξ)) (⊗ (ℑᶻ (⊠ᶻ (◀ ξ) (∗ᶻ (▶ ξ)))) (⊠ᶻ (▶ ξ) (∗ᶻ (▶ ξ)))))
+𝒩 ∶ ℚ[i] → ℚ
+𝒩 ξ ≔ (⊗ (⊠ᶻ (◀ ξ) (∗ᶻ (◀ ξ))) (⊠ᶻ (▶ ξ) (∗ᶻ (▶ ξ))))
+⍝ ---- floor, ceiling, rounding on ℚ;  integer division and remainder (floor convention; x div 0 = 0 and x mod 0 = x, as x ÷ 0 = 0)
+⌊ ∶ ℚ → ℤ
+⌊ ξ ≔ (⊗ (⌊ᶻ (ℜᶻ (⊠ᶻ (◀ ξ) (∗ᶻ (▶ ξ)))) (⊠ᶻ (▶ ξ) (∗ᶻ (▶ ξ)))) (◀ 1))
+⌈ ∶ ℚ → ℤ
+⌈ ξ ≔ (⊖ (⌊ (⊖ ξ)))
+round ∶ ℚ → ℤ
+round ξ ≔ (⌊ (⊞ ξ 1.11))
+div ∶ ℕ → ℕ → ℕ
+div ∶ ℤ → ℤ → ℤ
+div ξ η ≔ (⌊ (÷ ξ η))
+mod ∶ ℕ → ℕ → ℕ
+mod ∶ ℤ → ℤ → ℤ
+mod ξ η ≔ (⊟ ξ (⊠ η (div ξ η)))
+⍝ ---- absolute value, sign, maximum, minimum on ℚ
+abs ∶ ℕ → ℕ
+abs ∶ ℤ → ℕ
+abs ∶ ℚ → ℚ
+abs ξ ≔ ((⋚ ξ 0) (⊖ ξ) ξ ξ)
+sgn ∶ ℚ → ℤ
+sgn ξ ≔ ((⋚ ξ 0) 11101 0 1)
+max ∶ ℕ → ℕ → ℕ
+max ∶ ℤ → ℤ → ℤ
+max ∶ ℚ → ℚ → ℚ
+max ξ η ≔ ((⩾ ξ η) ξ η)
+min ∶ ℕ → ℕ → ℕ
+min ∶ ℤ → ℤ → ℤ
+min ∶ ℚ → ℚ → ℚ
+min ξ η ≔ ((⩾ ξ η) η ξ)
+⍝ ---- Gaussian integers: division with remainder (nearest quotient, N(r) ≤ N(b)/2), unit normalisation, gcd (Euclid)
+rndᶻ ∶ 𝔇 → 𝔇 → 𝔇
+rndᶻ ξ η ≔ (⌊ᶻ (⊞ᶻ (⊠ᶻ ξ (◀ 1100)) η) (⊠ᶻ η (◀ 1100)))
+quoᶻ ∶ 𝔇 → 𝔇 → 𝔇
+quoᶻ ξ η ≔ ((ω ν ↦ ((∅ᶻ ν) ⊥ (⊞ᶻ (rndᶻ (ℜᶻ ω) ν) (⊠ᶻ (rndᶻ (ℑᶻ ω) ν) (◀ 11))))) (⊠ᶻ ξ (∗ᶻ η)) (⊠ᶻ η (∗ᶻ η)))
+remᶻ ∶ 𝔇 → 𝔇 → 𝔇
+remᶻ ξ η ≔ (⊡ (⊟ᶻ ξ (⊠ᶻ (quoᶻ ξ η) η)))
+⍝ the associate of z with Re > 0 and Im ≥ 0  (0 stays 0)
+⌜ᶻ ∶ 𝔇 → 𝔇
+⌜ᶻ ξ ≔ (⊡ ((⋚ʳ ξ) ((⋚ⁱ ξ) (⊖ᶻ ξ) (⊖ᶻ ξ) (⊠ᶻ ξ (◀ 111))) ((⋚ⁱ ξ) (⊠ᶻ ξ (◀ 11)) ⊥ (⊠ᶻ ξ (◀ 111))) ((⋚ⁱ ξ) (⊠ᶻ ξ (◀ 11)) ξ ξ)))
+ggcdᶻ ∶ 𝔇 → 𝔇 → 𝔇
+ggcdᶻ ξ η ≔ ((∅ᶻ η) (⌜ᶻ ξ) (ggcdᶻ η (remᶻ ξ η)))
+⍝ ---- user level: gcd, lcm, quotient and remainder in ℤ[i]
+gcd ∶ ℕ → ℕ → ℕ
+gcd ∶ ℤ → ℤ → ℕ
+gcd ∶ ℤ[i] → ℤ[i] → ℤ[i]
+gcd ξ η ≔ ((θ ι ↦ (⊗ ((∧ (realᶻ θ) (realᶻ ι)) (gcdᶻ θ ι) (ggcdᶻ θ ι)) (◀ 1))) (↓ᶻ ξ) (↓ᶻ η))
+lcm ∶ ℕ → ℕ → ℕ
+lcm ∶ ℤ → ℤ → ℕ
+lcm ξ η ≔ (abs (÷ (⊠ ξ η) (gcd ξ η)))
+quo ∶ ℤ[i] → ℤ[i] → ℤ[i]
+quo ξ η ≔ (⊗ (quoᶻ (↓ᶻ ξ) (↓ᶻ η)) (◀ 1))
+rem ∶ ℤ[i] → ℤ[i] → ℤ[i]
+rem ξ η ≔ (⊗ (remᶻ (↓ᶻ ξ) (↓ᶻ η)) (◀ 1))
+⍝ ---- powers (square and multiply on the digits of the exponent: odd ⇔ last digit 1), factorial, binomial coefficient
+powᶻ′ ∶ ℚ[i] → 𝔇 → ℚ[i]
+powᶻ′ ξ ν ≔ ((∅ᶻ ν) 1 ((⌃ ν) (⊠ ξ (powᶻ′ ξ (⊟ᶻ ν (◀ 1)))) ((θ ↦ (⊠ θ θ)) (powᶻ′ ξ (⊡ (½ᶻ ν))))))
+^ ∶ ℕ → ℕ → ℕ
+^ ∶ ℤ → ℕ → ℤ
+^ ∶ ℚ → ℕ → ℚ
+^ ∶ ℤ[i] → ℕ → ℤ[i]
+^ ∶ ℚ[i] → ℕ → ℚ[i]
+^ ∶ ℚ → ℤ → ℚ
+^ ∶ ℚ[i] → ℤ → ℚ[i]
+^ ξ η ≔ ((θ ↦ ((⋚ʳ θ) (÷ 1 (powᶻ′ ξ (⊖ᶻ θ))) 1 (powᶻ′ ξ θ))) (↓ᶻ η))
+fact′ ∶ 𝔇 → 𝔇
+fact′ ν ≔ ((∅ᶻ ν) (◀ 1) (⊠ᶻ (fact′ (⊡ (⊟ᶻ ν (◀ 1)))) ν))
+fact ∶ ℕ → ℕ
+fact ξ ≔ (⊗ (fact′ (↓ᶻ ξ)) (◀ 1))
+⍝ choose′ m j k c:  c_j = c_(j−1)·(m + j)/j  for j = 1 … k  (every c_j is an integer, so the division is exact)
+choose′ ∶ 𝔇 → 𝔇 → 𝔇 → 𝔇 → 𝔇
+choose′ μ ι κ χ ≔ ((⩾ᶻ κ ι) (choose′ μ (⊞ᶻ ι (◀ 1)) κ (÷ᶻ (⊠ᶻ χ (⊞ᶻ μ ι)) ι)) χ)
+choose ∶ ℕ → ℕ → ℕ
+choose ξ η ≔ ((θ ι ↦ ((⩾ᶻ θ ι) (⊗ (⊡ (choose′ (⊟ᶻ θ ι) (◀ 1) ι (◀ 1))) (◀ 1)) 0)) (↓ᶻ ξ) (↓ᶻ η))
+⍝ ---- integer square root ⌊√n⌋ (Newton from above).  A number of L digits is below 2.42·2^(L/2), so 4^(⌈L/8⌉+1) ≥ √n is a safe start.
+⁴ᴸ ∶ 𝔇 → 𝔇
+⁴ᴸ ξ ≔ ((∅ ξ) (◀ 111010000) (⁴ᶻ (⁴ᴸ (⌄⁴ (⌄⁴ ξ)))))
+⌊½⌋ᶻ ∶ 𝔇 → 𝔇
+⌊½⌋ᶻ ξ ≔ (½ᶻ ((⌃ ξ) (⊟ᶻ ξ (◀ 1)) ξ))
+√ᶻ′ ∶ 𝔇 → 𝔇 → 𝔇
+√ᶻ′ ν ξ ≔ ((θ ↦ ((⩾ᶻ θ ξ) ξ (√ᶻ′ ν (⊡ θ)))) (⌊½⌋ᶻ (⊞ᶻ ξ (◀ (⫽ᶻ ν ξ)))))
+√ᶻ ∶ 𝔇 → 𝔇
+√ᶻ ν ≔ ((⩾⁰ (⊟ᶻ ν (◀ 1))) (√ᶻ′ ν (⁴ᴸ ν)) ⊥)
+isqrt ∶ ℕ → ℕ
+isqrt ξ ≔ (⊗ (√ᶻ (↓ᶻ ξ)) (◀ 1))

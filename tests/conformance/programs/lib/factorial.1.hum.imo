@@ -1,0 +1,1 @@
+main in \NN := factorial(12)

@@ -1,0 +1,1 @@
+main in Stream(\QQ) := atan2(-5/2, 1/6)

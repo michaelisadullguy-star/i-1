@@ -1,0 +1,1 @@
+main in List(\NN) := cycletype([12, 5, 7])

@@ -1,0 +1,1 @@
+main in Bool := isgausspower(1 - i)

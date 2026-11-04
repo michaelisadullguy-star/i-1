@@ -1,0 +1,1 @@
+main in \Z := shl(2 + 3*i, 7)

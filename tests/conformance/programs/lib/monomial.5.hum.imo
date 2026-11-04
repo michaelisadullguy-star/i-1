@@ -1,0 +1,1 @@
+main in List(\Z) := monomial(2 + 3*i, 7)

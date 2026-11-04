@@ -1,0 +1,1 @@
+main in List(\Q) := monomial(1/2 + 3/4*i, 7)

@@ -1,0 +1,2 @@
+n in \ZZ
+main in List(Prop) := [n^2 lt 10, 2*n == 3, n^2 != 1, n^2 == 4, n gt 2 and n lt 6, n^3 lt 30, n^2 geq 0, n^2 gt 5]

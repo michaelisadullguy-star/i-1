@@ -1,0 +1,1 @@
+main in Stream(\Q) := sinc(1/2 + 3/4*i)

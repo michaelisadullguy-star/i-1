@@ -1,0 +1,1 @@
+main in List(\NN) := gfminpoly(pair(5, [7, 3, 9]), [-2, 6, -3])

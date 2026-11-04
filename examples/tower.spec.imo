@@ -1,0 +1,7 @@
+⍝ examples/tower.spec.imo — a Cayley–Dickson product over the lazy ℝ[i]  (load it together with examples/target.spec.imo)
+x ∶ 𝔗 ℝ[i]
+x ≔ (❁ (❀ 𝕫) (❀ π))
+y ∶ 𝔗 ℝ[i]
+y ≔ (❁ (❀ 𝕖) (❀ 𝕫))
+w ∶ 𝔗 ℝ[i]
+w ≔ (⊠ᵀ 𝔸ℝ[i] x y)

@@ -1,0 +1,20 @@
+core: Haskimo
+PASS  ℤ[i] adder in the language is exact on ALL 961 pairs of digit strings of length ≤ 4 
+PASS  the adder's python twin (15 carry numerals, 10-entry tail+110 table) is exact on all 48129 pairs of total length ≤ 12 
+PASS  ℤ[i] in base i-1: add, multiply, conjugate agree with Gaussian integers 
+PASS  ℚ[i]: + · − conj ÷ against exact Gaussian rationals 
+PASS  Cayley–Dickson tower over ℚ[i] equals the python reference as ragged trees (shapes included), 12 random depth ≤ 2 pairs 
+PASS  dimension never reduces: x + (-x) and x·0 are zeros of the same depth; 1 + 0₂ has depth 2 
+PASS  quaternions (depth 1): j² = −1, ij = k = −ji, k² = −1 
+PASS  octonions (depth 2): non-associative ((e1 e2) e4 ≠ e1 (e2 e4)) but alternative ((xx)y = x(xy)) 
+PASS  exhaustive search over all (e_a ± e_b)(e_c ± e_d): octonions have no zero divisor, sedenions have some (depth 3: 336 ordered pairs)
+PASS  sedenions (depth 3): (e1 + e10)(e4 − e15) = 0 with both factors ≠ 0, evaluated in the language |x|² = (2+0i)
+PASS  Cayley–Dickson over the lazy ℝ[i]: the quaternion (z, π)·(e, z) is computed streamwise and matches exact partial sums 
+PASS  ℓ² over ℚ[i]: ⟨ϝ, ϛ⟩_N = Σ 1/((n+1)(n+2)) = N/(N+1) 
+PASS  ‖ϝ‖²_N = Σ_{n<N} 1/(n+1)²  (partial sums of ζ(2)) 
+PASS  the standard basis vectors δ_2, δ_3 are orthonormal in the function space 
+PASS  𝔉(ℚ[i]): pointwise + and × agree with the values of ϝ and ϛ 
+PASS  function space of quaternion-valued sequences (base = the Cayley–Dickson tower): ⟨f, g⟩_N matches the python reference 
+PASS  Cayley–Dickson over a function space (ℚ[i]^ℕ ⊕ ℚ[i]^ℕ j): ((ϝ,ϛ)·(ϛ,ϝ))(n) = CD product of the values 
+
+17/17 passed  (31.3s)

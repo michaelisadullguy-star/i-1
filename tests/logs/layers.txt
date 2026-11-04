@@ -1,0 +1,24 @@
+PASS  doc 1: a bijection spec symbol <-> bin symbol, codes are the ordinals 1..n in binary (2191 symbols)
+PASS  doc 1 covers every symbol of the prelude 
+PASS  bin files use only the characters  1 0 . space ( ) newline (prelude.bin.imo: 630848 bytes, target.bin.imo: 350 bytes, spaces.bin.imo: 201 bytes)
+PASS  spec -> bin -> spec reproduces every statement of the prelude and the examples (Char/String literals come back written out) (4112 statements)
+PASS  every bin token is a numeral, a marker (. .. ...), a symbol .B. or a parenthesis 
+PASS  spec notation:  π, 𝕖, 𝕫 are the exact Euler partial sums (N = 0..8) 
+PASS  hum notation:   the same three lines (pi, e, z) give the same streams 
+PASS  hum -> spec: overloads resolved by class (+ becomes ⊕, * becomes ⊛, a ⇡ is inserted for i) 
+PASS  bin notation:   the all-binary program (prelude.bin.imo + target.bin.imo) gives the same streams 
+PASS  bin notation with String literals: hello.bin.imo passes the class checker ('λ' is written (𝕔 numeral)) and prints the same text ['H', 'e', 'l', 'l', 'o', ',', ' ', 'i', '-', '1', ' ', '—', ' ', 'λ', '\n']
+PASS  a file mixing @spec and @hum sections loads and evaluates (allowed, not recommended) 
+PASS  doc 2 right-hand side given as a bin symbol (plus_bin := .111010.) resolves through doc 1 
+PASS  class checker: 19 accept / reject cases behave as specified 
+PASS  human notation: precedence, decimals, i, unary minus, ascription, Char/String literals, ++, length, ord, geq, user functions 
+PASS  bounded quantifiers: forall / exists over range(n) (short-circuiting, decidable) 
+PASS  `not` binds looser than geq:  not 1 geq 2  is true 
+PASS  if(b, x, y) selects lazily 
+PASS  characters compare with == (a Char widens to ℚ[i]) 
+PASS  analysis from the human layer:  exp(1), sin(1/2), cos(1/2) are the exact power-series partial sums (and converge to the true values) 
+PASS  human notation on the Cayley–Dickson class \D:  j * j, j * k + 1 (1 widened by ↑), conj(j) 
+PASS     ... and j * j = -1 is still a depth-1 element (no reduction of dimension) 
+PASS  ⩾ on ℚ (sign by search in base i-1) agrees with exact comparison, 40 random pairs 
+
+22/22 passed  (12.9s)

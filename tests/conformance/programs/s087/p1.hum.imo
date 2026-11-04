@@ -1,0 +1,10 @@
+-- predicates: a statement is simplified to its minimal form when it is evaluated (docs/predicates.md)
+--   python3 tools/i1.py examples/predicates.hum.imo                (also --out spec, --out bin: every answer reads back)
+-- x, z, y, n are UNKNOWNS: declared, never defined.  A relation about an unknown, or between elements of R[i], is a statement
+-- (class Prop): true if it holds for every value of its unknowns, false if for none, otherwise its simplest equivalent form.
+x in \RR
+z in \CC
+y in \CC
+n in \ZZ
+pi in \RR := sum(2, k in \QQ |-> k / (2 * k + 1))
+e in \RR := sum(1, k in \QQ |-> 1 / k)

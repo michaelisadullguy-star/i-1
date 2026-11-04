@@ -1,0 +1,1 @@
+main in Stream(\Q) := pow(1/2 + 3/4*i, 3/5)

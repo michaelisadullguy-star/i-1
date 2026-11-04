@@ -1,0 +1,5 @@
+⍝ char and string literals in spec notation
+main ∶ 𝕊
+main ≔ "spec: λ\n\"q\" \\ 'x'"
+c ∶ 𝕮
+c ≔ 'λ'

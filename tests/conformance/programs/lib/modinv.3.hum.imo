@@ -1,0 +1,1 @@
+main in \ZZ := modinv(-7, 7)

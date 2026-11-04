@@ -1,0 +1,420 @@
+⍝ lib/prove.imo — spec notation — trusted prelude, part 12: the predicates on ℝ[i] — relations decided by logic (true, false, undetermined)
+⍝ An element of ℝ[i] is defined logically (by its definition: a series, a sum, a product, …), so a relation between two of them is
+⍝ decided from the definitions, not from the streams.  The prover receives the relation φ and every definition it uses as CODES — terms
+⍝ written with numbers, a symbol by its doc 1 code — and decides φ by
+⍝   logical expansion   unfold definitions (β-reduction on codes);
+⍝   simplification      the ring normal form over atoms (series, exponentials, opaque terms), as for algebraic expressions;
+⍝   isomorphism         two series are the same element when their first terms and their ratios k ↦ ρ(k) agree (by induction on k);
+⍝   proof rules         Σ (k ↦ c/k) is exp c;  the sine / cosine / hyperbolic series are exponentials;  exp a · exp b = exp (a + b);
+⍝   certified bounds    a convergent series lies in a disc around its partial sum (ratio test), which refutes = and decides < .
+⍝ The decision is ⋗ ≖ ⋖ in 𝔒 (⋖ false < ≖ not decided < ⋗ true): "and" is min, "or" is max, "not" reverses.
+⍝ Statements (docs/predicates.md): every statement — a relation on ℝ[i], a relation or predicate about an UNKNOWN (a symbol declared
+⍝ and never defined), a connective on statements — has class Ω (Prop) and is simplified to its simplest form whenever it is evaluated
+⍝ or output: the compiler writes it as (simplify′ ε⌜⌝ ⌜φ⌝), and simplify′ (lib/solve.imo) returns the code of true, of false, or of the
+⍝ simplest equivalent statement.  A predicate is a function whose value is true, false or undetermined.
+⍝ As a truth value (decide, Ω → 𝔹) it is ⊤ or ⊥ (the digits 1 and 0), or ⍰ (undetermined) when it is neither — never a guess.
+⍝ ---- codes
+𝔔 ∶ 𝒦
+⍝ ---- statements (Prop): the class of statements in simplest form.  A value of Ω IS a code (𝔔) — the code of the simplest statement
+⍝ the simplifier found (lib/solve.imo, simplify′): (𝔮ˢ ᶜ⊤) is true, (𝔮ˢ ᶜ⊥) is false, anything else a statement that is neither.
+Ω ∶ 𝒦   ⍝ statements in simplest form (Prop); a value is the code of the statement
+𝔮ⁿ ∶ α → 𝔔
+𝔮ˢ ∶ 𝔇 → 𝔔
+𝔮ᵃ ∶ 𝔔 → 𝔔 → 𝔔
+𝔮ˡ ∶ 𝔔 → 𝔔
+𝔮ᵛ ∶ 𝔇 → 𝔔
+𝔮ⁿ ξ ≔ (cn cs ca cl cv ↦ (cn ξ))
+𝔮ˢ ξ ≔ (cn cs ca cl cv ↦ (cs ξ))
+𝔮ᵃ ξ η ≔ (cn cs ca cl cv ↦ (ca ξ η))
+𝔮ˡ ξ ≔ (cn cs ca cl cv ↦ (cl ξ))
+𝔮ᵛ ξ ≔ (cn cs ca cl cv ↦ (cv ξ))
+⍝ undetermined: a Boolean-like value that absorbs its arguments (an "if" on it is undetermined too); the host reports it, never as true or false
+⍰ ∶ 𝔹
+⍰ ≔ (ξ η ↦ ⍰)
+⍝ ---- three-valued logic on 𝔒: or = max, and = min, not = reverse
+∨³ ∶ 𝔒 → 𝔒 → 𝔒
+∨³ ξ η ≔ (ξ η (η ≖ ≖ ⋗) ⋗)
+∧³ ∶ 𝔒 → 𝔒 → 𝔒
+∧³ ξ η ≔ (ξ ⋖ (η ⋖ ≖ ≖) η)
+¬³ ∶ 𝔒 → 𝔒
+¬³ ξ ≔ (ξ ⋗ ≖ ⋖)
+⍝ ---- one system.  ⊤ and ⊥ ARE the digits 1 and 0, so a truth value is a number: ι (the Iverson bracket) widens 𝔹 to ℕ, and supp
+⍝ (the support, n ≠ 0) maps back.  ι turns "or" into max and "and" into min (= ×); supp turns + into "or" and × into "and"; the union of
+⍝ two sets is "or" of their membership tests.  The human notation therefore spells all of them with the same symbols (+ max or union …).
+ι ∶ 𝔹 → ℕ
+ι ξ ≔ (ξ 1 0)
+(↪ ι)
+supp ∶ ℕ → 𝔹
+supp ξ ≔ (¬ (≐ ξ 0))
+⍝ ---- value equality of Gaussian integers (for indices and codes)
+=ᶻ ∶ 𝔇 → 𝔇 → 𝔹
+=ᶻ ξ η ≔ (∅ᶻ (⊟ᶻ ξ η))
+⍝ ---- the head and the arguments of a code
+spine′ ∶ 𝔔 → 𝔏 𝔔 → 𝔓 𝔔 (𝔏 𝔔)
+spine′ ξ λ ≔ (ξ (θ ↦ (⊗ ξ λ)) (θ ↦ (⊗ ξ λ)) (φ ψ ↦ (spine′ φ (∷ ψ λ))) (θ ↦ (⊗ ξ λ)) (θ ↦ (⊗ ξ λ)))
+spine ∶ 𝔔 → 𝔓 𝔔 (𝔏 𝔔)
+spine ξ ≔ (spine′ ξ ⊥)
+⍝ the code of a symbol, if the code is a symbol (else the code −1, which no symbol has)
+symᶜ ∶ 𝔔 → 𝔇
+symᶜ ξ ≔ (ξ (θ ↦ (◀ 11101)) (θ ↦ θ) (φ ψ ↦ (◀ 11101)) (θ ↦ (◀ 11101)) (θ ↦ (◀ 11101)))
+apps ∶ 𝔔 → 𝔏 𝔔 → 𝔔
+apps ξ λ ≔ (foldl 𝔮ᵃ ξ λ)
+⍝ ---- de Bruijn shifting and substitution on codes, β-reduction
+⇑ᶜ ∶ 𝔔 → 𝔇 → 𝔇 → 𝔔
+⇑ᶜ ξ δ ϑ ≔ (ξ (θ ↦ ξ) (θ ↦ ξ) (φ ψ ↦ (𝔮ᵃ (⇑ᶜ φ δ ϑ) (⇑ᶜ ψ δ ϑ))) (θ ↦ (𝔮ˡ (⇑ᶜ θ δ (⊞ᶻ ϑ (◀ 1))))) (θ ↦ ((⩾ᶻ θ ϑ) (𝔮ᵛ (⊞ᶻ θ δ)) ξ)))
+⇓ᶜ ∶ 𝔔 → 𝔇 → 𝔔 → 𝔔
+⇓ᶜ ξ ϑ ω ≔ (ξ (θ ↦ ξ) (θ ↦ ξ) (φ ψ ↦ (𝔮ᵃ (⇓ᶜ φ ϑ ω) (⇓ᶜ ψ ϑ ω))) (θ ↦ (𝔮ˡ (⇓ᶜ θ (⊞ᶻ ϑ (◀ 1)) (⇑ᶜ ω (◀ 1) (◀ 1))))) (θ ↦ ((=ᶻ θ ϑ) ω ((⩾ᶻ θ ϑ) (𝔮ᵛ (⊟ᶻ θ (◀ 1))) ξ))))
+βᶜ ∶ 𝔔 → 𝔔 → 𝔔
+βᶜ ξ ω ≔ (⇓ᶜ ξ (◀ 1) ω)
+⍝ apply a code to a list of argument codes, β-reducing while the code is a λ
+βs ∶ 𝔔 → 𝔏 𝔔 → 𝔔
+βs ξ λ ≔ (λ (θ ι ↦ (ξ (φ ↦ (apps ξ λ)) (φ ↦ (apps ξ λ)) (φ ψ ↦ (apps ξ λ)) (φ ↦ (βs (βᶜ φ θ) ι)) (φ ↦ (apps ξ λ)))) ξ)
+⍝ ---- definitions: ε is a list of (code of a symbol, code of its definition)
+look ∶ 𝔏 (𝔓 𝔇 𝔔) → 𝔇 → 𝔓 𝔹 𝔔
+look ε ξ ≔ (ε (θ ι ↦ ((=ᶻ (◀ θ) ξ) (⊗ ⊤ (▶ θ)) (look ι ξ))) (⊗ ⊥ ⊥))
+⍝ one step of logical expansion: (f a b …) with f defined becomes the definition applied to a b …, and ((λ …) a …) is β-reduced;
+⍝ (⊤, code) or (⊥, _)
+unfold ∶ 𝔏 (𝔓 𝔇 𝔔) → 𝔔 → 𝔓 𝔹 𝔔
+unfold ε ξ ≔ ((σ ↦ ((υ ↦ ((◀ σ) (θ ↦ υ) (θ ↦ υ) (φ ψ ↦ υ) (θ ↦ (⊗ ⊤ (βs (◀ σ) (▶ σ)))) (θ ↦ υ))) ((τ ↦ ((◀ τ) (⊗ ⊤ (βs (▶ τ) (▶ σ))) (⊗ ⊥ ⊥))) (look ε (symᶜ (◀ σ)))))) (spine ξ))
+⍝ ---- the predicates on ℝ[i].  The compiler (pymo/imotypes.py, pymo/quote.py; haskimo/src/I1/Types.hs, Quote.hs) replaces every statement —
+⍝ a relation on ℝ[i], a relation whose sides mention an unknown, a connective with a statement operand — by  (simplify′ ⌜definitions⌝ ⌜φ⌝),
+⍝ so these bodies are only reached when a relation is used as a value without arguments.
+≐ᴿ ∶ ℝ[i] → ℝ[i] → Ω
+≐ᴿ ξ η ≔ ⍰
+≠ᴿ ∶ ℝ[i] → ℝ[i] → Ω
+≠ᴿ ξ η ≔ ⍰
+≺ᴿ ∶ ℝ → ℝ → Ω
+≺ᴿ ξ η ≔ ⍰
+⩽ᴿ ∶ ℝ → ℝ → Ω
+⩽ᴿ ξ η ≔ ⍰
+≻ᴿ ∶ ℝ → ℝ → Ω
+≻ᴿ ξ η ≔ ⍰
+⩾ᴿ ∶ ℝ → ℝ → Ω
+⩾ᴿ ξ η ≔ ⍰
+≠ ∶ ℚ[i] → ℚ[i] → 𝔹
+≠ ξ η ≔ (¬ (≐ ξ η))
+⍝ ---- Prop and Bool.  prop and decide are the canonical coercions 𝔹 → Ω and Ω → 𝔹; decide is the lossy one (a statement that is
+⍝ neither true nor false becomes ⍰), so the class checker counts it twice and prefers a reading in Ω when both fit.
+truth_rd ∶ Ω → 𝔒   ⍝ the truth of a statement in simplest form: ⋗ true, ⋖ false, ≖ neither (helper)
+truth_rd ξ ≔ (ξ (θ ↦ (θ ⋗ ⋖)) (θ ↦ ((=ᶻ θ ᶜ⊤) ⋗ ((=ᶻ θ ᶜ⊥) ⋖ ≖))) (φ ψ ↦ ≖) (θ ↦ ≖) (θ ↦ ≖))
+prop ∶ 𝔹 → Ω   ⍝ a truth value as a statement: ⊤ is the statement true, ⊥ the statement false (canonical coercion 𝔹 → Ω)
+prop ξ ≔ (ξ (𝔮ˢ ᶜ⊤) (𝔮ˢ ᶜ⊥))
+(↪ prop)
+decide ∶ Ω → 𝔹   ⍝ a statement as a truth value: ⊤ if it is true, ⊥ if it is false, ⍰ (undetermined) otherwise (canonical coercion Ω → 𝔹)
+decide ξ ≔ ((truth_rd ξ) ⊥ ⍰ ⊤)
+(↪ decide)
+⍝ the connectives on statements.  The compiler quotes every combination with a statement operand, so that it is simplified as one
+⍝ statement; these bodies (used only when a connective is passed as a value) build the code of the combination, true and false absorbed.
+∧Ω ∶ Ω → Ω → Ω   ⍝ and of two statements (simplified together)
+∧Ω ξ η ≔ ((truth_rd ξ) (𝔮ˢ ᶜ⊥) ((truth_rd η) (𝔮ˢ ᶜ⊥) (𝔮ᵃ (𝔮ᵃ (𝔮ˢ ᶜ∧) ξ) η) ξ) η)
+∨Ω ∶ Ω → Ω → Ω   ⍝ or of two statements (simplified together)
+∨Ω ξ η ≔ ((truth_rd ξ) η ((truth_rd η) ξ (𝔮ᵃ (𝔮ᵃ (𝔮ˢ ᶜ∨) ξ) η) (𝔮ˢ ᶜ⊤)) (𝔮ˢ ᶜ⊤))
+¬Ω ∶ Ω → Ω   ⍝ negation of a statement (simplified)
+¬Ω ξ ≔ ((truth_rd ξ) (𝔮ˢ ᶜ⊤) (𝔮ᵃ (𝔮ˢ ᶜ¬) ξ) (𝔮ˢ ᶜ⊥))
+⇒Ω ∶ Ω → Ω → Ω   ⍝ implication between statements (simplified together)
+⇒Ω ξ η ≔ ((truth_rd ξ) (𝔮ˢ ᶜ⊤) ((truth_rd η) (¬Ω ξ) (𝔮ᵃ (𝔮ᵃ (𝔮ˢ ᶜ⇒) ξ) η) (𝔮ˢ ᶜ⊤)) η)
+⇔Ω ∶ Ω → Ω → Ω   ⍝ equivalence of statements (simplified together)
+⇔Ω ξ η ≔ ((truth_rd ξ) (¬Ω η) ((truth_rd η) (¬Ω ξ) (𝔮ᵃ (𝔮ᵃ (𝔮ˢ ᶜ⇔) ξ) η) ξ) η)
+⍝ a statement computed at run time inside a quoted statement: its value is already a code
+code_rd ∶ Ω → 𝔔   ⍝ the code of a statement (a statement is its code; helper of the compiler)
+code_rd ξ ≔ ξ
+⍝ <mkprove>  generated by pymo/mkprove.py from doc 1 — do not edit by hand
+ᶜ⊞ ∶ 𝔇
+ᶜ⊞ ≔ (◀ 111010)
+ᶜ⊟ ∶ 𝔇
+ᶜ⊟ ≔ (◀ 1001001)
+ᶜ⊠ ∶ 𝔇
+ᶜ⊠ ≔ (◀ 111011)
+ᶜ⊖ ∶ 𝔇
+ᶜ⊖ ≔ (◀ 111100)
+ᶜ∗ ∶ 𝔇
+ᶜ∗ ≔ (◀ 111101)
+ᶜ÷ ∶ 𝔇
+ᶜ÷ ≔ (◀ 111110)
+ᶜ⊕ ∶ 𝔇
+ᶜ⊕ ≔ (◀ 1011011)
+ᶜ⊛ ∶ 𝔇
+ᶜ⊛ ≔ (◀ 1011100)
+ᶜ⊖ᴿ ∶ 𝔇
+ᶜ⊖ᴿ ≔ (◀ 1011101)
+ᶜ⊟ᴿ ∶ 𝔇
+ᶜ⊟ᴿ ≔ (◀ 1111000)
+ᶜ∗ᴿ ∶ 𝔇
+ᶜ∗ᴿ ≔ (◀ 1011110)
+ᶜ⇡ ∶ 𝔇
+ᶜ⇡ ≔ (◀ 1011010)
+ᶜΣ ∶ 𝔇
+ᶜΣ ≔ (◀ 1100010)
+ᶜ∧ ∶ 𝔇
+ᶜ∧ ≔ (◀ 11110)
+ᶜ∨ ∶ 𝔇
+ᶜ∨ ≔ (◀ 11111)
+ᶜ¬ ∶ 𝔇
+ᶜ¬ ≔ (◀ 11101)
+ᶜ⇒ ∶ 𝔇
+ᶜ⇒ ≔ (◀ 11010011)
+ᶜ⇔ ∶ 𝔇
+ᶜ⇔ ≔ (◀ 11010100)
+ᶜ≐ᴿ ∶ 𝔇
+ᶜ≐ᴿ ≔ (◀ 101110100)
+ᶜ≠ᴿ ∶ 𝔇
+ᶜ≠ᴿ ≔ (◀ 101110101)
+ᶜ≺ᴿ ∶ 𝔇
+ᶜ≺ᴿ ≔ (◀ 101110110)
+ᶜ⩽ᴿ ∶ 𝔇
+ᶜ⩽ᴿ ≔ (◀ 101110111)
+ᶜ≻ᴿ ∶ 𝔇
+ᶜ≻ᴿ ≔ (◀ 101111000)
+ᶜ⩾ᴿ ∶ 𝔇
+ᶜ⩾ᴿ ≔ (◀ 101111001)
+ᶜ√ ∶ 𝔇
+ᶜ√ ≔ (◀ 100000100)
+ᶜ≐ ∶ 𝔇
+ᶜ≐ ≔ (◀ 111111)
+ᶜ≠ ∶ 𝔇
+ᶜ≠ ≔ (◀ 101111010)
+ᶜ≺ ∶ 𝔇
+ᶜ≺ ≔ (◀ 1001000)
+ᶜ⩽ ∶ 𝔇
+ᶜ⩽ ≔ (◀ 1000110)
+ᶜ≻ ∶ 𝔇
+ᶜ≻ ≔ (◀ 1000111)
+ᶜ⩾ ∶ 𝔇
+ᶜ⩾ ≔ (◀ 1000010)
+ᶜ^ ∶ 𝔇
+ᶜ^ ≔ (◀ 11001001)
+ᶜ^ᴿ ∶ 𝔇
+ᶜ^ᴿ ≔ (◀ 111101111)
+ᶜℜ ∶ 𝔇
+ᶜℜ ≔ (◀ 10110011)
+ᶜℑ ∶ 𝔇
+ᶜℑ ≔ (◀ 10110100)
+ᶜℜᴿ ∶ 𝔇
+ᶜℜᴿ ≔ (◀ 11111011)
+ᶜℑᴿ ∶ 𝔇
+ᶜℑᴿ ≔ (◀ 11111100)
+ᶜ⊤ ∶ 𝔇
+ᶜ⊤ ≔ (◀ 11001)
+ᶜ⊥ ∶ 𝔇
+ᶜ⊥ ≔ (◀ 11010)
+ᶜ𝔲 ∶ 𝔇
+ᶜ𝔲 ≔ (◀ 111110000)
+ᶜ÷ᴿ ∶ 𝔇
+ᶜ÷ᴿ ≔ (◀ 11111010)
+ᶜroot ∶ 𝔇
+ᶜroot ≔ (◀ 1010001011)
+ᶜ∷ ∶ 𝔇
+ᶜ∷ ≔ (◀ 101000)
+ᶜ⊘ ∶ 𝔇
+ᶜ⊘ ≔ (◀ 101010)
+ᶜexp ∶ 𝔇
+ᶜexp ≔ (◀ 1111110)
+ᶜsin ∶ 𝔇
+ᶜsin ≔ (◀ 10000000)
+ᶜcos ∶ 𝔇
+ᶜcos ≔ (◀ 10000001)
+ᶜsinh ∶ 𝔇
+ᶜsinh ≔ (◀ 100000111)
+ᶜcosh ∶ 𝔇
+ᶜcosh ≔ (◀ 100001000)
+ᶜlog ∶ 𝔇
+ᶜlog ≔ (◀ 100000101)
+ᶜatan ∶ 𝔇
+ᶜatan ≔ (◀ 100000110)
+⍝ </mkprove>
+⍝ ---- evaluation of a ℚ[i] code (σ: the values of the bound variables, variable 1 first; ϕ: fuel for logical expansion)
+ev² ∶ (ℚ[i] → ℚ[i] → ℚ[i]) → 𝔓 𝔹 ℚ[i] → 𝔓 𝔹 ℚ[i] → 𝔓 𝔹 ℚ[i]
+ev² φ ξ η ≔ ((∧ (◀ ξ) (◀ η)) (⊗ ⊤ (⊜ (φ (▶ ξ) (▶ η)))) (⊗ ⊥ ⊥))
+ev¹ ∶ (ℚ[i] → ℚ[i]) → 𝔓 𝔹 ℚ[i] → 𝔓 𝔹 ℚ[i]
+ev¹ φ ξ ≔ ((◀ ξ) (⊗ ⊤ (φ (▶ ξ))) (⊗ ⊥ ⊥))
+args² ∶ 𝔏 α → 𝔹
+args² λ ≔ (∧ (¬ (∅ (⌄ λ))) (∅ (⌄ (⌄ λ))))
+args¹ ∶ 𝔏 α → 𝔹
+args¹ λ ≔ (∧ (¬ (∅ λ)) (∅ (⌄ λ)))
+⍝ the fuel: at most 64 nested expansions (a recursive definition is not unfolded for ever)
+fuel ∶ 𝔇
+fuel ≔ (◀ 111010000000000000000000)
+evQ ∶ 𝔏 (𝔓 𝔇 𝔔) → 𝔇 → 𝔏 ℚ[i] → 𝔔 → 𝔓 𝔹 ℚ[i]
+evQ ε ϕ σ ξ ≔ (ξ (θ ↦ (⊗ ⊤ θ)) (θ ↦ (evQ′ ε ϕ σ ξ ξ ⊥)) (φ ψ ↦ ((τ ↦ (evQ′ ε ϕ σ ξ (◀ τ) (▶ τ))) (spine ξ))) (θ ↦ (⊗ ⊥ ⊥)) (θ ↦ (⊗ ⊤ (hd (drop′ (⊟ᶻ θ (◀ 1)) σ)))))
+evQ′ ∶ 𝔏 (𝔓 𝔇 𝔔) → 𝔇 → 𝔏 ℚ[i] → 𝔔 → 𝔔 → 𝔏 𝔔 → 𝔓 𝔹 ℚ[i]
+evQ′ ε ϕ σ ξ η λ ≔ ((κ ρ₁ ρ₂ ↦ ((∧ (args² λ) (=ᶻ κ ᶜ⊞)) (ev² ⊞ ρ₁ ρ₂) ((∧ (args² λ) (=ᶻ κ ᶜ⊠)) (ev² ⊠ ρ₁ ρ₂) ((∧ (args² λ) (=ᶻ κ ᶜ÷)) (ev² ÷ ρ₁ ρ₂) ((∧ (args² λ) (=ᶻ κ ᶜ⊟)) (ev² ⊟ ρ₁ ρ₂) ((∧ (args¹ λ) (=ᶻ κ ᶜ⊖)) (ev¹ ⊖ ρ₁) ((∧ (args¹ λ) (=ᶻ κ ᶜ∗)) (ev¹ ∗ ρ₁) ((υ ↦ ((∧ (◀ υ) (¬ (∅ᶻ ϕ))) (evQ ε (⊟ᶻ ϕ (◀ 1)) σ (▶ υ)) (⊗ ⊥ ⊥))) (unfold ε ξ))))))))) (symᶜ η) (evQ ε ϕ σ (hd λ)) (evQ ε ϕ σ (hd (⌄ λ))))
+⍝ ---- polynomials in one variable k: coefficient lists, lowest degree first (as digit strings are)
+⊞ᵖ ∶ 𝔏 ℚ[i] → 𝔏 ℚ[i] → 𝔏 ℚ[i]
+⊞ᵖ ξ η ≔ (ξ (θ ι ↦ (η (θ′ ι′ ↦ (∷ (⊜ (⊞ θ θ′)) (⊞ᵖ ι ι′))) ξ)) η)
+⊖ᵖ ∶ 𝔏 ℚ[i] → 𝔏 ℚ[i]
+⊖ᵖ ξ ≔ (⫶ ⊖ ξ)
+∗ᵖ ∶ 𝔏 ℚ[i] → 𝔏 ℚ[i]
+∗ᵖ ξ ≔ (⫶ ∗ ξ)
+·ᵖ ∶ ℚ[i] → 𝔏 ℚ[i] → 𝔏 ℚ[i]
+·ᵖ ξ η ≔ (⫶ (θ ↦ (⊜ (⊠ ξ θ))) η)
+⊠ᵖ ∶ 𝔏 ℚ[i] → 𝔏 ℚ[i] → 𝔏 ℚ[i]
+⊠ᵖ ξ η ≔ (ξ (θ ι ↦ (⊞ᵖ (·ᵖ θ η) (∷ 0 (⊠ᵖ ι η)))) ⊥)
+∅ᵖ ∶ 𝔏 ℚ[i] → 𝔹
+∅ᵖ ξ ≔ (∀ₗ (θ ↦ (≐ θ 0)) ξ)
+evᵖ ∶ 𝔏 ℚ[i] → ℚ[i] → ℚ[i]
+evᵖ ξ η ≔ (foldr (θ ι ↦ (⊞ θ (⊠ η ι))) 0 ξ)
+dz⁰ ∶ 𝔏 ℚ[i] → 𝔏 ℚ[i]
+dz⁰ ξ ≔ (ξ (θ ι ↦ ((≐ θ 0) (dz⁰ ι) ξ)) ⊥)
+trimᵖ ∶ 𝔏 ℚ[i] → 𝔏 ℚ[i]
+trimᵖ ξ ≔ (reverse (dz⁰ (reverse ξ)))
+⍝ ‖z‖ = |Re z| + |Im z|, an upper bound of |z| that stays in ℚ
+‖ ∶ ℚ[i] → ℚ
+‖ ξ ≔ (⊞ (abs (ℜ ξ)) (abs (ℑ ξ)))
+⍝ Cauchy's bound: every root of a non-constant polynomial has |root| < 1 + max |aᵢ/aₙ|  (here with ‖ ‖ ≥ | |);  0 for a constant
+cauchyᵖ ∶ 𝔏 ℚ[i] → ℚ
+cauchyᵖ ξ ≔ ((τ ↦ ((∅ (⌄ τ)) 0 ((λ′ ↦ (⊞ 1 (foldl (θ ι ↦ (⊜ (max θ ι))) 0 (⫶ (θ ↦ (⊜ (‖ (⊜ (÷ θ λ′))))) (reverse (⌄ (reverse τ))))))) (last τ)))) (trimᵖ ξ))
+⍝ ---- rational functions of k with their "danger": the product of every divisor met; where the danger is not 0 the rational form is exact
+⍝ (n, d, z) as (⊗ n (⊗ d z))
+r⁺ ∶ 𝔓 (𝔏 ℚ[i]) (𝔓 (𝔏 ℚ[i]) (𝔏 ℚ[i])) → 𝔓 (𝔏 ℚ[i]) (𝔓 (𝔏 ℚ[i]) (𝔏 ℚ[i])) → 𝔓 (𝔏 ℚ[i]) (𝔓 (𝔏 ℚ[i]) (𝔏 ℚ[i]))
+r⁺ ξ η ≔ (⊗ (⊞ᵖ (⊠ᵖ (◀ ξ) (◀ (▶ η))) (⊠ᵖ (◀ η) (◀ (▶ ξ)))) (⊗ (⊠ᵖ (◀ (▶ ξ)) (◀ (▶ η))) (⊠ᵖ (▶ (▶ ξ)) (▶ (▶ η)))))
+r× ∶ 𝔓 (𝔏 ℚ[i]) (𝔓 (𝔏 ℚ[i]) (𝔏 ℚ[i])) → 𝔓 (𝔏 ℚ[i]) (𝔓 (𝔏 ℚ[i]) (𝔏 ℚ[i])) → 𝔓 (𝔏 ℚ[i]) (𝔓 (𝔏 ℚ[i]) (𝔏 ℚ[i]))
+r× ξ η ≔ (⊗ (⊠ᵖ (◀ ξ) (◀ η)) (⊗ (⊠ᵖ (◀ (▶ ξ)) (◀ (▶ η))) (⊠ᵖ (▶ (▶ ξ)) (▶ (▶ η)))))
+r÷ ∶ 𝔓 (𝔏 ℚ[i]) (𝔓 (𝔏 ℚ[i]) (𝔏 ℚ[i])) → 𝔓 (𝔏 ℚ[i]) (𝔓 (𝔏 ℚ[i]) (𝔏 ℚ[i])) → 𝔓 (𝔏 ℚ[i]) (𝔓 (𝔏 ℚ[i]) (𝔏 ℚ[i]))
+r÷ ξ η ≔ ((∅ᵖ (◀ η)) (⊗ ⊥ (⊗ (∷ 1 ⊥) (⊠ᵖ (▶ (▶ ξ)) (▶ (▶ η))))) (⊗ (⊠ᵖ (◀ ξ) (◀ (▶ η))) (⊗ (⊠ᵖ (◀ (▶ ξ)) (◀ η)) (⊠ᵖ (⊠ᵖ (▶ (▶ ξ)) (▶ (▶ η))) (◀ η)))))
+r⁻ ∶ 𝔓 (𝔏 ℚ[i]) (𝔓 (𝔏 ℚ[i]) (𝔏 ℚ[i])) → 𝔓 (𝔏 ℚ[i]) (𝔓 (𝔏 ℚ[i]) (𝔏 ℚ[i]))
+r⁻ ξ ≔ (⊗ (⊖ᵖ (◀ ξ)) (▶ ξ))
+r∗ ∶ 𝔓 (𝔏 ℚ[i]) (𝔓 (𝔏 ℚ[i]) (𝔏 ℚ[i])) → 𝔓 (𝔏 ℚ[i]) (𝔓 (𝔏 ℚ[i]) (𝔏 ℚ[i]))
+r∗ ξ ≔ (⊗ (∗ᵖ (◀ ξ)) (⊗ (∗ᵖ (◀ (▶ ξ))) (▶ (▶ ξ))))
+rr² ∶ (𝔓 (𝔏 ℚ[i]) (𝔓 (𝔏 ℚ[i]) (𝔏 ℚ[i])) → 𝔓 (𝔏 ℚ[i]) (𝔓 (𝔏 ℚ[i]) (𝔏 ℚ[i])) → 𝔓 (𝔏 ℚ[i]) (𝔓 (𝔏 ℚ[i]) (𝔏 ℚ[i]))) → 𝔓 𝔹 (𝔓 (𝔏 ℚ[i]) (𝔓 (𝔏 ℚ[i]) (𝔏 ℚ[i]))) → 𝔓 𝔹 (𝔓 (𝔏 ℚ[i]) (𝔓 (𝔏 ℚ[i]) (𝔏 ℚ[i]))) → 𝔓 𝔹 (𝔓 (𝔏 ℚ[i]) (𝔓 (𝔏 ℚ[i]) (𝔏 ℚ[i])))
+rr² φ ξ η ≔ ((∧ (◀ ξ) (◀ η)) (⊗ ⊤ (φ (▶ ξ) (▶ η))) (⊗ ⊥ ⊥))
+rr¹ ∶ (𝔓 (𝔏 ℚ[i]) (𝔓 (𝔏 ℚ[i]) (𝔏 ℚ[i])) → 𝔓 (𝔏 ℚ[i]) (𝔓 (𝔏 ℚ[i]) (𝔏 ℚ[i]))) → 𝔓 𝔹 (𝔓 (𝔏 ℚ[i]) (𝔓 (𝔏 ℚ[i]) (𝔏 ℚ[i]))) → 𝔓 𝔹 (𝔓 (𝔏 ℚ[i]) (𝔓 (𝔏 ℚ[i]) (𝔏 ℚ[i])))
+rr¹ φ ξ ≔ ((◀ ξ) (⊗ ⊤ (φ (▶ ξ))) (⊗ ⊥ ⊥))
+⍝ the rational form of a ℚ[i] code in the variable 1 (= k)
+ratQ ∶ 𝔏 (𝔓 𝔇 𝔔) → 𝔇 → 𝔔 → 𝔓 𝔹 (𝔓 (𝔏 ℚ[i]) (𝔓 (𝔏 ℚ[i]) (𝔏 ℚ[i])))
+ratQ ε ϕ ξ ≔ (ξ (θ ↦ (⊗ ⊤ (⊗ (∷ θ ⊥) (⊗ (∷ 1 ⊥) (∷ 1 ⊥))))) (θ ↦ (ratQ′ ε ϕ ξ ξ ⊥)) (φ ψ ↦ ((τ ↦ (ratQ′ ε ϕ ξ (◀ τ) (▶ τ))) (spine ξ))) (θ ↦ (⊗ ⊥ ⊥)) (θ ↦ ((=ᶻ θ (◀ 1)) (⊗ ⊤ (⊗ (∷ 0 (∷ 1 ⊥)) (⊗ (∷ 1 ⊥) (∷ 1 ⊥)))) (⊗ ⊥ ⊥))))
+ratQ′ ∶ 𝔏 (𝔓 𝔇 𝔔) → 𝔇 → 𝔔 → 𝔔 → 𝔏 𝔔 → 𝔓 𝔹 (𝔓 (𝔏 ℚ[i]) (𝔓 (𝔏 ℚ[i]) (𝔏 ℚ[i])))
+ratQ′ ε ϕ ξ η λ ≔ ((κ ρ₁ ρ₂ ↦ ((∧ (args² λ) (=ᶻ κ ᶜ⊞)) (rr² r⁺ ρ₁ ρ₂) ((∧ (args² λ) (=ᶻ κ ᶜ⊠)) (rr² r× ρ₁ ρ₂) ((∧ (args² λ) (=ᶻ κ ᶜ÷)) (rr² r÷ ρ₁ ρ₂) ((∧ (args² λ) (=ᶻ κ ᶜ⊟)) (rr² r⁺ ρ₁ (rr¹ r⁻ ρ₂)) ((∧ (args¹ λ) (=ᶻ κ ᶜ⊖)) (rr¹ r⁻ ρ₁) ((∧ (args¹ λ) (=ᶻ κ ᶜ∗)) (rr¹ r∗ ρ₁) ((υ ↦ ((∧ (◀ υ) (¬ (∅ᶻ ϕ))) (ratQ ε (⊟ᶻ ϕ (◀ 1)) (▶ υ)) (⊗ ⊥ ⊥))) (unfold ε ξ))))))))) (symᶜ η) (ratQ ε ϕ (hd λ)) (ratQ ε ϕ (hd (⌄ λ))))
+⍝ ---- exact square roots in ℚ(i):  (⊤, s) with s² = z, or (⊥, _) when z is not a square in ℚ(i)
+√ᶻⁱ ∶ ℚ[i] → 𝔓 𝔹 ℚ[i]
+√ᶻⁱ ξ ≔ ((ϕ ψ ν ↦ ((∧ (≐ (⊠ ν ν) (𝒩 ξ)) (∧ (≐ (denom (÷ (⊞ ν ϕ) 1100)) 1) (≐ (denom (÷ (⊟ ν ϕ) 1100)) 1))) ((χ υ ↦ ((σ′ ↦ ((≐ (⊠ σ′ σ′) ξ) (⊗ ⊤ σ′) (⊗ ⊥ ⊥))) (⊞ χ (⊠ ((⩾ ψ 0) υ (⊖ υ)) 11)))) (isqrt (÷ (⊞ ν ϕ) 1100)) (isqrt (÷ (⊟ ν ϕ) 1100))) (⊗ ⊥ ⊥))) (ℜ ξ) (ℑ ξ) (isqrt (𝒩 ξ)))
+√ᑫ ∶ ℚ[i] → 𝔓 𝔹 ℚ[i]
+√ᑫ ξ ≔ ((θ ↦ ((τ ↦ ((◀ τ) (⊗ ⊤ (⊜ (÷ (▶ τ) (⊗ (▶ θ) (◀ 1))))) (⊗ ⊥ ⊥))) (√ᶻⁱ (⊗ (⊠ᶻ (◀ θ) (▶ θ)) (◀ 1))))) (⊜ ξ))
+⍝ ---- atoms of the normal form:  (⊤, series) = Σ(1, ρ) with ρ's code and its rational form (n, d, z);  (⊥, code) = an opaque term
+⍝ structural equality of codes (values compared as numbers)
+≡ᶜ ∶ 𝔔 → 𝔔 → 𝔹
+≡ᶜ ξ η ≔ (ξ (θ ↦ (η (θ′ ↦ (≐ θ θ′)) (θ′ ↦ ⊥) (φ′ ψ′ ↦ ⊥) (θ′ ↦ ⊥) (θ′ ↦ ⊥))) (θ ↦ (η (θ′ ↦ ⊥) (θ′ ↦ (=ᶻ θ θ′)) (φ′ ψ′ ↦ ⊥) (θ′ ↦ ⊥) (θ′ ↦ ⊥))) (φ ψ ↦ (η (θ′ ↦ ⊥) (θ′ ↦ ⊥) (φ′ ψ′ ↦ (∧ (≡ᶜ φ φ′) (≡ᶜ ψ ψ′))) (θ′ ↦ ⊥) (θ′ ↦ ⊥))) (θ ↦ (η (θ′ ↦ ⊥) (θ′ ↦ ⊥) (φ′ ψ′ ↦ ⊥) (θ′ ↦ (≡ᶜ θ θ′)) (θ′ ↦ ⊥))) (θ ↦ (η (θ′ ↦ ⊥) (θ′ ↦ ⊥) (φ′ ψ′ ↦ ⊥) (θ′ ↦ ⊥) (θ′ ↦ (=ᶻ θ θ′)))))
+⍝ isomorphism of two series atoms: ρ₁(k) = ρ₂(k) for every k ≥ 1 — the rational forms agree as polynomials (n₁d₂ = n₂d₁), and at the
+⍝ finitely many k ≤ Cauchy's bound of d₁d₂ the values are compared directly.  Then the two series have the same terms, hence (by
+⍝ induction on k) the same partial sums: they are the same element.
+≡ˢ ∶ 𝔓 𝔔 (𝔓 (𝔏 ℚ[i]) (𝔓 (𝔏 ℚ[i]) (𝔏 ℚ[i]))) → 𝔓 𝔔 (𝔓 (𝔏 ℚ[i]) (𝔓 (𝔏 ℚ[i]) (𝔏 ℚ[i]))) → 𝔹
+≡ˢ ξ η ≔ ((ν δ ν′ δ′ ↦ (∧ (∅ᵖ (⊞ᵖ (⊠ᵖ ν δ′) (⊖ᵖ (⊠ᵖ ν′ δ)))) (∀ₗ (κ ↦ (≐ (÷ (evᵖ ν κ) (evᵖ δ κ)) (÷ (evᵖ ν′ κ) (evᵖ δ′ κ)))) (upto 1 (⌊ (cauchyᵖ (⊠ᵖ δ δ′))))))) (◀ (▶ ξ)) (◀ (▶ (▶ ξ))) (◀ (▶ η)) (◀ (▶ (▶ η))))
+≡ᵃ ∶ 𝔓 𝔹 α → 𝔓 𝔹 α → 𝔹
+≡ᵃ ξ η ≔ ((◀ ξ) ((◀ η) (≡ˢ (▶ ξ) (▶ η)) ⊥) ((◀ η) ⊥ (≡ᶜ (▶ ξ) (▶ η))))
+⍝ ---- polynomials over atoms.  A monomial is (c, [(atom, exponent)]) and stands for exp(c)·Π atomᵉ — exponentials are merged by the
+⍝ rule exp a · exp b = exp (a + b), so a monomial has at most one; a polynomial is a list of (coefficient, monomial), like terms merged.
+insᵐ ∶ α → ℕ → 𝔏 (𝔓 α ℕ) → 𝔏 (𝔓 α ℕ)
+insᵐ ξ ε λ ≔ (λ (θ ι ↦ ((≡ᵃ (◀ θ) ξ) (∷ (⊗ ξ (⊞ (▶ θ) ε)) ι) (∷ θ (insᵐ ξ ε ι)))) (∷ (⊗ ξ ε) ⊥))
+⊠ᵐ ∶ 𝔓 ℚ[i] (𝔏 (𝔓 α ℕ)) → 𝔓 ℚ[i] (𝔏 (𝔓 α ℕ)) → 𝔓 ℚ[i] (𝔏 (𝔓 α ℕ))
+⊠ᵐ μ ν ≔ (⊗ (⊜ (⊞ (◀ μ) (◀ ν))) (foldr (θ ι ↦ (insᵐ (◀ θ) (▶ θ) ι)) (▶ μ) (▶ ν)))
+≡ᵐ ∶ 𝔓 ℚ[i] (𝔏 (𝔓 α ℕ)) → 𝔓 ℚ[i] (𝔏 (𝔓 α ℕ)) → 𝔹
+≡ᵐ μ ν ≔ (∧ (≐ (◀ μ) (◀ ν)) (∧ (≐ (ℓ (▶ μ)) (ℓ (▶ ν))) (∀ₗ (θ ↦ (∃ₗ (ι ↦ (∧ (≡ᵃ (◀ θ) (◀ ι)) (≐ (▶ θ) (▶ ι)))) (▶ ν))) (▶ μ))))
+insᴾ ∶ 𝔓 ℚ[i] α → 𝔏 (𝔓 ℚ[i] α) → 𝔏 (𝔓 ℚ[i] α)
+insᴾ τ ξ ≔ (ξ (θ ι ↦ ((≡ᵐ (▶ θ) (▶ τ)) ((ω ↦ ((≐ ω 0) ι (∷ (⊗ ω (▶ θ)) ι))) (⊜ (⊞ (◀ θ) (◀ τ)))) (∷ θ (insᴾ τ ι)))) ((≐ (◀ τ) 0) ⊥ (∷ τ ⊥)))
+⊞ᴾ ∶ 𝔏 α → 𝔏 α → 𝔏 α
+⊞ᴾ ξ η ≔ (foldr insᴾ ξ η)
+⍝ the rule (√c)² = c (true of the principal root for every c): (⊤, c) when a code is (√ c) with c a value
+√?ᶜ ∶ 𝔔 → 𝔓 𝔹 ℚ[i]
+√?ᶜ ξ ≔ (ξ (θ ↦ (⊗ ⊥ ⊥)) (θ ↦ (⊗ ⊥ ⊥)) (φ ψ ↦ ((=ᶻ (symᶜ φ) ᶜ√) (ψ (θ ↦ (⊗ ⊤ θ)) (θ ↦ (⊗ ⊥ ⊥)) (φ′ ψ′ ↦ (⊗ ⊥ ⊥)) (θ ↦ (⊗ ⊥ ⊥)) (θ ↦ (⊗ ⊥ ⊥))) (⊗ ⊥ ⊥))) (θ ↦ (⊗ ⊥ ⊥)) (θ ↦ (⊗ ⊥ ⊥)))
+⍝ and √a·√b = √(ab) for real a, b ≥ 0: in a monomial such roots are merged into one, which becomes a number when ab is a square
+√⁺?ᵃ ∶ 𝔓 𝔹 α → 𝔓 𝔹 ℚ[i]
+√⁺?ᵃ ξ ≔ ((◀ ξ) (⊗ ⊥ ⊥) ((υ ↦ ((∧ (◀ υ) (∧ (≐ (ℑ (▶ υ)) 0) (⩾ (ℜ (▶ υ)) 0))) υ (⊗ ⊥ ⊥))) (√?ᶜ (▶ ξ))))
+⍝ (coefficient factor, monomial atoms):  the roots √c (c real ≥ 0, exponent 1) are multiplied into one value
+√merge ∶ 𝔏 (𝔓 (𝔓 𝔹 α) ℕ) → 𝔓 ℚ[i] (𝔏 (𝔓 (𝔓 𝔹 α) ℕ))
+√merge λ ≔ ((π′ ↦ ((ρ′ ↦ ((∅ π′) (⊗ 1 λ) ((τ ↦ ((◀ τ) (⊗ (▶ τ) ρ′) (⊗ 1 (∷ (⊗ (⊗ ⊥ (𝔮ᵃ (𝔮ˢ ᶜ√) (𝔮ⁿ (⊜ (prodof (⫶ (θ ↦ (▶ (√⁺?ᵃ (◀ θ)))) π′)))))) 1) ρ′)))) (√ᑫ (prodof (⫶ (θ ↦ (▶ (√⁺?ᵃ (◀ θ)))) π′)))))) (filter (θ ↦ (¬ (∧ (◀ (√⁺?ᵃ (◀ θ))) (≐ (▶ θ) 1)))) λ))) (filter (θ ↦ (∧ (◀ (√⁺?ᵃ (◀ θ))) (≐ (▶ θ) 1))) λ))
+simp′ ∶ 𝔏 (𝔓 (𝔓 𝔹 α) ℕ) → 𝔓 ℚ[i] (𝔏 (𝔓 (𝔓 𝔹 α) ℕ))
+simp′ λ ≔ (λ (θ ι ↦ ((ρ ↦ ((υ ↦ ((∧ (∧ (¬ (◀ (◀ θ))) (◀ υ)) (⩾ (▶ θ) 1100)) ((ε′ ↦ (⊗ (⊠ (◀ ρ) (▶ υ)) ((≐ ε′ 0) (▶ ρ) (∷ (⊗ (◀ θ) ε′) (▶ ρ))))) (⊟ (▶ θ) 1100)) (⊗ (◀ ρ) (∷ θ (▶ ρ))))) (√?ᶜ (▶ (◀ θ))))) (simp′ ι))) (⊗ 1 ⊥))
+⊠ᴾ ∶ 𝔏 α → 𝔏 α → 𝔏 α
+⊠ᴾ ξ η ≔ (foldr (θ ι ↦ (foldr (θ′ ι′ ↦ ((μ ↦ ((σ′ ↦ ((ω ↦ (insᴾ (⊗ (⊜ (⊠ (⊠ (⊠ (◀ θ) (◀ θ′)) (◀ σ′)) (◀ ω))) (⊗ (◀ μ) (▶ ω))) ι′)) (√merge (▶ σ′)))) (simp′ (▶ μ)))) (⊠ᵐ (▶ θ) (▶ θ′)))) ι η)) ⊥ ξ)
+⊖ᴾ ∶ 𝔏 α → 𝔏 α
+⊖ᴾ ξ ≔ (⫶ (θ ↦ (⊗ (⊖ (◀ θ)) (▶ θ))) ξ)
+constᴾ ∶ ℚ[i] → 𝔏 α
+constᴾ ξ ≔ (insᴾ (⊗ (⊜ ξ) (⊗ 0 ⊥)) ⊥)
+·ᴾ ∶ ℚ[i] → 𝔏 α → 𝔏 α
+·ᴾ ξ η ≔ (⊠ᴾ (constᴾ ξ) η)
+atomᴾ ∶ α → 𝔏 β
+atomᴾ ξ ≔ (∷ (⊗ 1 (⊗ 0 (∷ (⊗ ξ 1) ⊥))) ⊥)
+expᴾ ∶ ℚ[i] → 𝔏 α
+expᴾ ξ ≔ (∷ (⊗ 1 (⊗ (⊜ ξ) ⊥)) ⊥)
+⍝ conjugation (k is real, so a series is conjugated by conjugating its ratio)
+∗ᵃ ∶ 𝔓 𝔹 α → 𝔓 𝔹 α
+∗ᵃ ξ ≔ ((◀ ξ) (⊗ ⊤ ((σ′ ↦ (⊗ (𝔮ᵃ (𝔮ˢ ᶜ∗) (◀ σ′)) (⊗ (∗ᵖ (◀ (▶ σ′))) (⊗ (∗ᵖ (◀ (▶ (▶ σ′)))) (▶ (▶ (▶ σ′))))))) (▶ ξ))) (⊗ ⊥ (𝔮ᵃ (𝔮ˢ ᶜ∗ᴿ) (▶ ξ))))
+∗ᴾ ∶ 𝔏 α → 𝔏 α
+∗ᴾ ξ ≔ (⫶ (θ ↦ (⊗ (∗ (◀ θ)) (⊗ (∗ (◀ (▶ θ))) (⫶ (ι ↦ (⊗ (∗ᵃ (◀ ι)) (▶ ι))) (▶ (▶ θ)))))) ξ)
+⍝ ---- series.  A rational form is checked against the definition at every k ≤ Cauchy's bound of its danger (so it is exact for all k ≥ 1).
+valid ∶ 𝔏 (𝔓 𝔇 𝔔) → 𝔇 → 𝔔 → 𝔓 (𝔏 ℚ[i]) (𝔓 (𝔏 ℚ[i]) (𝔏 ℚ[i])) → 𝔹
+valid ε ϕ ξ η ≔ (∀ₗ (κ ↦ ((υ ↦ (∧ (◀ υ) (≐ (▶ υ) (÷ (evᵖ (◀ η) κ) (evᵖ (◀ (▶ η)) κ))))) (evQ ε ϕ (∷ κ ⊥) ξ))) (upto 1 (⌊ (cauchyᵖ (▶ (▶ η))))))
+⍝ proof rules: Σ(1, c/k) = exp c;  Σ(1, q/(k² + k/2)) = sinh u / u  and  Σ(1, q/(k² − k/2)) = cosh u,  u² = 4q  (when u ∈ ℚ(i)):
+⍝ the products of the ratios are cᵏ/k!, (4q)ᵏ/(2k+1)!, (4q)ᵏ/(2k)!.  With sinh u = (exp u − exp(−u))/2 and cosh u = (exp u + exp(−u))/2
+⍝ every exponential, sine, cosine, sinh and cosh series becomes a sum of exponentials.
+sinhᴾ ∶ ℚ[i] → 𝔏 α
+sinhᴾ ξ ≔ (⊞ᴾ (·ᴾ (÷ 1 (⊠ 1100 ξ)) (expᴾ ξ)) (·ᴾ (⊖ (÷ 1 (⊠ 1100 ξ))) (expᴾ (⊖ ξ))))
+coshᴾ ∶ ℚ[i] → 𝔏 α
+coshᴾ ξ ≔ (⊞ᴾ (·ᴾ 1.11 (expᴾ ξ)) (·ᴾ 1.11 (expᴾ (⊖ ξ))))
+recog ∶ 𝔔 → 𝔓 (𝔏 ℚ[i]) (𝔓 (𝔏 ℚ[i]) (𝔏 ℚ[i])) → 𝔏 α
+recog ξ η ≔ ((ν δ ↦ ((∅ ν) (constᴾ 1) ((∅ (⌄ ν)) ((∧ (args² δ) (≐ (hd δ) 0)) (expᴾ (÷ (hd ν) (hd (⌄ δ)))) ((∧ (∧ (∅ (⌄ (⌄ (⌄ δ)))) (¬ (∅ (⌄ (⌄ δ))))) (≐ (hd δ) 0)) ((μ ω ↦ ((υ ↦ ((◀ υ) ((≐ μ 1.11) (sinhᴾ (▶ υ)) ((≐ μ (⊖ 1.11)) (coshᴾ (▶ υ)) (atomᴾ (⊗ ⊤ (⊗ ξ η))))) (atomᴾ (⊗ ⊤ (⊗ ξ η))))) (√ᑫ (⊠ 111010000 ω)))) (÷ (hd (⌄ δ)) (hd (⌄ (⌄ δ)))) (÷ (hd ν) (hd (⌄ (⌄ δ))))) (atomᴾ (⊗ ⊤ (⊗ ξ η))))) (atomᴾ (⊗ ⊤ (⊗ ξ η)))))) (trimᵖ (◀ η)) (trimᵖ (◀ (▶ η))))
+⍝ Σ t₀ ρ:  t₀ times the series of ρ (the partial sums scale with t₀)
+Σᴾ ∶ 𝔏 (𝔓 𝔇 𝔔) → 𝔇 → ℚ[i] → 𝔔 → 𝔔 → 𝔏 α
+Σᴾ ε ϕ τ ξ ω ≔ ((ρ ↦ ((∧ (◀ ρ) (valid ε ϕ ξ (▶ ρ))) (·ᴾ τ (recog ξ (▶ ρ))) (atomᴾ (⊗ ⊥ ω)))) (ratQ ε ϕ ξ))
+⍝ the body of a λ-code (a defined function is expanded first)
+λᶜ ∶ 𝔏 (𝔓 𝔇 𝔔) → 𝔇 → 𝔔 → 𝔓 𝔹 𝔔
+λᶜ ε ϕ ξ ≔ ((υ ↦ (ξ (θ ↦ (⊗ ⊥ ⊥)) (θ ↦ υ) (φ ψ ↦ υ) (θ ↦ (⊗ ⊤ θ)) (θ ↦ (⊗ ⊥ ⊥)))) ((τ ↦ ((∧ (◀ τ) (¬ (∅ᶻ ϕ))) (λᶜ ε (⊟ᶻ ϕ (◀ 1)) (▶ τ)) (⊗ ⊥ ⊥))) (unfold ε ξ)))
+⍝ ---- the normal form of an ℝ[i] code
+normR ∶ 𝔏 (𝔓 𝔇 𝔔) → 𝔇 → 𝔔 → 𝔏 α
+normR ε ϕ ξ ≔ (ξ (θ ↦ (constᴾ θ)) (θ ↦ (normR′ ε ϕ ξ ξ ⊥)) (φ ψ ↦ ((τ ↦ (normR′ ε ϕ ξ (◀ τ) (▶ τ))) (spine ξ))) (θ ↦ (atomᴾ (⊗ ⊥ ξ))) (θ ↦ (atomᴾ (⊗ ⊥ ξ))))
+normR′ ∶ 𝔏 (𝔓 𝔇 𝔔) → 𝔇 → 𝔔 → 𝔔 → 𝔏 𝔔 → 𝔏 α
+normR′ ε ϕ ξ η λ ≔ ((κ ρ₁ ρ₂ ↦ ((∧ (args² λ) (=ᶻ κ ᶜ⊕)) (⊞ᴾ ρ₁ ρ₂) ((∧ (args² λ) (=ᶻ κ ᶜ⊛)) (⊠ᴾ ρ₁ ρ₂) ((∧ (args² λ) (=ᶻ κ ᶜ⊟ᴿ)) (⊞ᴾ ρ₁ (⊖ᴾ ρ₂)) ((∧ (args¹ λ) (=ᶻ κ ᶜ⊖ᴿ)) (⊖ᴾ ρ₁) ((∧ (args¹ λ) (=ᶻ κ ᶜ∗ᴿ)) (∗ᴾ ρ₁) ((∧ (args¹ λ) (=ᶻ κ ᶜ⇡)) ((υ ↦ ((◀ υ) (constᴾ (▶ υ)) (atomᴾ (⊗ ⊥ ξ)))) (evQ ε ϕ ⊥ (hd λ))) ((∧ (args¹ λ) (=ᶻ κ ᶜ√)) ((υ ↦ ((◀ υ) ((τ ↦ ((◀ τ) (constᴾ (▶ τ)) (atomᴾ (⊗ ⊥ (𝔮ᵃ (𝔮ˢ ᶜ√) (𝔮ⁿ (▶ υ))))))) (√ᑫ (▶ υ))) (atomᴾ (⊗ ⊥ ξ)))) (evQ ε ϕ ⊥ (hd λ))) ((∧ (args² λ) (=ᶻ κ ᶜΣ)) ((υ ν ↦ ((∧ (◀ υ) (◀ ν)) (Σᴾ ε ϕ (▶ υ) (▶ ν) ξ) (atomᴾ (⊗ ⊥ ξ)))) (evQ ε ϕ ⊥ (hd λ)) (λᶜ ε ϕ (hd (⌄ λ)))) ((υ ↦ ((∧ (◀ υ) (¬ (∅ᶻ ϕ))) (normR ε (⊟ᶻ ϕ (◀ 1)) (▶ υ)) (atomᴾ (⊗ ⊥ ξ)))) (unfold ε ξ))))))))))) (symᶜ η) (normR ε ϕ (hd λ)) (normR ε ϕ (hd (⌄ λ))))
+⍝ ---- certified discs (centre, radius): the value lies within the radius of the centre.  An opaque atom (√ c), c real ≥ 0, has the
+⍝ certificate of the prelude's √: its element n is within 2⁻ⁿ of √c.
+d⁺ ∶ 𝔓 ℚ[i] ℚ → 𝔓 ℚ[i] ℚ → 𝔓 ℚ[i] ℚ
+d⁺ ξ η ≔ (⊗ (⊞ (◀ ξ) (◀ η)) (⊞ (▶ ξ) (▶ η)))
+d× ∶ 𝔓 ℚ[i] ℚ → 𝔓 ℚ[i] ℚ → 𝔓 ℚ[i] ℚ
+d× ξ η ≔ (⊗ (⊠ (◀ ξ) (◀ η)) (⊞ (⊞ (⊠ (‖ (◀ ξ)) (▶ η)) (⊠ (‖ (◀ η)) (▶ ξ))) (⊠ (▶ ξ) (▶ η))))
+d^ ∶ 𝔓 ℚ[i] ℚ → ℕ → 𝔓 ℚ[i] ℚ
+d^ ξ ε ≔ ((≐ ε 0) (⊗ 1 0) (d× ξ (d^ ξ (⊟ ε 1))))
+⍝ partial sums of Σ(1, ρ) over one common denominator, as the series driver Σ′ does (no fraction is reduced on the way, so each step
+⍝ only multiplies by the small numerator and denominator of ρ(k)):  S = ω/ζ,  t = β/ζ;  the result is (S_M, t_M)
+psum ∶ 𝔏 ℚ[i] → 𝔏 ℚ[i] → ℕ → ℕ → 𝔇 → 𝔇 → 𝔇 → 𝔓 ℚ[i] ℚ[i]
+psum ν δ κ μ ω β ζ ≔ ((≻ κ μ) (⊗ (⊗ ω ζ) (⊗ β ζ)) ((ρ ↦ ((β′ ↦ (psum ν δ (⊞ κ 1) μ (⊞ᶻ (⊠ᶻ ω (▶ ρ)) β′) β′ (⊠ᶻ ζ (▶ ρ)))) (⊠ᶻ β (◀ ρ)))) (÷ (evᵖ ν κ) (evᵖ δ κ))))
+⍝ rounding to dyadic numbers (ball arithmetic): rnd² ω ζ π′ is the Gaussian number with denominator π′ = 2ᴾ nearest to ω/ζ (error at
+⍝ most 2⁻ᴾ); up² ω ζ π′ is an integer U with ‖ω/ζ‖ ≤ U/π′.  For a real ζ (every real series) ω/ζ = (±ω)/|ζ| needs only
+⍝ a short long division; otherwise ω/ζ = ω ζ̄ / N(ζ).  No gcd of the long partial sums is ever taken.
+rnd² ∶ 𝔇 → 𝔇 → 𝔇 → ℚ[i]
+rnd² ω ζ π′ ≔ ((ϖ ν ↦ (⊗ (⊞ᶻ (rndᶻ (ℜᶻ ϖ) ν) (⊠ᶻ (rndᶻ (ℑᶻ ϖ) ν) (◀ 11))) π′)) ((realᶻ ζ) (⊠ᶻ ((⋚ʳ ζ) (⊖ᶻ ω) ω ω) π′) (⊠ᶻ (⊠ᶻ ω (∗ᶻ ζ)) π′)) ((realᶻ ζ) (absᶻ ζ) (⊠ᶻ ζ (∗ᶻ ζ))))
+up² ∶ 𝔇 → 𝔇 → 𝔇 → 𝔇
+up² ω ζ π′ ≔ ((ϖ ν ↦ (⊖ᶻ (⌊ᶻ (⊖ᶻ (⊞ᶻ (absᶻ (ℜᶻ ϖ)) (absᶻ (ℑᶻ ϖ)))) ν))) ((realᶻ ζ) (⊠ᶻ ω π′) (⊠ᶻ (⊠ᶻ ω (∗ᶻ ζ)) π′)) ((realᶻ ζ) (absᶻ ζ) (⊠ᶻ ζ (∗ᶻ ζ))))
+⍝ the ratio test as a proof rule: if |ρ(k)| → |L| < 1, take r = (3 + |L|²)/4 (so |L| < r < 1); for k beyond Cauchy's bound of
+⍝ r²|d|² − |n|² (and of the danger) |ρ(k)| ≤ r, so the tail after the M-th term is at most |t_M|·r/(1 − r).
+⍝ prep: (⊤, (r, K)) with |ρ(k)| ≤ r for k ≥ K — computed once per series and shared by every precision (call-by-need);
+⍝ (⊥, _) when |ρ(k)| does not tend to a limit below 1.
+prep ∶ 𝔏 ℚ[i] → 𝔏 ℚ[i] → 𝔏 ℚ[i] → 𝔓 𝔹 (𝔓 ℚ ℕ)
+prep ν δ ζ ≔ ((τ υ ↦ ((≻ (ℓ τ) (ℓ υ)) (⊗ ⊥ ⊥) ((σ′ ↦ ((⩾ σ′ 1) (⊗ ⊥ ⊥) ((ρ ↦ (⊗ ⊤ (⊗ ρ (⊞ (⌈ (max (cauchyᵖ (⊞ᵖ (·ᵖ (⊠ ρ ρ) (⊠ᵖ δ (∗ᵖ δ))) (⊖ᵖ (⊠ᵖ ν (∗ᵖ ν))))) (cauchyᵖ ζ))) 1)))) (⊜ (÷ (⊞ 1101 σ′) 111010000))))) ((≐ (ℓ τ) (ℓ υ)) (⊜ (÷ (𝒩 (last τ)) (𝒩 (last υ)))) 0)))) (trimᵖ ν) (trimᵖ δ))
+⍝ the disc at precision η, from M = max(η, K) terms:  (S_M rounded to 2⁻ᴾ,  ⌈1 + U·r/(1 − r)⌉·2⁻ᴾ)  with ‖t_M‖ ≤ U·2⁻ᴾ, P = 2M + 8 bits
+disc ∶ 𝔏 ℚ[i] → 𝔏 ℚ[i] → ℚ → ℕ → ℕ → 𝔓 ℚ[i] ℚ
+disc ν δ ρ κ η ≔ ((μ ↦ ((ω π′ ↦ (⊗ (rnd² (◀ (◀ ω)) (▶ (◀ ω)) π′) (⊗ (↓ᶻ (⌈ (⊞ 1 (⊠ (⊗ (up² (◀ (▶ ω)) (▶ (▶ ω)) π′) (◀ 1)) (÷ ρ (⊟ 1 ρ)))))) π′))) (psum ν δ 1 μ (◀ 1) (◀ 1) (◀ 1)) (↓ᶻ (^ 1100 (⊞ (⊠ 1100 μ) 111000000))))) (max η κ))
+⍝ one certified disc per precision of the schedule — a lazy list: a finer precision is computed only when a coarser one did not decide
+certs ∶ 𝔏 ℚ[i] → 𝔏 ℚ[i] → 𝔏 ℚ[i] → 𝔏 (𝔓 𝔹 (𝔓 ℚ[i] ℚ))
+certs ν δ ζ ≔ ((∅ (trimᵖ ν)) (⫶ (η ↦ (⊗ ⊤ (⊗ 1 0))) sched) ((π′ ↦ (⫶ (η ↦ ((◀ π′) (⊗ ⊤ (disc ν δ (◀ (▶ π′)) (▶ (▶ π′)) η)) (⊗ ⊥ ⊥))) sched)) (prep ν δ ζ)))
+⍝ the discs of an atom: a series, or √c for a real c ≥ 0 (element n of the prelude's √c is within 2⁻ⁿ of it); other atoms have none
+encᵃ ∶ 𝔓 𝔹 α → 𝔏 (𝔓 𝔹 (𝔓 ℚ[i] ℚ))
+encᵃ ξ ≔ ((◀ ξ) ((σ′ ↦ (certs (◀ (▶ σ′)) (◀ (▶ (▶ σ′))) (▶ (▶ (▶ σ′))))) (▶ ξ)) ((υ ↦ (⫶ (η ↦ ((∧ (◀ υ) (∧ (≐ (ℑ (▶ υ)) 0) (⩾ (ℜ (▶ υ)) 0))) (⊗ ⊤ (⊗ (nth (√ (▶ υ)) η) (÷ 1 (^ 1100 η)))) (⊗ ⊥ ⊥))) sched)) (√?ᶜ (▶ ξ))))
+⍝ two lists of discs combined precision by precision
+d²ˡ ∶ (𝔓 ℚ[i] ℚ → 𝔓 ℚ[i] ℚ → 𝔓 ℚ[i] ℚ) → 𝔏 (𝔓 𝔹 (𝔓 ℚ[i] ℚ)) → 𝔏 (𝔓 𝔹 (𝔓 ℚ[i] ℚ)) → 𝔏 (𝔓 𝔹 (𝔓 ℚ[i] ℚ))
+d²ˡ φ ξ η ≔ (⫴ (θ ι ↦ ((∧ (◀ θ) (◀ ι)) (⊗ ⊤ (φ (▶ θ) (▶ ι))) (⊗ ⊥ ⊥))) ξ η)
+encᵐ ∶ 𝔓 ℚ[i] (𝔏 (𝔓 α ℕ)) → 𝔏 (𝔓 𝔹 (𝔓 ℚ[i] ℚ))
+encᵐ μ ≔ (foldl (θ ι ↦ (d²ˡ (φ ψ ↦ (d× φ (d^ ψ (▶ ι)))) θ (encᵃ (◀ ι)))) ((≐ (◀ μ) 0) (⫶ (η ↦ (⊗ ⊤ (⊗ 1 0))) sched) (certs (∷ (◀ μ) ⊥) (∷ 0 (∷ 1 ⊥)) (∷ 1 ⊥))) (▶ μ))
+encᴾ ∶ 𝔏 (𝔓 ℚ[i] α) → 𝔏 (𝔓 𝔹 (𝔓 ℚ[i] ℚ))
+encᴾ ξ ≔ (foldl (θ ι ↦ (d²ˡ (φ ψ ↦ (d⁺ φ (d× (⊗ (◀ ι) 0) ψ))) θ (encᵐ (▶ ι)))) (⫶ (η ↦ (⊗ ⊤ (⊗ 0 0))) sched) ξ)
+⍝ ---- relations.  The precision schedule: 8 terms, then 24 (easy separations are found early; an undecided relation stops at 24).
+sched ∶ 𝔏 ℕ
+sched ≔ (∷ 111000000 (∷ 110011000000 ⊥))
+⍝ x = 0:  proved when the normal form is 0;  refuted when a certified disc excludes 0
+eqᴾ ∶ 𝔏 α → 𝔒
+eqᴾ ξ ≔ ((∅ ξ) ⋗ (foldr (υ ι ↦ ((∧ (◀ υ) (≻ (𝒩 (◀ (▶ υ))) (⊠ (▶ (▶ υ)) (▶ (▶ υ))))) ⋖ ι)) ≖ (encᴾ ξ)))
+⍝ the sign of a real x from certified discs:  ⋗ positive, ⋖ negative, ≖ not decided
+sgnᴾ ∶ 𝔏 α → 𝔒
+sgnᴾ ξ ≔ (foldr (υ ι ↦ ((◀ υ) ((φ ψ ↦ ((≻ (⊟ (ℜ φ) ψ) 0) ⋗ ((≺ (⊞ (ℜ φ) ψ) 0) ⋖ ι))) (◀ (▶ υ)) (▶ (▶ υ))) ι)) ≖ (encᴾ ξ))
+⍝ ---- formulas: and = min, or = max, not = reverse on ⋖ < ≖ < ⋗;  values are decided directly
+fo ∶ 𝔏 (𝔓 𝔇 𝔔) → 𝔇 → 𝔔 → 𝔒
+fo ε ϕ ξ ≔ (ξ (θ ↦ (θ ⋗ ⋖)) (θ ↦ (fo′ ε ϕ ξ ξ ⊥)) (φ ψ ↦ ((τ ↦ (fo′ ε ϕ ξ (◀ τ) (▶ τ))) (spine ξ))) (θ ↦ ≖) (θ ↦ ≖))
+fo′ ∶ 𝔏 (𝔓 𝔇 𝔔) → 𝔇 → 𝔔 → 𝔔 → 𝔏 𝔔 → 𝔒
+fo′ ε ϕ ξ η λ ≔ ((κ ρ₁ ρ₂ π₁ π₂ ↦ ((∧ (args² λ) (=ᶻ κ ᶜ∧)) (∧³ ρ₁ ρ₂) ((∧ (args² λ) (=ᶻ κ ᶜ∨)) (∨³ ρ₁ ρ₂) ((∧ (args¹ λ) (=ᶻ κ ᶜ¬)) (¬³ ρ₁) ((∧ (args² λ) (=ᶻ κ ᶜ⇒)) (∨³ (¬³ ρ₁) ρ₂) ((∧ (args² λ) (=ᶻ κ ᶜ⇔)) (∧³ (∨³ (¬³ ρ₁) ρ₂) (∨³ (¬³ ρ₂) ρ₁)) ((∧ (args² λ) (=ᶻ κ ᶜ≐ᴿ)) (eqᴾ (⊞ᴾ π₁ (⊖ᴾ π₂))) ((∧ (args² λ) (=ᶻ κ ᶜ≠ᴿ)) (¬³ (eqᴾ (⊞ᴾ π₁ (⊖ᴾ π₂)))) ((∧ (args² λ) (=ᶻ κ ᶜ≺ᴿ)) ((θ ↦ ((∅ θ) ⋖ (sgnᴾ θ))) (⊞ᴾ π₂ (⊖ᴾ π₁))) ((∧ (args² λ) (=ᶻ κ ᶜ≻ᴿ)) ((θ ↦ ((∅ θ) ⋖ (sgnᴾ θ))) (⊞ᴾ π₁ (⊖ᴾ π₂))) ((∧ (args² λ) (=ᶻ κ ᶜ⩽ᴿ)) ((θ ↦ ((∅ θ) ⋗ (¬³ (sgnᴾ (⊖ᴾ θ))))) (⊞ᴾ π₂ (⊖ᴾ π₁))) ((∧ (args² λ) (=ᶻ κ ᶜ⩾ᴿ)) ((θ ↦ ((∅ θ) ⋗ (¬³ (sgnᴾ (⊖ᴾ θ))))) (⊞ᴾ π₁ (⊖ᴾ π₂))) ((υ ↦ ((∧ (◀ υ) (¬ (∅ᶻ ϕ))) (fo ε (⊟ᶻ ϕ (◀ 1)) (▶ υ)) ≖)) (unfold ε ξ)))))))))))))) (symᶜ η) (fo ε ϕ (hd λ)) (fo ε ϕ (hd (⌄ λ))) (normR ε ϕ (hd λ)) (normR ε ϕ (hd (⌄ λ))))

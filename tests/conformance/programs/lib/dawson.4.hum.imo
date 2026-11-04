@@ -1,0 +1,1 @@
+main in Stream(\Q) := dawson(2 - 1/3*i)

@@ -1,0 +1,2 @@
+pi in \RR := sum(2, k in \QQ |-> k / (2 * k + 1))
+main in Stream(\QQ) := seq(k in \NN |-> k * k)

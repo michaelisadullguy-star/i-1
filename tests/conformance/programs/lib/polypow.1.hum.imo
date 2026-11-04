@@ -1,0 +1,1 @@
+main in List(\ZZ) := polypow([-7, 4, 9], 7)

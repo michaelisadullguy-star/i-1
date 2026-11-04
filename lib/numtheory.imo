@@ -1,0 +1,603 @@
+⍝ lib/numtheory.imo — spec notation — trusted prelude, part 15: number theory over ℤ and ℤ[i]
+⍝ Every algorithm works on the base i−1 digit strings (𝔇) of the integers involved, with the digit operations of parts 2 and 6
+⍝ (⊞ᶻ ⊟ᶻ ⊠ᶻ ⫽ᶻ ⋚ʳ …).  Facts of the base that are used throughout (b = i − 1):
+⍝   * b⁴ = −4 and b⁸ = 16, so dropping 4 digits of a multiple of 4 divides it by −4: base 4 is native, up to a sign;
+⍝   * a real integer has digit d₁ = 0 and d₂ = d₃, so  n mod 2 = d₀,  n mod 4 = d₀ + 2d₃,  n mod 8 = d₀ + 2d₃ + 4(d₄ ⊻ d₅);
+⍝   * (1 + i) divides z exactly when its last digit is 0, and z / b is z without that digit: the prime above 2 is the base.
+⍝ ---- conversions, comparisons, small helpers on real integers
+up_nt ∶ 𝔇 → ℚ[i]
+up_nt ξ ≔ (⊗ (⊡ ξ) (◀ 1))
+⍝ equality of two Gaussian integers, whatever their trailing zero digits (⊞ᶻ ⊟ᶻ ⊠ᶻ do not remove them, so ≡ is not enough)
+eqz_nt ∶ 𝔇 → 𝔇 → 𝔹
+eqz_nt ξ η ≔ (∅ᶻ (⊟ᶻ ξ η))
+lt_nt ∶ 𝔇 → 𝔇 → 𝔹
+lt_nt ξ η ≔ ((⋚ʳ (⊟ᶻ ξ η)) ⊤ ⊥ ⊥)
+⍝ ξ mod ν for a real ξ of any sign and a natural ν  (ξ mod 0 = ξ)
+mod_nt ∶ 𝔇 → 𝔇 → 𝔇
+mod_nt ξ ν ≔ ((∅ᶻ ν) ξ ((⋚ʳ ξ) ((ρ ↦ ((∅ᶻ ρ) ⊥ (⊟ᶻ ν ρ))) (▶ (⫽ᶻ (⊖ᶻ ξ) ν))) ⊥ (▶ (⫽ᶻ ξ ν))))
+⍝ ⌊ξ / ν⌋ for naturals (ν > 0)
+dv_nt ∶ 𝔇 → 𝔇 → 𝔇
+dv_nt ξ ν ≔ (◀ (⫽ᶻ ξ ν))
+⍝ sgn(θ)·ξ
+sg_nt ∶ 𝔇 → 𝔇 → 𝔇
+sg_nt θ ξ ≔ ((⋚ʳ θ) (⊖ᶻ ξ) ⊥ ξ)
+⍝ ---- the 2-adic part.  While the last digit of an even value is 0, the last two digits are 0 and dropping them divides by b² = −2i;
+⍝ after k drops the value is (ξ / 2ᵏ)·iᵏ, and a unit fixes it.  v2_nt ξ = (k as a unary list, the odd part of ξ)   (ξ ≠ 0)
+v2′_nt ∶ 𝔇 → 𝔏 𝔹 → 𝔓 (𝔏 𝔹) 𝔇
+v2′_nt ξ υ ≔ ((⌃ ξ) (⊗ υ ξ) (v2′_nt (⌄ (⌄ ξ)) (∷ ⊤ υ)))
+⍝ ξ·(−i)ᵏ, with k mod 4 counted in two bits ϑ ϖ while the unary list is walked
+um_nt ∶ 𝔏 𝔹 → 𝔹 → 𝔹 → 𝔇 → 𝔇
+um_nt υ ϑ ϖ ξ ≔ (υ (σ τ ↦ (um_nt τ (¬ ϑ) (⊻ ϖ ϑ) ξ)) (ϑ (ϖ (⊞ᶻ ξ (𝕓 ξ)) (⊖ᶻ (⊞ᶻ ξ (𝕓 ξ)))) (ϖ (⊖ᶻ ξ) ξ)))
+v2_nt ∶ 𝔇 → 𝔓 (𝔏 𝔹) 𝔇
+v2_nt ξ ≔ ((θ ↦ (⊗ (◀ θ) (um_nt (◀ θ) ⊥ ⊥ (▶ θ)))) (v2′_nt ξ ⊥))
+⍝ the binary digits of a natural number, least significant first
+bits_nt ∶ 𝔇 → 𝔏 𝔹
+bits_nt ξ ≔ ((∅ᶻ ξ) ⊥ (∷ (⌃ ξ) (bits_nt (⌊½⌋ᶻ ξ))))
+⍝ ---- Montgomery arithmetic modulo an odd N > 0, in base 4.  A residue x is held as any real x̃ ≡ x·R (mod N), |x̃| < 2N, where
+⍝ R = (b⁴)ᵐ = (−4)ᵐ, m = ⌈L/4⌉ + 3 for N of L digits (N < 2.42·2^(L/2), so 4ᵐ > 26·N).  Reduction (REDC) divides by b⁴ m times:
+⍝ T ≡ t (mod 4) is read off the digits (t = d₀ + 2d₃), the multiple c·N with T + c·N ≡ 0 (mod 4) is added (c ∈ {0,1,2,3}, N⁻¹ ≡ N
+⍝ mod 4), and the four zero digits are dropped — no division and no comparison.  |T| < 26N² gives |REDC T| < N + |T|/4ᵐ < 2N.
+⍝ mlt_nt N = (c·N for t = 1, (2N, c·N for t = 3))
+mlt_nt ∶ 𝔇 → 𝔓 𝔇 (𝔓 𝔇 𝔇)
+mlt_nt ν ≔ ((θ ι ↦ ((⌃ (⌄ (⌄ (⌄ ν)))) (⊗ ν (⊗ θ ι)) (⊗ ι (⊗ θ ν)))) (⊞ᶻ ν ν) (⊞ᶻ ν (⊞ᶻ ν ν)))
+stp_nt ∶ 𝔓 𝔇 (𝔓 𝔇 𝔇) → 𝔇 → 𝔇
+stp_nt μ τ ≔ (⌄⁴ ((⌃ τ) ((⌃ (⌄ (⌄ (⌄ τ)))) (⊞ᶻ τ (▶ (▶ μ))) (⊞ᶻ τ (◀ μ))) ((⌃ (⌄ (⌄ (⌄ τ)))) (⊞ᶻ τ (◀ (▶ μ))) τ)))
+⍝ REDC: one step per block of four digits of the counter ν (the digits of N), and three more
+rdc_nt ∶ 𝔓 𝔇 (𝔓 𝔇 𝔇) → 𝔇 → 𝔇 → 𝔇
+rdc_nt μ ν τ ≔ ((∅ ν) (stp_nt μ (stp_nt μ (stp_nt μ τ))) (rdc_nt μ (⌄⁴ ν) (stp_nt μ τ)))
+⍝ R² = b⁸ᵐ = 16ᵐ: eight zero digits per step, then 1
+pw_nt ∶ 𝔇 → 𝔇
+pw_nt ν ≔ ((∅ ν) (𝕓⁴ (𝕓⁴ (𝕓⁴ (𝕓⁴ (𝕓⁴ (𝕓⁴ (◀ 1))))))) (𝕓⁴ (𝕓⁴ (pw_nt (⌄⁴ ν)))))
+⍝ the representative in [0, N) of a value within a few N of it
+nrm_nt ∶ 𝔇 → 𝔇 → 𝔇
+nrm_nt ν ξ ≔ ((⋚ʳ ξ) (nrm_nt ν (⊞ᶻ ξ ν)) ⊥ ((⩾ᶻ ξ ν) (nrm_nt ν (⊟ᶻ ξ ν)) ξ))
+⍝ ---- a modular context  K = (mul, (enc, (dec, (one, (nrm, N)))))  for a natural modulus N:  mul multiplies representatives, enc maps
+⍝ x ∈ [0, N) to its representative, dec maps a representative back to [0, N), one represents 1, nrm makes a representative canonical
+⍝ (equal residues ⇔ equal canonical representatives).  Odd N: Montgomery;  even N: products reduced by long division (⫽ᶻ);
+⍝ N = 0: plain arithmetic in ℤ.
+mctx_nt ∶ 𝔇 → 𝔓 (𝔇 → 𝔇 → 𝔇) (𝔓 (𝔇 → 𝔇) (𝔓 (𝔇 → 𝔇) (𝔓 𝔇 (𝔓 (𝔇 → 𝔇) 𝔇))))
+mctx_nt ν ≔ ((μ ↦ ((ρ ↦ (⊗ (ξ η ↦ (rdc_nt μ ν (⊠ᶻ ξ η))) (⊗ (ξ ↦ (rdc_nt μ ν (⊠ᶻ ξ ρ))) (⊗ (ξ ↦ (nrm_nt ν (rdc_nt μ ν ξ))) (⊗ (rdc_nt μ ν ρ) (⊗ (nrm_nt ν) ν)))))) (▶ (⫽ᶻ (pw_nt ν) ν)))) (mlt_nt ν))
+pctx_nt ∶ 𝔇 → 𝔓 (𝔇 → 𝔇 → 𝔇) (𝔓 (𝔇 → 𝔇) (𝔓 (𝔇 → 𝔇) (𝔓 𝔇 (𝔓 (𝔇 → 𝔇) 𝔇))))
+pctx_nt ν ≔ (⊗ (ξ η ↦ (▶ (⫽ᶻ (⊠ᶻ ξ η) ν))) (⊗ (ξ ↦ ξ) (⊗ (ξ ↦ ξ) (⊗ (▶ (⫽ᶻ (◀ 1) ν)) (⊗ (ξ ↦ ξ) ν)))))
+ctx_nt ∶ 𝔇 → 𝔓 (𝔇 → 𝔇 → 𝔇) (𝔓 (𝔇 → 𝔇) (𝔓 (𝔇 → 𝔇) (𝔓 𝔇 (𝔓 (𝔇 → 𝔇) 𝔇))))
+ctx_nt ν ≔ ((∅ᶻ ν) (⊗ ⊠ᶻ (⊗ (ξ ↦ ξ) (⊗ (ξ ↦ ξ) (⊗ (◀ 1) (⊗ (ξ ↦ ξ) ⊥))))) ((⌃ ν) (mctx_nt ν) (pctx_nt ν)))
+⍝ accessors
+kmul_nt ∶ 𝔓 (𝔇 → 𝔇 → 𝔇) (𝔓 (𝔇 → 𝔇) (𝔓 (𝔇 → 𝔇) (𝔓 𝔇 (𝔓 (𝔇 → 𝔇) 𝔇)))) → 𝔇 → 𝔇 → 𝔇
+kmul_nt κ ≔ (◀ κ)
+kenc_nt ∶ 𝔓 (𝔇 → 𝔇 → 𝔇) (𝔓 (𝔇 → 𝔇) (𝔓 (𝔇 → 𝔇) (𝔓 𝔇 (𝔓 (𝔇 → 𝔇) 𝔇)))) → 𝔇 → 𝔇
+kenc_nt κ ≔ (◀ (▶ κ))
+kdec_nt ∶ 𝔓 (𝔇 → 𝔇 → 𝔇) (𝔓 (𝔇 → 𝔇) (𝔓 (𝔇 → 𝔇) (𝔓 𝔇 (𝔓 (𝔇 → 𝔇) 𝔇)))) → 𝔇 → 𝔇
+kdec_nt κ ≔ (◀ (▶ (▶ κ)))
+kone_nt ∶ 𝔓 (𝔇 → 𝔇 → 𝔇) (𝔓 (𝔇 → 𝔇) (𝔓 (𝔇 → 𝔇) (𝔓 𝔇 (𝔓 (𝔇 → 𝔇) 𝔇)))) → 𝔇
+kone_nt κ ≔ (◀ (▶ (▶ (▶ κ))))
+knrm_nt ∶ 𝔓 (𝔇 → 𝔇 → 𝔇) (𝔓 (𝔇 → 𝔇) (𝔓 (𝔇 → 𝔇) (𝔓 𝔇 (𝔓 (𝔇 → 𝔇) 𝔇)))) → 𝔇 → 𝔇
+knrm_nt κ ≔ (◀ (▶ (▶ (▶ (▶ κ)))))
+⍝ ξ^ε in a context: right-to-left square and multiply over the bits β of ε; the last square is never forced
+kpw′_nt ∶ (𝔇 → 𝔇 → 𝔇) → 𝔇 → 𝔇 → 𝔏 𝔹 → 𝔇
+kpw′_nt μ ρ ξ β ≔ (β (σ τ ↦ (kpw′_nt μ (σ (μ ρ ξ) ρ) (μ ξ ξ) τ)) ρ)
+kpw_nt ∶ 𝔓 (𝔇 → 𝔇 → 𝔇) (𝔓 (𝔇 → 𝔇) (𝔓 (𝔇 → 𝔇) (𝔓 𝔇 (𝔓 (𝔇 → 𝔇) 𝔇)))) → 𝔇 → 𝔇 → 𝔇
+kpw_nt κ ξ ε ≔ (kpw′_nt (kmul_nt κ) (kone_nt κ) ξ (bits_nt ε))
+⍝ θ^ε mod ν for θ ∈ [0, ν) (any θ when ν = 0) and ε ≥ 0
+pmd_nt ∶ 𝔇 → 𝔇 → 𝔇 → 𝔇
+pmd_nt ν θ ε ≔ ((κ ↦ (kdec_nt κ (kpw_nt κ (kenc_nt κ θ) ε))) (ctx_nt ν))
+⍝ ---- extended Euclid.  On naturals with ⫽ᶻ; signs are put back afterwards.  On ℤ[i] with the nearest quotient quoᶻ (N(r) ≤ N(b)/2),
+⍝ the gcd then normalised to Re > 0, Im ≥ 0 by the unit u = ⌜g⌝ / g, which also multiplies the cofactors.
+eg_nt ∶ 𝔇 → 𝔇 → 𝔇 → 𝔇 → 𝔇 → 𝔇 → 𝔓 𝔇 (𝔓 𝔇 𝔇)
+eg_nt ρ ρ′ σ σ′ τ τ′ ≔ ((∅ᶻ ρ′) (⊗ ρ (⊗ σ τ)) ((χ ↦ (eg_nt ρ′ (▶ χ) σ′ (⊟ᶻ σ (⊠ᶻ (◀ χ) σ′)) τ′ (⊟ᶻ τ (⊠ᶻ (◀ χ) τ′)))) (⫽ᶻ ρ ρ′)))
+egz_nt ∶ 𝔇 → 𝔇 → 𝔓 𝔇 (𝔓 𝔇 𝔇)
+egz_nt θ ι ≔ ((χ ↦ (⊗ (◀ χ) (⊗ (sg_nt θ (◀ (▶ χ))) (sg_nt ι (▶ (▶ χ)))))) (eg_nt (absᶻ θ) (absᶻ ι) (◀ 1) ⊥ ⊥ (◀ 1)))
+egg_nt ∶ 𝔇 → 𝔇 → 𝔇 → 𝔇 → 𝔇 → 𝔇 → 𝔓 𝔇 (𝔓 𝔇 𝔇)
+egg_nt ρ ρ′ σ σ′ τ τ′ ≔ ((∅ᶻ ρ′) (⊗ ρ (⊗ σ τ)) ((χ ↦ (egg_nt ρ′ (⊡ (⊟ᶻ ρ (⊠ᶻ χ ρ′))) σ′ (⊟ᶻ σ (⊠ᶻ χ σ′)) τ′ (⊟ᶻ τ (⊠ᶻ χ τ′)))) (quoᶻ ρ ρ′)))
+egi_nt ∶ 𝔇 → 𝔇 → 𝔓 𝔇 (𝔓 𝔇 𝔇)
+egi_nt θ ι ≔ ((χ ↦ ((υ ↦ (⊗ (⌜ᶻ (◀ χ)) (⊗ (⊠ᶻ υ (◀ (▶ χ))) (⊠ᶻ υ (▶ (▶ χ)))))) (÷ᶻ (⌜ᶻ (◀ χ)) (◀ χ)))) (egg_nt θ ι (◀ 1) ⊥ ⊥ (◀ 1)))
+egcd ∶ ℤ → ℤ → 𝔓 ℕ (𝔓 ℤ ℤ)      ⍝ Bézout: (g, (s, t)) with s·a + t·b = g = gcd(a, b) ≥ 0 (extended Euclid; egcd(0, 0) = (0, (0, 0)))
+egcd ∶ ℤ[i] → ℤ[i] → 𝔓 ℤ[i] (𝔓 ℤ[i] ℤ[i])
+egcd ξ η ≔ ((θ ι ↦ ((χ ↦ (⊗ (up_nt (◀ χ)) (⊗ (up_nt (◀ (▶ χ))) (up_nt (▶ (▶ χ)))))) ((∧ (realᶻ θ) (realᶻ ι)) (egz_nt θ ι) (egi_nt θ ι)))) (↓ᶻ ξ) (↓ᶻ η))
+⍝ ---- inverses and powers modulo n
+minv_nt ∶ 𝔇 → 𝔇 → 𝔇
+minv_nt θ ν ≔ ((χ ↦ ((eqz_nt (◀ χ) (◀ 1)) (mod_nt (◀ (▶ χ)) ν) ⊥)) (egz_nt θ ν))
+gminv_nt ∶ 𝔇 → 𝔇 → 𝔇
+gminv_nt θ ι ≔ ((χ ↦ ((eqz_nt (◀ χ) (◀ 1)) (remᶻ (◀ (▶ χ)) ι) ⊥)) (egi_nt θ ι))
+modinv ∶ ℕ → ℕ → ℕ      ⍝ the inverse of a modulo n, in [0, n); 0 when gcd(a, n) ≠ 1 (modulo 0: a itself when a = ±1, else 0); on ℤ[i] reduced by rem (0 when not invertible)
+modinv ∶ ℤ → ℕ → ℤ
+modinv ∶ ℤ[i] → ℤ[i] → ℤ[i]
+modinv ξ ζ ≔ ((θ ι ↦ (up_nt ((∧ (realᶻ θ) (realᶻ ι)) (minv_nt θ (absᶻ ι)) (gminv_nt θ ι)))) (↓ᶻ ξ) (↓ᶻ ζ))
+powmod ∶ ℕ → ℤ → ℕ → ℕ      ⍝ aᵉ mod n in [0, n), square and multiply (Montgomery multiplication in base 4 = −(i−1)⁴ for odd n); e < 0 through modinv(a, n) (so 0 when a is not invertible); modulo 0 it is aᵉ in ℤ
+powmod ∶ ℤ → ℤ → ℕ → ℤ
+powmod ξ η ζ ≔ ((ν ε ↦ (up_nt ((⋚ʳ ε) (pmd_nt ν (mod_nt (↓ᶻ (modinv ξ ζ)) ν) (⊖ᶻ ε)) (pmd_nt ν (mod_nt (↓ᶻ ξ) ν) ε) (pmd_nt ν (mod_nt (↓ᶻ ξ) ν) ε)))) (↓ᶻ ζ) (↓ᶻ η))
+⍝ ---- primality.  Below 42: the list of primes; below 43² = 1849: trial division by the primes to 41.  Above: one gcd with 2·3·5·…·41
+⍝ removes every number with a small factor, and the strong (Miller–Rabin) test is made with the bases 2, 3, 5, …, 41 in turn:
+⍝ after base number k the answer is certain as soon as n < ψₖ, the least composite that passes the first k bases (OEIS A014233;
+⍝ ψ₁₃ = 3317044064679887385961981 ≈ 3.3·10²⁴).  Above ψ₁₃ every one of the 13 bases is tried, and a number passing them all must
+⍝ also pass the strong Lucas test (lsp_nt): together the Baillie–PSW test, for which no composite that passes is known.
+spr_nt ∶ 𝔏 𝔇
+spr_nt ≔ (∷ (◀ 1100) (∷ (◀ 1101) (∷ (◀ 111010001) (∷ (◀ 111011101) (∷ (◀ 111001101) (∷ (◀ 100010001) (∷ (◀ 100000001) (∷ (◀ 100001101) (∷ (◀ 110011011101) (∷ (◀ 110000010001) (∷ (◀ 110000011101) (∷ (◀ 110111010001) (∷ (◀ 110111000001) ⊥)))))))))))))
+mrb_nt ∶ 𝔏 (𝔓 𝔇 𝔇)
+mrb_nt ≔ (∷ (⊗ (◀ 1100) (◀ 1110000000000000000011101)) (∷ (⊗ (◀ 1101) (◀ 11001101000100000000110111000001110011010001)) (∷ (⊗ (◀ 111010001) (◀ 1100110000000000110111011101000011001100110100000001)) (∷ (⊗ (◀ 111011101) (◀ 10001000000000000110011000000110011000000000111000001000111011101)) (∷ (⊗ (◀ 111001101) (◀ 110000000000110100010000110000000000110100000000000000011101000111011101000011001101)) (∷ (⊗ (◀ 100010001) (◀ 110100001101110000010000000111000000110100001100000000001100000100010001110000011101)) (∷ (⊗ (◀ 100000001) (◀ 1100110100001101110111001101110100001101000100001101110011010000110100010001110000010001000000000001)) (∷ (⊗ (◀ 100001101) (◀ 1100110100001101110111001101110100001101000100001101110011010000110100010001110000010001000000000001)) (∷ (⊗ (◀ 110011011101) (◀ 111010000110100010000110011011100110000010000000100001101110000001101000100000000110011001100110100000000110011000000000011001101)) (∷ (⊗ (◀ 110000010001) (◀ 111010000110100010000110011011100110000010000000100001101110000001101000100000000110011001100110100000000110011000000000011001101)) (∷ (⊗ (◀ 110000011101) (◀ 111010000110100010000110011011100110000010000000100001101110000001101000100000000110011001100110100000000110011000000000011001101)) (∷ (⊗ (◀ 110111010001) (◀ 11101000111010000110000001100110100011101110000010000110111000000000011001100000000000000110011000000000000010001110000011101110000010000110000000001110111010001)) (∷ (⊗ (◀ 110111000001) (◀ 11010001000000011101110111011100110011010001000011001100110100011100000100011101110011001101000011000000110111010000000000010000000111001101110111000000000000010001)) ⊥)))))))))))))
+⍝ ---- the strong Lucas test (with Miller–Rabin it makes the Baillie–PSW test).  Selfridge's parameters: D the first of 5, −7, 9, −11, …
+⍝ with (D/n) = −1 (0 when a D has a proper common factor with n), P = 1, Q = (1 − D)/4.  With n + 1 = d·2ˢ (d odd), n passes when
+⍝ U_d ≡ 0 or V_(d·2ʳ) ≡ 0 for some r < s.  U, V and Qᵏ are Montgomery representatives (the products need no other reduction; the
+⍝ linear combinations are reduced by mod): the doubling U₂ₖ = UₖVₖ, V₂ₖ = Vₖ² − 2Qᵏ, Q²ᵏ = (Qᵏ)², and for a bit 1 the step
+⍝ Uₖ₊₁ = (Uₖ + Vₖ)/2, Vₖ₊₁ = (D·Uₖ + Vₖ)/2, Qᵏ⁺¹ = Qᵏ·Q, run over the bits of d after the leading one; x/2 mod n is x/2 or (x + n)/2.
+sfd_nt ∶ 𝔇 → 𝔇 → 𝔇
+sfd_nt ν δ ≔ ((γ ↦ ((∧ (lt_nt (◀ 1) γ) (lt_nt γ ν)) ⊥ ((≐ (jac_nt (mod_nt δ ν) ν ⊥) 11101) δ (sfd_nt ν ((lt_nt ⊥ δ) (⊟ᶻ (⊖ᶻ δ) (◀ 1100)) (⊞ᶻ (⊖ᶻ δ) (◀ 1100))))))) (gcdᶻ δ ν))
+hlf_nt ∶ 𝔇 → 𝔇 → 𝔇
+hlf_nt ν ξ ≔ (½ᶻ ((⌃ ξ) (⊞ᶻ ξ ν) ξ))
+lst_nt ∶ 𝔓 (𝔇 → 𝔇 → 𝔇) (𝔓 (𝔇 → 𝔇) (𝔓 (𝔇 → 𝔇) (𝔓 𝔇 (𝔓 (𝔇 → 𝔇) 𝔇)))) → 𝔇 → 𝔇 → 𝔇 → 𝔓 𝔇 (𝔓 𝔇 𝔇) → 𝔹 → 𝔓 𝔇 (𝔓 𝔇 𝔇)
+lst_nt κ ν δ χ ψ σ ≔ ((υ′ ϑ′ ϖ′ ↦ (σ (⊗ (hlf_nt ν (mod_nt (⊞ᶻ υ′ ϑ′) ν)) (⊗ (hlf_nt ν (mod_nt (⊞ᶻ (⊠ᶻ δ υ′) ϑ′) ν)) (mod_nt (⊠ᶻ χ ϖ′) ν))) (⊗ υ′ (⊗ ϑ′ ϖ′)))) (kmul_nt κ (◀ ψ) (◀ (▶ ψ))) (mod_nt (⊟ᶻ (kmul_nt κ (◀ (▶ ψ)) (◀ (▶ ψ))) (⊞ᶻ (▶ (▶ ψ)) (▶ (▶ ψ)))) ν) (kmul_nt κ (▶ (▶ ψ)) (▶ (▶ ψ))))
+⍝ the remaining doublings of V (|υ| = s − 1 of them), looking for V ≡ 0
+slr_nt ∶ 𝔓 (𝔇 → 𝔇 → 𝔇) (𝔓 (𝔇 → 𝔇) (𝔓 (𝔇 → 𝔇) (𝔓 𝔇 (𝔓 (𝔇 → 𝔇) 𝔇)))) → 𝔇 → 𝔏 𝔹 → 𝔇 → 𝔇 → 𝔹
+slr_nt κ ν υ ϑ ϖ ≔ (υ (σ τ ↦ ((ϑ′ ↦ ((∅ᶻ (knrm_nt κ ϑ′)) ⊤ (slr_nt κ ν τ ϑ′ (kmul_nt κ ϖ ϖ)))) (mod_nt (⊟ᶻ (kmul_nt κ ϑ ϑ) (⊞ᶻ ϖ ϖ)) ν))) ⊥)
+⍝ the strong Lucas test of an odd ν > 1 with the parameter D
+slq_nt ∶ 𝔇 → 𝔇 → 𝔹
+slq_nt ν δ ≔ ((κ ψ ↦ ((φ ↦ ((∨ (∅ᶻ (knrm_nt κ (◀ φ))) (∅ᶻ (knrm_nt κ (◀ (▶ φ))))) ⊤ (slr_nt κ ν (⌄ (◀ ψ)) (◀ (▶ φ)) (▶ (▶ φ))))) ((χ ↦ (foldl (lst_nt κ ν δ χ) (⊗ (kone_nt κ) (⊗ (kone_nt κ) (kenc_nt κ (mod_nt χ ν)))) (⌄ (reverse (bits_nt (▶ ψ)))))) (÷ᶻ (⊟ᶻ (◀ 1) δ) (◀ 111010000))))) (mctx_nt ν) (v2_nt (⊞ᶻ ν (◀ 1))))
+⍝ ν ≥ 0 is a square
+issq_nt ∶ 𝔇 → 𝔹
+issq_nt ν ≔ ((lt_nt ν ⊥) ⊥ ((ρ ↦ (eqz_nt (⊠ᶻ ρ ρ) ν)) (√ᶻ ν)))
+⍝ the strong Lucas test of an odd ν > 1: squares fail (no D exists for them), so does a ν with a proper factor in common with a D
+lsp_nt ∶ 𝔇 → 𝔹
+lsp_nt ν ≔ ((issq_nt ν) ⊥ ((δ ↦ ((∅ᶻ δ) ⊥ (slq_nt ν δ))) (sfd_nt ν (◀ 111010001))))
+islucasprp ∶ ℤ → 𝔹      ⍝ n passes the strong Lucas probable prime test with Selfridge's parameters (D the first of 5, −7, 9, … with (D/n) = −1, P = 1, Q = (1 − D)/4): every prime does; with Miller–Rabin it is the Baillie–PSW test
+islucasprp ξ ≔ ((ν ↦ ((lt_nt ν (◀ 1101)) (eqz_nt ν (◀ 1100)) ((⌃ ν) (lsp_nt ν) ⊥))) (↓ᶻ ξ))
+⍝ the remaining squarings of a strong test: −1 passes, 1 fails (a non-trivial square root of 1), the end fails
+sqr_nt ∶ 𝔓 (𝔇 → 𝔇 → 𝔇) (𝔓 (𝔇 → 𝔇) (𝔓 (𝔇 → 𝔇) (𝔓 𝔇 (𝔓 (𝔇 → 𝔇) 𝔇)))) → 𝔇 → 𝔇 → 𝔇 → 𝔏 𝔹 → 𝔹
+sqr_nt κ ξ ω ω′ υ ≔ (υ (σ τ ↦ ((θ ↦ ((ϑ ↦ ((eqz_nt ϑ ω′) ⊤ ((eqz_nt ϑ ω) ⊥ (sqr_nt κ θ ω ω′ τ)))) (knrm_nt κ θ))) (kmul_nt κ ξ ξ))) ⊥)
+⍝ strong test to base θ:  n − 1 = 2ˢ·δ,  υ = s as a unary list,  ω ω′ the canonical representatives of 1 and −1
+spsp_nt ∶ 𝔓 (𝔇 → 𝔇 → 𝔇) (𝔓 (𝔇 → 𝔇) (𝔓 (𝔇 → 𝔇) (𝔓 𝔇 (𝔓 (𝔇 → 𝔇) 𝔇)))) → 𝔇 → 𝔏 𝔹 → 𝔇 → 𝔇 → 𝔇 → 𝔹
+spsp_nt κ δ υ ω ω′ θ ≔ ((ξ ↦ ((ϑ ↦ ((∨ (eqz_nt ϑ ω) (eqz_nt ϑ ω′)) ⊤ (sqr_nt κ ξ ω ω′ (⌄ υ)))) (knrm_nt κ ξ))) (kpw_nt κ (kenc_nt κ θ) δ))
+mrl_nt ∶ 𝔓 (𝔇 → 𝔇 → 𝔇) (𝔓 (𝔇 → 𝔇) (𝔓 (𝔇 → 𝔇) (𝔓 𝔇 (𝔓 (𝔇 → 𝔇) 𝔇)))) → 𝔇 → 𝔇 → 𝔏 𝔹 → 𝔇 → 𝔇 → 𝔏 (𝔓 𝔇 𝔇) → 𝔹
+mrl_nt κ ν δ υ ω ω′ β ≔ (β (π′ τ ↦ ((spsp_nt κ δ υ ω ω′ (◀ π′)) ((lt_nt ν (▶ π′)) ⊤ (mrl_nt κ ν δ υ ω ω′ τ)) ⊥)) (lsp_nt ν))
+⍝ Miller–Rabin for an odd ν > 1
+mr_nt ∶ 𝔇 → 𝔹
+mr_nt ν ≔ ((κ θ ↦ ((ω ↦ (mrl_nt κ ν (▶ θ) (◀ θ) ω (⊟ᶻ ν ω) mrb_nt)) (knrm_nt κ (kone_nt κ)))) (mctx_nt ν) (v2_nt (⊟ᶻ ν (◀ 1))))
+ispr_nt ∶ 𝔇 → 𝔹
+⍝ 42 ≤ ν < 1849: trial division by the primes p ≤ 41 with p² ≤ ν (cheaper than the gcd with the primorial for such small ν)
+tds_nt ∶ 𝔇 → 𝔏 𝔇 → 𝔹
+tds_nt ν β ≔ (β (π′ τ ↦ ((lt_nt ν (⊠ᶻ π′ π′)) ⊤ ((∅ᶻ (▶ (⫽ᶻ ν π′))) ⊥ (tds_nt ν τ)))) ⊤)
+ispr_nt ν ≔ ((lt_nt ν (◀ 110111001100)) (∃ₗ (ξ ↦ (eqz_nt ν ξ)) spr_nt) ((lt_nt ν (◀ 1110000001101000011000001)) (tds_nt ν spr_nt) ((eqz_nt (gcdᶻ ν (◀ 1000011001101000100010000110111010001000111000001000111000000110011011100000111010000110111001100)) (◀ 1)) (mr_nt ν) ⊥)))
+isprime ∶ ℤ → 𝔹      ⍝ n is a prime (negative n: false); trial division below 1849, else a gcd with 2·3·…·41 and Miller–Rabin with the bases 2, 3, 5, …, 41, deterministic below ψ₁₃ ≈ 3.3·10²⁴ (A014233); above, all 13 bases and the strong Lucas test (Baillie–PSW: no counterexample is known); about 20 s at 10¹²
+isprime ξ ≔ (ispr_nt (↓ᶻ ξ))
+nxo_nt ∶ 𝔇 → 𝔇
+nxo_nt ν ≔ ((ispr_nt ν) ν (nxo_nt (⊞ᶻ ν (◀ 1100))))
+nxp_nt ∶ 𝔇 → 𝔇
+nxp_nt ν ≔ ((lt_nt ν (◀ 1100)) (◀ 1100) ((θ ↦ (nxo_nt ((⌃ θ) θ (⊞ᶻ θ (◀ 1))))) (⊞ᶻ ν (◀ 1))))
+nextprime ∶ ℤ → ℕ      ⍝ the least prime > n (odd candidates tested with isprime)
+nextprime ξ ≔ (up_nt (nxp_nt (↓ᶻ ξ)))
+pvo_nt ∶ 𝔇 → 𝔇
+pvo_nt ν ≔ ((ispr_nt ν) ν (pvo_nt (⊟ᶻ ν (◀ 1100))))
+pvp_nt ∶ 𝔇 → 𝔇
+pvp_nt ν ≔ ((⩾ᶻ (◀ 1100) ν) ⊥ ((eqz_nt ν (◀ 1101)) (◀ 1100) ((θ ↦ (pvo_nt ((⌃ θ) θ (⊟ᶻ θ (◀ 1))))) (⊟ᶻ ν (◀ 1)))))
+prevprime ∶ ℤ → ℕ      ⍝ the greatest prime < n; 0 when n ≤ 2
+prevprime ξ ≔ (up_nt (pvp_nt (↓ᶻ ξ)))
+⍝ ---- factorisation.  The power of 2 from the trailing zero digits; trial division by 3 … 47, stopping as soon as p² exceeds the rest;
+⍝ a rest without factors below 53 is prime when it is below 53² = 2809 or passes isprime; otherwise Pollard's ρ (Brent's cycle
+⍝ detection, products of 32 differences per gcd, x ↦ x² + c in Montgomery representation) splits it, and both parts are factored again.
+tdp_nt ∶ 𝔏 𝔇
+tdp_nt ≔ (∷ (◀ 1101) (∷ (◀ 111010001) (∷ (◀ 111011101) (∷ (◀ 111001101) (∷ (◀ 100010001) (∷ (◀ 100000001) (∷ (◀ 100001101) (∷ (◀ 110011011101) (∷ (◀ 110000010001) (∷ (◀ 110000011101) (∷ (◀ 110111010001) (∷ (◀ 110111000001) (∷ (◀ 110111001101) (∷ (◀ 110100011101) ⊥))))))))))))))
+⍝ a unary list as digits, and back
+ul_nt ∶ 𝔏 𝔹 → 𝔇
+ul_nt υ ≔ (υ (σ τ ↦ (⊞ᶻ (◀ 1) (ul_nt τ))) ⊥)
+ud_nt ∶ 𝔇 → 𝔏 𝔹
+ud_nt ε ≔ ((∅ᶻ ε) ⊥ (∷ ⊤ (ud_nt (⊟ᶻ ε (◀ 1)))))
+⍝ divide by π′ as often as possible: (number of times, rest)
+dvo_nt ∶ 𝔇 → 𝔇 → 𝔇 → 𝔓 𝔇 𝔇
+dvo_nt ν π′ κ ≔ ((θ ↦ ((∅ᶻ (▶ θ)) (dvo_nt (◀ θ) π′ (⊞ᶻ κ (◀ 1))) (⊗ κ ν))) (⫽ᶻ ν π′))
+⍝ merge two factor lists (ascending primes), adding the exponents of a common prime
+mrg_nt ∶ 𝔏 (𝔓 𝔇 𝔇) → 𝔏 (𝔓 𝔇 𝔇) → 𝔏 (𝔓 𝔇 𝔇)
+mrg_nt ξ η ≔ (ξ (θ τ ↦ (η (ι υ ↦ ((⋚ʳ (⊟ᶻ (◀ θ) (◀ ι))) (∷ θ (mrg_nt τ η)) (∷ (⊗ (◀ θ) (⊞ᶻ (▶ θ) (▶ ι))) (mrg_nt τ υ)) (∷ ι (mrg_nt ξ υ)))) ξ)) η)
+⍝ the first 32 elements of a list, and the rest
+b32_nt ∶ 𝔏 𝔹
+b32_nt ≔ (∷ ⊤ (∷ ⊤ (∷ ⊤ (∷ ⊤ (∷ ⊤ (∷ ⊤ (∷ ⊤ (∷ ⊤ (∷ ⊤ (∷ ⊤ (∷ ⊤ (∷ ⊤ (∷ ⊤ (∷ ⊤ (∷ ⊤ (∷ ⊤ (∷ ⊤ (∷ ⊤ (∷ ⊤ (∷ ⊤ (∷ ⊤ (∷ ⊤ (∷ ⊤ (∷ ⊤ (∷ ⊤ (∷ ⊤ (∷ ⊤ (∷ ⊤ (∷ ⊤ (∷ ⊤ (∷ ⊤ (∷ ⊤ ⊥))))))))))))))))))))))))))))))))
+tk_nt ∶ 𝔏 𝔹 → 𝔏 α → 𝔏 α
+tk_nt β κ ≔ (β (σ τ ↦ (κ (σ′ τ′ ↦ (∷ σ′ (tk_nt τ τ′))) ⊥)) ⊥)
+dr_nt ∶ 𝔏 𝔹 → 𝔏 α → 𝔏 α
+dr_nt β κ ≔ (β (σ τ ↦ (dr_nt τ (⌄ κ))) κ)
+⍝ ρ: one step y ↦ y² + γ (Montgomery product μ), r steps, one batch of steps multiplying the differences x − y into q
+fy_nt ∶ (𝔇 → 𝔇 → 𝔇) → 𝔇 → 𝔇 → 𝔇
+fy_nt μ γ η ≔ (⊞ᶻ (μ η η) γ)
+adv_nt ∶ (𝔇 → 𝔇 → 𝔇) → 𝔇 → 𝔏 𝔹 → 𝔇 → 𝔇
+adv_nt μ γ ρ η ≔ (ρ (σ τ ↦ (adv_nt μ γ τ (fy_nt μ γ η))) η)
+bat_nt ∶ (𝔇 → 𝔇 → 𝔇) → 𝔇 → 𝔇 → 𝔏 𝔹 → 𝔇 → 𝔇 → 𝔓 𝔇 𝔇
+bat_nt μ γ ξ β η ϰ ≔ (β (σ τ ↦ ((ζ ↦ (bat_nt μ γ ξ τ ζ (μ ϰ (⊟ᶻ ξ ζ)))) (fy_nt μ γ η))) (⊗ η ϰ))
+⍝ the comparisons of one round, batch by batch: (⊤, (g, y before the batch)) when a gcd is > 1, else (⊥, (y, q))
+cmp_nt ∶ (𝔇 → 𝔇 → 𝔇) → 𝔇 → 𝔇 → 𝔇 → 𝔏 𝔹 → 𝔇 → 𝔇 → 𝔓 𝔹 (𝔓 𝔇 𝔇)
+cmp_nt μ γ ν ξ κ η ϰ ≔ ((∅ κ) (⊗ ⊥ (⊗ η ϰ)) ((θ ↦ ((ϑ ↦ ((eqz_nt ϑ (◀ 1)) (cmp_nt μ γ ν ξ (dr_nt b32_nt κ) (◀ θ) (▶ θ)) (⊗ ⊤ (⊗ ϑ η)))) (gcdᶻ (▶ θ) ν))) (bat_nt μ γ ξ (tk_nt b32_nt κ) η ϰ)))
+⍝ back-tracking after a batch whose product collapsed to 0 mod ν: one step at a time
+bk_nt ∶ (𝔇 → 𝔇 → 𝔇) → 𝔇 → 𝔇 → 𝔇 → 𝔇 → 𝔇
+bk_nt μ γ ν ξ η ≔ ((ζ ↦ ((ϑ ↦ ((eqz_nt ϑ (◀ 1)) (bk_nt μ γ ν ξ ζ) ϑ)) (gcdᶻ (⊟ᶻ ξ ζ) ν))) (fy_nt μ γ η))
+⍝ one round of Brent's method: x = y, y advanced r = |ρ| steps, then r compared steps; the next round has r doubled.  Result: a divisor > 1
+rnd_nt ∶ (𝔇 → 𝔇 → 𝔇) → 𝔇 → 𝔇 → 𝔇 → 𝔏 𝔹 → 𝔇 → 𝔇
+rnd_nt μ γ ν η ρ ϰ ≔ ((ψ ↦ ((◀ ψ) ((eqz_nt (◀ (▶ ψ)) ν) (bk_nt μ γ ν η (▶ (▶ ψ))) (◀ (▶ ψ))) (rnd_nt μ γ ν (◀ (▶ ψ)) (⧺ ρ ρ) (▶ (▶ ψ))))) (cmp_nt μ γ ν η ρ (adv_nt μ γ ρ η) ϰ))
+⍝ a proper divisor of an odd composite ν: c = 1, 2, … until the divisor found is not ν itself
+rhc_nt ∶ 𝔇 → (𝔇 → 𝔇 → 𝔇) → 𝔇 → 𝔇
+rhc_nt ν μ γ ≔ ((ϑ ↦ ((eqz_nt ϑ ν) (rhc_nt ν μ (⊞ᶻ γ (◀ 1))) ϑ)) (rnd_nt μ γ ν (◀ 1100) (∷ ⊤ ⊥) (◀ 1)))
+rho_nt ∶ 𝔇 → 𝔇
+rho_nt ν ≔ (rhc_nt ν (kmul_nt (mctx_nt ν)) (◀ 1))
+⍝ a ν > 1 without prime factors below 53
+fcr_nt ∶ 𝔇 → 𝔏 (𝔓 𝔇 𝔇)
+fcr_nt ν ≔ ((∨ (lt_nt ν (◀ 1110011010000000011000001)) (ispr_nt ν)) (∷ (⊗ ν (◀ 1)) ⊥) ((δ ↦ (mrg_nt (fcr_nt δ) (fcr_nt (⊡ (÷ᶻ ν δ))))) (rho_nt ν)))
+⍝ trial division of an odd ν ≥ 1 by the primes of the list β
+td_nt ∶ 𝔇 → 𝔏 𝔇 → 𝔏 (𝔓 𝔇 𝔇)
+td_nt ν β ≔ ((eqz_nt ν (◀ 1)) ⊥ (β (π′ τ ↦ ((lt_nt ν (⊠ᶻ π′ π′)) (∷ (⊗ ν (◀ 1)) ⊥) ((θ ↦ ((∅ᶻ (◀ θ)) (td_nt ν τ) (∷ (⊗ π′ (◀ θ)) (td_nt (▶ θ) τ)))) (dvo_nt ν π′ ⊥)))) (fcr_nt ν)))
+⍝ the factorisation of a natural ν: list of (p, e), p ascending  (0 and 1 give the empty list)
+fct_nt ∶ 𝔇 → 𝔏 (𝔓 𝔇 𝔇)
+fct_nt ν ≔ ((∅ᶻ ν) ⊥ ((θ ↦ ((∅ (◀ θ)) (td_nt (▶ θ) tdp_nt) (∷ (⊗ (◀ 1100) (ul_nt (◀ θ))) (td_nt (▶ θ) tdp_nt)))) (v2_nt ν)))
+fcq_nt ∶ ℚ[i] → 𝔏 (𝔓 𝔇 𝔇)
+fcq_nt ξ ≔ (fct_nt (absᶻ (↓ᶻ ξ)))
+factor ∶ ℤ → 𝔏 (𝔓 ℕ ℕ)      ⍝ the prime factorisation of |n|: list of (p, e), p ascending; factor(0) = factor(±1) = []; trial division to 47, Miller–Rabin, Brent–Pollard ρ (practical to about 10¹²: a minute or two for a product of two 6-digit primes)
+factor ξ ≔ (⫶ (φ ↦ (⊗ (up_nt (◀ φ)) (up_nt (▶ φ)))) (fcq_nt ξ))
+primefactors ∶ ℤ → 𝔏 ℕ      ⍝ the distinct primes dividing |n|, ascending
+primefactors ξ ≔ (⫶ (φ ↦ (up_nt (◀ φ))) (fcq_nt ξ))
+⍝ ---- divisors, by merging the sorted lists L, L·p, …, L·pᵉ for each prime power
+mrgl_nt ∶ 𝔏 𝔇 → 𝔏 𝔇 → 𝔏 𝔇
+mrgl_nt ξ η ≔ (ξ (θ τ ↦ (η (ι υ ↦ ((lt_nt ι θ) (∷ ι (mrgl_nt ξ υ)) (∷ θ (mrgl_nt τ η)))) ξ)) η)
+dpp_nt ∶ 𝔇 → 𝔏 𝔹 → 𝔏 𝔇 → 𝔏 𝔇 → 𝔏 𝔇
+dpp_nt π′ υ ξ η ≔ (υ (σ τ ↦ ((ζ ↦ (dpp_nt π′ τ ζ (mrgl_nt η ζ))) (⫶ (θ ↦ (⊠ᶻ θ π′)) ξ))) η)
+divisors ∶ ℤ → 𝔏 ℕ      ⍝ the positive divisors of |n|, ascending (divisors(0) = [])
+divisors ξ ≔ ((∅ᶻ (↓ᶻ ξ)) ⊥ (⫶ up_nt (foldl (η φ ↦ (dpp_nt (◀ φ) (ud_nt (▶ φ)) η η)) (∷ (◀ 1) ⊥) (fcq_nt ξ))))
+⍝ ---- arithmetic functions, from the factorisation (n = 0 gives 0, or false)
+numdivisors ∶ ℤ → ℕ      ⍝ τ(n): the number of divisors of |n|  (τ(0) = 0)
+numdivisors ξ ≔ ((≐ ξ 0) 0 (prodof (⫶ (φ ↦ (up_nt (⊞ᶻ (▶ φ) (◀ 1)))) (fcq_nt ξ))))
+sigma ∶ ℕ → ℤ → ℕ      ⍝ σₖ(n): the sum of the k-th powers of the divisors of |n|, as Π (1 + pᵏ + … + pᵏᵉ)  (σₖ(0) = 0)
+sigma κ ξ ≔ ((≐ ξ 0) 0 (prodof (⫶ (φ ↦ ((θ ↦ (sumof (⫶ (ι ↦ (^ θ ι)) (⍳ (⊞ (up_nt (▶ φ)) 1))))) (^ (up_nt (◀ φ)) κ))) (fcq_nt ξ))))
+totient ∶ ℤ → ℕ      ⍝ Euler's φ(|n|) = Π pᵉ⁻¹(p − 1)  (φ(0) = 0)
+totient ξ ≔ ((≐ ξ 0) 0 (prodof (⫶ (φ ↦ (⊠ (^ (up_nt (◀ φ)) (up_nt (⊟ᶻ (▶ φ) (◀ 1)))) (up_nt (⊟ᶻ (◀ φ) (◀ 1))))) (fcq_nt ξ))))
+⍝ λ(pᵉ): pᵉ⁻¹(p − 1), except λ(2ᵉ) = 2ᵉ⁻² for e ≥ 3
+lpe_nt ∶ 𝔓 𝔇 𝔇 → ℕ
+lpe_nt φ ≔ ((∧ (eqz_nt (◀ φ) (◀ 1100)) (⩾ᶻ (▶ φ) (◀ 1101))) (^ 1100 (up_nt (⊟ᶻ (▶ φ) (◀ 1100)))) (⊠ (^ (up_nt (◀ φ)) (up_nt (⊟ᶻ (▶ φ) (◀ 1)))) (up_nt (⊟ᶻ (◀ φ) (◀ 1)))))
+carmichael ∶ ℤ → ℕ      ⍝ Carmichael's λ(|n|): the exponent of (ℤ/n)ˣ, the lcm of the λ(pᵉ)  (λ(0) = 0, λ(1) = 1)
+carmichael ξ ≔ ((≐ ξ 0) 0 (foldl lcm 1 (⫶ lpe_nt (fcq_nt ξ))))
+mobius ∶ ℤ → ℤ      ⍝ Möbius μ(|n|): 0 when a square divides n, else (−1)^(number of primes)  (μ(0) = 0)
+mobius ξ ≔ ((≐ ξ 0) 0 ((θ ↦ ((∀ₗ (φ ↦ (eqz_nt (▶ φ) (◀ 1))) θ) (foldl (η φ ↦ (⊖ η)) 1 θ) 0)) (fcq_nt ξ)))
+liouville ∶ ℤ → ℤ      ⍝ Liouville λ(|n|) = (−1)^Ω(n)  (0 for n = 0)
+liouville ξ ≔ ((≐ ξ 0) 0 (foldl (η φ ↦ (foldl (ζ σ ↦ (⊖ ζ)) η (ud_nt (▶ φ)))) 1 (fcq_nt ξ)))
+omega ∶ ℤ → ℕ      ⍝ ω(n): the number of distinct primes dividing |n|  (ω(0) = ω(1) = 0)
+omega ξ ≔ (ℓ (fcq_nt ξ))
+bigomega ∶ ℤ → ℕ      ⍝ Ω(n): the number of prime factors of |n| with multiplicity  (Ω(0) = 0)
+bigomega ξ ≔ (sumof (⫶ (φ ↦ (up_nt (▶ φ))) (fcq_nt ξ)))
+radical ∶ ℤ → ℕ      ⍝ rad(n): the product of the distinct primes dividing |n|  (rad(0) = 0, rad(1) = 1)
+radical ξ ≔ ((≐ ξ 0) 0 (prodof (primefactors ξ)))
+issquarefree ∶ ℤ → 𝔹      ⍝ no square > 1 divides n  (false for 0)
+issquarefree ξ ≔ (∧ (¬ (≐ ξ 0)) (∀ₗ (φ ↦ (eqz_nt (▶ φ) (◀ 1))) (fcq_nt ξ)))
+isperfect ∶ ℤ → 𝔹      ⍝ n > 0 and σ₁(n) = 2n
+isperfect ξ ≔ (∧ (≻ ξ 0) (≐ (sigma 1 ξ) (⊠ 1100 ξ)))
+⍝ ---- quadratic symbols.  Binary Jacobi algorithm: factors 2 are removed from the trailing zero digits (an odd number of them flips the sign
+⍝ when n ≡ 3, 5 mod 8, i.e. when d₃ ⊻ d₄), quadratic reciprocity flips it when a ≡ n ≡ 3 mod 4 (d₀ = d₃ = 1), then (a, n) ← (n mod a, a).
+odd_nt ∶ 𝔏 𝔹 → 𝔹
+odd_nt υ ≔ (υ (σ τ ↦ (¬ (odd_nt τ))) ⊥)
+⍝ n ≡ 3 or 5 (mod 8), for an odd real n
+m35_nt ∶ 𝔇 → 𝔹
+m35_nt ν ≔ (⊻ (⌃ (⌄ (⌄ (⌄ ν)))) (⌃ (⌄ (⌄ (⌄ (⌄ ν))))))
+⍝ n ≡ 3 (mod 4)
+m3_nt ∶ 𝔇 → 𝔹
+m3_nt ν ≔ (∧ (⌃ ν) (⌃ (⌄ (⌄ (⌄ ν)))))
+⍝ the Jacobi symbol of a natural θ < ν over an odd ν, times −1 when ς: as a ℤ value
+jac_nt ∶ 𝔇 → 𝔇 → 𝔹 → ℤ
+jac_nt θ ν ς ≔ ((∅ᶻ θ) ((eqz_nt ν (◀ 1)) (ς 11101 1) 0) ((ψ ↦ ((ς′ ↦ (jac_nt (mod_nt ν (▶ ψ)) (▶ ψ) ((∧ (m3_nt (▶ ψ)) (m3_nt ν)) (¬ ς′) ς′))) ((∧ (odd_nt (◀ ψ)) (m35_nt ν)) (¬ ς) ς))) (v2_nt θ)))
+jacobi ∶ ℤ → ℕ → ℤ      ⍝ the Jacobi symbol (a/n) for odd n > 0 (binary algorithm with reciprocity); 0 when n is even or 0
+jacobi ξ η ≔ ((θ ν ↦ ((⌃ ν) (jac_nt (mod_nt θ ν) ν ⊥) 0)) (↓ᶻ ξ) (↓ᶻ η))
+legendre ∶ ℤ → ℕ → ℤ      ⍝ the Legendre symbol (a/p) ∈ {−1, 0, 1} for an odd prime p (computed as the Jacobi symbol, which it is for any odd p)
+legendre ≔ jacobi
+⍝ Kronecker: (a/0) = [|a| = 1], (a/−1) = −1 for a < 0, (a/2) = 0 for even a, −1 for a ≡ ±3 mod 8, 1 otherwise
+kronecker ∶ ℤ → ℤ → ℤ      ⍝ the Kronecker symbol (a/n), the extension of the Jacobi symbol to every integer n
+kronecker ξ η ≔ ((θ ν ↦ ((∅ᶻ ν) ((eqz_nt (absᶻ θ) (◀ 1)) 1 0) ((ψ ↦ ((ϰ ↦ ((∧ (¬ (∅ (◀ ψ))) (¬ (⌃ θ))) 0 (⊠ ϰ (jac_nt (mod_nt θ (▶ ψ)) (▶ ψ) (∧ (odd_nt (◀ ψ)) (m35_nt θ)))))) ((∧ (lt_nt ν ⊥) (lt_nt θ ⊥)) 11101 1))) (v2_nt (absᶻ ν))))) (↓ᶻ ξ) (↓ᶻ η))
+eulercriterion ∶ ℤ → ℕ → ℤ      ⍝ Euler's criterion a^((p−1)/2) mod p, with the residue p − 1 written −1: the Legendre symbol when p is an odd prime (for any n ≥ 1 it is a^⌊(n−1)/2⌋ mod n; 0 for n = 0)
+eulercriterion ξ η ≔ ((ν ↦ ((∅ᶻ ν) 0 ((ρ ↦ ((∧ (eqz_nt ρ (⊟ᶻ ν (◀ 1))) (lt_nt (◀ 1100) ν)) 11101 (up_nt ρ))) (pmd_nt ν (mod_nt (↓ᶻ ξ) ν) (dv_nt (⊟ᶻ ν (◀ 1)) (◀ 1100)))))) (↓ᶻ η))
+⍝ ---- square roots modulo p.  p ≡ 3 (mod 4): r = a^((p+1)/4).  Otherwise Tonelli–Shanks with the least non-residue z.  Composite moduli:
+⍝ the squares x² are walked for x = 0, 1, … ((x+1)² = x² + 2x + 1, reduced by subtraction), the first hit is the least root.
+⍝ the least non-residue modulo an odd prime
+qnr_nt ∶ 𝔇 → 𝔇 → 𝔇
+qnr_nt ν ζ ≔ ((≐ (jac_nt ζ ν ⊥) 11101) ζ (qnr_nt ν (⊞ᶻ ζ (◀ 1))))
+⍝ the least i ≥ 1 with τ^(2^i) ≡ 1, as a unary list
+fi_nt ∶ 𝔓 (𝔇 → 𝔇 → 𝔇) (𝔓 (𝔇 → 𝔇) (𝔓 (𝔇 → 𝔇) (𝔓 𝔇 (𝔓 (𝔇 → 𝔇) 𝔇)))) → 𝔇 → 𝔇 → 𝔏 𝔹 → 𝔏 𝔹
+fi_nt κ ω τ ι ≔ ((θ ↦ ((eqz_nt (knrm_nt κ θ) ω) (∷ ⊤ ι) (fi_nt κ ω θ (∷ ⊤ ι)))) (kmul_nt κ τ τ))
+⍝ ξ squared |υ| times
+sqn_nt ∶ 𝔓 (𝔇 → 𝔇 → 𝔇) (𝔓 (𝔇 → 𝔇) (𝔓 (𝔇 → 𝔇) (𝔓 𝔇 (𝔓 (𝔇 → 𝔇) 𝔇)))) → 𝔏 𝔹 → 𝔇 → 𝔇
+sqn_nt κ υ ξ ≔ (υ (σ τ ↦ (sqn_nt κ τ (kmul_nt κ ξ ξ))) ξ)
+⍝ the Tonelli–Shanks loop on representatives: M (unary), c, t, R
+ts_nt ∶ 𝔓 (𝔇 → 𝔇 → 𝔇) (𝔓 (𝔇 → 𝔇) (𝔓 (𝔇 → 𝔇) (𝔓 𝔇 (𝔓 (𝔇 → 𝔇) 𝔇)))) → 𝔇 → 𝔏 𝔹 → 𝔇 → 𝔇 → 𝔇 → 𝔇
+ts_nt κ ω μ χ τ ρ ≔ ((eqz_nt (knrm_nt κ τ) ω) ρ ((ι ↦ ((β′ ↦ ((ϑ ↦ (ts_nt κ ω ι ϑ (kmul_nt κ τ ϑ) (kmul_nt κ ρ β′))) (kmul_nt κ β′ β′))) (sqn_nt κ (dr_nt (∷ ⊤ ι) μ) χ))) (fi_nt κ ω τ ⊥)))
+⍝ a square root of θ (a residue with (θ/ν) = 1) modulo an odd prime ν
+tsr_nt ∶ 𝔇 → 𝔇 → 𝔇
+tsr_nt θ ν ≔ ((κ ↦ ((m3_nt ν) (kdec_nt κ (kpw_nt κ (kenc_nt κ θ) (dv_nt (⊞ᶻ ν (◀ 1)) (◀ 111010000)))) ((ψ ↦ ((ϑ ↦ (kdec_nt κ (ts_nt κ (knrm_nt κ (kone_nt κ)) (◀ ψ) (kpw_nt κ (kenc_nt κ (qnr_nt ν (◀ 1100))) (▶ ψ)) (kpw_nt κ ϑ (▶ ψ)) (kpw_nt κ ϑ (dv_nt (⊞ᶻ (▶ ψ) (◀ 1)) (◀ 1100)))))) (kenc_nt κ θ))) (v2_nt (⊟ᶻ ν (◀ 1)))))) (ctx_nt ν))
+⍝ the least root by search: x, x² mod ν, 2x + 1
+sqs_nt ∶ 𝔇 → 𝔇 → 𝔇 → 𝔇 → 𝔇 → 𝔇
+sqs_nt θ ν ξ σ δ ≔ ((eqz_nt σ θ) ξ ((lt_nt ξ ν) (sqs_nt θ ν (⊞ᶻ ξ (◀ 1)) (nrm_nt ν (⊞ᶻ σ δ)) (⊞ᶻ δ (◀ 1100))) (◀ 11101)))
+⍝ θ reduced modulo ν
+sqm_nt ∶ 𝔇 → 𝔇 → 𝔇
+sqm_nt θ ν ≔ ((∅ᶻ θ) ⊥ ((∧ (ispr_nt ν) (⌃ ν)) ((≐ (jac_nt θ ν ⊥) 11101) (◀ 11101) ((ρ ↦ ((θ′ ↦ ((lt_nt ρ θ′) ρ θ′)) (⊟ᶻ ν ρ))) (tsr_nt θ ν))) (sqs_nt θ ν ⊥ ⊥ (◀ 1))))
+⍝ modulo 0: the exact square root
+sqz_nt ∶ 𝔇 → 𝔇
+sqz_nt θ ≔ ((lt_nt θ ⊥) (◀ 11101) ((ρ ↦ ((eqz_nt (⊠ᶻ ρ ρ) θ) ρ (◀ 11101))) (√ᶻ θ)))
+sqrtmod ∶ ℤ → ℕ → ℤ      ⍝ the least x ≥ 0 with x² ≡ a (mod n), −1 when there is none; Tonelli–Shanks for an odd prime n, a search over x < n otherwise (O(n)); modulo 0 the exact square root
+sqrtmod ξ η ≔ ((θ ν ↦ (up_nt ((∅ᶻ ν) (sqz_nt θ) (sqm_nt (mod_nt θ ν) ν)))) (↓ᶻ ξ) (↓ᶻ η))
+⍝ ---- Chinese remainders for arbitrary moduli: (x, M) and (a, m) combine when a ≡ x mod g = gcd(M, m), into
+⍝ x + M·(((a − x)/g)·(M/g)⁻¹ mod m/g) modulo lcm(M, m) = (M/g)·m.  A modulus 0 means equality.
+crs_nt ∶ 𝔓 𝔹 (𝔓 𝔇 𝔇) → 𝔓 𝔇 𝔇 → 𝔓 𝔹 (𝔓 𝔇 𝔇)
+crs_nt ψ φ ≔ ((◀ ψ) ((ξ μ θ ν ↦ ((γ δ ↦ ((∅ᶻ γ) ((∅ᶻ δ) ψ (⊗ ⊥ (⊗ ⊥ ⊥))) ((∅ᶻ (mod_nt δ γ)) ((μ′ ν′ ↦ ((λ ↦ (⊗ ⊤ (⊗ (mod_nt (⊞ᶻ ξ (⊠ᶻ μ (mod_nt (⊠ᶻ (÷ᶻ δ γ) (minv_nt μ′ ν′)) ν′))) λ) λ))) (⊠ᶻ μ′ ν))) (÷ᶻ μ γ) (÷ᶻ ν γ)) (⊗ ⊥ (⊗ ⊥ ⊥))))) (gcdᶻ μ ν) (⊟ᶻ θ ξ))) (◀ (▶ ψ)) (▶ (▶ ψ)) (◀ φ) (▶ φ)) ψ)
+crt ∶ 𝔏 ℤ → 𝔏 ℕ → 𝔓 𝔹 (𝔓 ℕ ℕ)      ⍝ Chinese remainder theorem for any moduli (not necessarily coprime): (true, (x, M)) with x ≡ aₖ mod mₖ, 0 ≤ x < M = lcm(mₖ); (false, (0, 0)) when inconsistent; a modulus 0 asks for equality (M = 0); the lists are paired up to the shorter one
+crt ξ η ≔ ((ψ ↦ (⊗ (◀ ψ) (⊗ (up_nt (◀ (▶ ψ))) (up_nt (▶ (▶ ψ)))))) (foldl crs_nt (⊗ ⊤ (⊗ ⊥ (◀ 1))) (⫴ (θ ι ↦ (⊗ (↓ᶻ θ) (↓ᶻ ι))) ξ η)))
+⍝ ---- multiplicative order, primitive roots
+⍝ ο divided by q while (up to |υ| times) θ^(ο/q) ≡ 1
+orq_nt ∶ 𝔓 (𝔇 → 𝔇 → 𝔇) (𝔓 (𝔇 → 𝔇) (𝔓 (𝔇 → 𝔇) (𝔓 𝔇 (𝔓 (𝔇 → 𝔇) 𝔇)))) → 𝔇 → 𝔇 → 𝔇 → 𝔇 → 𝔏 𝔹 → 𝔇
+orq_nt κ ω θ ο ϰ υ ≔ (υ (σ τ ↦ ((ο′ ↦ ((eqz_nt (knrm_nt κ (kpw_nt κ θ ο′)) ω) (orq_nt κ ω θ ο′ ϰ τ) ο)) (⊡ (÷ᶻ ο ϰ)))) ο)
+⍝ the order of θ (coprime to ν > 1): from λ(ν), dividing out its prime factors
+ord_nt ∶ 𝔇 → 𝔇 → 𝔇
+ord_nt θ ν ≔ ((κ λ ↦ ((ω θ′ ↦ (foldl (ο φ ↦ (orq_nt κ ω θ′ ο (◀ φ) (ud_nt (▶ φ)))) λ (fct_nt λ))) (knrm_nt κ (kone_nt κ)) (kenc_nt κ θ))) (ctx_nt ν) (↓ᶻ (carmichael (up_nt ν))))
+ordmod ∶ ℤ → ℕ → ℕ      ⍝ the multiplicative order of a modulo n (least k ≥ 1 with aᵏ ≡ 1), 0 when gcd(a, n) ≠ 1; from Carmichael's λ(n); modulo 0: the order in ℤ (1 for 1, 2 for −1, else 0)
+ordmod ξ η ≔ ((θ ν ↦ (up_nt ((∅ᶻ ν) ((eqz_nt θ (◀ 1)) (◀ 1) ((eqz_nt θ (◀ 11101)) (◀ 1100) ⊥)) ((θ′ ↦ ((eqz_nt (gcdᶻ θ′ ν) (◀ 1)) ((eqz_nt ν (◀ 1)) (◀ 1) (ord_nt θ′ ν)) ⊥)) (mod_nt θ ν))))) (↓ᶻ ξ) (↓ᶻ η))
+⍝ g is a primitive root: gcd(g, ν) = 1 and g^(φ/q) ≢ 1 for every prime q | φ
+isg_nt ∶ 𝔓 (𝔇 → 𝔇 → 𝔇) (𝔓 (𝔇 → 𝔇) (𝔓 (𝔇 → 𝔇) (𝔓 𝔇 (𝔓 (𝔇 → 𝔇) 𝔇)))) → 𝔇 → 𝔇 → 𝔇 → 𝔏 𝔇 → 𝔇 → 𝔹
+isg_nt κ ω ν φ ϰ ζ ≔ (∧ (eqz_nt (gcdᶻ ζ ν) (◀ 1)) ((ζ′ ↦ (∀ₗ (χ ↦ (¬ (eqz_nt (knrm_nt κ (kpw_nt κ ζ′ (⊡ (÷ᶻ φ χ)))) ω))) ϰ)) (kenc_nt κ ζ)))
+prs_nt ∶ 𝔓 (𝔇 → 𝔇 → 𝔇) (𝔓 (𝔇 → 𝔇) (𝔓 (𝔇 → 𝔇) (𝔓 𝔇 (𝔓 (𝔇 → 𝔇) 𝔇)))) → 𝔇 → 𝔇 → 𝔇 → 𝔏 𝔇 → 𝔇 → 𝔇
+prs_nt κ ω ν φ ϰ ζ ≔ ((isg_nt κ ω ν φ ϰ ζ) ζ (prs_nt κ ω ν φ ϰ (⊞ᶻ ζ (◀ 1))))
+⍝ a primitive root exists for 2, 4, pᵉ and 2pᵉ (p an odd prime)
+hpr_nt ∶ 𝔏 (𝔓 𝔇 𝔇) → 𝔹
+hpr_nt ψ ≔ (ψ (φ τ ↦ ((eqz_nt (◀ φ) (◀ 1100)) (τ (φ′ τ′ ↦ (∧ (∅ τ′) (eqz_nt (▶ φ) (◀ 1)))) (lt_nt (▶ φ) (◀ 1101))) (∅ τ))) ⊥)
+prt_nt ∶ 𝔇 → 𝔇
+prt_nt ν ≔ ((lt_nt ν (◀ 1101)) (⊡ (⊟ᶻ ν (◀ 1))) ((ψ ↦ ((hpr_nt ψ) ((φ ↦ ((κ ↦ (prs_nt κ (knrm_nt κ (kone_nt κ)) ν φ (⫶ ◀ (fct_nt φ)) (◀ 1))) (ctx_nt ν))) (↓ᶻ (totient (up_nt ν)))) ⊥)) (fct_nt ν)))
+primroot ∶ ℕ → ℕ      ⍝ the least primitive root modulo n (a generator of (ℤ/n)ˣ), 0 when there is none (n not 1, 2, 4, pᵉ, 2pᵉ; also primroot(0) = primroot(1) = 0)
+primroot ξ ≔ ((ν ↦ (up_nt ((lt_nt ν (◀ 1100)) ⊥ (prt_nt ν)))) (↓ᶻ ξ))
+⍝ ---- sorting lists by a strict comparator λ (merge sort: split by alternation, merge)
+spl_nt ∶ 𝔏 α → 𝔓 (𝔏 α) (𝔏 α)
+spl_nt ξ ≔ (ξ (θ τ ↦ ((ψ ↦ (⊗ (∷ θ (▶ ψ)) (◀ ψ))) (spl_nt τ))) (⊗ ⊥ ⊥))
+mrgc_nt ∶ (α → α → 𝔹) → 𝔏 α → 𝔏 α → 𝔏 α
+mrgc_nt λ ξ η ≔ (ξ (θ τ ↦ (η (ι υ ↦ ((λ ι θ) (∷ ι (mrgc_nt λ ξ υ)) (∷ θ (mrgc_nt λ τ η)))) ξ)) η)
+msort_nt ∶ (α → α → 𝔹) → 𝔏 α → 𝔏 α
+msort_nt λ ξ ≔ (ξ (θ τ ↦ (τ (θ′ τ′ ↦ ((ψ ↦ (mrgc_nt λ (msort_nt λ (◀ ψ)) (msort_nt λ (▶ ψ)))) (spl_nt ξ))) (∷ θ ⊥))) ⊥)
+⍝ drop the elements after the first of each run of equal keys (κ: the key of an element)
+ddp_nt ∶ (α → 𝔇) → 𝔏 α → 𝔏 α
+ddp_nt κ ξ ≔ (ξ (θ τ ↦ (∷ θ (ddp_nt κ (drw_nt κ (κ θ) τ)))) ⊥)
+drw_nt ∶ (α → 𝔇) → 𝔇 → 𝔏 α → 𝔏 α
+drw_nt κ ζ τ ≔ (τ (θ τ′ ↦ ((eqz_nt (κ θ) ζ) (drw_nt κ ζ τ′) τ)) ⊥)
+⍝ the least element of a non-empty list of real integers
+mn_nt ∶ 𝔏 𝔇 → 𝔇
+mn_nt ξ ≔ (foldl (θ ι ↦ ((lt_nt ι θ) ι θ)) (hd ξ) (⌄ ξ))
+⍝ ---- discrete logarithm.  While g = gcd(a, n) > 1:  x = 0 if k ≡ b, else g | b is needed and k·aˣ ≡ b (mod n) becomes
+⍝ (k·a/g)·aˣ⁻¹ ≡ b/g (mod n/g).  Then baby-step giant-step with s = ⌊√n⌋ + 1: the baby steps (b·a^q, q), q = 0 … s, and the giant
+⍝ steps (k·a^(s·p), p), p = 1 … s, are sorted (merge sort, keeping the largest q and the least p of each value), and a merge of the two
+⍝ lists gives every solution s·p − q of the least block; the least is the answer.
+bby_nt ∶ 𝔓 (𝔇 → 𝔇 → 𝔇) (𝔓 (𝔇 → 𝔇) (𝔓 (𝔇 → 𝔇) (𝔓 𝔇 (𝔓 (𝔇 → 𝔇) 𝔇)))) → 𝔇 → 𝔇 → 𝔇 → 𝔇 → 𝔏 (𝔓 𝔇 𝔇)
+bby_nt κ θ σ ξ ϰ ≔ ((lt_nt σ ϰ) ⊥ (∷ (⊗ (knrm_nt κ ξ) ϰ) (bby_nt κ θ σ (kmul_nt κ ξ θ) (⊞ᶻ ϰ (◀ 1)))))
+jn_nt ∶ 𝔇 → 𝔏 (𝔓 𝔇 𝔇) → 𝔏 (𝔓 𝔇 𝔇) → 𝔏 𝔇
+jn_nt σ ξ η ≔ (ξ (θ τ ↦ (η (ι υ ↦ ((⋚ʳ (⊟ᶻ (◀ θ) (◀ ι))) (jn_nt σ τ η) (∷ (⊟ᶻ (⊠ᶻ σ (▶ ι)) (▶ θ)) (jn_nt σ τ υ)) (jn_nt σ ξ υ))) ⊥)) ⊥)
+⍝ the least y ≥ 0 with k·θʸ ≡ β (mod ν), gcd(θ, ν) = 1, plus ζ; −1 when there is none
+bsgs_nt ∶ 𝔇 → 𝔇 → 𝔇 → 𝔇 → 𝔇 → 𝔇
+bsgs_nt θ β ν ϰ ζ ≔ ((κ σ ↦ ((θ′ ↦ ((ψ ↦ ((∅ ψ) (◀ 11101) (⊞ᶻ ζ (mn_nt ψ)))) (jn_nt σ (ddp_nt ◀ (msort_nt (φ φ′ ↦ ((⋚ʳ (⊟ᶻ (◀ φ) (◀ φ′))) ⊤ (lt_nt (▶ φ′) (▶ φ)) ⊥)) (bby_nt κ θ′ σ (kenc_nt κ β) ⊥))) (ddp_nt ◀ (msort_nt (φ φ′ ↦ ((⋚ʳ (⊟ᶻ (◀ φ) (◀ φ′))) ⊤ (lt_nt (▶ φ) (▶ φ′)) ⊥)) ((γ ↦ (bby_nt κ γ σ (kmul_nt κ (kenc_nt κ ϰ) γ) (◀ 1))) (kpw_nt κ θ′ σ))))))) (kenc_nt κ θ))) (ctx_nt ν) (⊞ᶻ (√ᶻ ν) (◀ 1)))
+⍝ the reduction while gcd(θ, ν) > 1  (ϰ: the coefficient k, ζ: the number of steps)
+dred_nt ∶ 𝔇 → 𝔇 → 𝔇 → 𝔇 → 𝔇 → 𝔇
+dred_nt θ β ν ϰ ζ ≔ ((γ ↦ ((eqz_nt γ (◀ 1)) (bsgs_nt θ β ν ϰ ζ) ((eqz_nt β ϰ) ζ ((∅ᶻ (mod_nt β γ)) ((ν′ ↦ (dred_nt (mod_nt θ ν′) (⊡ (÷ᶻ β γ)) ν′ (mod_nt (⊠ᶻ ϰ (÷ᶻ θ γ)) ν′) (⊞ᶻ ζ (◀ 1)))) (⊡ (÷ᶻ ν γ))) (◀ 11101))))) (gcdᶻ θ ν))
+⍝ modulo 0: aˣ = b in ℤ
+dlz′_nt ∶ 𝔇 → 𝔇 → 𝔇 → 𝔇 → 𝔇
+dlz′_nt θ β π′ ξ ≔ ((eqz_nt π′ β) ξ ((lt_nt (absᶻ β) (absᶻ π′)) (◀ 11101) (dlz′_nt θ β (⊠ᶻ π′ θ) (⊞ᶻ ξ (◀ 1)))))
+dlz_nt ∶ 𝔇 → 𝔇 → 𝔇
+dlz_nt θ β ≔ ((eqz_nt β (◀ 1)) ⊥ ((eqz_nt (absᶻ θ) (◀ 1)) ((eqz_nt β θ) (◀ 1) (◀ 11101)) ((∅ᶻ θ) ((∅ᶻ β) (◀ 1) (◀ 11101)) (dlz′_nt θ β θ (◀ 1)))))
+dlog ∶ ℤ → ℤ → ℕ → ℤ      ⍝ the discrete logarithm: the least x ≥ 0 with aˣ ≡ b (mod n), −1 when there is none (any n, a not necessarily coprime to n); baby-step giant-step, O(√n) steps and memory
+dlog ξ η ζ ≔ ((θ β ν ↦ (up_nt ((∅ᶻ ν) (dlz_nt θ β) (dred_nt (mod_nt θ ν) (mod_nt β ν) ν (mod_nt (◀ 1) ν) ⊥)))) (↓ᶻ ξ) (↓ᶻ η) (↓ᶻ ζ))
+⍝ the distinct squares x² mod n, x = 0 … ⌊n/2⌋, sorted
+qrl_nt ∶ 𝔇 → 𝔇 → 𝔇 → 𝔇 → 𝔏 𝔇
+qrl_nt ν ξ σ δ ≔ ((lt_nt ν (⊞ᶻ ξ ξ)) ⊥ (∷ σ (qrl_nt ν (⊞ᶻ ξ (◀ 1)) (nrm_nt ν (⊞ᶻ σ δ)) (⊞ᶻ δ (◀ 1100)))))
+quadresidues ∶ ℕ → 𝔏 ℕ      ⍝ the quadratic residues modulo n: the distinct values x² mod n, ascending (including 0; [] for n = 0)
+quadresidues ξ ≔ ((ν ↦ ((∅ᶻ ν) ⊥ (⫶ up_nt (ddp_nt (θ ↦ θ) (msort_nt lt_nt (qrl_nt ν ⊥ ⊥ (◀ 1))))))) (↓ᶻ ξ))
+⍝ ---- the sieve of Eratosthenes on the odd numbers 3, 5, …, n, with no arithmetic in the inner loop: a prime p ≤ √n is followed by its
+⍝ pattern (p − 1 times false, then true) repeated forever, or-ed into the stream of flags behind it; once p² > n the rest is only read.
+pat_nt ∶ 𝔇 → 𝔏 𝔹
+pat_nt π′ ≔ (⧺ (take′ (⊟ᶻ π′ (◀ 1)) (⁂ ⊥)) (∷ ⊤ ⊥))
+cyc_nt ∶ 𝔏 𝔹 → 𝔖 𝔹
+cyc_nt φ ≔ (⧺ φ (cyc_nt φ))
+rst_nt ∶ 𝔏 𝔇 → 𝔖 𝔹 → 𝔏 𝔇
+rst_nt ξ φ ≔ (ξ (θ τ ↦ (φ (ϕ υ ↦ (ϕ (rst_nt τ υ) (∷ θ (rst_nt τ υ)))) ⊥)) ⊥)
+sv_nt ∶ 𝔇 → 𝔏 𝔇 → 𝔖 𝔹 → 𝔏 𝔇
+sv_nt ν ξ φ ≔ (ξ (θ τ ↦ (φ (ϕ υ ↦ (ϕ (sv_nt ν τ υ) (∷ θ ((lt_nt ν (⊠ᶻ θ θ)) (rst_nt τ υ) (sv_nt ν τ (⫴ ∨ υ (cyc_nt (pat_nt θ)))))))) ⊥)) ⊥)
+odl_nt ∶ 𝔇 → 𝔇 → 𝔏 𝔇
+odl_nt ξ ν ≔ ((lt_nt ν ξ) ⊥ (∷ ξ (odl_nt (⊞ᶻ ξ (◀ 1100)) ν)))
+prm_nt ∶ 𝔇 → 𝔏 𝔇
+prm_nt ν ≔ ((lt_nt ν (◀ 1100)) ⊥ (∷ (◀ 1100) (sv_nt ν (odl_nt (◀ 1101) ν) (⁂ ⊥))))
+primes ∶ ℤ → 𝔏 ℕ      ⍝ all primes ≤ n, ascending (sieve of Eratosthenes on the odd numbers; about n·π(√n) cheap steps)
+primes ξ ≔ (⫶ up_nt (prm_nt (↓ᶻ ξ)))
+primepi ∶ ℤ → ℕ      ⍝ π(n): the number of primes ≤ n (by the sieve)
+primepi ξ ≔ (ℓ (prm_nt (↓ᶻ ξ)))
+⍝ pₖ < k(ln k + ln ln k) ≤ 2k ln k < k·(L + 3) for k ≥ 6, L the number of digits of k
+nthprime ∶ ℕ → ℕ      ⍝ the k-th prime (nthprime(1) = 2; nthprime(0) = 0), by sieving up to k·(L + 3) (L = digits of k), a bound for pₖ
+nthprime ξ ≔ ((κ ↦ (up_nt ((∅ᶻ κ) ⊥ (hd (drop′ (⊟ᶻ κ (◀ 1)) (prm_nt ((lt_nt κ (◀ 111011100)) (◀ 100010001) (⊠ᶻ κ (⊞ᶻ (ul_nt (⊡ κ)) (◀ 1101)))))))))) (↓ᶻ ξ))
+⍝ ---- Fibonacci and Lucas numbers by fast doubling on the bits of n:  F(2k) = F(k)(2F(k+1) − F(k)),  F(2k+1) = F(k)² + F(k+1)²
+fdb_nt ∶ 𝔏 𝔹 → 𝔓 𝔇 𝔇 → 𝔓 𝔇 𝔇
+fdb_nt β ψ ≔ (β (σ τ ↦ (fdb_nt τ ((φ ↦ (σ (⊗ (▶ φ) (⊞ᶻ (◀ φ) (▶ φ))) φ)) ((ϑ ϖ ↦ (⊗ (⊠ᶻ ϑ (⊟ᶻ (⊞ᶻ ϖ ϖ) ϑ)) (⊞ᶻ (⊠ᶻ ϑ ϑ) (⊠ᶻ ϖ ϖ)))) (◀ ψ) (▶ ψ))))) ψ)
+⍝ (F(|n|), F(|n| + 1))
+fbp_nt ∶ 𝔇 → 𝔓 𝔇 𝔇
+fbp_nt ν ≔ (fdb_nt (reverse (bits_nt (absᶻ ν))) (⊗ ⊥ (◀ 1)))
+fib ∶ ℤ → ℤ      ⍝ the Fibonacci number F(n) (fast doubling); F(−n) = (−1)ⁿ⁺¹F(n)
+fib ∶ ℕ → ℕ
+fib ξ ≔ ((ν ↦ ((ψ ↦ (up_nt ((∧ (lt_nt ν ⊥) (¬ (⌃ ν))) (⊖ᶻ (◀ ψ)) (◀ ψ)))) (fbp_nt ν))) (↓ᶻ ξ))
+lucas ∶ ℤ → ℤ      ⍝ the Lucas number L(n) = 2F(n+1) − F(n) (fast doubling); L(−n) = (−1)ⁿL(n)
+lucas ∶ ℕ → ℕ
+lucas ξ ≔ ((ν ↦ ((ψ ↦ ((ϑ ↦ (up_nt ((∧ (lt_nt ν ⊥) (⌃ ν)) (⊖ᶻ ϑ) ϑ))) (⊟ᶻ (⊞ᶻ (▶ ψ) (▶ ψ)) (◀ ψ)))) (fbp_nt ν))) (↓ᶻ ξ))
+⍝ ---- combinatorial numbers
+catalan ∶ ℕ → ℕ      ⍝ the Catalan number C(n) = (2n choose n)/(n + 1)
+catalan ξ ≔ (up_nt (÷ᶻ (↓ᶻ (choose (⊞ ξ ξ) ξ)) (⊞ᶻ (↓ᶻ ξ) (◀ 1))))
+⍝ a row of the Bell triangle from the previous one: it starts with the last element, each next is the previous plus the one above
+bsc_nt ∶ 𝔇 → 𝔏 𝔇 → 𝔏 𝔇
+bsc_nt ξ ρ ≔ (∷ ξ (ρ (θ τ ↦ (bsc_nt (⊞ᶻ ξ θ) τ)) ⊥))
+brw_nt ∶ 𝔏 𝔹 → 𝔏 𝔇 → 𝔏 𝔇
+brw_nt υ ρ ≔ (υ (σ τ ↦ (brw_nt τ (bsc_nt (last ρ) ρ))) ρ)
+bell ∶ ℕ → ℕ      ⍝ the Bell number Bₙ (set partitions of n elements), by the Bell triangle: O(n²) additions
+bell ξ ≔ (up_nt (hd (brw_nt (ud_nt (↓ᶻ ξ)) (∷ (◀ 1) ⊥))))
+⍝ rows of Stirling numbers: S(n+1, j) = j·S(n, j) + S(n, j−1);  s(n+1, j) = s(n, j−1) − n·s(n, j)
+ssr_nt ∶ 𝔇 → 𝔏 𝔇 → 𝔇 → 𝔏 𝔇
+ssr_nt ι ρ π′ ≔ (ρ (θ τ ↦ (∷ (⊞ᶻ (⊠ᶻ ι θ) π′) (ssr_nt (⊞ᶻ ι (◀ 1)) τ θ))) (∷ π′ ⊥))
+sfr_nt ∶ 𝔇 → 𝔏 𝔇 → 𝔇 → 𝔏 𝔇
+sfr_nt ν ρ π′ ≔ (ρ (θ τ ↦ (∷ (⊟ᶻ π′ (⊠ᶻ ν θ)) (sfr_nt ν τ θ))) (∷ π′ ⊥))
+ssl_nt ∶ 𝔏 𝔹 → 𝔏 𝔇 → 𝔏 𝔇
+ssl_nt υ ρ ≔ (υ (σ τ ↦ (ssl_nt τ (ssr_nt ⊥ ρ ⊥))) ρ)
+sfl_nt ∶ 𝔏 𝔹 → 𝔇 → 𝔏 𝔇 → 𝔏 𝔇
+sfl_nt υ ν ρ ≔ (υ (σ τ ↦ (sfl_nt τ (⊞ᶻ ν (◀ 1)) (sfr_nt ν ρ ⊥))) ρ)
+stirling₁ ∶ ℕ → ℕ → ℤ      ⍝ the signed Stirling number of the first kind s(n, k) (coefficient of xᵏ in x(x−1)…(x−n+1)), by rows: O(n·k)
+stirling₁ ξ η ≔ (up_nt (hd (drop′ (↓ᶻ η) (sfl_nt (ud_nt (↓ᶻ ξ)) ⊥ (∷ (◀ 1) ⊥)))))
+stirling₂ ∶ ℕ → ℕ → ℕ      ⍝ the Stirling number of the second kind S(n, k) (partitions of n elements into k blocks), by rows: O(n·k)
+stirling₂ ξ η ≔ (up_nt (hd (drop′ (↓ᶻ η) (ssl_nt (ud_nt (↓ᶻ ξ)) (∷ (◀ 1) ⊥)))))
+⍝ partitions: p(m) = Σₖ₌₁ (−1)ᵏ⁺¹ (p(m − k(3k−1)/2) + p(m − k(3k+1)/2)), read off the list ρ = p(m−1), p(m−2), …, p(0):
+⍝ the generalised pentagonal numbers 1, 2, 5, 7, 12, 15, … are reached by dropping k − 1 … alternately k and 2k + 1 elements.
+pps_nt ∶ 𝔏 𝔇 → 𝔇 → 𝔹 → 𝔇
+pps_nt ρ κ ς ≔ ((∅ ρ) ⊥ ((ρ′ ↦ ((ϑ ↦ ((ϖ ↦ (ς (⊞ᶻ ϑ ϖ) (⊟ᶻ ϖ ϑ))) (pps_nt (drop′ (⊞ᶻ (⊞ᶻ κ κ) (◀ 1)) ρ′) (⊞ᶻ κ (◀ 1)) (¬ ς)))) (⊞ᶻ (hd ρ) (hd ρ′)))) (drop′ κ ρ)))
+ppl_nt ∶ 𝔏 𝔹 → 𝔏 𝔇 → 𝔏 𝔇
+ppl_nt υ ρ ≔ (υ (σ τ ↦ (ppl_nt τ (∷ (pps_nt ρ (◀ 1) ⊤) ρ))) ρ)
+partitions ∶ ℕ → ℕ      ⍝ the partition number p(n), by Euler's pentagonal number recurrence: O(n^1.5) additions
+partitions ξ ≔ (up_nt (hd (ppl_nt (ud_nt (↓ᶻ ξ)) (∷ (◀ 1) ⊥))))
+⍝ ---- Bernoulli numbers from the tangent numbers T₁ … Tₘ (integers, Brent–Harvey / Knuth–Buckholtz):  Tₖ ← (k−1)!;  then for k = 2 … m,
+⍝ j = k … m:  Tⱼ ← (j−k)·Tⱼ₋₁ + (j−k+2)·Tⱼ.   B₂ₘ = (−1)ᵐ⁻¹·2m·Tₘ / (4ᵐ(4ᵐ − 1)),  ζ(2m)/π²ᵐ = Tₘ / (2(4ᵐ − 1)(2m − 1)!).
+fls_nt ∶ 𝔇 → 𝔇 → 𝔇 → 𝔏 𝔇
+fls_nt φ κ μ ≔ ((lt_nt κ μ) (∷ φ (fls_nt (⊠ᶻ φ (⊞ᶻ κ (◀ 1))) (⊞ᶻ κ (◀ 1)) μ)) ⊥)
+tsc_nt ∶ 𝔏 𝔇 → 𝔇 → 𝔇 → 𝔏 𝔇
+tsc_nt ρ π′ ι ≔ (ρ (θ τ ↦ ((η ↦ (∷ η (tsc_nt τ η (⊞ᶻ ι (◀ 1))))) (⊞ᶻ (⊠ᶻ ι π′) (⊠ᶻ (⊞ᶻ ι (◀ 1100)) θ)))) ⊥)
+tg_nt ∶ 𝔇 → 𝔏 𝔇 → 𝔇
+tg_nt π′ ρ ≔ (ρ (θ τ ↦ ((ρ′ ↦ ((∅ (⌄ ρ′)) (hd ρ′) (tg_nt (hd ρ′) (⌄ ρ′)))) (tsc_nt ρ π′ ⊥))) π′)
+⍝ the tangent number Tₘ (m ≥ 1)
+tan_nt ∶ 𝔇 → 𝔇
+tan_nt μ ≔ ((ρ ↦ (tg_nt (hd ρ) (⌄ ρ))) (fls_nt (◀ 1) ⊥ μ))
+⍝ 4ᵐ
+p4_nt ∶ 𝔇 → 𝔇
+p4_nt μ ≔ ((∅ᶻ μ) (◀ 1) (⁴ᶻ (p4_nt (⊟ᶻ μ (◀ 1)))))
+bernoulli ∶ ℕ → ℚ      ⍝ the Bernoulli number Bₙ, exactly, with B₁ = −1/2 (from the integer tangent numbers: O(n²) integer operations)
+bernoulli ξ ≔ ((ν ↦ ((∅ᶻ ν) 1 ((eqz_nt ν (◀ 1)) (÷ 11101 1100) ((⌃ ν) 0 ((μ ↦ ((ϑ ↦ (⊜ (⊗ ((⌃ μ) (⊠ᶻ ν (tan_nt μ)) (⊖ᶻ (⊠ᶻ ν (tan_nt μ)))) (⊠ᶻ ϑ (⊟ᶻ ϑ (◀ 1)))))) (p4_nt μ))) (⊡ (½ᶻ ν))))))) (↓ᶻ ξ))
+zetaeven ∶ ℕ → ℚ      ⍝ ζ(2n)/π²ⁿ, an exact rational (ζ(2) = π²/6, ζ(4) = π⁴/90, …; −1/2 for n = 0), from the tangent number Tₙ
+zetaeven ξ ≔ ((μ ↦ ((∅ᶻ μ) (÷ 11101 1100) (⊜ (⊗ (tan_nt μ) (⊠ᶻ (◀ 1100) (⊠ᶻ (⊟ᶻ (p4_nt μ) (◀ 1)) (↓ᶻ (fact (up_nt (⊟ᶻ (⊞ᶻ μ μ) (◀ 1))))))))))) (↓ᶻ ξ))
+⍝ ---- harmonic numbers over the common denominator L = lcm(1, …, n) = Π pᵉ (pᵉ ≤ n < pᵉ⁺¹)
+mpw_nt ∶ 𝔇 → 𝔇 → 𝔇 → 𝔇
+mpw_nt π′ ν ξ ≔ ((lt_nt ν (⊠ᶻ ξ π′)) ξ (mpw_nt π′ ν (⊠ᶻ ξ π′)))
+lcn_nt ∶ 𝔇 → 𝔇
+lcn_nt ν ≔ (foldl (ξ π′ ↦ (⊠ᶻ ξ (mpw_nt π′ ν π′))) (◀ 1) (prm_nt ν))
+hsum_nt ∶ 𝔇 → 𝔇 → 𝔇 → 𝔇
+hsum_nt λ κ ν ≔ ((lt_nt ν κ) ⊥ (⊞ᶻ (÷ᶻ λ κ) (hsum_nt λ (⊞ᶻ κ (◀ 1)) ν)))
+harmonic ∶ ℕ → ℚ      ⍝ the harmonic number Hₙ = 1 + 1/2 + … + 1/n, exactly, in lowest terms (H₀ = 0)
+harmonic ξ ≔ ((ν ↦ ((λ ↦ (⊜ (⊗ (hsum_nt λ (◀ 1) ν) λ))) (lcn_nt ν))) (↓ᶻ ξ))
+⍝ ---- digits in a base, integer roots, perfect powers
+dsm_nt ∶ 𝔇 → 𝔇 → 𝔇
+dsm_nt ν β ≔ ((∅ᶻ ν) ⊥ ((ψ ↦ (⊞ᶻ (▶ ψ) (dsm_nt (◀ ψ) β))) (⫽ᶻ ν β)))
+digitsum ∶ ℤ → ℕ → ℕ      ⍝ the sum of the digits of |n| in base b ≥ 2 (base 1: |n|, base 0: 0)
+digitsum ξ η ≔ ((ν β ↦ (up_nt ((lt_nt β (◀ 1100)) ((∅ᶻ β) ⊥ ν) (dsm_nt ν β)))) (absᶻ (↓ᶻ ξ)) (↓ᶻ η))
+⍝ Newton from above for ⌊ν^(1/k)⌋:  x ← ((k−1)x + ⌊ν / xᵏ⁻¹⌋) div k  while it decreases;  start 2^(⌊(L+4)/2k⌋ + 1) > ν^(1/k)
+irt′_nt ∶ 𝔇 → 𝔇 → 𝔇 → 𝔇
+irt′_nt ν κ ξ ≔ ((η ↦ ((lt_nt η ξ) (irt′_nt ν κ η) ξ)) (dv_nt (⊞ᶻ (⊠ᶻ (⊟ᶻ κ (◀ 1)) ξ) (dv_nt ν (↓ᶻ (^ (up_nt ξ) (up_nt (⊟ᶻ κ (◀ 1))))))) κ))
+irt_nt ∶ 𝔇 → 𝔇 → 𝔇
+irt_nt ν κ ≔ ((∅ᶻ κ) ⊥ ((∅ᶻ ν) ⊥ (irt′_nt ν κ (↓ᶻ (^ 1100 (up_nt (⊞ᶻ (dv_nt (⊞ᶻ (ul_nt (⊡ ν)) (◀ 111010000)) (⊞ᶻ κ κ)) (◀ 1))))))))
+iroot ∶ ℕ → ℕ → ℕ      ⍝ ⌊n^(1/k)⌋, the integer k-th root (Newton's method from above); iroot(n, 0) = 0
+iroot ξ η ≔ (up_nt (irt_nt (↓ᶻ ξ) (↓ᶻ η)))
+⍝ ν = aᵖ for one of the primes p of the list (each p checked by its root)
+ipw_nt ∶ 𝔇 → 𝔏 𝔇 → 𝔹
+ipw_nt ν ψ ≔ (∃ₗ (π′ ↦ (eqz_nt (↓ᶻ (^ (up_nt (irt_nt ν π′)) (up_nt π′))) ν)) ψ)
+ispower ∶ ℤ → 𝔹      ⍝ n = aᵏ for an integer a and some k ≥ 2 (true for 0, 1, −1; a negative n needs an odd k); a k-th root test for every prime k ≤ log₂|n|
+ispower ξ ≔ ((ν ↦ ((θ ↦ ((lt_nt θ (◀ 1100)) ⊤ (ipw_nt θ ((lt_nt ν ⊥) (⌄ (prm_nt (dv_nt (⊞ᶻ (ul_nt (⊡ θ)) (◀ 111010000)) (◀ 1100)))) (prm_nt (dv_nt (⊞ᶻ (ul_nt (⊡ θ)) (◀ 111010000)) (◀ 1100))))))) (absᶻ ν))) (↓ᶻ ξ))
+⍝ ---- continued fractions
+cf_nt ∶ 𝔇 → 𝔇 → 𝔏 𝔇
+cf_nt π′ δ ≔ ((∅ᶻ δ) ⊥ ((ϑ ↦ (∷ ϑ (cf_nt δ (⊟ᶻ π′ (⊠ᶻ ϑ δ))))) (⌊ᶻ π′ δ)))
+contfrac ∶ ℚ → 𝔏 ℤ      ⍝ the continued fraction [a₀; a₁, …, aₖ] of a rational (Euclid with floor quotients; aₖ ≥ 2 unless k = 0)
+contfrac ξ ≔ ((θ ↦ (⫶ up_nt (cf_nt (◀ θ) (▶ θ)))) (⊜ ξ))
+⍝ the fraction h/k with k made positive (0 when k = 0)
+frc_nt ∶ 𝔇 → 𝔇 → ℚ
+frc_nt η κ ≔ ((∅ᶻ κ) 0 ((lt_nt κ ⊥) (⊗ (⊡ (⊖ᶻ η)) (⊡ (⊖ᶻ κ))) (⊗ (⊡ η) (⊡ κ))))
+cvp_nt ∶ 𝔏 𝔇 → 𝔇 → 𝔇 → 𝔇 → 𝔇 → 𝔏 (𝔓 𝔇 𝔇)
+cvp_nt ξ η η′ κ κ′ ≔ (ξ (θ τ ↦ ((ϑ ϖ ↦ (∷ (⊗ ϑ ϖ) (cvp_nt τ ϑ η ϖ κ))) (⊞ᶻ (⊠ᶻ θ η) η′) (⊞ᶻ (⊠ᶻ θ κ) κ′))) ⊥)
+convergents ∶ 𝔏 ℤ → 𝔏 ℚ      ⍝ the convergents hₖ/kₖ of [a₀; a₁, …] (hₖ = aₖhₖ₋₁ + hₖ₋₂, kₖ = aₖkₖ₋₁ + kₖ₋₂)
+convergents ξ ≔ (⫶ (φ ↦ (frc_nt (◀ φ) (▶ φ))) (cvp_nt (⫶ ↓ᶻ ξ) (◀ 1) ⊥ ⊥ (◀ 1)))
+⍝ √n = [a₀; period]:  m ← d·a − m,  d ← (n − m²)/d,  a ← ⌊(a₀ + m)/d⌋, until a = 2a₀
+cfs_nt ∶ 𝔇 → 𝔇 → 𝔇 → 𝔇 → 𝔇 → 𝔏 𝔇
+cfs_nt ν ϑ μ δ ϖ ≔ ((μ′ ↦ ((δ′ ↦ ((ϖ′ ↦ (∷ ϖ′ ((eqz_nt ϖ′ (⊞ᶻ ϑ ϑ)) ⊥ (cfs_nt ν ϑ μ′ δ′ ϖ′)))) (dv_nt (⊞ᶻ ϑ μ′) δ′))) (⊡ (÷ᶻ (⊟ᶻ ν (⊠ᶻ μ′ μ′)) δ)))) (⊟ᶻ (⊠ᶻ δ ϖ) μ))
+cfq_nt ∶ 𝔇 → 𝔓 𝔇 (𝔏 𝔇)
+cfq_nt ν ≔ ((ϑ ↦ (⊗ ϑ ((eqz_nt (⊠ᶻ ϑ ϑ) ν) ⊥ (cfs_nt ν ϑ ⊥ (◀ 1) ϑ)))) (√ᶻ ν))
+cfsqrt ∶ ℕ → 𝔓 ℕ (𝔏 ℕ)      ⍝ √n = [a₀; a₁, …, aᵣ, a₁, …]: (a₀, the period a₁ … aᵣ); the period is empty when n is a square
+cfsqrt ξ ≔ ((ψ ↦ (⊗ (up_nt (◀ ψ)) (⫶ up_nt (▶ ψ)))) (cfq_nt (↓ᶻ ξ)))
+⍝ the fundamental solution is the convergent number r − 1 (r even) or 2r − 1 (r odd) of √D, r the length of the period
+pell ∶ ℕ → 𝔓 ℕ ℕ      ⍝ the fundamental solution (x, y), y > 0 least, of x² − D·y² = 1, from the continued fraction of √D; (1, 0) when D is 0 or a square
+pell ξ ≔ ((ψ ↦ ((∅ (▶ ψ)) (⊗ 1 0) ((φ ↦ (⊗ (up_nt (◀ φ)) (up_nt (▶ φ)))) (hd (drop′ ((odd_nt (▶ ψ)) (⊟ᶻ (⊞ᶻ (ul_nt (▶ ψ)) (ul_nt (▶ ψ))) (◀ 1)) (⊟ᶻ (ul_nt (▶ ψ)) (◀ 1))) (cvp_nt (∷ (◀ ψ) (⧺ (▶ ψ) (▶ ψ))) (◀ 1) ⊥ ⊥ (◀ 1))))))) (cfq_nt (↓ᶻ ξ)))
+⍝ ---- Gaussian integers.  The prime 1 + i is the base up to a unit (b = i·(1 + i)), so its exponent in z is the number of trailing zero
+⍝ digits.  The other Gaussian primes lie over the odd primes p | N(z): p itself when p ≡ 3 (mod 4), and π = gcd(p, t + i), π̄ when
+⍝ p ≡ 1 (mod 4), t² ≡ −1 (t = z^((p−1)/4) for the least non-residue z).  Primes are normalised to Re > 0, Im ≥ 0 (⌜ᶻ) and listed by
+⍝ norm, then by imaginary part; the unit is z divided by the product of the prime powers.
+tz_nt ∶ 𝔇 → 𝔏 𝔹 → 𝔓 (𝔏 𝔹) 𝔇
+tz_nt ξ υ ≔ ((⌃ ξ) (⊗ υ ξ) (tz_nt (⌄ ξ) (∷ ⊤ υ)))
+nz_nt ∶ 𝔇 → 𝔇
+nz_nt ζ ≔ (⊠ᶻ ζ (∗ᶻ ζ))
+pwz_nt ∶ 𝔇 → 𝔇 → 𝔇
+pwz_nt ζ ν ≔ (↓ᶻ (^ (up_nt ζ) (up_nt ν)))
+gpi_nt ∶ 𝔇 → 𝔇
+gpi_nt π′ ≔ (ggcdᶻ π′ (⊞ᶻ (pmd_nt π′ (qnr_nt π′ (◀ 1100)) (dv_nt (⊟ᶻ π′ (◀ 1)) (◀ 111010000))) (◀ 11)))
+⍝ how often π divides ζ: (count, rest)
+dvg_nt ∶ 𝔇 → 𝔇 → 𝔇 → 𝔓 𝔇 𝔇
+dvg_nt ζ π′ κ ≔ ((∅ᶻ (remᶻ ζ π′)) (dvg_nt (⊡ (÷ᶻ ζ π′)) π′ (⊞ᶻ κ (◀ 1))) (⊗ κ ζ))
+gent_nt ∶ 𝔇 → 𝔓 𝔇 𝔇 → 𝔏 (𝔓 𝔇 𝔇)
+gent_nt π′ ψ ≔ ((∅ᶻ (◀ ψ)) ⊥ (∷ (⊗ π′ (◀ ψ)) ⊥))
+⍝ the Gaussian prime powers over the rational primes of the list (the factorisation of N(ζ), ζ odd)
+gpe_nt ∶ 𝔇 → 𝔏 (𝔓 𝔇 𝔇) → 𝔏 (𝔓 𝔇 𝔇)
+gpe_nt ζ φ′ ≔ (φ′ (φ τ ↦ ((m3_nt (◀ φ)) ((ψ ↦ (∷ (⊗ (◀ φ) (◀ ψ)) (gpe_nt (▶ ψ) τ))) (dvg_nt ζ (◀ φ) ⊥)) ((ϑ ↦ ((ϖ ↦ ((ψ ↦ ((ψ′ ↦ (⧺ (gent_nt ϑ ψ) (⧺ (gent_nt ϖ ψ′) (gpe_nt (▶ ψ′) τ)))) (dvg_nt (▶ ψ) ϖ ⊥))) (dvg_nt ζ ϑ ⊥))) (⌜ᶻ (∗ᶻ ϑ)))) (gpi_nt (◀ φ))))) ⊥)
+⍝ Gaussian order: by norm, then by imaginary part
+gcmp_nt ∶ 𝔓 𝔇 α → 𝔓 𝔇 α → 𝔹
+gcmp_nt φ φ′ ≔ ((⋚ʳ (⊟ᶻ (nz_nt (◀ φ)) (nz_nt (◀ φ′)))) ⊤ (lt_nt (ℑᶻ (◀ φ)) (ℑᶻ (◀ φ′))) ⊥)
+gfa_nt ∶ 𝔇 → 𝔓 𝔇 (𝔏 (𝔓 𝔇 𝔇))
+gfa_nt ζ ≔ ((ψ ↦ ((ρ ↦ (⊗ (⊡ (÷ᶻ ζ (foldl (ξ φ ↦ (⊠ᶻ ξ (pwz_nt (◀ φ) (▶ φ)))) (◀ 1) ρ))) ρ)) (msort_nt gcmp_nt (⧺ ((∅ (◀ ψ)) ⊥ (∷ (⊗ (◀ 1110) (ul_nt (◀ ψ))) ⊥)) (gpe_nt (▶ ψ) (fct_nt (nz_nt (▶ ψ)))))))) (tz_nt ζ ⊥))
+gaussfactor ∶ ℤ[i] → 𝔓 ℤ[i] (𝔏 (𝔓 ℤ[i] ℕ))      ⍝ z = u·Π πᵉ: (the unit u, the list of (π, e)), π Gaussian primes with Re > 0, Im ≥ 0, by norm then imaginary part; (0, []) for 0. Through the factorisation of N(z) and Gaussian gcds; 1 + i from the trailing zero digits
+gaussfactor ξ ≔ ((ζ ↦ ((∅ᶻ ζ) (⊗ 0 ⊥) ((ψ ↦ (⊗ (up_nt (◀ ψ)) (⫶ (φ ↦ (⊗ (up_nt (◀ φ)) (up_nt (▶ φ)))) (▶ ψ)))) (gfa_nt ζ)))) (↓ᶻ ξ))
+⍝ a real p is a Gaussian prime when p is a prime ≡ 3 (mod 4)
+gp3_nt ∶ 𝔇 → 𝔹
+gp3_nt ν ≔ (∧ (m3_nt ν) (ispr_nt ν))
+igp_nt ∶ 𝔇 → 𝔹
+igp_nt ζ ≔ ((ϑ ϖ ↦ ((∅ᶻ ϖ) (gp3_nt (absᶻ ϑ)) ((∅ᶻ ϑ) (gp3_nt (absᶻ ϖ)) (ispr_nt (⊞ᶻ (⊠ᶻ ϑ ϑ) (⊠ᶻ ϖ ϖ)))))) (ℜᶻ ζ) (ℑᶻ ζ))
+isgaussprime ∶ ℤ[i] → 𝔹      ⍝ z is a Gaussian prime: N(z) a prime when Re z·Im z ≠ 0, else |Re z| or |Im z| a prime ≡ 3 (mod 4)
+isgaussprime ξ ≔ (igp_nt (↓ᶻ ξ))
+⍝ ---- sums of two squares: the Gaussian integers of norm n, up to units, are (1+i)ˢ · Π qᶠ · Π πʲπ̄ᵉ⁻ʲ (j = 0 … e) — none when a prime
+⍝ q ≡ 3 (mod 4) has an odd exponent.  Each z = x + iy gives (max(|x|,|y|), min(|x|,|y|)); the pairs are sorted by b and repeated ones dropped.
+s2c_nt ∶ 𝔏 𝔇 → 𝔓 𝔇 𝔇 → 𝔏 𝔇
+s2c_nt ζ′ φ ≔ ((eqz_nt (◀ φ) (◀ 1100)) ((ϑ ↦ (⫶ (ζ ↦ (⊠ᶻ ζ ϑ)) ζ′)) (pwz_nt (◀ 1110) (▶ φ))) ((m3_nt (◀ φ)) ((ϑ ↦ (⫶ (ζ ↦ (⊠ᶻ ζ ϑ)) ζ′)) (pwz_nt (◀ φ) (½ᶻ (▶ φ)))) ((ϑ ↦ ((ϖ ↦ (concat (⫶ (ι ↦ ((χ ↦ (⫶ (ζ ↦ (⊠ᶻ ζ χ)) ζ′)) (⊠ᶻ (pwz_nt ϑ ι) (pwz_nt ϖ (⊟ᶻ (▶ φ) ι))))) (upl_nt ⊥ (▶ φ))))) (⌜ᶻ (∗ᶻ ϑ)))) (gpi_nt (◀ φ)))))
+⍝ 0, 1, …, ν as digits
+upl_nt ∶ 𝔇 → 𝔇 → 𝔏 𝔇
+upl_nt ξ ν ≔ ((lt_nt ν ξ) ⊥ (∷ ξ (upl_nt (⊞ᶻ ξ (◀ 1)) ν)))
+s2p_nt ∶ 𝔇 → 𝔓 𝔇 𝔇
+s2p_nt ζ ≔ ((ϑ ϖ ↦ ((lt_nt ϑ ϖ) (⊗ ϖ ϑ) (⊗ ϑ ϖ))) (absᶻ (ℜᶻ ζ)) (absᶻ (ℑᶻ ζ)))
+s2s_nt ∶ 𝔇 → 𝔏 (𝔓 𝔇 𝔇)
+s2s_nt ν ≔ ((lt_nt ν ⊥) ⊥ ((∅ᶻ ν) (∷ (⊗ ⊥ ⊥) ⊥) ((ψ ↦ ((∃ₗ (φ ↦ (∧ (m3_nt (◀ φ)) (⌃ (▶ φ)))) ψ) ⊥ (ddp_nt ▶ (msort_nt (φ φ′ ↦ (lt_nt (▶ φ) (▶ φ′))) (⫶ s2p_nt (foldl s2c_nt (∷ (◀ 1) ⊥) ψ)))))) (fct_nt ν))))
+sumtwosquares ∶ ℤ → 𝔏 (𝔓 ℕ ℕ)      ⍝ every way to write n = a² + b² with a ≥ b ≥ 0, by increasing b; from the Gaussian factorisation of n ([] when n < 0 or a prime ≡ 3 mod 4 divides n to an odd power)
+sumtwosquares ξ ≔ (⫶ (φ ↦ (⊗ (up_nt (◀ φ)) (up_nt (▶ φ)))) (s2s_nt (↓ᶻ ξ)))
+⍝ the Gaussian primes of norm ≤ n: 1 + i, π and π̄ over p ≡ 1 (mod 4), p ≤ n, and q ≡ 3 (mod 4) with q² ≤ n
+gps_nt ∶ 𝔇 → 𝔇 → 𝔏 𝔇
+gps_nt ν π′ ≔ ((eqz_nt π′ (◀ 1100)) (∷ (◀ 1110) ⊥) ((m3_nt π′) ((lt_nt ν (⊠ᶻ π′ π′)) ⊥ (∷ π′ ⊥)) ((ϑ ↦ (∷ ϑ (∷ (⌜ᶻ (∗ᶻ ϑ)) ⊥))) (gpi_nt π′))))
+gaussprimes ∶ ℕ → 𝔏 ℤ[i]      ⍝ the Gaussian primes of norm ≤ n (normalised: Re > 0, Im ≥ 0), by norm then imaginary part
+gaussprimes ξ ≔ ((ν ↦ (⫶ (φ ↦ (up_nt (◀ φ))) (msort_nt gcmp_nt (⫶ (ζ ↦ (⊗ ζ ⊥)) (concat (⫶ (gps_nt ν) (prm_nt ν))))))) (↓ᶻ ξ))
+⍝ ---- more: gcd and lcm of lists, squares, prime powers, coprimality, totatives, primitive roots, Ramanujan sums, Wilson's test
+gcdlist ∶ 𝔏 ℤ → ℕ      ⍝ the gcd of a list of integers (0 for the empty list); of Gaussian integers, normalised to Re > 0, Im ≥ 0
+gcdlist ∶ 𝔏 ℤ[i] → ℤ[i]
+gcdlist ξ ≔ (foldl gcd 0 ξ)
+lcl_nt ∶ 𝔇 → 𝔇 → 𝔇
+lcl_nt ξ η ≔ ((∨ (∅ᶻ ξ) (∅ᶻ η)) ⊥ (⊡ (÷ᶻ (absᶻ (⊠ᶻ ξ η)) (gcdᶻ ξ η))))
+lcmlist ∶ 𝔏 ℤ → ℕ      ⍝ the least common multiple of a list of integers (1 for the empty list, 0 when an element is 0)
+lcmlist ξ ≔ (up_nt (foldl (η ζ ↦ (lcl_nt η (↓ᶻ ζ))) (◀ 1) ξ))
+issquare ∶ ℤ → 𝔹      ⍝ n is a perfect square (false for n < 0; through the integer square root)
+issquare ξ ≔ (issq_nt (↓ᶻ ξ))
+isprimepower ∶ ℤ → 𝔹      ⍝ n = pᵏ for a prime p and k ≥ 1 (n > 0; from the factorisation)
+isprimepower ξ ≔ (∧ (≻ ξ 0) ((θ ↦ (∧ (¬ (∅ θ)) (∅ (⌄ θ)))) (fcq_nt ξ)))
+iscoprime ∶ ℤ → ℤ → 𝔹      ⍝ gcd(a, b) = 1; for Gaussian integers: the gcd is a unit
+iscoprime ∶ ℤ[i] → ℤ[i] → 𝔹
+iscoprime ξ η ≔ (≐ (gcd ξ η) 1)
+totatives ∶ ℕ → 𝔏 ℕ      ⍝ the k in 1 … n with gcd(k, n) = 1, ascending (φ(n) of them; [] for n = 0)
+totatives ξ ≔ (filter (κ ↦ (≐ (gcd κ ξ) 1)) (upto 1 ξ))
+⍝ gᵏ mod ν for κ ≤ k ≤ φ with gcd(k, φ) = 1  (ξ = gᵏ)
+prl_nt ∶ 𝔇 → 𝔇 → 𝔇 → 𝔇 → 𝔇 → 𝔏 𝔇
+prl_nt ν φ γ κ ξ ≔ ((lt_nt φ κ) ⊥ ((ψ ↦ ((eqz_nt (gcdᶻ κ φ) (◀ 1)) (∷ ξ ψ) ψ)) (prl_nt ν φ γ (⊞ᶻ κ (◀ 1)) (mod_nt (⊠ᶻ ξ γ) ν))))
+primitiveroots ∶ ℕ → 𝔏 ℕ      ⍝ all primitive roots modulo n, ascending: gᵏ mod n for the k ≤ φ(n) prime to φ(n), g = primroot(n); [] when there is none (O(n) products)
+primitiveroots ξ ≔ ((ν γ ↦ ((∅ᶻ γ) ⊥ (⫶ up_nt (msort_nt lt_nt (prl_nt ν (↓ᶻ (totient ξ)) γ (◀ 1) γ))))) (↓ᶻ ξ) (↓ᶻ (primroot ξ)))
+ramanujansum ∶ ℕ → ℤ → ℤ      ⍝ Ramanujan's sum c_q(n) = Σ μ(q/d)·d over the divisors d of gcd(q, n): the sum of the n-th powers of the primitive q-th roots of unity (c₀(n) = 0)
+ramanujansum κ ξ ≔ ((≐ κ 0) 0 (sumof (⫶ (δ ↦ (⊠ (mobius (÷ κ δ)) δ)) (divisors (gcd κ ξ)))))
+⍝ the product κ·(κ − 1)·…·2·φ modulo ν
+wil_nt ∶ 𝔇 → 𝔇 → 𝔇 → 𝔇
+wil_nt ν κ φ ≔ ((lt_nt κ (◀ 1100)) φ (wil_nt ν (⊟ᶻ κ (◀ 1)) (mod_nt (⊠ᶻ φ κ) ν)))
+wilson ∶ ℤ → 𝔹      ⍝ Wilson's theorem as a primality test: n ≥ 2 and (n − 1)! ≡ −1 (mod n), true exactly for the primes (O(n) modular products: a demonstration, not a fast test)
+wilson ξ ≔ ((ν ↦ (∧ (lt_nt (◀ 1) ν) (eqz_nt (wil_nt ν (⊟ᶻ ν (◀ 1)) (◀ 1)) (⊟ᶻ ν (◀ 1))))) (↓ᶻ ξ))
+⍝ ---- more Gaussian integers: the Gaussian primes of a given norm, the next Gaussian prime, perfect powers in ℤ[i]
+⍝ the Gaussian primes of norm μ (normalised), by imaginary part: 1 + i for 2; π, π̄ for a prime ≡ 1 (mod 4); q for μ = q², q ≡ 3 (mod 4)
+gpm_nt ∶ 𝔇 → 𝔏 𝔇
+gpm_nt μ ≔ ((eqz_nt μ (◀ 1100)) (∷ (◀ 1110) ⊥) ((ispr_nt μ) ((m3_nt μ) ⊥ ((ϑ ↦ ((ϖ ↦ ((lt_nt (ℑᶻ ϑ) (ℑᶻ ϖ)) (∷ ϑ (∷ ϖ ⊥)) (∷ ϖ (∷ ϑ ⊥)))) (⌜ᶻ (∗ᶻ ϑ)))) (gpi_nt μ))) ((ρ ↦ ((∧ (eqz_nt (⊠ᶻ ρ ρ) μ) (gp3_nt ρ)) (∷ ρ ⊥) ⊥)) (√ᶻ μ))))
+⍝ the first Gaussian prime of norm ≥ μ, after imaginary part ι when ς (at the norm μ itself)
+ngp_nt ∶ 𝔇 → 𝔇 → 𝔹 → 𝔇
+ngp_nt μ ι ς ≔ ((ψ ↦ ((∅ ψ) (ngp_nt (⊞ᶻ μ (◀ 1)) ι ⊥) (hd ψ))) (filter (ζ ↦ (∨ (¬ ς) (lt_nt ι (ℑᶻ ζ)))) (gpm_nt μ)))
+nextgaussprime ∶ ℤ[i] → ℤ[i]      ⍝ the next Gaussian prime after z in the order of gaussprimes: the normalised (Re > 0, Im ≥ 0) π with (N(π), Im π) > (N(z), Im z) least
+nextgaussprime ξ ≔ ((ζ ↦ (up_nt (ngp_nt (nz_nt ζ) (ℑᶻ ζ) ⊤))) (↓ᶻ ξ))
+isgausspower ∶ ℤ[i] → 𝔹      ⍝ z = wᵏ for a Gaussian integer w and some k ≥ 2 (true for 0 and the units): with z = u·Π πᵉ, g = gcd of the e has an odd prime factor, or g is even and u = ±1
+isgausspower ξ ≔ ((ζ ↦ ((∅ᶻ ζ) ⊤ ((ψ ↦ ((γ ↦ ((∅ᶻ γ) ⊤ ((θ ↦ ((∃ₗ (φ ↦ (¬ (eqz_nt (◀ φ) (◀ 1100)))) θ) ⊤ (∧ (¬ (∅ θ)) (realᶻ (◀ ψ))))) (fct_nt γ)))) (foldl (η φ ↦ (gcdᶻ η (▶ φ))) ⊥ (▶ ψ)))) (gfa_nt ζ)))) (↓ᶻ ξ))

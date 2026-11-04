@@ -1,0 +1,13 @@
+PASS  round trip: 16 values × 3 notations — the printed term reads back to the same canonical form 
+PASS  one value in the three notations:  hum 1/10 + 7/10*i,  spec (÷ 1111010 111001100),  bin (.111110. 1111010 111001100) {'bin': '(.111110. 1111010 111001100)', 'spec': '(÷ 1111010 111001100)', 'hum': '1/10 + 7/10*i'} 
+PASS  bin output uses only the binary alphabet  1 0 . space ( ) (.101000. (.111110. 1 1100) (.101000. 10001 (.101000. (.111110. 101011 1101) .101010.))) 
+PASS  a stream prints its element n, with an approximation computed in the language:  741455/524288   -- element 20 of the stream, ≈ 1.414213180542 
+PASS  main ∶ String: the text is the output (the program formats itself) 'Hello, 42!\n' 
+PASS  main ∶ List(String): one line per element 'a\nbc\n' 
+PASS  main ∶ Stream(String): an infinite stream of lines, cut at --n '1\n2\n4\n8\n16\n' 
+PASS  default output notation = the notation main is written in (hum → hum, spec → spec, bin → bin) ('3/2 - 1/2*i\n', '(÷ 111010110 1100)\n', '(.111110. 111010110 1100)\n') 
+PASS  @out in the program overrides the default, --out on the command line overrides @out ('(÷ 111010110 1100)\n', '(.111110. 111010110 1100)\n') 
+PASS  a function has no normal form: running it is an error, not a guess error: a value of class ℚ[i] → ℚ[i] has no normal form to print (it is a function) 
+PASS  a program without main says so error: this program has no main:  define  main ∶ <class>  (spec),  main in <Class> := …  (hum) 
+
+11/11 passed  (75.6s)

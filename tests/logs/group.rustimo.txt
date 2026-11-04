@@ -1,0 +1,243 @@
+core: Rustimo
+PASS  every statement of the group test program passes the class checker 
+PASS  symgroup(3), symgroup(4): all permutations, sorted 
+PASS  symgroup(4) 
+PASS  altgroup(4): the 12 even permutations 
+PASS  dihedralgroup(4): the 8 symmetries of the square 
+PASS  quaterniongroup: Q₈ from the Cayley–Dickson units 1, −1, i, −i, j, −j, k, −k (regular representation) 
+PASS  kleingroup 
+PASS  cyclicgroup(6) 
+PASS  semidirect(4, 4, 3) = C₄ ⋊ C₄ on 16 points 
+PASS  directproduct(C₂, Q₈) on 2 + 8 points 
+PASS  pid(4) 
+PASS  pid(0) = [] 
+PASS  pcompose: (p ∘ q)(i) = p(q(i)) 
+PASS  pcompose of different lengths pads with fixed points 
+PASS  pinverse 
+PASS  pinverse([]) = [] 
+PASS  papply 
+PASS  papply beyond the list: a fixed point 
+PASS  ppow with a negative exponent 
+PASS  ppow(p, 0) is the identity 
+PASS  ppow(p, 7) for p of order 6 
+PASS  porder: lcm of the cycle lengths 
+PASS  porder([]) = 1 
+PASS  pcycles: cycles ≥ 2 from their least point, sorted 
+PASS  pcycles(identity) = [] 
+PASS  fromcycles(6, [[4, 1, 3], [0, 5]]) 
+PASS  fromcycles: the degree grows to the largest point 
+PASS  fromcycles with overlapping cycles: c₁ ∘ c₂ 
+PASS  psign of a transposition 
+PASS  psign of a 3-cycle 
+PASS  psign([]) = 1 
+PASS  iseven of a 4-cycle 
+PASS  iseven of (0 1 2)(3 4)(5 6) 
+PASS  cycletype: all cycle lengths, decreasing 
+PASS  pconj(p, q) = q p q⁻¹ 
+PASS  isperm([1, 1, 0]) is false 
+PASS  isperm([]) is true 
+PASS  isperm([2, 0, 1]) 
+PASS  isperm([0, 3]) is false 
+PASS  generate: the closure of two generators, sorted 
+PASS  generate([]) is the trivial group [[]] 
+PASS  generate pads generators of different lengths 
+PASS  symgroup(0) = [[]] 
+PASS  symgroup(1) = [[0]] 
+PASS  altgroup(2) is trivial 
+PASS  cyclicgroup(5) 
+PASS  cyclicgroup(0) = [[]] 
+PASS  dihedralgroup(5): order 10 on 5 points 
+PASS  dihedralgroup(1) = C₂ on 2 points 
+PASS  dihedralgroup(2) = V₄ 
+PASS  dihedralgroup(0) = [[]] 
+PASS  dihedralgroup(3) = S₃ 
+PASS  altgroup(5): 60 elements 
+PASS  regular: ℤ/4 listed as 3, 1, 0, 2 
+PASS  regular: a non-associative operation gives [] 
+PASS  regular: a product outside the list gives [] 
+PASS  regular on ℤ[i]: the units {1, i, −1, −i} under · 
+PASS  regular on the Cayley–Dickson tower: 1, −1, j, −j, k, −k, i, −i under ⊠𝔻 
+PASS  regular on matrices: rotations by quarter turns under mmul 
+PASS  regular on permutations under pcompose 
+PASS  regular: {1, 1/2, 2, −1} is not closed under · 
+PASS  regular([]) = [] 
+PASS  grouporder(S₄) = 24 
+PASS  grouporder counts distinct elements 
+PASS  grouporder([]) = 0 
+PASS  isgroup (i1) 
+PASS  isgroup (i2) 
+PASS  isgroup (i3) 
+PASS  isgroup (i4) 
+PASS  isgroup (i5) 
+PASS  isgroup (i6) 
+PASS  isgroup (i7) 
+PASS  isgroup (i8) 
+PASS  issubgroup (u1) 
+PASS  issubgroup (u2) 
+PASS  issubgroup (u3) 
+PASS  issubgroup (u4) 
+PASS  issubgroup (u5) 
+PASS  issubgroup (u6) 
+PASS  issubgroup (u7) 
+PASS  issubgroup (u8) 
+PASS  isnormal (n1) 
+PASS  isnormal (n2) 
+PASS  isnormal (n3) 
+PASS  isnormal (n4) 
+PASS  isnormal (n5) 
+PASS  isnormal (n6) 
+PASS  leftcosets of ⟨(0 1)⟩ in S₃ 
+PASS  rightcosets of ⟨(0 1)⟩ in S₃ (different from the left ones) 
+PASS  leftcosets of V₄ in S₄: 6 cosets 
+PASS  leftcosets of a non-subgroup: [] 
+PASS  rightcosets of S₃ (fixing 0) in S₄ 
+PASS  index(V₄, S₄) = 6 
+PASS  index(A₄, S₄) = 2 
+PASS  index of a non-subgroup is 0 
+PASS  index of the trivial subgroup = |Q₈|, padded degrees 
+PASS  conjclasses(S₄): 5 classes 
+PASS  conjclasses(D₄) 
+PASS  conjclasses(Q₈) 
+PASS  conjclasses([]) = [] 
+PASS  center(D₄) 
+PASS  center(S₃) is trivial 
+PASS  center(Q₈) = {±1} 
+PASS  center(V₄) = V₄ 
+PASS  centralizer of (0 1) in S₄ 
+PASS  centralizer of a shorter permutation (padded) 
+PASS  centralizer of a longer permutation (G padded) 
+PASS  normalizer of ⟨(0 1)⟩ in S₄ 
+PASS  normalizer of V₄ in S₄ is S₄ 
+PASS  normalizer of ⟨(0 1 2)⟩ in S₄ 
+PASS  commutatorsubgroup(S₄) = A₄ 
+PASS  commutatorsubgroup(D₄) 
+PASS  commutatorsubgroup(Q₈) = {±1} 
+PASS  commutatorsubgroup(A₄) = V₄ 
+PASS  commutatorsubgroup(V₄) is trivial 
+PASS  commutatorsubgroup of a non-group: [] 
+PASS  issolvable(S₄) 
+PASS  issolvable(A₅) is false (A₅ is perfect) 
+PASS  issolvable of the trivial group 
+PASS  issolvable of a non-group: false 
+PASS  issolvable(C₇ ⋊ C₃) 
+PASS  isabelian(V₄) 
+PASS  isabelian(S₃) is false 
+PASS  isabelian(C₆) 
+PASS  isabelian of a non-group: false 
+PASS  iscyclic(C₆) 
+PASS  iscyclic(C₂ × C₃) 
+PASS  iscyclic(V₄) is false 
+PASS  iscyclic of the trivial group 
+PASS  iscyclic(Q₈) is false 
+PASS  elementorders(S₄) 
+PASS  elementorders(Q₈) 
+PASS  elementorders of the trivial group 
+PASS  elementorders of a non-group: [] 
+PASS  elementorders(C₂ × Q₈) 
+PASS  exponent(S₄) = 12 
+PASS  exponent(Q₈) = 4 
+PASS  exponent of the trivial group 
+PASS  exponent of a non-group: 0 
+PASS  exponent(C₂ × C₃) = 6 
+PASS  orbit of a point under a group 
+PASS  orbit of a fixed point 
+PASS  orbit under no generators 
+PASS  orbit of a point beyond the degree 
+PASS  orbit under generators (not a group) 
+PASS  orbits under generators 
+PASS  orbits([]) = [] 
+PASS  orbits of the identity: singletons 
+PASS  orbits of a single permutation (its cycles) 
+PASS  stabilizer of 0 in S₄ (≅ S₃) 
+PASS  stabilizer of a point beyond the degree: the whole group 
+PASS  stabilizer of a vertex in D₄ 
+PASS  burnside = number of orbits 
+PASS  burnside(D₄) = 1 
+PASS  burnside of the trivial group on 0 points 
+PASS  burnside of the identity on 3 points 
+PASS  burnside of a non-group: 0 
+PASS  burnside(C₆ × V₄) on 10 points 
+PASS  cayleytable(S₃) 
+PASS  cayleytable(Q₈) 
+PASS  cayleytable of a non-group (no identity): [] 
+PASS  cayleytable of a non-permutation: [] 
+PASS  cayleytable of the trivial group 
+PASS  directproduct(C₂, C₃) on 5 points 
+PASS  directproduct with the trivial group on 0 points 
+PASS  directproduct(S₃, trivial) 
+PASS  directproduct with [] is [] 
+PASS  sylow(S₄, 2): a subgroup of order 8 [[0, 1, 2, 3], [0, 1, 3, 2], [1, 0, 2, 3], [1, 0, 3, 2], [2, 3, 0, 1], [2, 3, 1, 0], [3, 2, 0, 1], [3, 2, 1, 0]] 
+PASS  sylow(S₄, 3): a subgroup of order 3 [[0, 1, 2, 3], [0, 2, 3, 1], [0, 3, 1, 2]] 
+PASS  sylow(S₄, 5): 5 ∤ 24, the trivial subgroup 
+PASS  sylow(S₄, 4): 4 is not a prime, trivial 
+PASS  sylow(S₄, 1): trivial 
+PASS  sylow(C₇ ⋊ C₃, 3): order 3 
+PASS  sylow(Q₈, 2) = Q₈ 
+PASS  sylow with a huge prime: trivial 
+PASS  sylow of a non-group: [] 
+PASS  sylow(S₃ × C₄, 2): order 8 
+PASS  subgroups(S₄: 30 subgroups) 
+PASS  subgroups(Q₈: 6 subgroups) 
+PASS  subgroups(C₂³: 16 subgroups) 
+PASS  subgroups(S₃: 6 subgroups) 
+PASS  subgroups(C₆: 4 subgroups) 
+PASS  subgroups of the trivial group 
+PASS  subgroups of a non-group: [] 
+PASS  sameinvariants(C₄ ⋊ C₄, C₂ × Q₈): the invariants agree 
+PASS  sameinvariants(D₄, Q₈) is false (element orders differ) 
+PASS  sameinvariants(S₃, C₆) is false 
+PASS  sameinvariants(C₆, C₂ × C₃) 
+PASS  sameinvariants with a non-group: false 
+PASS  C₄ ⋊ C₄ and C₂ × Q₈ really differ: their abelianizations are C₂ × C₄ and C₂³ (python) 
+PASS  isomorphic(C₄ ⋊ C₄, C₂ × Q₈) is false although the invariants agree 
+PASS  isomorphic(C₂ × Q₈, C₄ ⋊ C₄) is false 
+PASS  isomorphic(D₄, C₄ ⋊ C₂) 
+PASS  isomorphic(Q₈, D₄) is false 
+PASS  isomorphic(C₆, C₂ × C₃) 
+PASS  isomorphic(D₆, S₃ × C₂) (search in python) 
+PASS  isomorphic(S₃, its regular representation) 
+PASS  isomorphic(V₄, C₄) is false 
+PASS  isomorphic of trivial groups of different degrees 
+PASS  isomorphic(A₄, its regular representation on 12 points) 
+PASS  isomorphic(Q₈, Q₈ from another order of the units) 
+PASS  isomorphic(D₆, C₃ ⋊ C₄) is false (the dicyclic group) 
+PASS  isomorphic with a non-group: false 
+PASS  abelianinvariants(S₄) 
+PASS  abelianinvariants(Q₈) 
+PASS  abelianinvariants(A₄) 
+PASS  abelianinvariants(C₄ × C₆) 
+PASS  abelianinvariants(V₄) 
+PASS  abelianinvariants(C₁₂) 
+PASS  abelianinvariants(A₅ (perfect)) 
+PASS  abelianinvariants(C₄ ⋊ C₄) 
+PASS  abelianinvariants(C₂ × Q₈) 
+PASS  abelianinvariants(D₄) 
+PASS  abelianinvariants(C₂ × C₄ × C₆) 
+PASS  abelianinvariants of the trivial group: [] 
+PASS  abelianinvariants of a non-group: [] 
+PASS  colorings(S₄, 3) = 15 
+PASS  colorings(C₄, 2) 
+PASS  colorings(D₄, 3) 
+PASS  colorings of a non-group: 0 
+PASS  colorings with 0 colours 
+PASS  colorings(V₄, 5) 
+PASS  necklaces(6, 2) = 14 
+PASS  necklaces(0, 5) = 1 (the empty necklace) 
+PASS  necklaces(1, 3) = 3 
+PASS  necklaces(4, 0) = 0 
+PASS  necklaces(5, 3) 
+PASS  bracelets(6, 2) = 13 
+PASS  bracelets(2, 3) = 6 
+PASS  bracelets(0, 2) = 1 
+PASS  bracelets(5, 3) 
+PASS  bracelets(1, 4) = 4 
+PASS  semidirect(3, 2, 2) 
+PASS  semidirect(5, 4, 2) 
+PASS  semidirect(4, 3, 3) 
+PASS  semidirect(6, 2, 2) 
+PASS  semidirect(0, 2, 1) 
+PASS  semidirect(1, 3, 0) 
+PASS  semidirect(3, 2, 1) 
+PASS  semidirect(3, 2, 2) ≅ S₃ (python brute force) 
+
+240/240 passed  (2.8s)

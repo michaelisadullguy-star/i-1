@@ -1,0 +1,2 @@
+@out spec
+main in List(\ZZ) := [1, -2, 3]

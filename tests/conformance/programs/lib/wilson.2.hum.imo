@@ -1,0 +1,1 @@
+main in Bool := wilson(4)

@@ -1,0 +1,1 @@
+main in Bool := isgoodprime([-7, 4, 9], 7)

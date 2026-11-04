@@ -1,0 +1,15 @@
+-- predicates on R[i]: relations between elements of R[i] are decided from their definitions, by logic, not by evaluation
+--   python3 pymo/i1.py examples/prove.hum.imo
+pi in \RR := sum(2, k in \QQ |-> k / (2 * k + 1))
+e in \RR := sum(1, k in \QQ |-> 1 / k)
+main in List(String) := [
+  "pi + e - pi == e                    " ++ showb(pi + e - pi == e),
+  "exp(1) == e                         " ++ showb(exp(1) == e),
+  "4 * atan(1) == pi                   " ++ showb(4 * atan(1) == pi),
+  "e * e == exp(2)                     " ++ showb(e * e == exp(2)),
+  "sin(1/2)^2 + cos(1/2)^2 == 1        " ++ showb(sin(1/2) * sin(1/2) + cos(1/2) * cos(1/2) == 1),
+  "exp(i/2) == cos(1/2) + i*sin(1/2)   " ++ showb(exp(i / 2) == cos(1/2) + i * sin(1/2)),
+  "sqrt(3) * sqrt(2) == sqrt(6)        " ++ showb(sqrt(3) * sqrt(2) == sqrt(6)),
+  "pi == e                             " ++ showb(pi == e),
+  "pi lt 22/7                          " ++ showb(pi lt 22 / 7),
+  "true + false, 1 + true              " ++ showb(true + false) ++ ", " ++ str(1 + true)]

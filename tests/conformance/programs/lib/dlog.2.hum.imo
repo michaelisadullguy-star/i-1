@@ -1,0 +1,1 @@
+main in \ZZ := dlog(4, -2, 2)

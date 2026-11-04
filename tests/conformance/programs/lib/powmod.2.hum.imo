@@ -1,0 +1,1 @@
+main in \NN := powmod(5, -2, 2)

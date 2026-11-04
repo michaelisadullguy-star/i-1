@@ -1,0 +1,1 @@
+main in Bool := digit(2 + 3*i, 7)

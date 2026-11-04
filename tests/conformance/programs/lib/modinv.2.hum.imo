@@ -1,0 +1,1 @@
+main in \NN := modinv(5, 3)

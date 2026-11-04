@@ -1,0 +1,1 @@
+main in Stream(\QQ) := lambertw(3/4)

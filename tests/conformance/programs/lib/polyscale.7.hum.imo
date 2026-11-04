@@ -1,0 +1,1 @@
+main in List(\Q) := polyscale(1/2 + 3/4*i, [3/5, -2*i, 1 + i])

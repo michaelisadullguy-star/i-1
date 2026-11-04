@@ -1,0 +1,1 @@
+main in Tree(\NN) := node(leaf(1), node(leaf(2), leaf(3)))

@@ -1,0 +1,200 @@
+⍝ lib/linalg.imo — spec notation — trusted prelude, part 9: vectors and matrices over ℚ[i], exactly
+⍝ a vector is a list 𝔏 ℚ[i]; a matrix is a list of rows 𝔏 (𝔏 ℚ[i]).  Elimination is exact (no rounding: every pivot is an exact ℚ[i] value).
+vadd ∶ 𝔏 ℚ[i] → 𝔏 ℚ[i] → 𝔏 ℚ[i]
+vadd ≔ (⫴ (a b ↦ (⊜ (⊞ a b))))
+vscale ∶ ℚ[i] → 𝔏 ℚ[i] → 𝔏 ℚ[i]
+vscale ξ ≔ (⫶ (η ↦ (⊜ (⊠ ξ η))))
+dot ∶ 𝔏 ℚ[i] → 𝔏 ℚ[i] → ℚ[i]
+dot ξ η ≔ (⊜ (sumof (⫴ ⊠ ξ η)))
+madd ∶ 𝔏 (𝔏 ℚ[i]) → 𝔏 (𝔏 ℚ[i]) → 𝔏 (𝔏 ℚ[i])
+madd ≔ (⫴ (⫴ (a b ↦ (⊜ (⊞ a b)))))
+transpose ∶ 𝔏 (𝔏 α) → 𝔏 (𝔏 α)
+transpose ξ ≔ ((∨ (∅ ξ) (∅ (hd ξ))) ⊥ (∷ (⫶ hd ξ) (transpose (⫶ ⌄ ξ))))
+mmul ∶ 𝔏 (𝔏 ℚ[i]) → 𝔏 (𝔏 ℚ[i]) → 𝔏 (𝔏 ℚ[i])
+mmul ξ η ≔ ((τ ↦ (⫶ (ρ ↦ (⫶ (dot ρ) τ)) ξ)) (transpose η))
+mvec ∶ 𝔏 (𝔏 ℚ[i]) → 𝔏 ℚ[i] → 𝔏 ℚ[i]
+mvec ξ η ≔ (⫶ (ρ ↦ (dot ρ η)) ξ)
+⍝ the unit vectors of length n, and the identity matrix
+unitv ∶ ℕ → ℕ → 𝔏 ℚ[i]
+unitv ξ η ≔ (⫶ (θ ↦ ((≐ θ η) 1 0)) (⍳ ξ))
+idm ∶ ℕ → 𝔏 (𝔏 ℚ[i])
+idm ξ ≔ (⫶ (unitv ξ) (⍳ ξ))
+⍝ ---- Gaussian elimination.  pick: the first row with a non-zero head, the other rows (order kept), and the parity of its position
+pick′ ∶ 𝔏 (𝔏 ℚ[i]) → 𝔓 (𝔏 ℚ[i]) (𝔓 (𝔏 (𝔏 ℚ[i])) 𝔹)
+pick′ ξ ≔ (ξ (ρ ι ↦ ((≐ (hd ρ) 0) ((θ ↦ (⊗ (◀ θ) (⊗ (∷ ρ (◀ (▶ θ))) (¬ (▶ (▶ θ)))))) (pick′ ι)) (⊗ ρ (⊗ ι ⊥)))) (⊗ ⊥ (⊗ ⊥ ⊥)))
+⍝ eliminate the first column of every row with the pivot row p:  r ↦ tail(r) − (r₀/p₀)·tail(p)
+elim′ ∶ 𝔏 ℚ[i] → 𝔏 (𝔏 ℚ[i]) → 𝔏 (𝔏 ℚ[i])
+elim′ ξ η ≔ (⫶ (ρ ↦ ((φ ↦ (⫴ (θ ι ↦ (⊜ (⊟ θ (⊠ φ ι)))) (⌄ ρ) (⌄ ξ))) (⊜ (÷ (hd ρ) (hd ξ))))) η)
+det ∶ 𝔏 (𝔏 ℚ[i]) → ℚ[i]
+det ξ ≔ ((∅ ξ) 1 ((∃ₗ (ρ ↦ (¬ (≐ (hd ρ) 0))) ξ) ((θ ↦ (⊠ ((▶ (▶ θ)) (⊖ (hd (◀ θ))) (hd (◀ θ))) (det (elim′ (◀ θ) (◀ (▶ θ)))))) (pick′ ξ)) 0))
+⍝ triangular form of an augmented matrix [A | b] and back′ substitution; solve A b is the solution of A x = b when A is invertible
+fwd′ ∶ 𝔏 (𝔏 ℚ[i]) → 𝔏 (𝔏 ℚ[i])
+fwd′ ξ ≔ ((∅ ξ) ⊥ ((θ ↦ (∷ (◀ θ) (fwd′ (elim′ (◀ θ) (◀ (▶ θ)))))) (pick′ ξ)))
+back′ ∶ 𝔏 (𝔏 ℚ[i]) → 𝔏 ℚ[i]
+back′ ξ ≔ (ξ (ρ ι ↦ ((χ ↦ (∷ (⊜ (÷ (⊟ (last ρ) (dot (⌄ ρ) χ)) (hd ρ))) χ)) (back′ ι))) ⊥)
+solve ∶ 𝔏 (𝔏 ℚ[i]) → 𝔏 ℚ[i] → 𝔏 ℚ[i]
+solve ξ η ≔ (back′ (fwd′ (⫴ (ρ β′ ↦ (⧺ ρ (∷ β′ ⊥))) ξ η)))
+inverse ∶ 𝔏 (𝔏 ℚ[i]) → 𝔏 (𝔏 ℚ[i])
+inverse ξ ≔ (transpose (⫶ (solve ξ) (idm (ℓ ξ))))
+⍝ ============================================================================================================
+⍝ more linear algebra over ℚ[i] — exact.  Vectors are lists, matrices lists of rows;  helper names end in _la.
+⍝ ---- vectors
+vsub ∶ 𝔏 ℚ[i] → 𝔏 ℚ[i] → 𝔏 ℚ[i]   ⍝ difference of two vectors
+vsub ≔ (⫴ (a b ↦ (⊜ (⊟ a b))))
+vneg ∶ 𝔏 ℚ[i] → 𝔏 ℚ[i]   ⍝ negated vector
+vneg ≔ (⫶ ⊖)
+outer ∶ 𝔏 ℚ[i] → 𝔏 ℚ[i] → 𝔏 (𝔏 ℚ[i])   ⍝ outer product u vᵀ (rows indexed by u)
+outer ξ η ≔ (⫶ (a ↦ (⫶ (b ↦ (⊠ a b)) η)) ξ)
+hdot ∶ 𝔏 ℚ[i] → 𝔏 ℚ[i] → ℚ[i]   ⍝ Hermitian inner product ⟨u, v⟩ = Σ conj(uₖ)·vₖ
+hdot ξ η ≔ (sumof (⫴ (a b ↦ (⊠ (∗ a) b)) ξ η))
+vnorm2 ∶ 𝔏 ℚ[i] → ℚ   ⍝ squared Hermitian norm Σ |vₖ|² (exact)
+vnorm2 ξ ≔ (ℜ (hdot ξ ξ))
+vnorm ∶ 𝔏 ℚ[i] → ℝ   ⍝ Hermitian norm √(Σ |vₖ|²) as a lazy real
+vnorm ξ ≔ (√ (vnorm2 ξ))
+proj ∶ 𝔏 ℚ[i] → 𝔏 ℚ[i] → 𝔏 ℚ[i]   ⍝ proj(u, v): the orthogonal projection of u onto v (0 when v is 0)
+proj ξ η ≔ (vscale (÷ (hdot η ξ) (hdot η η)) η)
+cross ∶ 𝔏 ℚ[i] → 𝔏 ℚ[i] → 𝔏 ℚ[i]   ⍝ cross product of two vectors of length 3
+cross ξ η ≔ (∷ (⊟ (⊠ (nth ξ 1) (nth η 1100)) (⊠ (nth ξ 1100) (nth η 1))) (∷ (⊟ (⊠ (nth ξ 1100) (nth η 0)) (⊠ (nth ξ 0) (nth η 1100))) (∷ (⊟ (⊠ (nth ξ 0) (nth η 1)) (⊠ (nth ξ 1) (nth η 0))) ⊥)))
+⍝ ---- matrices: arithmetic
+msub ∶ 𝔏 (𝔏 ℚ[i]) → 𝔏 (𝔏 ℚ[i]) → 𝔏 (𝔏 ℚ[i])   ⍝ difference of two matrices
+msub ≔ (⫴ (⫴ (a b ↦ (⊜ (⊟ a b)))))
+mneg ∶ 𝔏 (𝔏 ℚ[i]) → 𝔏 (𝔏 ℚ[i])   ⍝ negated matrix
+mneg ≔ (⫶ (⫶ ⊖))
+mscale ∶ ℚ[i] → 𝔏 (𝔏 ℚ[i]) → 𝔏 (𝔏 ℚ[i])   ⍝ scalar times matrix
+mscale ξ η ≔ (⫶ (vscale ξ) η)
+hadamard ∶ 𝔏 (𝔏 ℚ[i]) → 𝔏 (𝔏 ℚ[i]) → 𝔏 (𝔏 ℚ[i])   ⍝ entrywise (Hadamard) product
+hadamard ≔ (⫴ (⫴ ⊠))
+htranspose ∶ 𝔏 (𝔏 ℚ[i]) → 𝔏 (𝔏 ℚ[i])   ⍝ conjugate transpose
+htranspose ξ ≔ (transpose (⫶ (⫶ ∗) ξ))
+kron ∶ 𝔏 (𝔏 ℚ[i]) → 𝔏 (𝔏 ℚ[i]) → 𝔏 (𝔏 ℚ[i])   ⍝ Kronecker product
+kron ξ η ≔ (concat (⫶ (ra ↦ (⫶ (rb ↦ (concat (⫶ (x ↦ (⫶ (y ↦ (⊠ x y)) rb)) ra))) η)) ξ))
+blockdiag ∶ 𝔏 (𝔏 ℚ[i]) → 𝔏 (𝔏 ℚ[i]) → 𝔏 (𝔏 ℚ[i])   ⍝ block diagonal matrix diag(A, B)
+blockdiag ξ η ≔ (⧺ (⫶ (r ↦ (⧺ r (replicate (ℓ (hd η)) 0))) ξ) (⫶ (r ↦ (⧺ (replicate (ℓ (hd ξ)) 0) r)) η))
+zeros ∶ ℕ → ℕ → 𝔏 (𝔏 ℚ[i])   ⍝ the m × n zero matrix
+zeros ξ η ≔ (replicate ξ (replicate η 0))
+trace ∶ 𝔏 (𝔏 ℚ[i]) → ℚ[i]   ⍝ trace (sum of the diagonal)
+trace ξ ≔ (sumof (mdiag ξ))
+mdiag ∶ 𝔏 (𝔏 ℚ[i]) → 𝔏 ℚ[i]   ⍝ the diagonal of a matrix as a vector
+mdiag ξ ≔ (⫴ (r k ↦ (nth r k)) ξ (⍳ (ℓ ξ)))
+diagm ∶ 𝔏 ℚ[i] → 𝔏 (𝔏 ℚ[i])   ⍝ the diagonal matrix with the given diagonal
+diagm ξ ≔ (⫴ (a k ↦ (⫶ (j ↦ ((≐ j k) a 0)) (⍳ (ℓ ξ)))) ξ (⍳ (ℓ ξ)))
+mpow ∶ 𝔏 (𝔏 ℚ[i]) → ℤ → 𝔏 (𝔏 ℚ[i])   ⍝ A^n for a square matrix (n < 0: a power of the inverse; singular A gives garbage for n < 0)
+mpow ξ η ≔ ((≺ η 0) (mpow_la (inverse ξ) (⊖ η)) (mpow_la ξ η))
+mpow_la ∶ 𝔏 (𝔏 ℚ[i]) → ℕ → 𝔏 (𝔏 ℚ[i])
+mpow_la ξ η ≔ ((≐ η 0) (idm (ℓ ξ)) ((h ↦ ((≐ (mod η 1100) 0) (mmul h h) (mmul ξ (mmul h h)))) (mpow_la ξ (div η 1100))))
+⍝ ---- predicates on matrices
+issymmetric ∶ 𝔏 (𝔏 ℚ[i]) → 𝔹   ⍝ A = Aᵀ
+issymmetric ξ ≔ (meq_la ξ (transpose ξ))
+ishermitian ∶ 𝔏 (𝔏 ℚ[i]) → 𝔹   ⍝ A = Aᴴ
+ishermitian ξ ≔ (meq_la ξ (htranspose ξ))
+isunitary ∶ 𝔏 (𝔏 ℚ[i]) → 𝔹   ⍝ Aᴴ A = I
+isunitary ξ ≔ (meq_la (mmul (htranspose ξ) ξ) (idm (ℓ ξ)))
+isdiagonal ∶ 𝔏 (𝔏 ℚ[i]) → 𝔹   ⍝ every off-diagonal entry is 0
+isdiagonal ξ ≔ (∀ₗ (b ↦ b) (⫴ (r k ↦ (∀ₗ (b ↦ b) (⫴ (a j ↦ ((≐ j k) ⊤ (≐ a 0))) r (⍳ (ℓ r))))) ξ (⍳ (ℓ ξ))))
+isupper ∶ 𝔏 (𝔏 ℚ[i]) → 𝔹   ⍝ every entry below the diagonal is 0
+isupper ξ ≔ (∀ₗ (b ↦ b) (⫴ (r k ↦ (∀ₗ (b ↦ b) (⫴ (a j ↦ ((≺ j k) (≐ a 0) ⊤)) r (⍳ (ℓ r))))) ξ (⍳ (ℓ ξ))))
+islower ∶ 𝔏 (𝔏 ℚ[i]) → 𝔹   ⍝ every entry above the diagonal is 0
+islower ξ ≔ (∀ₗ (b ↦ b) (⫴ (r k ↦ (∀ₗ (b ↦ b) (⫴ (a j ↦ ((≻ j k) (≐ a 0) ⊤)) r (⍳ (ℓ r))))) ξ (⍳ (ℓ ξ))))
+isinvertible ∶ 𝔏 (𝔏 ℚ[i]) → 𝔹   ⍝ det A ≠ 0
+isinvertible ξ ≔ (¬ (≐ (det ξ) 0))
+meq_la ∶ 𝔏 (𝔏 ℚ[i]) → 𝔏 (𝔏 ℚ[i]) → 𝔹
+meq_la ξ η ≔ (∧ (≐ (ℓ ξ) (ℓ η)) (∀ₗ (b ↦ b) (⫴ (r s ↦ (∧ (≐ (ℓ r) (ℓ s)) (∀ₗ (b ↦ b) (⫴ ≐ r s)))) ξ η)))
+⍝ ---- reduced row echelon form, rank, the four fundamental subspaces
+nzr_la ∶ 𝔏 ℚ[i] → 𝔹
+nzr_la ξ ≔ (∃ₗ (a ↦ (¬ (≐ a 0))) ξ)
+⍝ the position of the first non-zero entry of a row
+pvt_la ∶ 𝔏 ℚ[i] → ℕ
+pvt_la ξ ≔ (ξ (a r ↦ ((≐ a 0) (⊞ 1 (pvt_la r)) 0)) 0)
+⍝ eliminate from a row t the entries above the pivots of the echelon rows s
+red_la ∶ 𝔏 ℚ[i] → 𝔏 (𝔏 ℚ[i]) → 𝔏 ℚ[i]
+red_la ξ η ≔ (foldl (t s ↦ (vsub t (vscale (nth t (pvt_la s)) s))) ξ (filter nzr_la η))
+rref ∶ 𝔏 (𝔏 ℚ[i]) → 𝔏 (𝔏 ℚ[i])   ⍝ reduced row echelon form (pivots 1, zero rows last)
+rref ξ ≔ ((∨ (∅ ξ) (∅ (hd ξ))) ξ ((∃ₗ (r ↦ (¬ (≐ (hd r) 0))) ξ) (rrefp_la ξ) (⫴ ∷ (replicate (ℓ ξ) 0) (rref (⫶ ⌄ ξ)))))
+rrefp_la ∶ 𝔏 (𝔏 ℚ[i]) → 𝔏 (𝔏 ℚ[i])
+rrefp_la ξ ≔ ((p ↦ ((r ↦ ((os ↦ ((s ↦ (∷ (∷ 1 (red_la (⌄ r) s)) (⫶ (∷ 0) s))) (rref (⫶ ⌄ os)))) (⫶ (o ↦ (vsub o (vscale (hd o) r))) (rmv_la p ξ)))) (vscale (÷ 1 (hd (nth ξ p))) (nth ξ p)))) (fi_la ξ))
+⍝ index of the first row with a non-zero first entry;  the matrix without row p
+fi_la ∶ 𝔏 (𝔏 ℚ[i]) → ℕ
+fi_la ξ ≔ (ξ (r rest ↦ ((≐ (hd r) 0) (⊞ 1 (fi_la rest)) 0)) 0)
+rmv_la ∶ ℕ → 𝔏 α → 𝔏 α
+rmv_la ν ξ ≔ (⧺ (take ν ξ) (drop (⊞ ν 1) ξ))
+rank ∶ 𝔏 (𝔏 ℚ[i]) → ℕ   ⍝ rank (number of pivots)
+rank ξ ≔ (ℓ (filter nzr_la (rref ξ)))
+rowspace ∶ 𝔏 (𝔏 ℚ[i]) → 𝔏 (𝔏 ℚ[i])   ⍝ a basis of the row space (the non-zero rows of the reduced echelon form)
+rowspace ξ ≔ (filter nzr_la (rref ξ))
+colspace ∶ 𝔏 (𝔏 ℚ[i]) → 𝔏 (𝔏 ℚ[i])   ⍝ a basis of the column space (the pivot columns of A, as vectors)
+colspace ξ ≔ ((cols ↦ (⫶ (k ↦ (nth cols k)) (⫶ pvt_la (rowspace ξ)))) (transpose ξ))
+nullspace ∶ 𝔏 (𝔏 ℚ[i]) → 𝔏 (𝔏 ℚ[i])   ⍝ a basis of the kernel {x : A x = 0} (one vector per free column)
+nullspace ξ ≔ ((R ↦ ((n ↦ ((pv ↦ (⫶ (f ↦ (⫶ (j ↦ ((≐ j f) 1 ((elem j pv) (⊖ (nth (nth R (idx_la j pv)) f)) 0))) (⍳ n))) (filter (f ↦ (¬ (elem f pv))) (⍳ n)))) (⫶ pvt_la (filter nzr_la R)))) (ℓ (hd ξ)))) (rref ξ))
+idx_la ∶ ℕ → 𝔏 ℕ → ℕ
+idx_la ν ξ ≔ (ξ (a r ↦ ((≐ a ν) 0 (⊞ 1 (idx_la ν r)))) 0)
+⍝ ---- determinants: minors, cofactors, adjugate
+minor ∶ 𝔏 (𝔏 ℚ[i]) → ℕ → ℕ → ℚ[i]   ⍝ minor(A, i, j): the determinant of A without row i and column j (rows and columns count from 0)
+minor ξ η ζ ≔ (det (⫶ (r ↦ (rmv_la ζ r)) (rmv_la η ξ)))
+cofactor ∶ 𝔏 (𝔏 ℚ[i]) → ℕ → ℕ → ℚ[i]   ⍝ cofactor(A, i, j) = (−1)^(i+j)·minor(A, i, j)
+cofactor ξ η ζ ≔ (⊠ ((≐ (mod (⊞ η ζ) 1100) 0) 1 11101) (minor ξ η ζ))
+adjugate ∶ 𝔏 (𝔏 ℚ[i]) → 𝔏 (𝔏 ℚ[i])   ⍝ the adjugate (transpose of the cofactor matrix): A·adj(A) = det(A)·I
+adjugate ξ ≔ (transpose (⫶ (i ↦ (⫶ (j ↦ (cofactor ξ i j)) (⍳ (ℓ ξ)))) (⍳ (ℓ ξ))))
+⍝ ---- characteristic polynomial (Faddeev–LeVerrier), minimal polynomial, eigenvalues and eigenvectors
+cp_la ∶ 𝔏 (𝔏 ℚ[i]) → 𝔏 (𝔏 ℚ[i]) → ℕ → ℕ → 𝔏 ℚ[i]
+cp_la A M k n ≔ ((c ↦ (∷ c ((≺ k n) (cp_la A (madd (mmul A M) (mscale c (idm n))) (⊞ k 1) n) ⊥))) (⊖ (÷ (trace (mmul A M)) k)))
+charpoly ∶ 𝔏 (𝔏 ℚ[i]) → 𝔏 ℚ[i]   ⍝ the characteristic polynomial det(xI − A) as a coefficient list, lowest degree first (monic)
+charpoly ξ ≔ ((∅ ξ) (∷ 1 ⊥) (reverse (∷ 1 (cp_la ξ (idm (ℓ ξ)) 1 (ℓ ξ)))))
+⍝ the multiplicity of the root λ of the polynomial p
+mult_la ∶ 𝔏 ℚ[i] → ℚ[i] → ℕ
+mult_la ξ η ≔ ((q ↦ ((∅ (▶ q)) (⊞ 1 (mult_la (◀ q) η)) 0)) (polydivmod ξ (∷ (⊖ η) (∷ 1 ⊥))))
+eigenvals ∶ 𝔏 (𝔏 ℚ[i]) → 𝔏 (𝔓 ℚ[i] ℕ)   ⍝ the eigenvalues that lie in ℚ(i), each with its algebraic multiplicity: pairs (λ, m), sorted by (Re, Im)
+eigenvals ξ ≔ ((p ↦ (⫶ (l ↦ (⊗ l (mult_la p l))) (ratroots p))) (charpoly ξ))
+eigvalsR ∶ 𝔏 (𝔏 ℚ[i]) → 𝔏 ℝ[i]   ⍝ all eigenvalues, with multiplicity, as lazy complex numbers (element n within 2⁻ⁿ; numerical, from croots)
+eigvalsR ξ ≔ (croots (charpoly ξ))
+eigvecs ∶ 𝔏 (𝔏 ℚ[i]) → ℚ[i] → 𝔏 (𝔏 ℚ[i])   ⍝ eigvecs(A, λ): a basis of the eigenspace {x : A x = λ x}
+eigvecs ξ η ≔ (nullspace (msub ξ (mscale η (idm (ℓ ξ)))))
+mflat_la ∶ 𝔏 (𝔏 ℚ[i]) → 𝔏 ℚ[i]
+mflat_la ξ ≔ (concat ξ)
+⍝ least k with A^k a combination of I … A^(k−1): the coefficients c with A^k = Σ cᵢ Aⁱ
+mp_la ∶ 𝔏 (𝔏 ℚ[i]) → 𝔏 (𝔏 (𝔏 ℚ[i])) → 𝔏 (𝔏 ℚ[i]) → ℕ → 𝔏 ℚ[i]
+mp_la A ps P k ≔ ((s ↦ ((◀ s) (⧺ (⫶ ⊖ (◀ (▶ s))) (∷ 1 ⊥)) (mp_la A (⧺ ps (∷ P ⊥)) (mmul A P) (⊞ k 1)))) (linsolve (transpose (⫶ mflat_la ps)) (mflat_la P)))
+minpoly ∶ 𝔏 (𝔏 ℚ[i]) → 𝔏 ℚ[i]   ⍝ the minimal polynomial (monic, lowest degree first): the least-degree monic p with p(A) = 0 (Krylov on the powers of A)
+minpoly ξ ≔ ((∅ ξ) (∷ 1 ⊥) (mp_la ξ (∷ (idm (ℓ ξ)) ⊥) ξ 1))
+⍝ ---- systems of equations
+linsolve ∶ 𝔏 (𝔏 ℚ[i]) → 𝔏 ℚ[i] → 𝔓 𝔹 (𝔓 (𝔏 ℚ[i]) (𝔏 (𝔏 ℚ[i])))   ⍝ linsolve(A, b): all solutions of A x = b as (consistent?, (a particular solution, a basis of the kernel)); the solutions are x₀ + Σ cₖ nₖ
+linsolve ξ η ≔ ((R ↦ ((n ↦ ((pv ↦ (⊗ (¬ (∃ₗ (r ↦ (∧ (nzr_la r) (≐ (pvt_la r) n))) R)) (⊗ (⫶ (j ↦ ((elem j pv) (nth (nth R (idx_la j pv)) n) 0)) (⍳ n)) (nullspace ξ)))) (⫶ pvt_la (filter (r ↦ (∧ (nzr_la r) (≺ (pvt_la r) n))) R)))) (ℓ (hd ξ)))) (rref (⫴ (r b ↦ (⧺ r (∷ b ⊥))) ξ η)))
+⍝ ---- LU decomposition with row exchanges (square matrices):  lu(A) = (P, (L, U)) with P·A = L·U, P a permutation matrix, L unit lower triangular, U upper triangular
+lu ∶ 𝔏 (𝔏 ℚ[i]) → 𝔓 (𝔏 (𝔏 ℚ[i])) (𝔓 (𝔏 (𝔏 ℚ[i])) (𝔏 (𝔏 ℚ[i])))
+lu ξ ≔ ((n ↦ ((≐ n 0) (⊗ ⊥ (⊗ ⊥ ⊥)) ((≐ n 1) (⊗ (∷ (∷ 1 ⊥) ⊥) (⊗ (∷ (∷ 1 ⊥) ⊥) ξ)) ((r ↦ ((≐ r n) (lun_la ξ) (lup_la ξ r))) (fi_la ξ))))) (ℓ ξ))
+⍝ no pivot in the first column
+lun_la ∶ 𝔏 (𝔏 ℚ[i]) → α
+lun_la ξ ≔ ((t ↦ (⊗ (blockdiag (∷ (∷ 1 ⊥) ⊥) (◀ t)) (⊗ (blockdiag (∷ (∷ 1 ⊥) ⊥) (◀ (▶ t))) (∷ (hd ξ) (⫶ (∷ 0) (▶ (▶ t))))))) (lu (⫶ ⌄ (⌄ ξ))))
+⍝ the pivot row r is moved to the front; Schur complement; recursion
+lup_la ∶ 𝔏 (𝔏 ℚ[i]) → ℕ → α
+lup_la ξ r ≔ (lub_la (ℓ ξ) (permm_la (ℓ ξ) r) ξ)
+⍝ the permutation matrix that moves row r to the front and keeps the order of the others
+permm_la ∶ ℕ → ℕ → 𝔏 (𝔏 ℚ[i])
+permm_la ν r ≔ (⫶ (k ↦ (unitv ν ((≐ k 0) r ((⩽ k r) (⊟ k 1) k)))) (⍳ ν))
+lub_la ∶ ℕ → 𝔏 (𝔏 ℚ[i]) → 𝔏 (𝔏 ℚ[i]) → α
+lub_la ν pm ξ ≔ (lud_la ν pm (mmul pm ξ))
+lud_la ∶ ℕ → 𝔏 (𝔏 ℚ[i]) → 𝔏 (𝔏 ℚ[i]) → α
+lud_la ν pm a ≔ ((p ↦ (luf_la ν pm a (⫶ (o ↦ (÷ (hd o) p)) (⌄ a)))) (hd (hd a)))
+luf_la ∶ ℕ → 𝔏 (𝔏 ℚ[i]) → 𝔏 (𝔏 ℚ[i]) → 𝔏 ℚ[i] → α
+luf_la ν pm a ls ≔ (lug_la ν pm a ls (lu (⫴ (o l ↦ (⌄ (vsub o (vscale l (hd a))))) (⌄ a) ls)))
+lug_la ∶ ℕ → 𝔏 (𝔏 ℚ[i]) → 𝔏 (𝔏 ℚ[i]) → 𝔏 ℚ[i] → α → α
+lug_la ν pm a ls t ≔ (⊗ (mmul (blockdiag (∷ (∷ 1 ⊥) ⊥) (◀ t)) pm) (⊗ (∷ (∷ 1 (replicate (⊟ ν 1) 0)) (⫴ ∷ (mvec (◀ t) ls) (◀ (▶ t)))) (∷ (hd a) (⫶ (∷ 0) (▶ (▶ t))))))
+⍝ ---- Gram–Schmidt: an orthogonal basis (not normalised) of the span of the vectors, for the Hermitian inner product; dependent vectors are dropped
+gramschmidt ∶ 𝔏 (𝔏 ℚ[i]) → 𝔏 (𝔏 ℚ[i])
+gramschmidt ξ ≔ (foldl (acc v ↦ ((u ↦ ((nzr_la u) (⧺ acc (∷ u ⊥)) acc)) (foldl (x w ↦ (vsub x (proj v w))) v acc))) ⊥ ξ)
+⍝ ---- Moore–Penrose pseudo-inverse and least squares (exact):  A = C F (pivot columns times echelon rows), A⁺ = Fᴴ (F Fᴴ)⁻¹ (Cᴴ C)⁻¹ Cᴴ
+pinv ∶ 𝔏 (𝔏 ℚ[i]) → 𝔏 (𝔏 ℚ[i])   ⍝ the Moore–Penrose pseudo-inverse of any matrix (exact)
+pinv ξ ≔ ((∅ (rowspace ξ)) (zeros (ℓ (hd ξ)) (ℓ ξ)) ((F ↦ ((C ↦ (mmul (mmul (htranspose F) (inverse (mmul F (htranspose F)))) (mmul (inverse (mmul (htranspose C) C)) (htranspose C)))) (transpose (colspace ξ)))) (rowspace ξ)))
+lstsq ∶ 𝔏 (𝔏 ℚ[i]) → 𝔏 ℚ[i] → 𝔏 ℚ[i]   ⍝ lstsq(A, b): the least-squares solution of minimal norm, A⁺ b
+lstsq ξ η ≔ (mvec (pinv ξ) η)
+⍝ ---- Smith normal form of an integer matrix: the invariant factors e₁ | e₂ | … | e_r (e_k = d_k/d_(k−1), d_k the gcd of the k × k minors)
+subs_la ∶ ℕ → 𝔏 ℕ → 𝔏 (𝔏 ℕ)
+subs_la ν ξ ≔ ((≐ ν 0) (∷ ⊥ ⊥) (ξ (a r ↦ (⧺ (⫶ (∷ a) (subs_la (⊟ ν 1) r)) (subs_la ν r))) ⊥))
+dd_la ∶ ℕ → 𝔏 (𝔏 ℚ[i]) → ℕ
+dd_la ν ξ ≔ (foldl (g d ↦ (gcd g (abs d))) 0 (concat (⫶ (rs ↦ (⫶ (cs ↦ (det (⫶ (r ↦ (⫶ (c ↦ (nth (nth ξ r) c)) cs)) rs))) (subs_la ν (⍳ (ℓ (hd ξ)))))) (subs_la ν (⍳ (ℓ ξ))))))
+smith ∶ 𝔏 (𝔏 ℤ) → 𝔏 ℕ   ⍝ the invariant factors of an integer matrix (Smith normal form diagonal, without the zeros); exponential in the size: small matrices only
+smith ξ ≔ ((r ↦ (⫶ (k ↦ (div (dd_la k ξ) (dd_la (⊟ k 1) ξ))) (upto 1 r))) (rank ξ))
+⍝ ---- the matrix exponential as a stream of partial sums  Σ_(j ≤ n) Aʲ/j!
+mexp_la ∶ 𝔏 (𝔏 ℚ[i]) → 𝔏 (𝔏 ℚ[i]) → 𝔏 (𝔏 ℚ[i]) → ℕ → 𝔖 (𝔏 (𝔏 ℚ[i]))
+mexp_la A T S k ≔ ((S′ ↦ (∷ S′ (mexp_la A (mscale (÷ 1 (⊞ k 1)) (mmul T A)) S′ (⊞ k 1)))) (madd S T))
+matexp ∶ 𝔏 (𝔏 ℚ[i]) → 𝔖 (𝔏 (𝔏 ℚ[i]))   ⍝ the matrix exponential e^A: element n is the partial sum Σ_(j ≤ n) Aʲ/j! (entries exact)
+matexp ξ ≔ (mexp_la ξ (idm (ℓ ξ)) (zeros (ℓ ξ) (ℓ ξ)) 0)

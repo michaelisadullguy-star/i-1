@@ -1,0 +1,1 @@
+main in List(\ZZ) := polyadd([-7, 4, 9], [9, -2, 6])

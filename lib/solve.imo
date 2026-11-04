@@ -1,0 +1,515 @@
+⍝ lib/solve.imo — spec notation — trusted prelude, part 21: the simplifier — every statement reduced to its simplest form
+⍝ CONTRACT (docs/predicates.md §5):
+⍝   simplify′ ε φ   takes the code φ of a statement and the table ε of definitions (code of a symbol, code of its definition) and
+⍝                   returns the code of an equivalent statement in simplest form: ⊤ (𝔮ˢ ᶜ⊤) if φ holds for every value of its unknowns,
+⍝                   ⊥ (𝔮ˢ ᶜ⊥) if it holds for none, otherwise the simplest equivalent statement.
+⍝   𝔲 k             the definition code of an unknown (a symbol that is declared and never defined) of domain k:
+⍝                   0 ℂ (ℝ[i]), 1 ℝ, 2 ℚ(i), 3 ℚ, 4 ℤ[i], 5 ℤ, 6 ℕ.   It is never evaluated.
+⍝ Everything here is computed on base-(i−1) numerals: a truth value is the digit 1 (⊤) or 0 (⊥), a polynomial is a list of
+⍝ numbers, a decision is a digit selecting a branch.  Helper names end in _sv.
+𝔲 ∶ ℕ → α
+𝔲 ξ ≔ ⍰
+⍝ ============================================================================================================
+⍝ 1. building codes
+cn_sv ∶ ℚ[i] → 𝔔
+cn_sv ξ ≔ (𝔮ⁿ (⊜ ξ))
+bi_sv ∶ 𝔇 → 𝔔 → 𝔔 → 𝔔
+bi_sv κ ξ η ≔ (𝔮ᵃ (𝔮ᵃ (𝔮ˢ κ) ξ) η)
+un_sv ∶ 𝔇 → 𝔔 → 𝔔
+un_sv κ ξ ≔ (𝔮ᵃ (𝔮ˢ κ) ξ)
+tr_sv ∶ 𝔔
+tr_sv ≔ (𝔮ˢ ᶜ⊤)
+fl_sv ∶ 𝔔
+fl_sv ≔ (𝔮ˢ ᶜ⊥)
+⍝ the symbols (by doc 1 code) of each kind of head
+lAdd_sv ∶ 𝔏 𝔇
+lAdd_sv ≔ (∷ ᶜ⊞ (∷ ᶜ⊕ ⊥))
+lSub_sv ∶ 𝔏 𝔇
+lSub_sv ≔ (∷ ᶜ⊟ (∷ ᶜ⊟ᴿ ⊥))
+lMul_sv ∶ 𝔏 𝔇
+lMul_sv ≔ (∷ ᶜ⊠ (∷ ᶜ⊛ ⊥))
+lNeg_sv ∶ 𝔏 𝔇
+lNeg_sv ≔ (∷ ᶜ⊖ (∷ ᶜ⊖ᴿ ⊥))
+lDiv_sv ∶ 𝔏 𝔇
+lDiv_sv ≔ (∷ ᶜ÷ (∷ ᶜ÷ᴿ ⊥))
+lPow_sv ∶ 𝔏 𝔇
+lPow_sv ≔ (∷ ᶜ^ (∷ ᶜ^ᴿ ⊥))
+lCnj_sv ∶ 𝔏 𝔇
+lCnj_sv ≔ (∷ ᶜ∗ (∷ ᶜ∗ᴿ ⊥))
+lRe_sv ∶ 𝔏 𝔇
+lRe_sv ≔ (∷ ᶜℜ (∷ ᶜℜᴿ ⊥))
+lIm_sv ∶ 𝔏 𝔇
+lIm_sv ≔ (∷ ᶜℑ (∷ ᶜℑᴿ ⊥))
+lSplit_sv ∶ 𝔏 𝔇
+lSplit_sv ≔ (∷ ᶜ∗ (∷ ᶜ∗ᴿ (∷ ᶜℜ (∷ ᶜℜᴿ (∷ ᶜℑ (∷ ᶜℑᴿ ⊥))))))
+lEmb_sv ∶ 𝔏 𝔇
+lEmb_sv ≔ (∷ ᶜ⇡ ⊥)
+lSqrt_sv ∶ 𝔏 𝔇
+lSqrt_sv ≔ (∷ ᶜ√ ⊥)
+lEq_sv ∶ 𝔏 𝔇
+lEq_sv ≔ (∷ ᶜ≐ (∷ ᶜ≐ᴿ ⊥))
+lNe_sv ∶ 𝔏 𝔇
+lNe_sv ≔ (∷ ᶜ≠ (∷ ᶜ≠ᴿ ⊥))
+lLt_sv ∶ 𝔏 𝔇
+lLt_sv ≔ (∷ ᶜ≺ (∷ ᶜ≺ᴿ ⊥))
+lLe_sv ∶ 𝔏 𝔇
+lLe_sv ≔ (∷ ᶜ⩽ (∷ ᶜ⩽ᴿ ⊥))
+lGt_sv ∶ 𝔏 𝔇
+lGt_sv ≔ (∷ ᶜ≻ (∷ ᶜ≻ᴿ ⊥))
+lGe_sv ∶ 𝔏 𝔇
+lGe_sv ≔ (∷ ᶜ⩾ (∷ ᶜ⩾ᴿ ⊥))
+lNoUnf_sv ∶ 𝔏 𝔇
+lNoUnf_sv ≔ (∷ ᶜexp (∷ ᶜsin (∷ ᶜcos (∷ ᶜsinh (∷ ᶜcosh (∷ ᶜlog (∷ ᶜatan ⊥)))))))
+mem_sv ∶ 𝔇 → 𝔏 𝔇 → 𝔹
+mem_sv κ ξ ≔ (∃ₗ (θ ↦ (=ᶻ κ θ)) ξ)
+⍝ the relations are numbered 0 = (≐) 1 (≠) 2 (≺) 3 (⩽) 4 (≻) 5 (⩾);  flip_sv is the negation, mir_sv the mirror (multiplying by −1)
+flip_sv ∶ ℕ → ℕ
+flip_sv ξ ≔ ((≐ ξ 0) 1 ((≐ ξ 1) 0 ((≐ ξ 1100) 111010001 ((≐ ξ 1101) 111010000 ((≐ ξ 111010000) 1101 1100)))))
+mir_sv ∶ ℕ → ℕ
+mir_sv ξ ≔ ((≐ ξ 1100) 111010000 ((≐ ξ 111010000) 1100 ((≐ ξ 1101) 111010001 ((≐ ξ 111010001) 1101 ξ))))
+⍝ does a relation hold when the polynomial has sign s ∈ {−1, 0, 1}?
+relt_sv ∶ ℕ → ℚ → 𝔹
+relt_sv ξ η ≔ ((≐ ξ 0) (≐ η 0) ((≐ ξ 1) (¬ (≐ η 0)) ((≐ ξ 1100) (≺ η 0) ((≐ ξ 1101) (⩽ η 0) ((≐ ξ 111010000) (≻ η 0) (⩾ η 0))))))
+sgn_sv ∶ ℚ → ℚ
+sgn_sv ξ ≔ ((⋚ ξ 0) 11101 0 1)
+relsym_sv ∶ ℕ → 𝔇
+relsym_sv ξ ≔ ((≐ ξ 0) ᶜ≐ ((≐ ξ 1) ᶜ≠ ((≐ ξ 1100) ᶜ≺ ((≐ ξ 1101) ᶜ⩽ ((≐ ξ 111010000) ᶜ≻ ᶜ⩾)))))
+⍝ ============================================================================================================
+⍝ 2. multivariate polynomials over ℚ[i].  A polynomial in ν variables is a list of terms (c, e), c ≠ 0 canonical, e the list of
+⍝ the ν exponents, in decreasing graded-lexicographic order, like terms merged: equal polynomials are equal lists.
+zer_sv ∶ ℕ → 𝔏 ℕ
+zer_sv ξ ≔ (replicate ξ 0)
+mpc_sv ∶ ℕ → ℚ[i] → α
+mpc_sv ξ η ≔ ((≐ η 0) ⊥ (∷ (⊗ (⊜ η) (zer_sv ξ)) ⊥))
+mpv_sv ∶ ℕ → ℕ → α
+mpv_sv ξ η ≔ (∷ (⊗ 1 (⫶ (κ ↦ ((≐ κ η) 1 0)) (⍳ ξ))) ⊥)
+lex_sv ∶ 𝔏 ℕ → 𝔏 ℕ → 𝔒
+lex_sv ξ η ≔ (ξ (a as ↦ (η (b bs ↦ ((⋚ a b) ⋖ (lex_sv as bs) ⋗)) ≖)) ≖)
+cmp_sv ∶ 𝔏 ℕ → 𝔏 ℕ → 𝔒
+cmp_sv ξ η ≔ ((⋚ (sumof ξ) (sumof η)) ⋖ (lex_sv ξ η) ⋗)
+mpadd_sv ∶ α → α → α
+mpadd_sv ξ η ≔ (ξ (t ts ↦ (η (u us ↦ ((cmp_sv (▶ t) (▶ u)) (∷ u (mpadd_sv ξ us)) ((κ ↦ ((≐ κ 0) (mpadd_sv ts us) (∷ (⊗ κ (▶ t)) (mpadd_sv ts us)))) (⊜ (⊞ (◀ t) (◀ u)))) (∷ t (mpadd_sv ts η)))) ξ)) η)
+mpscale_sv ∶ ℚ[i] → α → α
+mpscale_sv ξ η ≔ ((≐ ξ 0) ⊥ (⫶ (θ ↦ (⊗ (⊜ (⊠ ξ (◀ θ))) (▶ θ))) η))
+mpneg_sv ∶ α → α
+mpneg_sv ξ ≔ (mpscale_sv 11101 ξ)
+mpmul_sv ∶ α → α → α
+mpmul_sv ξ η ≔ (foldr (θ ι ↦ (mpadd_sv (⫶ (κ ↦ (⊗ (⊜ (⊠ (◀ θ) (◀ κ))) (⫴ ⊞ (▶ θ) (▶ κ)))) η) ι)) ⊥ ξ)
+mppow_sv ∶ ℕ → α → ℕ → α
+mppow_sv ν ξ κ ≔ ((≐ κ 0) (mpc_sv ν 1) (mpmul_sv ξ (mppow_sv ν ξ (⊟ κ 1))))
+⍝ (⊤, c) when the polynomial is the constant c (0 for the empty polynomial)
+mpconst_sv ∶ α → 𝔓 𝔹 ℚ[i]
+mpconst_sv ξ ≔ (ξ (θ ι ↦ ((∧ (∅ ι) (∀ₗ (κ ↦ (≐ κ 0)) (▶ θ))) (⊗ ⊤ (◀ θ)) (⊗ ⊥ 0))) (⊗ ⊤ 0))
+isc_sv ∶ α → 𝔹
+isc_sv ξ ≔ (◀ (mpconst_sv ξ))
+⍝ the constant term, and the other terms
+cst_sv ∶ α → ℚ[i]
+cst_sv ξ ≔ (foldr (θ ι ↦ ((∀ₗ (κ ↦ (≐ κ 0)) (▶ θ)) (◀ θ) ι)) 0 ξ)
+nocst_sv ∶ α → α
+nocst_sv ξ ≔ (filter (θ ↦ (¬ (∀ₗ (κ ↦ (≐ κ 0)) (▶ θ)))) ξ)
+⍝ apply a function to the coefficients (zeros dropped)
+mpmap_sv ∶ (ℚ[i] → ℚ[i]) → α → α
+mpmap_sv φ ξ ≔ (filter (θ ↦ (¬ (≐ (◀ θ) 0))) (⫶ (θ ↦ (⊗ (⊜ (φ (◀ θ))) (▶ θ))) ξ))
+⍝ which variables occur
+use_sv ∶ ℕ → α → 𝔏 𝔹
+use_sv ν ξ ≔ (⫶ (j ↦ (∃ₗ (θ ↦ (¬ (≐ (nth (▶ θ) j) 0))) ξ)) (⍳ ν))
+⍝ do only real variables occur?  (ρ: the list of reality flags of the variables)
+allreal_sv ∶ 𝔏 𝔹 → α → 𝔹
+allreal_sv ρ ξ ≔ (∀ₗ (θ ↦ (∀ₗ (κ ↦ κ) (⫴ (e r ↦ ((≐ e 0) ⊤ r)) (▶ θ) ρ))) ξ)
+⍝ ============================================================================================================
+⍝ 3. unknowns.  isU_sv: is a definition code the code of (𝔲 k)?  domU_sv: the k.
+isU_sv ∶ 𝔔 → 𝔹
+isU_sv ξ ≔ (ξ (θ ↦ ⊥) (θ ↦ ⊥) (φ ψ ↦ (φ (θ ↦ ⊥) (θ ↦ (=ᶻ θ ᶜ𝔲)) (a b ↦ ⊥) (b ↦ ⊥) (v ↦ ⊥))) (θ ↦ ⊥) (θ ↦ ⊥))
+domU_sv ∶ 𝔔 → ℚ[i]
+domU_sv ξ ≔ (ξ (θ ↦ 0) (θ ↦ 0) (φ ψ ↦ (ψ (k ↦ k) (θ ↦ 0) (a b ↦ 0) (b ↦ 0) (v ↦ 0))) (θ ↦ 0) (θ ↦ 0))
+⍝ the unknowns of a code: a list of (code, domain), with repeats
+unk_sv ∶ 𝔏 (𝔓 𝔇 𝔔) → 𝔔 → 𝔏 (𝔓 𝔇 ℚ[i])
+unk_sv ε ξ ≔ (ξ (θ ↦ ⊥) (σ ↦ ((τ ↦ ((∧ (◀ τ) (isU_sv (▶ τ))) (∷ (⊗ σ (domU_sv (▶ τ))) ⊥) ⊥)) (look ε σ))) (φ ψ ↦ (⧺ (unk_sv ε φ) (unk_sv ε ψ))) (β ↦ (unk_sv ε β)) (κ ↦ ⊥))
+⍝ the unknowns are listed first in the table of definitions, in declaration order: sort by the position in the table
+epos_sv ∶ 𝔏 (𝔓 𝔇 𝔔) → 𝔇 → ℕ
+epos_sv ε σ ≔ (ε (θ ι ↦ ((=ᶻ (◀ θ) σ) 0 (⊞ 1 (epos_sv ι σ)))) 0)
+⍝ insert into a list sorted by position, dropping repeats
+ins_sv ∶ 𝔏 (𝔓 𝔇 𝔔) → 𝔓 𝔇 ℚ[i] → 𝔏 (𝔓 𝔇 ℚ[i]) → 𝔏 (𝔓 𝔇 ℚ[i])
+ins_sv ε ξ η ≔ (η (θ ι ↦ ((=ᶻ (◀ ξ) (◀ θ)) η ((≺ (epos_sv ε (◀ ξ)) (epos_sv ε (◀ θ))) (∷ ξ η) (∷ θ (ins_sv ε ξ ι))))) (∷ ξ ⊥))
+srt_sv ∶ 𝔏 (𝔓 𝔇 𝔔) → 𝔏 (𝔓 𝔇 ℚ[i]) → 𝔏 (𝔓 𝔇 ℚ[i])
+srt_sv ε ξ ≔ (foldr (ins_sv ε) ⊥ ξ)
+⍝ does the code mention an unknown (looking through the definitions of defined symbols, ϕ levels deep)?
+mu_sv ∶ 𝔏 (𝔓 𝔇 𝔔) → 𝔇 → 𝔔 → 𝔹
+mu_sv ε ϕ ξ ≔ (ξ (θ ↦ ⊥) (σ ↦ ((τ ↦ ((◀ τ) ((isU_sv (▶ τ)) ⊤ ((∅ᶻ ϕ) ⊥ (mu_sv ε (⊟ᶻ ϕ (◀ 1)) (▶ τ)))) ⊥)) (look ε σ))) (φ ψ ↦ (∨ (mu_sv ε ϕ φ) (mu_sv ε ϕ ψ))) (β ↦ (mu_sv ε ϕ β)) (κ ↦ ⊥))
+⍝ expansion: a defined symbol whose value mentions an unknown is replaced by its definition (β-reduced); the series functions
+⍝ (exp, sin, …) and closed constants are kept as symbols
+dep_sv ∶ 𝔇
+dep_sv ≔ (◀ 100000000)
+exp_sv ∶ 𝔏 (𝔓 𝔇 𝔔) → 𝔇 → 𝔔 → 𝔔
+exp_sv ε ϕ ξ ≔ ((υ ↦ ((∧ (◀ υ) (∧ (¬ (∅ᶻ ϕ)) (mu_sv ε ϕ (▶ υ)))) (exp_sv ε (⊟ᶻ ϕ (◀ 1)) (▶ υ)) (expd_sv ε ϕ ξ))) ((τ ↦ ((mem_sv (symᶜ (◀ τ)) lNoUnf_sv) (⊗ ⊥ ⊥) (unfold ε ξ))) (spine ξ)))
+expd_sv ∶ 𝔏 (𝔓 𝔇 𝔔) → 𝔇 → 𝔔 → 𝔔
+expd_sv ε ϕ ξ ≔ (ξ (θ ↦ ξ) (σ ↦ ξ) (φ ψ ↦ (𝔮ᵃ (exp_sv ε ϕ φ) (exp_sv ε ϕ ψ))) (β ↦ (𝔮ˡ (exp_sv ε ϕ β))) (κ ↦ ξ))
+⍝ ============================================================================================================
+⍝ 4. variables.  A variable record is (output code, (real?, domain)).  In "split" mode every complex unknown z becomes the two real
+⍝ variables re z and im z (needed as soon as conj, re or im occurs).  um: the polynomial each unknown stands for.
+cplx_sv ∶ ℚ[i] → 𝔹
+cplx_sv ξ ≔ (∨ (≐ ξ 0) (∨ (≐ ξ 1100) (≐ ξ 111010000)))
+hasop_sv ∶ 𝔔 → 𝔹
+hasop_sv ξ ≔ (ξ (θ ↦ ⊥) (σ ↦ (mem_sv σ lSplit_sv)) (φ ψ ↦ (∨ (hasop_sv φ) (hasop_sv ψ))) (β ↦ (hasop_sv β)) (κ ↦ ⊥))
+cnt_sv ∶ 𝔹 → 𝔏 (𝔓 𝔇 ℚ[i]) → ℕ
+cnt_sv σ us ≔ (sumof (⫶ (u ↦ ((∧ σ (cplx_sv (▶ u))) 1100 1)) us))
+⍝ mv_sv ν σ π us: (variable records, [(code, polynomial)]) for the unknowns us, the first of which gets the position π
+mv_sv ∶ ℕ → 𝔹 → ℕ → 𝔏 (𝔓 𝔇 ℚ[i]) → 𝔓 α α
+mv_sv ν σ π us ≔ (us (u rest ↦ ((∧ σ (cplx_sv (▶ u))) ((r ↦ (⊗ (∷ (⊗ (un_sv ᶜℜ (𝔮ˢ (◀ u))) (⊗ ⊤ (⊞ (▶ u) 1))) (∷ (⊗ (un_sv ᶜℑ (𝔮ˢ (◀ u))) (⊗ ⊤ (⊞ (▶ u) 1))) (◀ r))) (∷ (⊗ (◀ u) (mpadd_sv (mpv_sv ν π) (mpscale_sv 11 (mpv_sv ν (⊞ π 1))))) (▶ r)))) (mv_sv ν σ (⊞ π 1100) rest)) ((r ↦ (⊗ (∷ (⊗ (𝔮ˢ (◀ u)) (⊗ (¬ (cplx_sv (▶ u))) (▶ u))) (◀ r)) (∷ (⊗ (◀ u) (mpv_sv ν π)) (▶ r)))) (mv_sv ν σ (⊞ π 1) rest)))) (⊗ ⊥ ⊥))
+⍝ ============================================================================================================
+⍝ 5. terms → polynomials.  tmp_sv ε ν um ρ ξ = (⊤, p) if the term ξ is the polynomial p in the variables, (⊥, _) if it is not polynomial
+ko_sv ∶ 𝔓 𝔹 α
+ko_sv ≔ (⊗ ⊥ ⊥)
+lfa_sv ∶ (α → α) → 𝔓 𝔹 α → 𝔓 𝔹 α
+lfa_sv φ ξ ≔ ((◀ ξ) (⊗ ⊤ (φ (▶ ξ))) ko_sv)
+lfb_sv ∶ (α → α → α) → 𝔓 𝔹 α → 𝔓 𝔹 α → 𝔓 𝔹 α
+lfb_sv φ ξ η ≔ ((∧ (◀ ξ) (◀ η)) (⊗ ⊤ (φ (▶ ξ) (▶ η))) ko_sv)
+lku_sv ∶ α → 𝔇 → 𝔓 𝔹 α
+lku_sv υ σ ≔ (υ (θ ι ↦ ((=ᶻ (◀ θ) σ) (⊗ ⊤ (▶ θ)) (lku_sv ι σ))) ko_sv)
+tmp_sv ∶ 𝔏 (𝔓 𝔇 𝔔) → ℕ → α → 𝔏 𝔹 → 𝔔 → 𝔓 𝔹 α
+tmp_sv ε ν υ ρ ξ ≔ (ξ (θ ↦ (⊗ ⊤ (mpc_sv ν θ))) (σ ↦ (lku_sv υ σ)) (φ ψ ↦ (tmpa_sv ε ν υ ρ (spine ξ))) (β ↦ ko_sv) (κ ↦ ko_sv))
+tmpa_sv ∶ 𝔏 (𝔓 𝔇 𝔔) → ℕ → α → 𝔏 𝔹 → 𝔓 𝔔 (𝔏 𝔔) → 𝔓 𝔹 α
+tmpa_sv ε ν υ ρ σ ≔ (tmpb_sv ε ν υ ρ (symᶜ (◀ σ)) (▶ σ))
+ta_sv ∶ 𝔏 (𝔓 𝔇 𝔔) → ℕ → α → 𝔏 𝔹 → (α → α) → 𝔏 𝔔 → 𝔓 𝔹 α
+ta_sv ε ν υ ρ φ λ ≔ ((args¹ λ) (lfa_sv φ (tmp_sv ε ν υ ρ (hd λ))) ko_sv)
+tb_sv ∶ 𝔏 (𝔓 𝔇 𝔔) → ℕ → α → 𝔏 𝔹 → (α → α → α) → 𝔏 𝔔 → 𝔓 𝔹 α
+tb_sv ε ν υ ρ φ λ ≔ ((args² λ) (lfb_sv φ (tmp_sv ε ν υ ρ (hd λ)) (tmp_sv ε ν υ ρ (hd (⌄ λ)))) ko_sv)
+tcj_sv ∶ 𝔏 (𝔓 𝔇 𝔔) → ℕ → α → 𝔏 𝔹 → (α → α) → 𝔏 𝔔 → 𝔓 𝔹 α
+tcj_sv ε ν υ ρ φ λ ≔ ((args¹ λ) ((τ ↦ ((∧ (◀ τ) (allreal_sv ρ (▶ τ))) (⊗ ⊤ (φ (▶ τ))) ko_sv)) (tmp_sv ε ν υ ρ (hd λ))) ko_sv)
+tdv_sv ∶ 𝔏 (𝔓 𝔇 𝔔) → ℕ → α → 𝔏 𝔹 → 𝔏 𝔔 → 𝔓 𝔹 α
+tdv_sv ε ν υ ρ λ ≔ ((args² λ) ((a b ↦ ((∧ (◀ a) (◀ b)) ((c ↦ ((◀ c) (⊗ ⊤ (mpscale_sv (÷ 1 (▶ c)) (▶ a))) ko_sv)) (mpconst_sv (▶ b))) ko_sv)) (tmp_sv ε ν υ ρ (hd λ)) (tmp_sv ε ν υ ρ (hd (⌄ λ)))) ko_sv)
+tpw_sv ∶ ℕ → α → ℚ[i] → 𝔓 𝔹 α
+tpw_sv ν ξ η ≔ ((∧ (≐ (ℑ η) 0) (∧ (≐ (denom η) 1) (⩽ (abs η) 11101000000000000))) (((⩾ η 0)) (⊗ ⊤ (mppow_sv ν ξ η)) ((c ↦ ((∧ (◀ c) (¬ (≐ (▶ c) 0))) (⊗ ⊤ (mpc_sv ν (^ (▶ c) η))) ko_sv)) (mpconst_sv ξ))) ko_sv)
+tpo_sv ∶ 𝔏 (𝔓 𝔇 𝔔) → ℕ → α → 𝔏 𝔹 → 𝔏 𝔔 → 𝔓 𝔹 α
+tpo_sv ε ν υ ρ λ ≔ ((args² λ) ((a e ↦ ((∧ (◀ a) (◀ e)) (tpw_sv ν (▶ a) (▶ e)) ko_sv)) (tmp_sv ε ν υ ρ (hd λ)) (evQ ε fuel ⊥ (hd (⌄ λ)))) ko_sv)
+tsq_sv ∶ 𝔏 (𝔓 𝔇 𝔔) → ℕ → 𝔏 𝔔 → 𝔓 𝔹 α
+tsq_sv ε ν λ ≔ ((args¹ λ) ((e ↦ ((◀ e) ((v ↦ ((∧ (≐ (ℑ v) 0) (⩾ v 0)) ((n ↦ ((s ↦ ((≐ (⊠ s s) n) (⊗ ⊤ (mpc_sv ν (÷ s (denom v)))) ko_sv)) (isqrt n))) (⊠ (numer v) (denom v))) ko_sv)) (▶ e)) ko_sv)) (evQ ε fuel ⊥ (hd λ))) ko_sv)
+tmpb_sv ∶ 𝔏 (𝔓 𝔇 𝔔) → ℕ → α → 𝔏 𝔹 → 𝔇 → 𝔏 𝔔 → 𝔓 𝔹 α
+tmpb_sv ε ν υ ρ κ λ ≔ ((mem_sv κ lAdd_sv) (tb_sv ε ν υ ρ mpadd_sv λ) ((mem_sv κ lSub_sv) (tb_sv ε ν υ ρ (a b ↦ (mpadd_sv a (mpneg_sv b))) λ) ((mem_sv κ lMul_sv) (tb_sv ε ν υ ρ mpmul_sv λ) ((mem_sv κ lNeg_sv) (ta_sv ε ν υ ρ mpneg_sv λ) ((mem_sv κ lDiv_sv) (tdv_sv ε ν υ ρ λ) ((mem_sv κ lPow_sv) (tpo_sv ε ν υ ρ λ) ((mem_sv κ lCnj_sv) (tcj_sv ε ν υ ρ (a ↦ (mpmap_sv ∗ a)) λ) ((mem_sv κ lRe_sv) (tcj_sv ε ν υ ρ (a ↦ (mpmap_sv ℜ a)) λ) ((mem_sv κ lIm_sv) (tcj_sv ε ν υ ρ (a ↦ (mpmap_sv ℑ a)) λ) ((mem_sv κ lEmb_sv) (ta_sv ε ν υ ρ (a ↦ a) λ) ((mem_sv κ lSqrt_sv) (tsq_sv ε ν λ) ko_sv)))))))))))
+⍝ ============================================================================================================
+⍝ 6. formulas.  A formula is (tag, payload): 0 constant (a Boolean), 1 atom (relation number, polynomial: "p rel 0"), 2 and, 3 or,
+⍝ 4 opaque (the code of a subformula that is not polynomial).
+fC_sv ∶ 𝔹 → α
+fC_sv ξ ≔ (⊗ 0 ξ)
+fA_sv ∶ ℕ → α → α
+fA_sv ξ η ≔ (⊗ 1 (⊗ ξ η))
+fO_sv ∶ 𝔔 → α
+fO_sv ξ ≔ (⊗ 111010000 ξ)
+isC_sv ∶ α → 𝔹
+isC_sv ξ ≔ (≐ (◀ ξ) 0)
+fAnd_sv ∶ α → α → α
+fAnd_sv ξ η ≔ ((isC_sv ξ) ((▶ ξ) η ξ) ((isC_sv η) ((▶ η) ξ η) (⊗ 1100 (⊗ ξ η))))
+fOr_sv ∶ α → α → α
+fOr_sv ξ η ≔ ((isC_sv ξ) ((▶ ξ) ξ η) ((isC_sv η) ((▶ η) η ξ) (⊗ 1101 (⊗ ξ η))))
+negΦ_sv ∶ α → α
+negΦ_sv ξ ≔ ((≐ (◀ ξ) 0) (fC_sv (¬ (▶ ξ))) ((≐ (◀ ξ) 1) (fA_sv (flip_sv (◀ (▶ ξ))) (▶ (▶ ξ))) ((≐ (◀ ξ) 1100) (fOr_sv (negΦ_sv (◀ (▶ ξ))) (negΦ_sv (▶ (▶ ξ)))) ((≐ (◀ ξ) 1101) (fAnd_sv (negΦ_sv (◀ (▶ ξ))) (negΦ_sv (▶ (▶ ξ)))) (fO_sv (un_sv ᶜ¬ (▶ ξ)))))))
+⍝ a relation whose polynomial is a constant is decided now; an ordering of a non-real constant is false
+cat_sv ∶ ℕ → ℚ[i] → α
+cat_sv ξ η ≔ (fC_sv ((≐ ξ 0) (≐ η 0) ((≐ ξ 1) (¬ (≐ η 0)) ((≐ (ℑ η) 0) (relt_sv ξ (sgn_sv (ℜ η))) ⊥))))
+atom_sv ∶ ℕ → α → α
+atom_sv ξ η ≔ ((τ ↦ ((◀ τ) (cat_sv ξ (▶ τ)) (fA_sv ξ η))) (mpconst_sv η))
+⍝ a relation between two terms: both polynomial → an atom;  otherwise a closed relation is decided by the prover of lib/prove.imo
+⍝ and a relation about the unknowns is kept as it is
+rel_sv ∶ 𝔏 (𝔓 𝔇 𝔔) → ℕ → α → 𝔏 𝔹 → ℕ → 𝔔 → 𝔏 𝔔 → α
+rel_sv ε ν υ ρ κ ξ λ ≔ ((args² λ) ((a b ↦ ((∧ (◀ a) (◀ b)) (atom_sv κ (mpadd_sv (▶ a) (mpneg_sv (▶ b)))) (clo_sv ε ξ))) (tmp_sv ε ν υ ρ (hd λ)) (tmp_sv ε ν υ ρ (hd (⌄ λ)))) (clo_sv ε ξ))
+clo_sv ∶ 𝔏 (𝔓 𝔇 𝔔) → 𝔔 → α
+clo_sv ε ξ ≔ ((mu_sv ε dep_sv ξ) (fO_sv ξ) ((fo ε fuel ξ) (fC_sv ⊥) (fO_sv ξ) (fC_sv ⊤)))
+pf_sv ∶ 𝔏 (𝔓 𝔇 𝔔) → ℕ → α → 𝔏 𝔹 → 𝔔 → α
+pf_sv ε ν υ ρ ξ ≔ (ξ (θ ↦ (fC_sv θ)) (σ ↦ ((=ᶻ σ ᶜ⊤) (fC_sv ⊤) ((=ᶻ σ ᶜ⊥) (fC_sv ⊥) (fO_sv ξ)))) (φ ψ ↦ (pfa_sv ε ν υ ρ ξ (spine ξ))) (β ↦ (fO_sv ξ)) (κ ↦ (fO_sv ξ)))
+pfa_sv ∶ 𝔏 (𝔓 𝔇 𝔔) → ℕ → α → 𝔏 𝔹 → 𝔔 → 𝔓 𝔔 (𝔏 𝔔) → α
+pfa_sv ε ν υ ρ ξ σ ≔ (pfb_sv ε ν υ ρ ξ (symᶜ (◀ σ)) (▶ σ))
+pfb_sv ∶ 𝔏 (𝔓 𝔇 𝔔) → ℕ → α → 𝔏 𝔹 → 𝔔 → 𝔇 → 𝔏 𝔔 → α
+pfb_sv ε ν υ ρ ξ κ λ ≔ ((mem_sv κ (∷ ᶜ∧ ⊥)) ((args² λ) (fAnd_sv (pf_sv ε ν υ ρ (hd λ)) (pf_sv ε ν υ ρ (hd (⌄ λ)))) (fO_sv ξ)) ((mem_sv κ (∷ ᶜ∨ ⊥)) ((args² λ) (fOr_sv (pf_sv ε ν υ ρ (hd λ)) (pf_sv ε ν υ ρ (hd (⌄ λ)))) (fO_sv ξ)) ((mem_sv κ (∷ ᶜ¬ ⊥)) ((args¹ λ) (negΦ_sv (pf_sv ε ν υ ρ (hd λ))) (fO_sv ξ)) ((mem_sv κ (∷ ᶜ⇒ ⊥)) ((args² λ) (fOr_sv (negΦ_sv (pf_sv ε ν υ ρ (hd λ))) (pf_sv ε ν υ ρ (hd (⌄ λ)))) (fO_sv ξ)) ((mem_sv κ (∷ ᶜ⇔ ⊥)) ((args² λ) ((a b ↦ (fAnd_sv (fOr_sv (negΦ_sv a) b) (fOr_sv (negΦ_sv b) a))) (pf_sv ε ν υ ρ (hd λ)) (pf_sv ε ν υ ρ (hd (⌄ λ)))) (fO_sv ξ)) ((mem_sv κ lEq_sv) (rel_sv ε ν υ ρ 0 ξ λ) ((mem_sv κ lNe_sv) (rel_sv ε ν υ ρ 1 ξ λ) ((mem_sv κ lLt_sv) (rel_sv ε ν υ ρ 1100 ξ λ) ((mem_sv κ lLe_sv) (rel_sv ε ν υ ρ 1101 ξ λ) ((mem_sv κ lGt_sv) (rel_sv ε ν υ ρ 111010000 ξ λ) ((mem_sv κ lGe_sv) (rel_sv ε ν υ ρ 111010001 ξ λ) (fO_sv ξ))))))))))))
+⍝ the variables that occur in a formula, and whether it has an opaque part
+vuse_sv ∶ ℕ → α → 𝔏 𝔹
+vuse_sv ν ξ ≔ ((≐ (◀ ξ) 1) (use_sv ν (▶ (▶ ξ))) ((∨ (≐ (◀ ξ) 1100) (≐ (◀ ξ) 1101)) (⫴ ∨ (vuse_sv ν (◀ (▶ ξ))) (vuse_sv ν (▶ (▶ ξ)))) (replicate ν ⊥)))
+hasO_sv ∶ α → 𝔹
+hasO_sv ξ ≔ ((≐ (◀ ξ) 111010000) ⊤ ((∨ (≐ (◀ ξ) 1100) (≐ (◀ ξ) 1101)) (∨ (hasO_sv (◀ (▶ ξ))) (hasO_sv (▶ (▶ ξ)))) ⊥))
+⍝ ============================================================================================================
+⍝ 7. printing a formula (residual form: every relation as "polynomial rel constant", primitive, leading coefficient positive)
+isneg_sv ∶ ℚ[i] → 𝔹
+isneg_sv ξ ≔ (∧ (≐ (ℑ ξ) 0) (≺ (ℜ ξ) 0))
+⍝ the relation p rel 0 scaled: real coefficients → primitive integers, leading coefficient positive (the relation mirrored if the
+⍝ scale is negative); complex coefficients → monic.  Result (relation, polynomial)
+norm_sv ∶ ℕ → α → 𝔓 ℕ α
+norm_sv ξ η ≔ ((∀ₗ (c ↦ (≐ (ℑ c) 0)) (⫶ ◀ η)) ((g ↦ ((s ↦ (⊗ ((≐ s 11101) (mir_sv ξ) ξ) (mpscale_sv (÷ s g) η))) (sgn_sv (◀ (hd η))))) (polycontent (⫶ ◀ η))) (⊗ ξ (mpscale_sv (÷ 1 (◀ (hd η))) η)))
+pwr_sv ∶ 𝔔 → ℚ[i] → 𝔔
+pwr_sv ξ η ≔ ((≐ η 1) ξ (bi_sv ᶜ^ ξ (cn_sv η)))
+⍝ the monomial with exponents e, as a product of powers of the output codes oc
+mono_sv ∶ 𝔏 𝔔 → 𝔏 ℕ → 𝔔
+mono_sv oc e ≔ ((fs ↦ (fs (h t ↦ (foldl (bi_sv ᶜ⊠) h t)) tr_sv)) (concat (⫴ (o k ↦ ((≐ k 0) ⊥ (∷ (pwr_sv o k) ⊥))) oc e)))
+⍝ a term with a positive (or non-real) coefficient, and the sum of terms
+tm_sv ∶ 𝔏 𝔔 → ℚ[i] → 𝔏 ℕ → 𝔔
+tm_sv oc c e ≔ ((≐ c 1) (mono_sv oc e) (bi_sv ᶜ⊠ (cn_sv c) (mono_sv oc e)))
+add_sv ∶ 𝔏 𝔔 → 𝔔 → α → 𝔔
+add_sv oc acc t ≔ ((isneg_sv (◀ t)) (bi_sv ᶜ⊟ acc (tm_sv oc (⊖ (◀ t)) (▶ t))) (bi_sv ᶜ⊞ acc (tm_sv oc (◀ t) (▶ t))))
+first_sv ∶ 𝔏 𝔔 → α → 𝔔
+first_sv oc t ≔ ((isneg_sv (◀ t)) (un_sv ᶜ⊖ (tm_sv oc (⊖ (◀ t)) (▶ t))) (tm_sv oc (◀ t) (▶ t)))
+lhs_sv ∶ 𝔏 𝔔 → α → 𝔔
+lhs_sv oc p ≔ ((nt ↦ (foldl (add_sv oc) (first_sv oc (hd nt)) (⌄ nt))) (nocst_sv p))
+outA_sv ∶ 𝔏 𝔔 → ℕ → α → 𝔔
+outA_sv oc r p ≔ ((τ ↦ (bi_sv (relsym_sv (◀ τ)) (lhs_sv oc (▶ τ)) (cn_sv (⊖ (cst_sv (▶ τ)))))) (norm_sv r p))
+out_sv ∶ 𝔏 𝔔 → α → 𝔔
+out_sv oc ξ ≔ ((≐ (◀ ξ) 0) ((▶ ξ) tr_sv fl_sv) ((≐ (◀ ξ) 1) (outA_sv oc (◀ (▶ ξ)) (▶ (▶ ξ))) ((≐ (◀ ξ) 1100) (bi_sv ᶜ∧ (out_sv oc (◀ (▶ ξ))) (out_sv oc (▶ (▶ ξ)))) ((≐ (◀ ξ) 1101) (bi_sv ᶜ∨ (out_sv oc (◀ (▶ ξ))) (out_sv oc (▶ (▶ ξ)))) (▶ ξ)))))
+⍝ ============================================================================================================
+⍝ 7b. one real unknown (ℝ, ℚ, ℤ, ℕ).  Every atom is a polynomial in the variable j; it is factored over ℚ, the real roots of all the
+⍝ factors are isolated together, and the sign of every factor is found exactly at every root and on every interval between
+⍝ them (at a root of another factor: signat;  to the right of its own simple root: the sign of the derivative there;  left of all
+⍝ roots: (−1)^degree, since the factors have positive leading coefficients).  The formula is then evaluated on each cell.
+⍝ coefficient list (lowest degree first) of a polynomial that uses only the variable j
+cof_sv ∶ ℕ → α → ℕ → ℚ[i]
+cof_sv j p k ≔ (foldr (θ ι ↦ ((≐ (nth (▶ θ) j) k) (◀ θ) ι)) 0 p)
+pol_sv ∶ ℕ → α → 𝔏 ℚ[i]
+pol_sv j p ≔ (poly ((d ↦ (⫶ (k ↦ (cof_sv j p k)) (⍳ (⊞ d 1)))) (foldl (m t ↦ (max m (nth (▶ t) j))) 0 p)))
+⍝ an atom "p rel 0" (relation r) becomes a constant, or the node (tag 6, (r, (c, factors))) with p = c·Π f^m, the f with real roots only;
+⍝ an equality is about gcd(Re p, Im p);  an ordering of a non-real polynomial is not understood (opaque)
+fa_sv ∶ ℕ → ℕ → α → α
+fa_sv j r p ≔ ((pl ↦ (fb_sv r (poly (⫶ ℜ pl)) (poly (⫶ ℑ pl)))) (pol_sv j p))
+fb_sv ∶ ℕ → 𝔏 ℚ → 𝔏 ℚ → α
+fb_sv r a b ≔ ((≺ r 1100) (fc_sv r (polygcd a b)) ((∅ b) (fc_sv r a) (fO_sv tr_sv)))
+fc_sv ∶ ℕ → 𝔏 ℚ → α
+fc_sv r g ≔ ((⩽ (deg g) 0) (fC_sv (relt_sv r (sgn_sv (lc g)))) ((τ ↦ (⊗ 111011100 (⊗ r (⊗ (◀ τ) (filter (θ ↦ (≻ (nrealroots (◀ θ)) 0)) (▶ τ)))))) (polyfactor g)))
+pa_sv ∶ ℕ → α → α
+pa_sv j ξ ≔ ((≐ (◀ ξ) 1) (fa_sv j (◀ (▶ ξ)) (▶ (▶ ξ))) ((≐ (◀ ξ) 1100) (fAnd_sv (pa_sv j (◀ (▶ ξ))) (pa_sv j (▶ (▶ ξ)))) ((≐ (◀ ξ) 1101) (fOr_sv (pa_sv j (◀ (▶ ξ))) (pa_sv j (▶ (▶ ξ)))) ξ)))
+⍝ the distinct real-rooted irreducible factors of all the atoms
+addf_sv ∶ 𝔏 ℤ → 𝔏 (𝔏 ℤ) → 𝔏 (𝔏 ℤ)
+addf_sv f a ≔ ((∃ₗ (g ↦ (polyeq f g)) a) a (⧺ a (∷ f ⊥)))
+gf_sv ∶ α → 𝔏 (𝔏 ℤ) → 𝔏 (𝔏 ℤ)
+gf_sv ξ acc ≔ ((≐ (◀ ξ) 111011100) (foldl (a θ ↦ (addf_sv (◀ θ) a)) acc (▶ (▶ (▶ ξ)))) ((∨ (≐ (◀ ξ) 1100) (≐ (◀ ξ) 1101)) (gf_sv (▶ (▶ ξ)) (gf_sv (◀ (▶ ξ)) acc)) acc))
+⍝ node (tag 7, (r, (sign of c, multiplicities of the global factors)))
+pb_sv ∶ 𝔏 (𝔏 ℤ) → α → α
+pb_sv gf ξ ≔ ((≐ (◀ ξ) 111011100) (⊗ 111011101 (⊗ (◀ (▶ ξ)) (⊗ (sgn_sv (◀ (▶ (▶ ξ)))) (⫶ (f ↦ (foldr (θ ι ↦ ((polyeq (◀ θ) f) (▶ θ) ι)) 0 (▶ (▶ (▶ ξ))))) gf)))) ((≐ (◀ ξ) 1100) (fAnd_sv (pb_sv gf (◀ (▶ ξ))) (pb_sv gf (▶ (▶ ξ)))) ((≐ (◀ ξ) 1101) (fOr_sv (pb_sv gf (◀ (▶ ξ))) (pb_sv gf (▶ (▶ ξ)))) ξ)))
+⍝ the sign of c·Π fᵐ when the factors have the signs fs
+sg_sv ∶ ℚ → 𝔏 ℕ → 𝔏 ℚ → ℚ
+sg_sv cs ms fs ≔ (foldl (a mf ↦ ((∨ (≐ (◀ mf) 0) (≐ a 0)) a ((≐ (▶ mf) 0) 0 ((≐ (mod (◀ mf) 1100) 1) (⊠ a (▶ mf)) a)))) cs (⫴ ⊗ ms fs))
+evs_sv ∶ α → 𝔏 ℚ → 𝔹
+evs_sv ξ fs ≔ ((≐ (◀ ξ) 0) (▶ ξ) ((≐ (◀ ξ) 111011101) (relt_sv (◀ (▶ ξ)) (sg_sv (◀ (▶ (▶ ξ))) (▶ (▶ (▶ ξ))) fs)) ((≐ (◀ ξ) 1100) (∧ (evs_sv (◀ (▶ ξ)) fs) (evs_sv (▶ (▶ ξ)) fs)) (∨ (evs_sv (◀ (▶ ξ)) fs) (evs_sv (▶ (▶ ξ)) fs)))))
+idz_sv ∶ 𝔏 ℚ → ℕ
+idz_sv ξ ≔ (ξ (θ ι ↦ ((≐ θ 0) 0 (⊞ 1 (idz_sv ι)))) 0)
+⍝ per root of F = Π gf (isolated by ab): (signs of the factors AT the root, (signs just AFTER it, (owner index, interval)))
+rts_sv ∶ 𝔏 (𝔏 ℤ) → 𝔏 ℚ → 𝔏 (𝔓 ℚ ℚ) → 𝔏 α
+rts_sv gf F iv ≔ (⫶ (ab ↦ ((pt ↦ (⊗ pt (⊗ (⫴ (f s ↦ ((≐ s 0) (signat (polyderiv f) F (◀ ab) (▶ ab)) s)) gf pt) (⊗ (idz_sv pt) ab)))) (⫶ (f ↦ (signat f F (◀ ab) (▶ ab))) gf))) iv)
+⍝ the truth on all cells: [R₀, P₁, R₁, …, Pₙ, Rₙ]
+cells_sv ∶ α → 𝔏 ℚ → 𝔏 α → 𝔏 𝔹
+cells_sv φ rz rs ≔ (∷ (evs_sv φ rz) (concat (⫶ (r ↦ (∷ (evs_sv φ (◀ r)) (∷ (evs_sv φ (◀ (▶ r))) ⊥))) rs)))
+⍝ ranks of the roots among those of the same factor (1, 2, …)
+rkl_sv ∶ 𝔏 ℕ → 𝔏 ℕ → 𝔏 ℕ
+rkl_sv ξ seen ≔ (ξ (θ ι ↦ (∷ (⊞ 1 (ℓ (filter (σ ↦ (≐ σ θ)) seen))) (rkl_sv ι (⧺ seen (∷ θ ⊥))))) ⊥)
+⍝ ---- exact codes of the roots
+sqfp_sv ∶ ℕ → 𝔓 ℕ ℕ
+sqfp_sv n ≔ ((fs ↦ (⊗ (prodof (⫶ (pe ↦ (^ (◀ pe) (div (▶ pe) 1100))) fs)) (prodof (⫶ (pe ↦ (^ (◀ pe) (mod (▶ pe) 1100))) fs)))) (factor n))
+lcode_sv ∶ 𝔏 ℤ → 𝔔
+lcode_sv f ≔ (foldr (c rest ↦ (bi_sv ᶜ∷ (cn_sv c) rest)) (𝔮ˢ ᶜ⊘) f)
+⍝ the two roots of a quadratic a x² + b x + c with a > 0 and real coefficients, D = b² − 4ac ≠ 0:  u ∓ v √d  (d squarefree, negative
+⍝ when D < 0; for d = −1 the roots are the Gaussian rationals u ∓ v i);  (lower, upper) by the real part, then the imaginary part
+qd_sv ∶ 𝔏 ℚ → α
+qd_sv f ≔ ((a ↦ ((b ↦ ((c ↦ ((D ↦ ((N ↦ ((M ↦ ((sd ↦ ((d ↦ ((u ↦ ((v ↦ (⊗ u (⊗ v d))) (÷ (◀ sd) (⊠ (⊠ 1100 a) M)))) (÷ (⊖ b) (⊠ 1100 a)))) ((≻ D 0) (▶ sd) (⊖ (▶ sd))))) (sqfp_sv (⊠ (abs N) M)))) (denom D))) (numer D))) (⊟ (⊠ b b) (⊠ 111010000 (⊠ a c))))) (nth f 0))) (nth f 1))) (nth f 1100))
+qr_sv ∶ 𝔏 ℚ → 𝔓 𝔔 𝔔
+qr_sv f ≔ ((t ↦ (qrc_sv (◀ t) (◀ (▶ t)) (▶ (▶ t)))) (qd_sv f))
+qrc_sv ∶ ℚ → ℚ → ℤ → 𝔓 𝔔 𝔔
+qrc_sv u v d ≔ ((≐ d 11101) (⊗ (cn_sv (⊟ u (⊠ v 11))) (cn_sv (⊞ u (⊠ v 11)))) ((T ↦ ((≐ u 0) (⊗ (un_sv ᶜ⊖ T) T) (⊗ (bi_sv ᶜ⊟ (cn_sv u) T) (bi_sv ᶜ⊞ (cn_sv u) T)))) ((≐ v 1) (un_sv ᶜ√ (cn_sv d)) (bi_sv ᶜ⊠ (cn_sv v) (un_sv ᶜ√ (cn_sv d))))))
+⍝ the code of the k-th real root (k = 1, 2, …) of the irreducible factor f
+rcf_sv ∶ 𝔏 ℤ → ℕ → 𝔔
+rcf_sv f k ≔ ((≐ (deg f) 1) (cn_sv (⊖ (÷ (nth f 0) (nth f 1)))) ((≐ (deg f) 1100) (((≐ k 1) ◀ ▶) (qr_sv f)) (bi_sv ᶜroot (lcode_sv f) (cn_sv k))))
+⍝ ---- the formula from the truth of the cells.  xc: code of the variable;  rcs: codes of the roots r₁ < … < rₙ
+⍝ cell t: even t = 2j → the open interval after the j-th root;  odd t = 2j−1 → the j-th root itself
+runs_sv ∶ 𝔏 𝔹 → ℕ → 𝔏 (𝔓 ℕ ℕ)
+runs_sv ts t ≔ (ts (b rest ↦ (b ((e ↦ (∷ (⊗ t e) (runs_sv (drop (⊞ 1 (⊟ e t)) ts) (⊞ e 1)))) (lastrun_sv rest t)) (runs_sv rest (⊞ t 1)))) ⊥)
+lastrun_sv ∶ 𝔏 𝔹 → ℕ → ℕ
+lastrun_sv ξ t ≔ (ξ (b r ↦ (b (lastrun_sv r (⊞ t 1)) t)) t)
+rcn_sv ∶ 𝔏 𝔔 → ℕ → 𝔔
+rcn_sv rcs j ≔ (nth rcs (⊟ j 1))
+⍝ a run (s, e) of true cells as a statement about x
+runc_sv ∶ 𝔔 → 𝔏 𝔔 → ℕ → ℕ → ℕ → 𝔔
+runc_sv xc rcs n s e ≔ ((∧ (≐ s e) (≐ (mod s 1100) 1)) (bi_sv ᶜ≐ xc (rcn_sv rcs (div (⊞ s 1) 1100))) (rb_sv (rlo_sv xc rcs s) (rhi_sv xc rcs n e)))
+rlo_sv ∶ 𝔔 → 𝔏 𝔔 → ℕ → 𝔓 𝔹 𝔔
+rlo_sv xc rcs s ≔ ((≐ s 0) (⊗ ⊥ tr_sv) ((≐ (mod s 1100) 1) (⊗ ⊤ (bi_sv ᶜ⩽ (rcn_sv rcs (div (⊞ s 1) 1100)) xc)) (⊗ ⊤ (bi_sv ᶜ≺ (rcn_sv rcs (div s 1100)) xc))))
+rhi_sv ∶ 𝔔 → 𝔏 𝔔 → ℕ → ℕ → 𝔓 𝔹 𝔔
+rhi_sv xc rcs n e ≔ ((≐ e (⊠ 1100 n)) (⊗ ⊥ tr_sv) ((≐ (mod e 1100) 1) (⊗ ⊤ (bi_sv ᶜ⩽ xc (rcn_sv rcs (div (⊞ e 1) 1100)))) (⊗ ⊤ (bi_sv ᶜ≺ xc (rcn_sv rcs (⊞ (div e 1100) 1))))))
+rb_sv ∶ 𝔓 𝔹 𝔔 → 𝔓 𝔹 𝔔 → 𝔔
+rb_sv l h ≔ ((◀ l) ((◀ h) (bi_sv ᶜ∧ (▶ l) (▶ h)) (▶ l)) ((◀ h) (▶ h) tr_sv))
+⍝ the disjunction of the runs;  if every interval between roots is true the set is "all but some points":  x ≠ r ∧ …
+orl_sv ∶ 𝔏 𝔔 → 𝔔
+orl_sv ξ ≔ (ξ (a r ↦ ((∅ r) a (bi_sv ᶜ∨ a (orl_sv r)))) fl_sv)
+andl_sv ∶ 𝔏 𝔔 → 𝔔
+andl_sv ξ ≔ (ξ (a r ↦ ((∅ r) a (bi_sv ᶜ∧ a (andl_sv r)))) tr_sv)
+regs_sv ∶ 𝔏 𝔹 → 𝔏 𝔹
+regs_sv ξ ≔ (ξ (a r ↦ (∷ a (regs_sv (drop 1 r)))) ⊥)
+pts_sv ∶ 𝔏 𝔹 → 𝔏 𝔹
+pts_sv ξ ≔ (regs_sv (drop 1 ξ))
+outR_sv ∶ 𝔔 → 𝔏 𝔹 → 𝔏 𝔔 → 𝔔
+outR_sv xc ts rcs ≔ ((∀ₗ (b ↦ b) (regs_sv ts)) (andl_sv (⫶ (rf ↦ (bi_sv ᶜ≠ xc (▶ rf))) (filter (rf ↦ (¬ (◀ rf))) (⫴ ⊗ (pts_sv ts) rcs)))) (orl_sv (⫶ (se ↦ (runc_sv xc rcs (ℓ rcs) (◀ se) (▶ se))) (runs_sv ts 0))))
+⍝ ---- integer domains (ℤ, ℕ): the true runs become integer intervals.  Floor and ceiling of a root: exact for a rational root, by
+⍝ bisection (refine) for an irrational one, whose floor is found as soon as both ends of the interval have the same floor.
+flo_sv ∶ 𝔏 ℤ → ℚ → ℚ → ℕ → ℤ
+flo_sv f a b n ≔ ((ab ↦ ((≐ (⌊ (◀ ab)) (⌊ (▶ ab))) (⌊ (◀ ab)) (flo_sv f a b (⊞ n 1)))) (refine f a b n))
+fcl_sv ∶ 𝔏 ℤ → 𝔓 ℚ ℚ → 𝔓 ℤ ℤ
+fcl_sv f ab ≔ ((≐ (deg f) 1) ((r ↦ (⊗ (⌊ r) (⌈ r))) (⊖ (÷ (nth f 0) (nth f 1)))) ((fl ↦ (⊗ fl (⊞ fl 1))) (flo_sv f (◀ ab) (▶ ab) 0)))
+⍝ a run of integers:  (has lower, (L, (has upper, U)))
+irun_sv ∶ ℕ → 𝔏 (𝔓 ℤ ℤ) → ℕ → ℕ → α
+irun_sv n fc s e ≔ (⊗ ((≐ s 0) (⊗ ⊥ 0) ((≐ (mod s 1100) 1) (⊗ ⊤ (▶ (nth fc (⊟ (div (⊞ s 1) 1100) 1)))) (⊗ ⊤ (⊞ 1 (◀ (nth fc (⊟ (div s 1100) 1))))))) ((≐ e (⊠ 1100 n)) (⊗ ⊥ 0) ((≐ (mod e 1100) 1) (⊗ ⊤ (◀ (nth fc (⊟ (div (⊞ e 1) 1100) 1)))) (⊗ ⊤ (⊟ (▶ (nth fc (div e 1100))) 1)))))
+⍝ normalised run (hl, (L, (hu, U))); in ℕ the lower bound is at least 0;  an empty run is dropped
+nr_sv ∶ ℚ → α → 𝔏 α
+nr_sv dom r ≔ ((hl ↦ ((l ↦ ((hu ↦ ((u ↦ ((∧ (∧ hl hu) (≻ l u)) ⊥ (∷ (⊗ hl (⊗ l (⊗ hu u))) ⊥))) (▶ (▶ r)))) (◀ (▶ r)))) ((≐ dom 111011100) ((◀ (◀ r)) (max 0 (▶ (◀ r))) 0) (▶ (◀ r))))) ((≐ dom 111011100) ⊤ (◀ (◀ r))))
+rhl_sv ∶ α → 𝔹
+rhl_sv r ≔ (◀ r)
+rl_sv ∶ α → ℤ
+rl_sv r ≔ (◀ (▶ r))
+rhu_sv ∶ α → 𝔹
+rhu_sv r ≔ (◀ (▶ (▶ r)))
+ru_sv ∶ α → ℤ
+ru_sv r ≔ (▶ (▶ (▶ r)))
+⍝ merge runs that touch or overlap
+mrg_sv ∶ 𝔏 α → 𝔏 α
+mrg_sv ξ ≔ (ξ (a r ↦ (r (b rr ↦ ((∧ (rhu_sv a) (⩾ (⊞ (ru_sv a) 1) (rl_sv b))) (mrg_sv (∷ (⊗ (rhl_sv a) (⊗ (rl_sv a) (⊗ (rhu_sv b) (▶ (▶ (▶ b)))))) rr)) (∷ a (mrg_sv r)))) ξ)) ⊥)
+⍝ does the set contain every integer but some single ones?
+cmpl_sv ∶ ℚ → 𝔏 α → 𝔹
+cmpl_sv dom ξ ≔ ((∅ ξ) ⊥ (∧ ((≐ dom 111011100) (≐ (rl_sv (hd ξ)) 0) (¬ (rhl_sv (hd ξ)))) (∧ (¬ (rhu_sv (last ξ))) (∀ₗ (b ↦ b) (⫴ (a b ↦ (≐ (⊟ (rl_sv b) (ru_sv a)) 1100)) ξ (drop 1 ξ))))))
+irc_sv ∶ ℚ → 𝔔 → α → 𝔔
+irc_sv dom xc r ≔ ((∧ (∧ (rhl_sv r) (rhu_sv r)) (≐ (rl_sv r) (ru_sv r))) (bi_sv ᶜ≐ xc (cn_sv (rl_sv r))) (rb_sv (⊗ (∧ (rhl_sv r) (¬ (∧ (≐ dom 111011100) (≐ (rl_sv r) 0)))) (bi_sv ᶜ⩽ (cn_sv (rl_sv r)) xc)) (⊗ (rhu_sv r) (bi_sv ᶜ⩽ xc (cn_sv (ru_sv r))))))
+outI_sv ∶ ℚ → 𝔔 → 𝔏 𝔹 → 𝔏 (𝔓 ℤ ℤ) → 𝔔
+outI_sv dom xc ts fc ≔ ((rs ↦ ((∅ rs) fl_sv ((cmpl_sv dom rs) (andl_sv (⫶ (g ↦ (bi_sv ᶜ≠ xc (cn_sv g))) (⫴ (a b ↦ (⊞ (ru_sv a) 1)) rs (drop 1 rs)))) (orl_sv (⫶ (irc_sv dom xc) rs))))) (mrg_sv (concat (⫶ (se ↦ (nr_sv dom (irun_sv (ℓ fc) fc (◀ se) (▶ se)))) (runs_sv ts 0)))))
+⍝ ---- the driver for one real variable
+sr_sv ∶ ℕ → 𝔔 → ℚ → α → 𝔓 𝔹 𝔔
+sr_sv j xc dom ξ ≔ ((φa ↦ ((hasO_sv φa) ko_sv ((gf ↦ (sr2_sv xc dom gf (pb_sv gf φa))) (gf_sv φa ⊥)))) (pa_sv j ξ))
+sr2_sv ∶ 𝔔 → ℚ → 𝔏 (𝔏 ℤ) → α → 𝔓 𝔹 𝔔
+sr2_sv xc dom gf φ ≔ ((∅ gf) (⊗ ⊤ ((evs_sv φ ⊥) tr_sv fl_sv)) ((F ↦ ((iv ↦ (sr3_sv xc dom gf φ (rts_sv gf F iv) iv)) (isolate F))) (foldl polymul (∷ 1 ⊥) gf)))
+sr3_sv ∶ 𝔔 → ℚ → 𝔏 (𝔏 ℤ) → α → 𝔏 α → 𝔏 (𝔓 ℚ ℚ) → 𝔓 𝔹 𝔔
+sr3_sv xc dom gf φ rs iv ≔ ((rz ↦ ((tsz ↦ ((ids ↦ ((rcs ↦ (⊗ ⊤ ((∨ (≐ dom 111010001) (≐ dom 111011100)) (outI_sv dom xc tsz (⫴ (i ab ↦ (fcl_sv (nth gf i) ab)) ids (⫶ (r ↦ (▶ (▶ (▶ r)))) rs))) (outR_sv xc (rq_sv dom gf ids tsz) rcs)))) (⫴ (i k ↦ (rcf_sv (nth gf i) k)) ids (rkl_sv ids ⊥)))) (⫶ (r ↦ (◀ (▶ (▶ r)))) rs))) (cells_sv φ rz rs))) (⫶ (f ↦ ((≐ (mod (deg f) 1100) 0) 1 11101)) gf))
+⍝ over ℚ an irrational root is not a point of the line: its cell is true only if both neighbours are (so the bounds come out strict)
+rq_sv ∶ ℚ → 𝔏 (𝔏 ℤ) → 𝔏 ℕ → 𝔏 𝔹 → 𝔏 𝔹
+rq_sv dom gf ids ts ≔ ((≐ dom 1101) (rqf_sv gf ids ts) ts)
+rqf_sv ∶ 𝔏 (𝔏 ℤ) → 𝔏 ℕ → 𝔏 𝔹 → 𝔏 𝔹
+rqf_sv gf ids ts ≔ (ts (rz rest ↦ (∷ rz (rqg_sv gf ids rz rest))) ⊥)
+rqg_sv ∶ 𝔏 (𝔏 ℤ) → 𝔏 ℕ → 𝔹 → 𝔏 𝔹 → 𝔏 𝔹
+rqg_sv gf ids l ts ≔ (ids (i is ↦ (ts (p rest ↦ (rest (r rest2 ↦ (∷ ((≻ (deg (nth gf i)) 1) (∧ l r) p) (∷ r (rqg_sv gf is r rest2)))) ⊥)) ⊥)) ⊥)
+⍝ ============================================================================================================
+⍝ 7c. one complex unknown (ℂ, ℚ(i), ℤ[i]).  Only equalities and inequalities make sense.  The roots of the atoms are grouped into
+⍝ BLOCKS: monic polynomials that are either linear (a Gaussian rational root), quadratic with no Gaussian root (irreducible over
+⍝ ℚ(i)), or of higher degree (kept symbolic).  An atom is true on all roots of a block or on none (its truth is "the block divides the
+⍝ atom's polynomial"), so the formula is evaluated once per block and once for a generic point.
+gl_sv ∶ ℚ[i] → 𝔏 ℚ[i]
+gl_sv r ≔ (∷ (⊖ r) (∷ 1 ⊥))
+blf_sv ∶ 𝔓 (𝔏 ℤ) ℕ → 𝔏 (𝔏 ℚ[i])
+blf_sv fm ≔ ((f ↦ ((≐ (deg f) 1100) ((t ↦ ((≐ (▶ (▶ t)) 11101) (∷ (gl_sv (⊟ (◀ t) (⊠ (◀ (▶ t)) 11))) (∷ (gl_sv (⊞ (◀ t) (⊠ (◀ (▶ t)) 11))) ⊥)) (∷ (polymonic f) ⊥))) (qd_sv f)) (∷ (polymonic f) ⊥))) (◀ fm))
+blc_sv ∶ 𝔏 ℚ[i] → 𝔏 (𝔏 ℚ[i])
+blc_sv pl ≔ ((rts ↦ ((rm ↦ (⧺ (⫶ gl_sv rts) ((≻ (deg rm) 0) (∷ (polymonic rm) ⊥) ⊥))) (polyquo (sqfree pl) (polyfromroots rts)))) (ratroots pl))
+blk_sv ∶ 𝔏 ℚ[i] → 𝔏 (𝔏 ℚ[i])
+blk_sv pl ≔ ((∀ₗ (c ↦ (≐ (ℑ c) 0)) pl) (concat (⫶ blf_sv (▶ (polyfactor pl)))) (blc_sv pl))
+addb_sv ∶ 𝔏 ℚ[i] → 𝔏 (𝔏 ℚ[i]) → 𝔏 (𝔏 ℚ[i])
+addb_sv b acc ≔ ((∃ₗ (g ↦ (polyeq b g)) acc) acc (⧺ acc (∷ b ⊥)))
+⍝ approximate √|d| (from below, to 2⁻³⁰), used only to order the roots
+apr_sv ∶ ℤ → ℚ
+apr_sv d ≔ (÷ (isqrt (⊠ (abs d) (^ 1100 11101000000010000))) (^ 1100 110000011100))
+qk_sv ∶ ℚ → ℚ → ℤ → 𝔓 α α
+qk_sv u v d ≔ ((a ↦ ((≻ d 0) (⊗ (⊗ (⊟ u (⊠ v a)) 0) (⊗ (⊞ u (⊠ v a)) 0)) (⊗ (⊗ u (⊖ (⊠ v a))) (⊗ u (⊠ v a))))) (apr_sv d))
+⍝ the explicit roots of a block as entries (key, code), key = (Re, Im) approximately;  [] for a block of degree ≥ 3
+bq_sv ∶ 𝔏 ℚ[i] → 𝔏 α
+bq_sv b ≔ ((∀ₗ (c ↦ (≐ (ℑ c) 0)) b) ((t ↦ ((k ↦ ((cd ↦ (∷ (⊗ (◀ k) (◀ cd)) (∷ (⊗ (▶ k) (▶ cd)) ⊥))) (qrc_sv (◀ t) (◀ (▶ t)) (▶ (▶ t))))) (qk_sv (◀ t) (◀ (▶ t)) (▶ (▶ t))))) (qd_sv (polyprimitive b))) ((u ↦ ((w ↦ ((T ↦ (∷ (⊗ (⊗ (ℜ u) (ℑ u)) ((≐ u 0) (un_sv ᶜ⊖ T) (bi_sv ᶜ⊟ (cn_sv u) T))) (∷ (⊗ (⊗ (ℜ u) (ℑ u)) ((≐ u 0) T (bi_sv ᶜ⊞ (cn_sv u) T))) ⊥))) (un_sv ᶜ√ (cn_sv w)))) (⊟ (⊠ u u) (nth b 0)))) (÷ (⊖ (nth b 1)) 1100)))
+bre_sv ∶ 𝔏 ℚ[i] → 𝔏 α
+bre_sv b ≔ ((≐ (deg b) 1) ((r ↦ (∷ (⊗ (⊗ (ℜ r) (ℑ r)) (cn_sv r)) ⊥)) (⊖ (nth b 0))) ((≐ (deg b) 1100) (bq_sv b) ⊥))
+kle_sv ∶ α → α → 𝔹
+kle_sv k l ≔ (∨ (≺ (◀ k) (◀ l)) (∧ (≐ (◀ k) (◀ l)) (⩽ (▶ k) (▶ l))))
+insk_sv ∶ α → 𝔏 α → 𝔏 α
+insk_sv e ξ ≔ (ξ (h t ↦ ((kle_sv (◀ e) (◀ h)) (∷ e ξ) (∷ h (insk_sv e t)))) (∷ e ⊥))
+⍝ blocks of a polynomial as a statement p(x) = 0 / ≠ 0 (kept symbolic)
+pm_sv ∶ ℕ → ℕ → 𝔏 ℚ[i] → α
+pm_sv ν j pl ≔ (reverse (concat (⫴ (c k ↦ ((≐ c 0) ⊥ (∷ (⊗ c (⫶ (m ↦ ((≐ m j) k 0)) (⍳ ν))) ⊥))) pl (⍳ (ℓ pl)))))
+ats_sv ∶ ℕ → α → 𝔏 α
+ats_sv j ξ ≔ ((≐ (◀ ξ) 1) (∷ (⊗ (◀ (▶ ξ)) (pol_sv j (▶ (▶ ξ)))) ⊥) ((∨ (≐ (◀ ξ) 1100) (≐ (◀ ξ) 1101)) (⧺ (ats_sv j (◀ (▶ ξ))) (ats_sv j (▶ (▶ ξ)))) ⊥))
+evz_sv ∶ ℕ → (𝔏 ℚ[i] → 𝔹) → α → 𝔹
+evz_sv j ρ ξ ≔ ((≐ (◀ ξ) 0) (▶ ξ) ((≐ (◀ ξ) 1) ((z ↦ ((≐ (◀ (▶ ξ)) 0) z (¬ z))) (ρ (pol_sv j (▶ (▶ ξ))))) ((≐ (◀ ξ) 1100) (∧ (evz_sv j ρ (◀ (▶ ξ))) (evz_sv j ρ (▶ (▶ ξ)))) (∨ (evz_sv j ρ (◀ (▶ ξ))) (evz_sv j ρ (▶ (▶ ξ)))))))
+⍝ the blocks of the domain: ℂ all;  ℚ(i) the linear ones;  ℤ[i] the linear ones with a Gaussian integer root
+dfb_sv ∶ ℚ → 𝔏 ℚ[i] → 𝔹
+dfb_sv dom b ≔ ((≐ dom 0) ⊤ (∧ (≐ (deg b) 1) ((≐ dom 1100) ⊤ (≐ (denom (nth b 0)) 1))))
+⍝ symbolic blocks must not share only SOME of their roots with an atom
+okb_sv ∶ 𝔏 α → 𝔏 ℚ[i] → 𝔹
+okb_sv pls b ≔ ((⩽ (deg b) 1100) ⊤ (∀ₗ (a ↦ ((g ↦ (∨ (polyeq g (∷ 1 ⊥)) (polyeq g b))) (polygcd (▶ a) b))) pls))
+cz_sv ∶ ℕ → 𝔏 𝔔 → ℕ → 𝔔 → ℚ → α → 𝔓 𝔹 𝔔
+cz_sv ν oc j xc dom φ ≔ ((pls ↦ ((∀ₗ (a ↦ (≺ (◀ a) 1100)) pls) ((all ↦ ((bs ↦ ((∀ₗ (okb_sv pls) all) (czz_sv ν oc j xc φ bs) ko_sv)) (filter (dfb_sv dom) all))) (foldl (acc pl ↦ (foldl (a b ↦ (addb_sv b a)) acc (blk_sv (▶ pl)))) ⊥ pls)) ko_sv)) (ats_sv j φ))
+czz_sv ∶ ℕ → 𝔏 𝔔 → ℕ → 𝔔 → α → 𝔏 (𝔏 ℚ[i]) → 𝔓 𝔹 𝔔
+czz_sv ν oc j xc φ bs ≔ ((g ↦ ((sel ↦ (⊗ ⊤ ((g (czr_sv ν oc j xc ⊤ sel) (czr_sv ν oc j xc ⊥ sel))))) (filter (b ↦ (⊻ (evz_sv j (pl ↦ (∅ (polyrem pl b))) φ) g)) bs))) (evz_sv j (pl ↦ ⊥) φ))
+czr_sv ∶ ℕ → 𝔏 𝔔 → ℕ → 𝔔 → 𝔹 → 𝔏 (𝔏 ℚ[i]) → 𝔔
+czr_sv ν oc j xc g sel ≔ ((es ↦ ((sy ↦ ((cs ↦ (g (andl_sv cs) (orl_sv cs))) (⧺ (⫶ (e ↦ (bi_sv ((g ᶜ≠ ᶜ≐)) xc (▶ e))) es) sy))) (⫶ (b ↦ (outA_sv oc ((g 1 0)) (pm_sv ν j b))) (filter (b ↦ (≻ (deg b) 0)) (filter (b ↦ (∅ (bre_sv b))) sel))))) (foldl (a b ↦ (insk_sv b a)) ⊥ (concat (⫶ bre_sv sel))))
+⍝ ============================================================================================================
+⍝ 7d. several unknowns.  The formula is first rewritten atom by atom (ρ: which variables are real):
+⍝   an equality with complex coefficients over real variables splits into its real and imaginary parts;
+⍝   a "sum of even powers" (all non-constant monomials of even degree in every variable, coefficients of one sign) is bounded by its
+⍝   constant term, which decides it (x² + y² + 1 > 0 is true, x² + y² = 0 is x = 0 ∧ y = 0).
+⍝ Then the conjuncts that are affine equations are solved by Gauss–Jordan elimination (the pivot variables are substituted into the other
+⍝ conjuncts, which may become affine in turn), and the conjuncts that are left about one variable are solved by the one-variable solvers.
+idx_sv ∶ ℕ → α → 𝔏 ℕ
+idx_sv ν e ≔ (filter (j ↦ (¬ (≐ (nth e j) 0))) (⍳ ν))
+adds_sv ∶ 𝔏 ℕ → 𝔏 (𝔏 ℕ) → 𝔏 (𝔏 ℕ)
+adds_sv s acc ≔ ((∃ₗ (u ↦ (eqlist ≐ s u)) acc) acc (⧺ acc (∷ s ⊥)))
+zm_sv ∶ ℕ → 𝔏 ℕ → α
+zm_sv ν s ≔ (foldr (j acc ↦ (fOr_sv (fA_sv 0 (mpv_sv ν j)) acc)) (fC_sv ⊥) s)
+zset_sv ∶ ℕ → α → α
+zset_sv ν nc ≔ (foldr (s acc ↦ (fAnd_sv (zm_sv ν s) acc)) (fC_sv ⊤) (foldl (a t ↦ (adds_sv (idx_sv ν (▶ t)) a)) ⊥ nc))
+⍝ the decision table for  c₀ + (non-negative terms) rel 0
+sosD_sv ∶ ℕ → ℕ → ℚ → α → α → α
+sosD_sv ν r c nc lv ≔ ((Z ↦ ((≐ r 0) ((≻ c 0) (fC_sv ⊥) ((≐ c 0) Z lv)) ((≐ r 1) ((≻ c 0) (fC_sv ⊤) ((≐ c 0) (negΦ_sv Z) lv)) ((≐ r 1100) ((⩾ c 0) (fC_sv ⊥) lv) ((≐ r 1101) ((≻ c 0) (fC_sv ⊥) ((≐ c 0) Z lv)) ((≐ r 111010000) ((≻ c 0) (fC_sv ⊤) ((≐ c 0) (negΦ_sv Z) lv)) ((⩾ c 0) (fC_sv ⊤) lv))))))) (zset_sv ν nc))
+sosG_sv ∶ ℕ → 𝔏 𝔹 → ℕ → α → α
+sosG_sv ν ρ r P ≔ ((nc ↦ ((∧ (allreal_sv ρ P) (∧ (∀ₗ (c ↦ (≐ (ℑ c) 0)) (⫶ ◀ P)) (∧ (∀ₗ (t ↦ (∀ₗ (k ↦ (≐ (mod k 1100) 0)) (▶ t))) nc) (∨ (∀ₗ (t ↦ (≻ (◀ t) 0)) nc) (∀ₗ (t ↦ (≺ (◀ t) 0)) nc))))) ((≻ (◀ (hd nc)) 0) (sosD_sv ν r (cst_sv P) nc (fA_sv r P)) (sosD_sv ν (mir_sv r) (⊖ (cst_sv P)) nc (fA_sv r P))) (fA_sv r P))) (nocst_sv P))
+sosF_sv ∶ ℕ → 𝔏 𝔹 → ℕ → α → α
+sosF_sv ν ρ r P ≔ ((isc_sv P) (cat_sv r (cst_sv P)) (sosG_sv ν ρ r P))
+atF_sv ∶ ℕ → 𝔏 𝔹 → ℕ → α → α
+atF_sv ν ρ r P ≔ ((∧ (≺ r 1100) (∧ (¬ (∀ₗ (c ↦ (≐ (ℑ c) 0)) (⫶ ◀ P))) (allreal_sv ρ P))) ((A ↦ ((B ↦ ((≐ r 0) (fAnd_sv (sosF_sv ν ρ 0 A) (sosF_sv ν ρ 0 B)) (fOr_sv (sosF_sv ν ρ 1 A) (sosF_sv ν ρ 1 B)))) (mpmap_sv ℑ P))) (mpmap_sv ℜ P)) (sosF_sv ν ρ r P))
+fixΦ_sv ∶ ℕ → 𝔏 𝔹 → α → α
+fixΦ_sv ν ρ ξ ≔ ((≐ (◀ ξ) 1) (atF_sv ν ρ (◀ (▶ ξ)) (▶ (▶ ξ))) ((≐ (◀ ξ) 1100) (fAnd_sv (fixΦ_sv ν ρ (◀ (▶ ξ))) (fixΦ_sv ν ρ (▶ (▶ ξ)))) ((≐ (◀ ξ) 1101) (fOr_sv (fixΦ_sv ν ρ (◀ (▶ ξ))) (fixΦ_sv ν ρ (▶ (▶ ξ)))) ξ)))
+⍝ substitution of x_j by the polynomial rep
+sub_sv ∶ ℕ → ℕ → α → α → α
+sub_sv ν j rep P ≔ (foldr (t acc ↦ (mpadd_sv acc (mpmul_sv (∷ (⊗ (◀ t) (⫴ (k m ↦ ((≐ m j) 0 k)) (▶ t) (⍳ ν))) ⊥) (mppow_sv ν rep (nth (▶ t) j))))) ⊥ P)
+subΦ_sv ∶ ℕ → 𝔏 𝔹 → ℕ → α → α → α
+subΦ_sv ν ρ j rep ξ ≔ ((≐ (◀ ξ) 1) (atF_sv ν ρ (◀ (▶ ξ)) (sub_sv ν j rep (▶ (▶ ξ)))) ((≐ (◀ ξ) 1100) (fAnd_sv (subΦ_sv ν ρ j rep (◀ (▶ ξ))) (subΦ_sv ν ρ j rep (▶ (▶ ξ)))) ((≐ (◀ ξ) 1101) (fOr_sv (subΦ_sv ν ρ j rep (◀ (▶ ξ))) (subΦ_sv ν ρ j rep (▶ (▶ ξ)))) ξ)))
+⍝ affine equations and Gauss–Jordan elimination
+cj_sv ∶ α → 𝔏 α
+cj_sv ξ ≔ ((≐ (◀ ξ) 1100) (⧺ (cj_sv (◀ (▶ ξ))) (cj_sv (▶ (▶ ξ)))) (∷ ξ ⊥))
+aff_sv ∶ α → 𝔹
+aff_sv P ≔ (∧ (¬ (isc_sv P)) (∀ₗ (t ↦ (⩽ (sumof (▶ t)) 1)) P))
+isaff_sv ∶ α → 𝔹
+isaff_sv c ≔ (∧ (≐ (◀ c) 1) (∧ (≐ (◀ (▶ c)) 0) (aff_sv (▶ (▶ c)))))
+ldv_sv ∶ α → ℕ
+ldv_sv P ≔ (fi_sv (⫶ (k ↦ (≐ k 1)) (▶ (hd P))))
+lco_sv ∶ ℕ → α → ℚ[i]
+lco_sv j P ≔ (foldr (t acc ↦ ((≐ (nth (▶ t) j) 1) (◀ t) acc)) 0 P)
+elm_sv ∶ ℕ → α → α → α
+elm_sv j r row ≔ (mpadd_sv row (mpscale_sv (⊖ (lco_sv j row)) r))
+insr_sv ∶ α → 𝔏 α → 𝔏 α
+insr_sv r ξ ≔ (ξ (h t ↦ ((cmp_sv (▶ (hd r)) (▶ (hd h))) (∷ h (insr_sv r t)) (∷ r ξ) (∷ r ξ))) (∷ r ⊥))
+ech_sv ∶ 𝔏 α → 𝔏 α → 𝔓 𝔹 (𝔏 α)
+ech_sv done rows ≔ ((rs ↦ ((∃ₗ isc_sv rs) (⊗ ⊥ ⊥) ((∅ rs) (⊗ ⊤ done) ((srt ↦ ((r ↦ ((j ↦ (ech_sv (⧺ (⫶ (elm_sv j r) done) (∷ r ⊥)) (⫶ (elm_sv j r) (⌄ srt)))) (ldv_sv r))) (mpscale_sv (÷ 1 (◀ (hd (hd srt)))) (hd srt)))) (foldr insr_sv ⊥ rs))))) (filter (r ↦ (¬ (∅ r))) rows))
+⍝ the loop: conj = the conjuncts left, piv = the pivot rows so far;  (⊤, (pivots, conjuncts)) or (⊥, _) when inconsistent
+ll_sv ∶ ℕ → 𝔏 𝔹 → 𝔏 α → 𝔏 α → 𝔓 𝔹 (𝔓 (𝔏 α) (𝔏 α))
+ll_sv ν ρ piv conj ≔ ((rows ↦ ((∅ rows) (⊗ ⊤ (⊗ piv conj)) ((e ↦ ((◀ e) ((np ↦ (ll_sv ν ρ (⧺ (⫶ (row ↦ (foldl (q n ↦ (elm_sv (ldv_sv n) n q)) row np)) piv) np) (foldl (cs n ↦ (⫶ (c ↦ (subΦ_sv ν ρ (ldv_sv n) (mpadd_sv (mpv_sv ν (ldv_sv n)) (mpneg_sv n)) c)) cs)) (filter (c ↦ (¬ (isaff_sv c))) conj) np))) (▶ e)) (⊗ ⊥ ⊥))) (ech_sv ⊥ rows)))) (⫶ (c ↦ (▶ (▶ c))) (filter isaff_sv conj)))
+⍝ the pieces of the answer, each with the index of its first variable:  pivot rows, one-variable groups, the others
+single_sv ∶ ℕ → α → 𝔹
+single_sv ν c ≔ (∧ (¬ (hasO_sv c)) (≐ (nt_sv (vuse_sv ν c)) 1))
+varof_sv ∶ ℕ → α → ℕ
+varof_sv ν c ≔ (fi_sv (vuse_sv ν c))
+insp_sv ∶ 𝔓 ℕ 𝔔 → 𝔏 (𝔓 ℕ 𝔔) → 𝔏 (𝔓 ℕ 𝔔)
+insp_sv e ξ ≔ (ξ (h t ↦ ((⩽ (◀ e) (◀ h)) (∷ e ξ) (∷ h (insp_sv e t)))) (∷ e ⊥))
+asm_sv ∶ ℕ → 𝔏 𝔔 → 𝔏 α → 𝔏 α → 𝔏 α → 𝔔
+asm_sv ν oc vi piv conj ≔ (andl_sv (⫶ ▶ (foldr insp_sv ⊥ (⧺ (⫶ (r ↦ (⊗ (ldv_sv r) (outA_sv oc 0 r))) piv) (⧺ (⫶ (j ↦ (grp_sv ν oc vi conj j)) (filter (j ↦ (∃ₗ (c ↦ (∧ (single_sv ν c) (≐ (varof_sv ν c) j))) conj)) (⍳ ν))) (⫶ (c ↦ (⊗ ((∃ₗ (b ↦ b) (vuse_sv ν c)) (varof_sv ν c) ν) (out_sv oc c))) (filter (c ↦ (¬ (single_sv ν c))) conj)))))))
+grp_sv ∶ ℕ → 𝔏 𝔔 → 𝔏 α → 𝔏 α → ℕ → 𝔓 ℕ 𝔔
+grp_sv ν oc vi conj j ≔ ((cs ↦ ((r ↦ (⊗ j ((◀ r) (▶ r) (andl_sv (⫶ (out_sv oc) cs))))) (sv_sv ν oc j (nth vi j) (foldr fAnd_sv (fC_sv ⊤) cs)))) (filter (c ↦ (∧ (single_sv ν c) (≐ (varof_sv ν c) j))) conj))
+msim_sv ∶ ℕ → 𝔏 α → 𝔏 𝔹 → α → 𝔔
+msim_sv ν vi ρ φ ≔ ((φz ↦ ((cs ↦ ((∃ₗ (c ↦ (∧ (isC_sv c) (¬ (▶ c)))) cs) fl_sv ((l ↦ ((◀ l) (asm_sv ν (⫶ ◀ vi) vi (◀ (▶ l)) (filter (c ↦ (¬ (isC_sv c))) (▶ (▶ l)))) fl_sv)) (ll_sv ν ρ ⊥ cs)))) (cj_sv φz))) (fixΦ_sv ν ρ φ))
+⍝ ============================================================================================================
+⍝ 8. the simplifier
+⍝ the index of the first true entry, and the number of true entries
+fi_sv ∶ 𝔏 𝔹 → ℕ
+fi_sv ξ ≔ (ξ (b r ↦ (b 0 (⊞ 1 (fi_sv r)))) 0)
+nt_sv ∶ 𝔏 𝔹 → ℕ
+nt_sv ξ ≔ (sumof (⫶ ι ξ))
+⍝ the formula φ over the variables vi (records (output code, (real?, domain))): solved when it is about one variable, else printed
+⍝ as it is (every relation as "polynomial rel constant")
+fin_sv ∶ ℕ → 𝔏 α → α → 𝔔
+fin_sv ν vi φ ≔ ((hasO_sv φ) (out_sv (⫶ ◀ vi) φ) ((vu ↦ ((≐ (nt_sv vu) 1) ((j ↦ ((r ↦ ((◀ r) (▶ r) (out_sv (⫶ ◀ vi) φ))) (sv_sv ν (⫶ ◀ vi) j (nth vi j) φ))) (fi_sv vu)) ((≐ (nt_sv vu) 0) (out_sv (⫶ ◀ vi) φ) (msim_sv ν vi (⫶ (v ↦ (◀ (▶ v))) vi) φ)))) (vuse_sv ν φ)))
+⍝ one variable: real domains (ℝ ℚ ℤ ℕ) → the cell method;  complex domains (ℂ ℚ(i) ℤ[i]) → roots grouped in blocks
+sv_sv ∶ ℕ → 𝔏 𝔔 → ℕ → α → α → 𝔓 𝔹 𝔔
+sv_sv ν oc j v φ ≔ ((cplx_sv (▶ (▶ v))) (cz_sv ν oc j (◀ v) (▶ (▶ v)) φ) (sr_sv j (◀ v) (▶ (▶ v)) φ))
+sim_sv ∶ 𝔏 (𝔓 𝔇 𝔔) → 𝔔 → 𝔏 (𝔓 𝔇 ℚ[i]) → 𝔔
+sim_sv ε ξ us ≔ ((σ ↦ ((ν ↦ ((mv ↦ ((vi ↦ (fin_sv ν vi (pf_sv ε ν (▶ mv) (⫶ (v ↦ (◀ (▶ v))) vi) ξ))) (◀ mv))) (mv_sv ν σ 0 us))) (cnt_sv σ us))) (∧ (hasop_sv ξ) (∃ₗ (u ↦ (cplx_sv (▶ u))) us)))
+simplify′ ∶ 𝔏 (𝔓 𝔇 𝔔) → 𝔔 → Ω   ⍝ the simplest form of the statement ξ (a code), given the table ε of the definitions it uses
+simplify′ ε ξ ≔ ((ψ ↦ ((us ↦ ((∅ us) ((fo ε fuel ψ) fl_sv ψ tr_sv) (sim_sv ε ψ us))) (srt_sv ε (unk_sv ε ψ)))) (exp_sv ε dep_sv ξ))

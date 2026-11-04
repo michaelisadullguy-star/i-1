@@ -1,0 +1,1 @@
+main in Stream(\Q) := logb(2 - 1/3*i, -2*i)

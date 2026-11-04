@@ -1,0 +1,26 @@
+[package]
+name = "rustimo"
+version = "0.1.0"
+edition = "2021"
+authors = ["Yinhao Wang <yinhao.wang@outlook.com>"]
+description = "Rustimo, the Rust interpreter of the i-1 language (a parallel core next to Pymo and Haskimo)"
+license-file = "../LICENSE"
+publish = false
+
+# Nothing from crates.io: the standard library only (as Pymo uses only the Python standard library and Haskimo only GHC's boot libraries).
+[dependencies]
+
+[[bin]]
+name = "rustimo"
+path = "src/main.rs"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+debug = false
+
+# for profiling (valgrind / perf need symbols):  cargo build --profile profiling --offline
+[profile.profiling]
+inherits = "release"
+debug = true

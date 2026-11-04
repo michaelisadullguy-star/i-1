@@ -1,0 +1,1 @@
+main in List(\ZZ) := polyfromroots([4, 9, -2])
