@@ -85,7 +85,7 @@ Spec is bin with readable glyphs, plus three conveniences that the translator re
 * **literals**: `'λ'` is a `Char`, `"text"` a `String` ([§8](#8-characters-and-strings)); escapes `\n \t \\ \" \'`;
 * **comments**: everything after the name `⍝` up to the end of the line.
 
-The reserved glyphs are `≔` (definition), `↦` (lambda), `∶` (class).  Class variables are `α β γ`.  Lambda binders **must** carry a class: `(ξ ∶ ℚ ↦ ÷ ξ 1100)`; definition parameters take their classes from the declaration.
+The reserved glyphs are `≔` (definition), `↦` (lambda), `∶` (class).  Class variables are `α β γ δ ε`.  Lambda binders **must** carry a class: `(ξ ∶ ℚ ↦ ÷ ξ 1100)`; definition parameters take their classes from the declaration.
 
 ### 4.4 Human notation
 

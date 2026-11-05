@@ -1,0 +1,2 @@
+error in p1.imo: u is declared but never defined, so it is an unknown, and an unknown has one class
+error in p1.imo: main: u is overloaded (2 declarations): use it applied to arguments

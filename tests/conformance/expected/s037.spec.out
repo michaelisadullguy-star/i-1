@@ -1,0 +1,2 @@
+again ∶ (𝔏 𝕊)
+again ≔ (∷ "héllo" (∷ "with \"quotes\"" (∷ "" ⊘)))

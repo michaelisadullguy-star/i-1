@@ -1,0 +1,21 @@
+-- psd.hum.imo -- the sign of a quadratic polynomial, exactly (human notation; lib/psd.imo is its translation, made by libsrc/build.sh).
+-- A polynomial of lib/polynf.imo is a list of terms (coefficient, monomial); a monomial is a list of (atom, exponent).  A polynomial of degree 2 is (x, 1) M (x, 1)^T for a symmetric matrix M of rationals
+-- (x the atoms, the last coordinate the constant): it is non-negative for all values exactly when M is positive semidefinite.  The elimination below (LDL^T with exact rationals) decides that, and gives
+-- the minimum s of the polynomial when it is bounded below: then p >= s everywhere and p = s somewhere, so p >= 0 iff s >= 0 and p > 0 iff s > 0.
+-- quadsign p is 3 if p > 0 for all values, 2 if p >= 0 (and 0 somewhere), 0 if p < 0 for all, 1 if p <= 0 (and 0 somewhere), 4 when this analysis cannot tell (or p is not of degree 2).
+_psdsum(xs) in List(\QQ) -> \QQ := foldl((a in \QQ |-> (b in \QQ |-> a + b)), 0, xs)
+-- the first row and column are eliminated: a positive pivot changes the rest by the Schur complement, a zero pivot needs a zero row (and is dropped), a negative pivot means not semidefinite
+_psdrowzero(r) in List(\QQ) -> Bool := forall((x in \QQ |-> x == 0), r)
+_psd(m) in List(List(\QQ)) -> List(\QQ) := if(length(m) == 1, [head(head(m))], if(head(head(m)) lt 0, [], if(head(head(m)) == 0, if(_psdrowzero(head(m)), _psd(map(tail, tail(m))), []), _psd(map((r in List(\QQ) |-> zipwith((a in \QQ |-> (b in \QQ |-> a - head(r) * b / head(head(m)))), tail(r), tail(head(m)))), tail(m))))))
+_psdneg(m) in List(List(\QQ)) -> List(List(\QQ)) := map((r in List(\QQ) |-> map((x in \QQ |-> 0 - x), r)), m)
+_psdclass(a, b) in List(\QQ) -> List(\QQ) -> \NN := if((not isnil(a)) and (head(a) gt 0), 3, if((not isnil(a)) and (head(a) == 0), 2, if((not isnil(b)) and (head(b) gt 0), 0, if((not isnil(b)) and (head(b) == 0), 1, 4))))
+_psdatoms(p) in List(Pair(\Q, List(Pair(Term, \NN)))) -> List(Term) := nubby(teq, concatmap((t in Pair(\Q, List(Pair(Term, \NN))) |-> map(fst, snd(t))), p))
+_psdpos(a, atoms) in Term -> List(Term) -> \NN := if(teq(a, head(atoms)), 0, 1 + _psdpos(a, tail(atoms)))
+_psddeg(m) in List(Pair(Term, \NN)) -> \NN := sumof(map(snd, m))
+_psdokmono(m) in List(Pair(Term, \NN)) -> Bool := isnil(m) or ((length(m) == 1) and (snd(head(m)) leq 2)) or ((length(m) == 2) and (snd(head(m)) == 1) and (snd(head(tail(m))) == 1))
+_psdapplicable(p) in List(Pair(\Q, List(Pair(Term, \NN)))) -> Bool := forall((t in Pair(\Q, List(Pair(Term, \NN))) |-> (im(fst(t)) == 0) and _psdokmono(snd(t))), p) and exists((t in Pair(\Q, List(Pair(Term, \NN))) |-> _psddeg(snd(t)) == 2), p)
+-- the cell (i, j) of M that the term c.m contributes to; n is the index of the constant coordinate
+_psdcell(atoms, n, c, m, i, j) in List(Term) -> \NN -> \QQ -> List(Pair(Term, \NN)) -> \NN -> \NN -> \QQ := if(isnil(m), if((i == n) and (j == n), c, 0), if(length(m) == 1, if(snd(head(m)) == 2, if((i == _psdpos(fst(head(m)), atoms)) and (j == i), c, 0), if(((i == _psdpos(fst(head(m)), atoms)) and (j == n)) or ((j == _psdpos(fst(head(m)), atoms)) and (i == n)), c / 2, 0)), if(((i == _psdpos(fst(head(m)), atoms)) and (j == _psdpos(fst(head(tail(m))), atoms))) or ((j == _psdpos(fst(head(m)), atoms)) and (i == _psdpos(fst(head(tail(m))), atoms))), c / 2, 0)))
+_psdmat(p, atoms) in List(Pair(\Q, List(Pair(Term, \NN)))) -> List(Term) -> List(List(\QQ)) := map((i in \NN |-> map((j in \NN |-> _psdsum(map((t in Pair(\Q, List(Pair(Term, \NN))) |-> _psdcell(atoms, length(atoms), re(fst(t)), snd(t), i, j)), p))), upto(0, length(atoms)))), upto(0, length(atoms)))
+_psdsign(m) in List(List(\QQ)) -> \NN := _psdclass(_psd(m), _psd(_psdneg(m)))
+quadsign(p) in List(Pair(\Q, List(Pair(Term, \NN)))) -> \NN := if(_psdapplicable(p), _psdsign(_psdmat(p, _psdatoms(p))), 4)

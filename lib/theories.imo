@@ -1,0 +1,79 @@
+⍝ lib/theories.imo — spec notation — trusted prelude, part 32: the registry of theories, their compiled forms, and the first packages: core (logic and equality), arith (commutative rings and
+⍝ fields, ordered), reals (the default domain), peano (the natural numbers).  A package that is not default is switched on with  use "name" env  (lib/theory.imo).
+⍝ A theory is a value built by mktheory; the strings are written with  (lines "a\nb")  so that a theory is one definition.  Precedences: iff 1, imp 1, or 2, and 3, not 4, relations 5,
+⍝ + and - 6, * and / and unary - 7, ^ 8.
+registry ∶ 𝔏 Theory      ⍝ every theory of the library, in the order of definition
+registry ≔ (∷ thcore (∷ thclassical (∷ thintuitionistic (∷ tharith (∷ threals (∷ thpeano (∷ thintegers (∷ thgroup (∷ thabelian (∷ thsets (∷ thlattice (∷ thzfc (∷ thetcs (∷ thprob (∷ thpiecewise (∷ thincidence (∷ theuclid (∷ thhilbert (∷ thhyperbolic (∷ thelliptic (∷ thtopology (∷ thmonoid (∷ thcmonoid ⊘)))))))))))))))))))))))
+⍝ ---- compiling: each theory once, parsed with the operators of all it requires
+mkhooks ∶ 𝔏 (𝔓 𝕊 α) → Dict (𝔏 α)
+mkhooks ξ ≔ (foldl (η ζ ↦ (dkwith (θ ι ↦ (⧺ ι θ)) (◀ (symid (◀ ζ))) (∷ (▶ ζ) ⊘) η)) ⊘ ξ)
+compilesig ∶ 𝕊 → Sig      ⍝ the operators of a theory and of its requirements, the theory itself last (it wins on a clash)
+compilesig ξ ≔ (foldl (η ζ ↦ (sigmerge (mksig (thsig (hd (thlookup ζ)))) η)) (⊗ ⊘ ⊘) (thclosure ξ))
+compile ∶ Theory → α
+compile ξ ≔ (⊗ (mksig (thsig ξ)) (⊗ (mkrules (compilesig (thname ξ)) (thrules ξ)) (mkhooks (thhooks ξ))))
+compiledtable ∶ Dict α
+compiledtable ≔ (foldl (η ζ ↦ (dputs (thname ζ) (compile ζ) η)) ⊘ registry)
+compiledof ∶ 𝕊 → α
+compiledof ξ ≔ (sdgetd ξ (⊗ (⊗ ⊘ ⊘) (⊗ ⊘ ⊘)) compiledtable)
+envof ∶ 𝔏 𝕊 → Env      ⍝ the environment of a list of theory names (requirements first)
+envof ξ ≔ (mkenv (foldl (η ζ ↦ (sigmerge (◀ (compiledof ζ)) η)) (⊗ ⊘ ⊘) ξ) (foldl (η ζ ↦ (dunionwith (θ ι ↦ (⧺ θ ι)) η (◀ (▶ (compiledof ζ))))) ⊘ ξ) (foldl (η ζ ↦ (dunionwith (θ ι ↦ (⧺ θ ι)) η (▶ (▶ (compiledof ζ))))) ⊘ ξ) ξ 110000000000)
+⍝ ---- core: propositional logic (the connectives and, or, not, imp, iff, xor, ite are decided by diagrams, lib/boolalg.imo) and equality
+corehook ∶ Env → Term → 𝔏 Term
+corehook ξ η ≔ ((a ↦ ((b ↦ ((teq a b) (∷ ttrue ⊘) ((∧ (tisnum a) (tisnum b)) (∷ tfalse ⊘) ⊘))) (hd (⌄ (targs η))))) (hd (targs η)))
+thcore ∶ Theory
+thcoresig ∶ 𝔏 𝕊
+thcoresig ≔ (lines "infixr 3 ∧ and ACI\ninfixr 3 && and ACI\ninfixr 3 and and ACI\ninfixr 2 ∨ or ACI\ninfixr 2 || or ACI\ninfixr 2 or or ACI\nprefix 4 ¬ not\nprefix 4 ~ not\nprefix 4 not not\ninfixr 1 ⇒ imp\ninfixr 1 => imp\ninfixr 1 implies imp\ninfix 1 ⇔ iff\ninfix 1 <=> iff\ninfix 1 iff iff\ninfixr 3 ⊻ xor AC\ninfixr 3 xor xor AC\nconst 0 ⊤ true\nconst 0 true true\nconst 0 ⊥ false\nconst 0 false false\nfn 0 ite ite\ninfix 5 = eq C\ninfix 5 ≠ neq\ninfix 5 != neq")
+thcorerules ∶ 𝔏 𝕊
+thcorerules ≔ (lines "neq(x, y) ==> not(eq(x, y))\neq(x, x) ==> true")
+thcoreaxioms ∶ 𝔏 𝕊
+thcoreaxioms ≔ (lines "x = x (reflexivity)\nx = y ⇒ y = x (symmetry)\n(x = y ∧ y = z) ⇒ x = z (transitivity)\nthe truth tables of ¬ ∧ ∨ ⇒ ⇔ (classical, two-valued)\nexcluded middle: p ∨ ¬p")
+thcoretheorems ∶ 𝔏 𝕊
+thcoretheorems ≔ (lines "x = x\n(x = y) ⇔ (y = x)\n(x = y ∧ y = z) ⇒ x = z\n(x = y) ⇒ (y = x)\n(p ∧ (p ⇒ q)) ⇒ q\n((p ⇒ q) ∧ (q ⇒ r)) ⇒ (p ⇒ r)\n(p ⇔ q) ⇔ ((p ⇒ q) ∧ (q ⇒ p))\np ⇒ p\n(p ∧ q) ⇒ p\np ⇒ (q ⇒ p)")
+thcoredoc ∶ 𝕊
+thcoredoc ≔ "the language of logic (and, or, not, imp, iff, xor, ite, true, false) and equality; the logic that decides it is chosen by the packages classical (default) or intuitionistic"
+thcore ≔ (mktheory "core" ⊘ ⊘ ⊤ thcoresig thcorerules (∷ (⊗ "eq" corehook) ⊘) thcoreaxioms thcoretheorems thcoredoc)
+⍝ ---- arith: commutative rings and fields, ordered: every arithmetic term has one normal form (lib/polynf.imo)
+tharith ∶ Theory
+tharithsig ∶ 𝔏 𝕊
+tharithsig ≔ (lines "infixl 6 + add AC\ninfixl 6 - sub\ninfixl 7 * mul AC\ninfixl 7 / rdiv\ninfixr 8 ^ pow\nprefix 7 - neg\ninfix 5 < lt\ninfix 5 <= le\ninfix 5 ≤ le\ninfix 5 > gt\ninfix 5 >= ge\ninfix 5 ≥ ge")
+tharithrules ∶ 𝔏 𝕊
+tharithrules ≔ (lines "gt(x, y) ==> lt(y, x)\nge(x, y) ==> le(y, x)")
+tharithaxioms ∶ 𝔏 𝕊
+tharithaxioms ≔ (lines "x + y = y + x\n(x + y) + z = x + (y + z)\nx + 0 = x\nx + (-x) = 0\nx * y = y * x\n(x * y) * z = x * (y * z)\nx * 1 = x\nx * (y + z) = x * y + x * z\n0 ≠ 1\nx ≠ 0 ⇒ x * (1 / x) = 1 (a field)\nx ≤ y ∨ y ≤ x, x ≤ y ∧ y ≤ x ⇒ x = y, x ≤ y ⇒ x + z ≤ y + z, 0 ≤ x ∧ 0 ≤ y ⇒ 0 ≤ x * y (an ordered field)")
+thariththeorems ∶ 𝔏 𝕊
+thariththeorems ≔ (lines "x + 0 = x\n0 + x = x\nx * 1 = x\nx * 0 = 0\nx + y = y + x\n(x + y) + z = x + (y + z)\nx * (y + z) = x * y + x * z\n(x + y)^2 = x^2 + 2 * x * y + y^2\n(x - y) * (x + y) = x^2 - y^2\nx + (-x) = 0\n(x + 1)^3 = x^3 + 3 * x^2 + 3 * x + 1\nx^2 - 2 * x + 1 = (x - 1)^2\nx < x + 1\n¬(x + 1 < x)\nx <= x\nx < y ⇒ x <= y\n(x + y) / 2 = x / 2 + y / 2\n2 + 3 * 4 = 14\n1 / 3 + 1 / 6 = 1 / 2")
+tharithdoc ∶ 𝕊
+tharithdoc ≔ "ordered commutative ring and field arithmetic with exact numbers: every polynomial identity is decided by normal forms"
+tharith ≔ (mktheory "arith" (∷ "core" ⊘) ⊘ ⊤ tharithsig tharithrules (∷ (⊗ "add" polyhook) (∷ (⊗ "sub" polyhook) (∷ (⊗ "neg" polyhook) (∷ (⊗ "mul" polyhook) (∷ (⊗ "pow" polyhook) (∷ (⊗ "rdiv" polyhook) (∷ (⊗ "eq" relhook) (∷ (⊗ "lt" relhook) (∷ (⊗ "le" relhook) ⊘))))))))) tharithaxioms thariththeorems tharithdoc)
+⍝ ---- reals: the default domain of the variables (even powers are ≥ 0)
+threals ∶ Theory
+threalsaxioms ∶ 𝔏 𝕊
+threalsaxioms ≔ (lines "the real numbers are a complete ordered field (completeness is not used by the simplifier)")
+threalstheorems ∶ 𝔏 𝕊
+threalstheorems ≔ (lines "x * x >= 0\nx^2 + y^2 >= 0\nx^2 + 1 > 0\n¬(x^2 + 1 = 0)\nx^4 >= 0\nx^2 * y^2 >= 0\n(x + 1)^2 >= 0\n(x - y)^2 >= 0\nx^2 + x + 1 > 0\nx^2 + 2 * x + 2 > 0\nx^2 + y^2 >= 2 * x * y\n4 * x^2 + 4 * x + 1 >= 0\na^2 + b^2 + c^2 >= a * b + b * c + c * a\n¬(x^2 + 2 * x + 2 <= 0)\n(x + y)^2 <= 2 * x^2 + 2 * y^2")
+threalsdoc ∶ 𝕊
+threalsdoc ≔ "the variables range over the reals: the squares x^2, x^4 … are non-negative"
+threals ≔ (mktheory "reals" (∷ "arith" ⊘) (∷ "peano" (∷ "integers" ⊘)) ⊤ ⊘ ⊘ ⊘ threalsaxioms threalstheorems threalsdoc)
+⍝ ---- peano: the natural numbers (the variables are ≥ 0; successor; discreteness).  Conflicts with the other domains
+thpeano ∶ Theory
+thpeanosig ∶ 𝔏 𝕊
+thpeanosig ≔ (lines "fn 0 S succ\nfn 0 pred pred")
+thpeanorules ∶ 𝔏 𝕊
+thpeanorules ≔ (lines "succ(x) ==> x + 1\nlt(x, y) ==> le(x + 1, y)")
+thpeanoaxioms ∶ 𝔏 𝕊
+thpeanoaxioms ≔ (lines "0 is a natural number\nevery natural number n has a successor S(n)\nS(n) ≠ 0\nS(m) = S(n) ⇒ m = n\nm + 0 = m\nm + S(n) = S(m + n)\nm * 0 = 0\nm * S(n) = m * n + m\ninduction: P(0) ∧ (∀n. P(n) ⇒ P(S(n))) ⇒ ∀n. P(n)  (a schema: not used by the simplifier)")
+thpeanotheorems ∶ 𝔏 𝕊
+thpeanotheorems ≔ (lines "S(x) != 0\nS(x) = S(y) <=> x = y\nx + S(y) = S(x + y)\nx * S(y) = x * y + x\nx <= x + y\nx < x + 1\nx < y ⇒ x + 1 <= y\nx * y >= 0\n¬(x + 1 <= x)\n(x + 1)^2 > 0\n0 <= x\nx < S(x)")
+thpeanodoc ∶ 𝕊
+thpeanodoc ≔ "Peano arithmetic: S(x) = x + 1 is the normal form, the variables are naturals (sign analysis), and < is discrete (x < y ⇔ x + 1 ≤ y)"
+thpeano ≔ (mktheory "peano" (∷ "arith" ⊘) (∷ "reals" (∷ "integers" ⊘)) ⊥ thpeanosig thpeanorules ⊘ thpeanoaxioms thpeanotheorems thpeanodoc)
+thintegers ∶ Theory
+thintegersrules ∶ 𝔏 𝕊
+thintegersrules ≔ (lines "lt(x, y) ==> le(x + 1, y)")
+thintegersaxioms ∶ 𝔏 𝕊
+thintegersaxioms ≔ (lines "the integers are a discretely ordered ring")
+thintegerstheorems ∶ 𝔏 𝕊
+thintegerstheorems ≔ (lines "x < y ⇒ x + 1 <= y\nx < x + 1\nx^2 >= 0")
+thintegersdoc ∶ 𝕊
+thintegersdoc ≔ "the variables are integers: < is discrete (x < y ⇔ x + 1 ≤ y)"
+thintegers ≔ (mktheory "integers" (∷ "arith" ⊘) (∷ "reals" (∷ "peano" ⊘)) ⊥ ⊘ thintegersrules ⊘ thintegersaxioms thintegerstheorems thintegersdoc)

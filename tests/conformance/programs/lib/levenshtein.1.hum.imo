@@ -1,0 +1,1 @@
+main in \NN := levenshtein(['a', 'z', 'Q'], ['Q', '7', 'a'])

@@ -78,7 +78,7 @@ build/rustimo translate examples/target.hum.imo --to bin
 * **Speed and memory.**  About as fast as Haskimo on evaluation-heavy programs, several times faster than Pymo; it starts in a few
   milliseconds (Haskimo needs 0.2 s to set up) and needs about a tenth of Haskimo's memory.  README §16.5 has the table.
 * **Laziness of the host.**  Rustimo's loader and checker are eager, Haskimo's are lazy (as Haskell is): the order in which two host errors in one program are noticed can differ.  No shipped case depends on it.
-* **The Python API** (`imo.load`, `Machine.val`, ...) used by four of the eighteen suites exists in Python only.
+* **The Python API** (`imo.load`, `Machine.val`, ...) used by four of the twenty-two suites exists in Python only.
 
 ## Test
 
@@ -88,7 +88,7 @@ The test suite is shared by the three cores; nothing in it is specific to Rustim
 python3 tests/conformance/run.py --impl rustimo      # the shared command-line cases, against the bytes on which all the cores agree
 python3 tests/conformance/run.py                     # every core that is built
 python3 tests/conformance/run.py --impl rustimo -v --filter prove
-python3 tests/test_poly.py --core rustimo            # a library suite on Rustimo (fourteen of the eighteen suites can)
+python3 tests/test_poly.py --core rustimo            # a library suite on Rustimo (eighteen of the twenty-two suites can)
 python3 tests/run_suites.py --core rustimo           # all of them
 cd rustimo && cargo test --release                   # the unit tests of the arithmetic (big integers, base i − 1, Python-compatible %g)
 ```

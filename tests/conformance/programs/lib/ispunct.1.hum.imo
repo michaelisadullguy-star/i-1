@@ -1,0 +1,1 @@
+main in Bool := ispunct('a')

@@ -1,0 +1,1 @@
+main in List(Char) := octal(12)

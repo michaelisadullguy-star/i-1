@@ -73,6 +73,8 @@ pub struct Checker {
     /// atom -> class
     pub eqs: HashMap<String, Ty>,
     pub coercions: Vec<String>,
+    /// the covariant class constructors: the built-in ones and those declared with (↗ C)
+    pub cov: HashSet<String>,
     pub defined: HashSet<String>,
     /// human symbol -> spec symbols
     pub overloads: BTreeMap<String, Vec<String>>,
@@ -99,6 +101,7 @@ impl Checker {
             fact_idx: HashMap::new(),
             eqs: HashMap::new(),
             coercions: vec![],
+            cov: COV.iter().map(|s| s.to_string()).collect(),
             defined: HashSet::new(),
             overloads: BTreeMap::new(),
             unknowns: vec![],
@@ -163,10 +166,10 @@ impl Checker {
             if n == m && !xs.is_empty() && xs.len() == ys.len() {
                 let s = if n == ARROW {
                     self.leq_s(seen, &ys[0], &xs[0]) && self.leq_s(seen, &xs[1], &ys[1])
-                } else if COV.contains(&n.as_str()) {
+                } else if self.cov.contains(n) {
                     xs.iter().zip(ys.iter()).all(|(x, y)| self.leq_s(seen, x, y))
                 } else {
-                    false
+                    flex_eq(&a, &b)
                 };
                 if s {
                     return true;
@@ -213,7 +216,7 @@ impl Checker {
         let a = self.norm(a0);
         let b = self.norm(b0);
         if let (Ty::K(n, xs), Ty::K(m, ys)) = (&a, &b) {
-            if n == m && COV.contains(&n.as_str()) && !xs.is_empty() && xs.len() == ys.len() {
+            if n == m && self.cov.contains(n) && !xs.is_empty() && xs.len() == ys.len() {
                 let mut js = vec![];
                 for (x, y) in xs.iter().zip(ys.iter()) {
                     let j = if self.leq(y, x) {
@@ -248,8 +251,12 @@ impl Checker {
         match &p {
             Ty::V(pn) => match s.get(pn) {
                 Some(b) => {
-                    if mode == Mode::Eq {
-                        if *b == a {
+                    if a == Ty::F {
+                        Some(s.clone())
+                    } else if *b == Ty::F {
+                        Some(s.insert(pn, a.clone()))
+                    } else if mode == Mode::Eq {
+                        if flex_eq(b, &a) {
                             Some(s.clone())
                         } else {
                             None
@@ -274,7 +281,7 @@ impl Checker {
                     let ok = match mode {
                         Mode::Pos => self.leq(&a, &p),
                         Mode::Neg => self.leq(&p, &a),
-                        Mode::Eq => p == a,
+                        Mode::Eq => flex_eq(&p, &a),
                     };
                     return if ok { Some(s.clone()) } else { None };
                 }
@@ -291,7 +298,7 @@ impl Checker {
                                 } else {
                                     mode
                                 }
-                            } else if COV.contains(&pn.as_str()) {
+                            } else if self.cov.contains(pn) {
                                 mode
                             } else {
                                 Mode::Eq
@@ -425,6 +432,17 @@ impl Checker {
                                 }
                             }
                         }
+                        "↗" => match args.first() {
+                            Some(Term::Var(n)) => {
+                                if self.classes.get(n).copied().unwrap_or(0) >= 1 {
+                                    self.cov.insert(n.clone());
+                                    Ok(Ok(()))
+                                } else {
+                                    Ok(Err(format!("covariant: {} is not a class constructor", n)))
+                                }
+                            }
+                            _ => Ok(Err("covariant:  is not a class constructor".to_string())),
+                        },
                         "↪" => match args.first() {
                             Some(Term::Var(f)) => {
                                 if self.sigs.contains_key(f) {
@@ -930,6 +948,17 @@ pub fn mk_chain(ps: &[Ty], r: Ty) -> Ty {
         out = Ty::K(ARROW.to_string(), vec![p.clone(), out]);
     }
     out
+}
+
+/// the same class, where the flexible class ⊥ (an unconstrained polymorphic constant, e.g. emptydict ∶ Dict α) equals anything
+pub fn flex_eq(x: &Ty, y: &Ty) -> bool {
+    if x == y || *x == Ty::F || *y == Ty::F {
+        return true;
+    }
+    match (x, y) {
+        (Ty::K(n, xs), Ty::K(m, ys)) => n == m && xs.len() == ys.len() && xs.iter().zip(ys.iter()).all(|(p, q)| flex_eq(p, q)),
+        _ => false,
+    }
 }
 
 pub fn has_var(t: &Ty) -> bool {

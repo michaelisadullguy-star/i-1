@@ -16,7 +16,7 @@ sys.path.insert(0, __file__.rsplit('/', 1)[0])
 import imo_core
 from base_b import to_digits, numeral
 
-CLASS_VARS = {'α', 'β', 'γ'}
+CLASS_VARS = {'α', 'β', 'γ', 'δ', 'ε'}      # class variables (a declaration's classes are universally quantified over them)
 RESERVED = {'≔', '↦', '∶'}
 
 # ------------------------------------------------------------------ lexer

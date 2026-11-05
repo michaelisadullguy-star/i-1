@@ -90,8 +90,19 @@ node  ❁ a b  =  (a, b)    two trees; depth = 1 + max(depth a, depth b)
   * depth 1 — associative but not commutative: `j² = −1`, `ij = k = −ji`, `k² = −1`;
   * depth 2 — not associative (`(e₁e₂)e₄ ≠ e₁(e₂e₄)`) but alternative (`(xx)y = x(xy)`), and no zero divisors among the sums `(eₐ ± e_b)(e_c ± e_d)`;
   * depth 3 — **zero divisors**: with the basis e₀ = 1, e₁ = *i*, e₂ = *j*, e₃ = *ij*, …, e_{2^d + n} = (0, eₙ), the product `(e₁ + e₁₀)(e₄ − e₁₅)` is `0` although both factors have norm² 2.  So the norm is not multiplicative from depth 3 on.
+* **Names and notation.**  The whole tower is one class, `𝔻` (human `\D`; `𝔗 A` is the same construction over any class `A`), and its algebras are named by depth, not by letters: ℍ and 𝕆 are not symbols of the language, and the letter 𝕊 that mathematics uses for the sedenions is the class of strings here ([§8](#8-characters-and-strings)) — this document says *sedenions*.  A tree is written `node(a, b)` and `leaf(x)` in human notation (a number where a tree is expected becomes a leaf, so `node(i, 0)` is `node(leaf(i), leaf(0))`), `(❁ a b)` and `(❀ x)` in spec, and with the doc 1 codes of `❁` and `❀` in bin; the printer writes the same three spellings and what it prints reads back, and `eval` shows a tree as `⟨a, b⟩`.  There is no `==` on trees in the human notation yet (`≐ᵀ` is spec only): a zero is recognised by its printed form (the example below).
 * **`𝕋` is generic**: `𝕋 𝔸ℝ[i]` is trees of lazy reals (a quaternion `(z, π)·(e, z)` is computed stream-wise and agrees with the exact partial sums), `𝕋 (𝔉 A)` is trees of functions, and `𝕋 (𝕋 A)` is a tower of towers.
 * Equality of trees is `≐ᵀ` (up to lifting) given an equality on the base.
+
+The sedenions in human notation, [`examples/sedenion.hum.imo`](examples/sedenion.hum.imo): the factors `x = e₁ + e₁₀` and `y = e₄ − e₁₅` have norm² 2 (`eval examples/sedenion.hum.imo x` shows them), and their product is the zero of depth 3.
+
+```text
+$ python3 pymo/i1.py examples/sedenion.hum.imo
+{{RUNOUT:run examples/sedenion.hum.imo}}
+```
+
+```text
+{{FILE:examples/sedenion.hum.imo}}```
 
 ### 10.4 Function spaces, including infinite-dimensional ones
 

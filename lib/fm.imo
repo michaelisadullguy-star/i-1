@@ -1,0 +1,135 @@
+⍝ lib/fm.imo — spec notation — trusted prelude, part 33: linear arithmetic by Fourier–Motzkin elimination, and Boolean simplification modulo the order of the numbers (DPLL(T) with diagrams)
+⍝ A constraint is (⊗ d kind) with d a polynomial (lib/polynf.imo) and kind 0 for d > 0, 1 for d ≥ 0, 2 for d = 0.  Every distinct monomial of positive degree counts as a variable, so the test is exact
+⍝ for conjunctions of linear equations and inequalities over the ordered field of the rationals, and sound (never wrongly inconsistent) for polynomial ones.
+⍝ A formula over relation atoms (eq, lt, le) becomes a diagram (lib/boolalg.imo); each path to ⊤ assigns a truth value to some atoms; a path is kept only if its atoms are consistent as constraints.
+⍝ No path left: a contradiction (false); no consistent path of the negation: a theorem (true); otherwise the formula written from the consistent paths.
+pcoef ∶ Poly → 𝔏 α → ℚ[i]      ⍝ the coefficient of a monomial in a polynomial
+pcoef ξ η ≔ (sumof (⫶ ◀ (filter (θ ↦ (meq (▶ θ) η)) ξ)))
+pmonos ∶ Poly → 𝔏 (𝔏 α)      ⍝ the monomials of positive degree
+pmonos ξ ≔ (filter (θ ↦ (¬ (∅ θ))) (⫶ ▶ ξ))
+pconst ∶ Poly → ℚ[i]      ⍝ the constant term
+pconst ξ ≔ (pcoef ξ ⊘)
+isrealpoly ∶ Poly → 𝔹      ⍝ all coefficients real
+isrealpoly ξ ≔ (∀ₗ (θ ↦ (≐ (ℑ (◀ θ)) 0)) ξ)
+⍝ ---- Fourier–Motzkin elimination.  A row is (⊗ p k): p > 0 (k = 0), p ≥ 0 (k = 1) or p = 0 (k = 2).  A row is divided by the absolute value of its first coefficient and a row that another one implies is dropped;
+⍝ an equality is solved for the monomial that occurs in the fewest other rows; a monomial that has one sign only is removed with its rows (it can be taken as large as needed); otherwise the monomial that makes the fewest new rows is eliminated.
+peq ∶ Poly → Poly → 𝔹      ⍝ the same polynomial
+peq ξ η ≔ (ξ (θ ι ↦ (η (κ′ μ ↦ (∧ (≐ (◀ θ) (◀ κ′)) (∧ (meq (▶ θ) (▶ κ′)) (peq ι μ)))) ⊥)) (∅ η))
+fmvarp ∶ Poly → Poly      ⍝ the terms of positive degree
+fmvarp ξ ≔ (filter (θ ↦ (¬ (∅ (▶ θ)))) ξ)
+fmisconst ∶ 𝔓 Poly ℕ → 𝔹      ⍝ a row without a variable (the terms come in decreasing degree and a constant comes last)
+fmisconst ξ ≔ ((◀ ξ) (θ ι ↦ (∅ (▶ θ))) ⊤)
+fmscale ∶ 𝔓 Poly ℕ → 𝔓 Poly ℕ
+fmscale ξ ≔ ((fmisconst ξ) ξ ((c ↦ (⊗ (pscale (÷ 1 c) (◀ ξ)) (▶ ξ))) ((∨ (≐ (▶ ξ) 1100) (≻ (◀ (hd (◀ ξ))) 0)) (◀ (hd (◀ ξ))) (⊖ (◀ (hd (◀ ξ)))))))
+fmcheck ∶ 𝔓 Poly ℕ → 𝔹      ⍝ does a row without a variable hold
+fmcheck ξ ≔ ((≐ (▶ ξ) 1100) (≐ (pconst (◀ ξ)) 0) ((≐ (▶ ξ) 0) (≻ (pconst (◀ ξ)) 0) (⩾ (pconst (◀ ξ)) 0)))
+fmbad ∶ 𝔏 (𝔓 Poly ℕ)      ⍝ the rows that say 0 > 0
+fmbad ≔ (∷ (⊗ ⊘ 0) ⊘)
+fmisbad ∶ 𝔏 (𝔓 Poly ℕ) → 𝔹
+fmisbad ξ ≔ (∃ₗ (r ↦ (∧ (fmisconst r) (¬ (fmcheck r)))) ξ)
+fmsame ∶ 𝔓 Poly ℕ → 𝔓 Poly ℕ → 𝔹      ⍝ the same terms of positive degree
+fmsame ξ η ≔ (peq (fmvarp (◀ ξ)) (fmvarp (◀ η)))
+fmstronger ∶ 𝔓 Poly ℕ → 𝔓 Poly ℕ → 𝔹      ⍝ for two inequalities with the same terms of positive degree: the first implies the second
+fmstronger ξ η ≔ (∨ (≺ (pconst (◀ ξ)) (pconst (◀ η))) (∧ (≐ (pconst (◀ ξ)) (pconst (◀ η))) (∨ (≐ (▶ ξ) 0) (≻ (▶ η) 0))))
+fmadd ∶ 𝔏 (𝔓 Poly ℕ) → 𝔓 Poly ℕ → 𝔏 (𝔓 Poly ℕ)
+fmadd ξ η ≔ ((≐ (▶ η) 1100) ((∃ₗ (r ↦ (∧ (≐ (▶ r) 1100) (peq (◀ r) (◀ η)))) ξ) ξ (∷ η ξ)) ((∃ₗ (r ↦ (∧ (¬ (≐ (▶ r) 1100)) (∧ (fmsame r η) (fmstronger r η)))) ξ) ξ (∷ η (filter (r ↦ (¬ (∧ (¬ (≐ (▶ r) 1100)) (∧ (fmsame r η) (fmstronger η r))))) ξ))))
+fmsigns ∶ 𝔏 α → 𝔏 (𝔓 Poly ℕ) → ℕ      ⍝ the number of new rows when the monomial is eliminated
+fmsigns ξ η ≔ (⊠ (count (r ↦ (≻ (pcoef (◀ r) ξ) 0)) η) (count (r ↦ (≺ (pcoef (◀ r) ξ) 0)) η))
+fmispure ∶ 𝔏 α → 𝔏 (𝔓 Poly ℕ) → 𝔹      ⍝ the monomial has one sign in all rows
+fmispure ξ η ≔ (¬ (∧ (∃ₗ (r ↦ (≻ (pcoef (◀ r) ξ) 0)) η) (∃ₗ (r ↦ (≺ (pcoef (◀ r) ξ) 0)) η)))
+fmdrop ∶ 𝔏 α → 𝔏 (𝔓 Poly ℕ) → 𝔏 (𝔓 Poly ℕ)      ⍝ the rows without the monomial
+fmdrop ξ η ≔ (filter (r ↦ (≐ (pcoef (◀ r) ξ) 0)) η)
+fmbest ∶ 𝔏 (𝔏 α) → 𝔏 (𝔓 Poly ℕ) → 𝔏 α      ⍝ the monomial with the fewest new rows
+fmbest ξ η ≔ (◀ (minimumby (a b ↦ (⩽ (▶ a) (▶ b))) (⫶ (m ↦ (⊗ m (fmsigns m η))) ξ)))
+fmcomb ∶ 𝔏 α → 𝔓 Poly ℕ → 𝔓 Poly ℕ → 𝔓 Poly ℕ      ⍝ p has a positive coefficient a for m, q a negative one b: (−b)·p + a·q has none; strict if one of the two is
+fmcomb ξ η ζ ≔ (⊗ (padd (pscale (⊖ (pcoef (◀ ζ) ξ)) (◀ η)) (pscale (pcoef (◀ η) ξ) (◀ ζ))) ((∨ (≐ (▶ η) 0) (≐ (▶ ζ) 0)) 0 1))
+fmfm ∶ 𝔏 α → 𝔏 (𝔓 Poly ℕ) → 𝔏 (𝔓 Poly ℕ)      ⍝ eliminate the monomial: the rows without it, and each lower bound combined with each upper bound
+fmfm ξ η ≔ (⧺ (fmdrop ξ η) (concatmap (p ↦ (⫶ (q ↦ (fmcomb ξ p q)) (filter (c ↦ (≺ (pcoef (◀ c) ξ) 0)) η))) (filter (c ↦ (≻ (pcoef (◀ c) ξ) 0)) η)))
+fmpick ∶ 𝔓 Poly ℕ → 𝔏 (𝔓 Poly ℕ) → 𝔏 α      ⍝ the monomial of an equality that occurs in the fewest other rows
+fmpick ξ η ≔ (◀ (minimumby (a b ↦ (⩽ (▶ a) (▶ b))) (⫶ (m ↦ (⊗ m (count (r ↦ (¬ (≐ (pcoef (◀ r) m) 0))) η))) (pmonos (◀ ξ)))))
+fmelim ∶ 𝔓 Poly ℕ → 𝔏 (𝔓 Poly ℕ) → 𝔏 (𝔓 Poly ℕ)      ⍝ solve the equality for a monomial and put it into the other rows
+fmelim ξ η ≔ ((m ↦ ((c ↦ (⫶ (r ↦ (⊗ (padd (◀ r) (pscale (⊖ (÷ (pcoef (◀ r) m) c)) (◀ ξ))) (▶ r))) η)) (pcoef (◀ ξ) m))) (fmpick ξ η))
+fmsubst ∶ ℕ → 𝔏 (𝔓 Poly ℕ) → 𝔏 (𝔓 Poly ℕ)      ⍝ eliminate the equality at this index
+fmsubst ξ η ≔ ((sp ↦ (fmelim (hd (▶ sp)) (⧺ (◀ sp) (⌄ (▶ sp))))) (splitat ξ η))
+fmfeasible ∶ 𝔏 (𝔓 Poly ℕ) → 𝔹      ⍝ can all the rows hold at the same time (over the ordered field of the rationals, each monomial a variable)
+fmfeasible ξ ≔ (fmfeasibleb ⊥ ξ)
+⍝ ---- integer variables (the theories peano and integers).  A row whose atoms are all variables is scaled to integer coefficients without a common factor and its constant is tightened:
+⍝ a·x + c ≥ 0 becomes a·x + ⌊c⌋ ≥ 0 and a·x + c > 0 becomes a·x + ⌈c⌉ − 1 ≥ 0; an equation whose constant is no integer has no solution.  This decides x = 0 ∨ x > 0 and the like.
+fmabs ∶ ℚ[i] → ℚ[i]
+fmabs ξ ≔ ((⩾ ξ 0) ξ (⊖ ξ))
+fmvarsonly ∶ 𝔓 Poly ℕ → 𝔹
+fmvarsonly ξ ≔ (∧ (¬ (fmisconst ξ)) (∀ₗ (θ ↦ (∀ₗ (e ↦ (tisvar (◀ e))) (▶ θ))) (◀ ξ)))
+fmtight ∶ 𝔓 Poly ℕ → 𝔓 Poly ℕ
+fmtight ξ ≔ ((q ↦ ((g ↦ (fmtight′ (pscale (÷ 1 g) q) (▶ ξ))) (gcdlist (⫶ (θ ↦ (fmabs (◀ θ))) (fmvarp q))))) (pscale (lcmlist (⫶ (θ ↦ (denom (◀ θ))) (◀ ξ))) (◀ ξ)))
+fmtight′ ∶ Poly → ℕ → 𝔓 Poly ℕ
+fmtight′ ξ η ≔ ((c ↦ ((≐ η 1100) ((≐ (denom c) 1) (fmsign (⊗ ξ 1100)) (⊗ ⊘ 0)) ((≐ η 1) (⊗ (padd (fmvarp ξ) (pcst (⌊ c))) 1) (⊗ (padd (fmvarp ξ) (pcst (⊟ (⌈ c) 1))) 1)))) (pconst ξ))
+fmsign ∶ 𝔓 Poly ℕ → 𝔓 Poly ℕ      ⍝ an equation with a positive first coefficient
+fmsign ξ ≔ ((≻ (◀ (hd (◀ ξ))) 0) ξ (⊗ (pneg (◀ ξ)) (▶ ξ)))
+fmscaleb ∶ 𝔹 → 𝔓 Poly ℕ → 𝔓 Poly ℕ
+fmscaleb ξ η ≔ ((∧ ξ (fmvarsonly η)) (fmtight η) (fmscale η))
+fmnormb ∶ 𝔹 → 𝔏 (𝔓 Poly ℕ) → 𝔏 (𝔓 Poly ℕ)
+fmnormb ξ η ≔ ((rs ↦ ((fmisbad rs) fmbad (foldl fmadd ⊘ (filter (r ↦ (¬ (fmisconst r))) rs)))) (⫶ (fmscaleb ξ) η))
+fmfeasibleb ∶ 𝔹 → 𝔏 (𝔓 Poly ℕ) → 𝔹      ⍝ with True: the variables are integers
+fmfeasibleb ξ η ≔ (fmloopb ξ (fmnormb ξ η))
+fmloopb ∶ 𝔹 → 𝔏 (𝔓 Poly ℕ) → 𝔹
+fmloopb ξ η ≔ ((fmisbad η) ⊥ ((∨ (∅ η) (⩾ (ℓ η) 10001000111000000)) ⊤ ((ix ↦ ((∅ ix) (fmloopb′ ξ η) (fmloopb ξ (fmnormb ξ (fmsubst (hd ix) η))))) (findindex (c ↦ (≐ (▶ c) 1100)) η))))
+fmloopb′ ∶ 𝔹 → 𝔏 (𝔓 Poly ℕ) → 𝔹
+fmloopb′ ξ η ≔ ((ms ↦ ((ix ↦ ((∅ ix) (fmloopb ξ (fmnormb ξ (fmfm (fmbest ms η) η))) (fmloopb ξ (fmdrop (nth ms (hd ix)) η)))) (findindex (m ↦ (fmispure m η)) ms))) (nubby meq (concatmap (c ↦ (pmonos (◀ c))) η)))
+⍝ ---- the constraints of an atom with a truth value
+atomalts ∶ Term → 𝔹 → 𝔏 (𝔏 (𝔓 Poly ℕ))      ⍝ the alternatives (each a list of constraints) that make the atom have the value; [] if it is not a relation
+atomalts ξ η ≔ ((∨ (¬ (tisapp ξ)) (¬ (≐ (ℓ (targs ξ)) 1100))) ⊘ ((d ↦ ((≐ (thead ξ) sylt) (η (∷ (∷ (⊗ d 0) ⊘) ⊘) (∷ (∷ (⊗ (pneg d) 1) ⊘) ⊘)) ((≐ (thead ξ) syle) (η (∷ (∷ (⊗ d 1) ⊘) ⊘) (∷ (∷ (⊗ (pneg d) 0) ⊘) ⊘)) ((≐ (thead ξ) syeq) (η (∷ (∷ (⊗ d 1100) ⊘) ⊘) (∷ (∷ (⊗ d 0) ⊘) (∷ (∷ (⊗ (pneg d) 0) ⊘) ⊘))) ⊘)))) (padd (topoly (hd (⌄ (targs ξ)))) (pneg (topoly (hd (targs ξ)))))))
+⍝ the alternatives of a whole path: the product of the alternatives of its atoms
+pathalts ∶ 𝔏 Term → 𝔏 (𝔓 ℕ 𝔹) → 𝔏 (𝔏 (𝔓 Poly ℕ))
+pathalts ξ η ≔ (foldl (ζ ω ↦ ((as ↦ ((∅ as) ζ (concatmap (a ↦ (⫶ (b ↦ (⧺ a b)) as)) ζ))) (atomalts (nth ξ (◀ ω)) (▶ ω)))) (∷ ⊘ ⊘) η)
+⍝ the facts about the variables themselves: over the naturals every monomial is ≥ 0, over the reals every monomial with only even exponents is
+domaincons ∶ 𝔹 → 𝔏 (𝔓 Poly ℕ) → 𝔏 (𝔓 Poly ℕ)
+domaincons ξ η ≔ (⫶ (m ↦ (⊗ (∷ (⊗ 1 m) ⊘) 1)) (filter (m ↦ (∨ ξ (∨ (∀ₗ (e ↦ (≐ (mod (▶ e) 1100) 0)) m) (∀ₗ (e ↦ (tishead sminterm (◀ e))) m)))) (nubby meq (concatmap (c ↦ (pmonos (◀ c))) η))))
+fmprep ∶ Env → 𝔏 (𝔓 Poly ℕ) → 𝔏 (𝔓 Poly ℕ)      ⍝ the rows with the facts about the variables (and, in the Kolmogorov theory, written with the probabilities of the minterms)
+fmprep ξ η ≔ ((rs ↦ (⧺ rs (domaincons (natmode ξ) rs))) ((isactive "kolmogorov" ξ) (probprep ξ η) η))
+⍝ is the path consistent: some alternative is feasible (constraints with non-real coefficients are left out)
+fmpathok ∶ Env → 𝔏 Term → 𝔏 (𝔓 ℕ 𝔹) → 𝔹
+fmpathok ξ η ζ ≔ (∃ₗ (alt ↦ (fmfeasibleb (∨ (isactive "peano" ξ) (isactive "integers" ξ)) (fmprep ξ (filter (c ↦ (isrealpoly (◀ c))) alt)))) (pathalts η ζ))
+⍝ ---- the algebra of sets: the atoms  subset(S, T)  and  eq(S, T)  with a Boolean expression on a side.  A set variable A is the atom "w ∈ A" for an element w.
+ssubset ∶ ℕ
+ssubset ≔ (symid "subset")
+smem ∶ ℕ
+smem ≔ (symid "mem")
+issetatom ∶ Env → Term → 𝔹      ⍝ subset(S, T), or eq(S, T) with a Boolean expression on a side, or any eq if the sets are the only domain (no arithmetic)
+issetatom ξ η ≔ (∧ (tisapp η) (∧ (≐ (ℓ (targs η)) 1100) (∨ (≐ (thead η) ssubset) (∧ (≐ (thead η) syeq) (∨ (isbool (hd (targs η))) (∨ (isbool (hd (⌄ (targs η)))) (∧ (isactive "sets" ξ) (¬ (isactive "arith" ξ)))))))))
+tomem ∶ Term → Term → Term      ⍝ the Boolean formula "element w is in the set S"
+tomem ξ η ≔ ((isbool η) (tapp (thead η) (⫶ (tomem ξ) (targs η))) (tapp₂ smem ξ η))
+⍝ the statement of a set atom about the element w
+setrel ∶ Term → Term → Term
+setrel ξ η ≔ ((≐ (thead ξ) ssubset) (tapp₂ s⇒ (tomem η (hd (targs ξ))) (tomem η (hd (⌄ (targs ξ))))) (tapp₂ s⇔ (tomem η (hd (targs ξ))) (tomem η (hd (⌄ (targs ξ))))))
+⍝ the same, false: an element in one set and not in the other
+setrelneg ∶ Term → Term → Term
+setrelneg ξ η ≔ ((≐ (thead ξ) ssubset) (tapp₂ s∧ (tomem η (hd (targs ξ))) (tapp₁ s¬ (tomem η (hd (⌄ (targs ξ)))))) (tapp₂ s⊻ (tomem η (hd (targs ξ))) (tomem η (hd (⌄ (targs ξ))))))
+bsatisfiable ∶ Term → 𝔹
+bsatisfiable ξ ≔ (¬ (beq (tobdd (bnorm (batoms ξ)) ξ) bf))
+⍝ 1 if the statement holds for every element (so the sets are related for every interpretation), 0 if for none, 2 otherwise (a universe with an element is assumed)
+bsetverdict ∶ Term → ℕ
+bsetverdict ξ ≔ ((f ↦ ((b ↦ ((beq b bt) 1 ((beq b bf) 0 1100))) (tobdd (bnorm (batoms f)) f))) (setrel ξ (tnum 0)))
+bsetatom ∶ Env → Term → 𝔏 Term      ⍝ the hook of the sets: a set atom that is decided by one element
+bsetatom ξ η ≔ ((issetatom ξ η) ((v ↦ ((≐ v 1) (∷ ttrue ⊘) ((≐ v 0) (∷ tfalse ⊘) ⊘))) (bsetverdict η)) ⊘)
+⍝ is a path consistent for the sets: a witness element for every non-inclusion, every inclusion and equality checked on every witness
+setsok ∶ Env → 𝔏 Term → 𝔏 (𝔓 ℕ 𝔹) → 𝔹
+setsok ξ η ζ ≔ ((sa ↦ ((∅ sa) ⊤ (setscheck sa))) (⫶ (e ↦ (⊗ (nth η (◀ e)) (▶ e))) (filter (e ↦ (issetatom ξ (nth η (◀ e)))) ζ)))
+setscheck ∶ 𝔏 (𝔓 Term 𝔹) → 𝔹
+setscheck ξ ≔ ((negs ↦ ((ws ↦ (bsatisfiable (foldl (f c ↦ (tapp₂ s∧ f c)) ttrue (⧺ (concatmap (e ↦ ((▶ e) (⫶ (w ↦ (setrel (◀ e) w)) ws) ⊘)) ξ) (⫶ (p ↦ (setrelneg (◀ (▶ p)) (tnum (◀ p)))) (zip (⍳ (ℓ negs)) negs)))))) (⫶ tnum (⍳ (ℓ negs))))) (filter (e ↦ (¬ (▶ e))) ξ))
+pathconsistent ∶ Env → 𝔏 Term → 𝔏 (𝔓 ℕ 𝔹) → 𝔹
+pathconsistent ξ η ζ ≔ (∧ (fmpathok ξ η ζ) (setsok ξ η ζ))
+⍝ ---- paths of a diagram
+bpaths ∶ BDD → 𝔏 (𝔏 (𝔓 ℕ 𝔹))
+bpaths ξ ≔ (ξ (∷ ⊘ ⊘) ⊘ (η ζ ω ↦ (⧺ (⫶ (∷ (⊗ η ⊥)) (bpaths ζ)) (⫶ (∷ (⊗ η ⊤)) (bpaths ω)))))
+bfrompaths ∶ 𝔏 (𝔏 (𝔓 ℕ 𝔹)) → BDD
+bfrompaths ξ ≔ (foldl (η ζ ↦ (bdor η (foldl (ω ν ↦ (bdand ω ((▶ ν) (bn (◀ ν) bf bt) (bn (◀ ν) bt bf)))) bt ζ))) bf ξ)
+⍝ the formula modulo the order: false if no path is consistent, true if no path of its negation is, else the formula of its consistent paths
+isrel ∶ Term → 𝔹      ⍝ a relation atom: eq, lt or le of two terms
+isrel ξ ≔ (∧ (tisapp ξ) (∧ (≐ (ℓ (targs ξ)) 1100) (∨ (≐ (thead ξ) syeq) (∨ (≐ (thead ξ) sylt) (≐ (thead ξ) syle)))))
+canonT ∶ Env → Term → Term
+canonT ξ η ≔ ((as ↦ ((∃ₗ (a ↦ (∨ (isrel a) (issetatom ξ a))) as) ((b ↦ ((ps ↦ ((cs ↦ ((∅ cs) tfalse ((∀ₗ (p ↦ (¬ (pathconsistent ξ as p))) (bpaths (bdnot b))) ttrue ((≐ (ℓ cs) (ℓ ps)) (frombdd as b) (frombdd as (bfrompaths cs)))))) (filter (p ↦ (pathconsistent ξ as p)) ps))) (bpaths b))) (tobdd as η)) (frombdd as (tobdd as η)))) (bnorm (batoms η)))
+⍝ every maximal Boolean subterm of a term, simplified modulo the order of the numbers
+boolpassT ∶ Env → Term → Term
+boolpassT ξ η ≔ ((∨ (isbool η) (∨ (isrel η) (issetatom ξ η))) (acdeep ξ (canonT ξ (boolatomsT ξ η))) (tmapargs (boolpassT ξ) η))
+boolatomsT ∶ Env → Term → Term
+boolatomsT ξ η ≔ ((isbool η) (tapp (thead η) (⫶ (boolatomsT ξ) (targs η))) (tmapargs (boolpassT ξ) η))

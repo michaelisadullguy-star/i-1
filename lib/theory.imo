@@ -1,0 +1,86 @@
+⍝ lib/theory.imo — spec notation — trusted prelude, part 30: theories (axiomatic packages): records, activation with requirements and conflicts, and the simplifier
+⍝ A theory is a package of axioms and theorems that the simplifier uses as rewrite rules: its name, the theories it requires, the theories it cannot live with, whether it is on by
+⍝ default, the operators it declares (lines of text, lib/parse.imo), its rules ("lhs ==> rhs"), its hooks (functions for what rules cannot do), and — as text, for the record and for
+⍝ the self-check — its axioms and its theorems.  Theories are values; an Env is the set of the theories that are active, and  use  /  unuse  return a new Env: nothing is global.
+⍝   use "zfc" env   switches ZFC on (its requirements with it) and every active theory that conflicts with it OFF (and those that required these).
+⍝ The registry of all theories and their compiled forms are in lib/theories.imo.
+Theory ∶ 𝒦
+mktheory ∶ 𝕊 → 𝔏 𝕊 → 𝔏 𝕊 → 𝔹 → 𝔏 𝕊 → 𝔏 𝕊 → 𝔏 (𝔓 𝕊 α) → 𝔏 𝕊 → 𝔏 𝕊 → 𝕊 → Theory
+mktheory ξ η ζ ω ν ο ρ σ τ υ φ ≔ (φ ξ η ζ ω ν ο ρ σ τ υ)
+thname ∶ Theory → 𝕊
+thname ξ ≔ (ξ (η ζ ω ν ο ρ σ τ υ φ ↦ η))
+threquires ∶ Theory → 𝔏 𝕊
+threquires ξ ≔ (ξ (η ζ ω ν ο ρ σ τ υ φ ↦ ζ))
+thconflicts ∶ Theory → 𝔏 𝕊
+thconflicts ξ ≔ (ξ (η ζ ω ν ο ρ σ τ υ φ ↦ ω))
+thdefault ∶ Theory → 𝔹
+thdefault ξ ≔ (ξ (η ζ ω ν ο ρ σ τ υ φ ↦ ν))
+thsig ∶ Theory → 𝔏 𝕊
+thsig ξ ≔ (ξ (η ζ ω ν ο ρ σ τ υ φ ↦ ο))
+thrules ∶ Theory → 𝔏 𝕊
+thrules ξ ≔ (ξ (η ζ ω ν ο ρ σ τ υ φ ↦ ρ))
+thhooks ∶ Theory → 𝔏 (𝔓 𝕊 α)
+thhooks ξ ≔ (ξ (η ζ ω ν ο ρ σ τ υ φ ↦ σ))
+thaxioms ∶ Theory → 𝔏 𝕊
+thaxioms ξ ≔ (ξ (η ζ ω ν ο ρ σ τ υ φ ↦ τ))
+ththeorems ∶ Theory → 𝔏 𝕊
+ththeorems ξ ≔ (ξ (η ζ ω ν ο ρ σ τ υ φ ↦ υ))
+thdoc ∶ Theory → 𝕊
+thdoc ξ ≔ (ξ (η ζ ω ν ο ρ σ τ υ φ ↦ φ))
+⍝ ---- the registry (lib/theories.imo): thlookup finds a theory by name (a maybe)
+thlookup ∶ 𝕊 → 𝔏 Theory
+thlookup ξ ≔ (find (η ↦ (≐ˢ (thname η) ξ)) registry)
+theorynames ∶ 𝔏 𝕊      ⍝ the names of all the theories
+theorynames ≔ (⫶ thname registry)
+⍝ ---- activation.  The requirements of a name, deepest first, then the name itself
+thclosure ∶ 𝕊 → 𝔏 𝕊
+thclosure ξ ≔ (nubby ≐ˢ (thclosure′ ξ))
+thclosure′ ∶ 𝕊 → 𝔏 𝕊
+thclosure′ ξ ≔ ((t ↦ ((∅ t) (∷ ξ ⊘) (⧺ (concatmap thclosure′ (threquires (hd t))) (∷ ξ ⊘)))) (thlookup ξ))
+thconflict ∶ 𝕊 → 𝕊 → 𝔹      ⍝ do two theories exclude each other (either one says so)
+thconflict ξ η ≔ ((s ↦ ((t ↦ (∨ (∧ (¬ (∅ s)) (elem′ η (thconflicts (hd s)))) (∧ (¬ (∅ t)) (elem′ ξ (thconflicts (hd t)))))) (thlookup η))) (thlookup ξ))
+elem′ ∶ 𝕊 → 𝔏 𝕊 → 𝔹
+elem′ ξ η ≔ (elemby ≐ˢ ξ η)
+⍝ the active theories that remain after removing those in a list and every theory that requires one of them
+thprune ∶ 𝔏 𝕊 → 𝔏 𝕊 → 𝔏 𝕊
+thprune ξ η ≔ (filter (ζ ↦ (¬ (∃ₗ (ω ↦ (elem′ ω (thclosure ζ))) ξ))) η)
+use ∶ 𝕊 → Env → Env      ⍝ use name env: switch a theory on, with its requirements; every active theory that conflicts with it, and those that need one that goes, are switched off
+use ξ η ≔ ((new ↦ (envof (nubby ≐ˢ (⧺ (thprune (filter (ζ ↦ (∃ₗ (ω ↦ (thconflict ζ ω)) new)) (enames η)) (enames η)) new)))) (thclosure ξ))
+unuse ∶ 𝕊 → Env → Env      ⍝ unuse name env: switch a theory off, and every active theory that requires it
+unuse ξ η ≔ (envof (thprune (∷ ξ ⊘) (enames η)))
+usetheories ∶ 𝔏 𝕊 → Env → Env      ⍝ use, one after the other
+usetheories ξ η ≔ (foldl (ζ ω ↦ (use ω ζ)) η ξ)
+defaultnames ∶ 𝔏 𝕊
+defaultnames ≔ (nubby ≐ˢ (concatmap thclosure (⫶ thname (filter thdefault registry))))
+defaultenv ∶ Env      ⍝ the theories that are on by default
+defaultenv ≔ (envof defaultnames)
+envwith ∶ 𝔏 𝕊 → Env      ⍝ the default theories, then these (each may switch some off)
+envwith ξ ≔ (usetheories ξ defaultenv)
+activetheories ∶ Env → 𝔏 𝕊      ⍝ the names of the active theories, requirements first
+activetheories ξ ≔ (enames ξ)
+isactive ∶ 𝕊 → Env → 𝔹
+isactive ξ η ≔ (elem′ ξ (enames η))
+⍝ ---- the simplifier
+simplifyl ∶ Env → ℕ → Term → Term
+simplifyl ξ η ζ ≔ ((t ↦ (≐ η 0) t ((u ↦ ((teq t u) t (simplifyl ξ (⊟ η 1) u))) (normalize ξ ((isactive "intuitionistic" ξ) (intpass t) (boolpassT ξ t))))) (normalize ξ ζ))
+simplifyt ∶ Env → Term → Term      ⍝ the simplest form of a term under the active theories (rewriting, then Boolean canonical forms, until nothing changes)
+simplifyt ξ η ≔ (simplifyl ξ 111010000 η)
+simpe ∶ Env → 𝕊 → 𝕊      ⍝ simpe env "text": the simplest form of a statement or an expression, as text (the text itself if it does not parse)
+simpe ξ η ≔ ((t ↦ ((∅ t) η (tprint (esig ξ) (simplifyt ξ (hd t))))) (parseterm (esig ξ) η))
+simp ∶ 𝕊 → 𝕊      ⍝ the simplest form under the default theories
+simp ξ ≔ (simpe defaultenv ξ)
+holdsv ∶ Env → 𝕊 → ℕ      ⍝ the verdict as a number: 1 true for all values, 0 false for all, 2 undetermined
+holdsv ξ η ≔ ((t ↦ ((∅ t) 1100 ((u ↦ ((teq u ttrue) 1 ((teq u tfalse) 0 1100))) (simplifyt ξ (hd t))))) (parseterm (esig ξ) η))
+holdse ∶ Env → 𝕊 → 𝔹      ⍝ holdse env "statement": ⊤ if it is true for all values of its variables, ⊥ if for none, ⍰ if the theories cannot tell
+holdse ξ η ≔ ((v ↦ ((≐ v 1) ⊤ ((≐ v 0) ⊥ ⍰))) (holdsv ξ η))
+holds ∶ 𝕊 → 𝔹      ⍝ holds "statement": under the default theories
+holds ξ ≔ (holdse defaultenv ξ)
+⍝ ---- the embedded axioms and theorems
+axiomsof ∶ 𝕊 → 𝔏 𝕊      ⍝ the axioms of a theory, as text
+axiomsof ξ ≔ ((t ↦ ((∅ t) ⊘ (thaxioms (hd t)))) (thlookup ξ))
+theoremsof ∶ 𝕊 → 𝔏 𝕊      ⍝ the theorems of a theory (each is checked by checktheory)
+theoremsof ξ ≔ ((t ↦ ((∅ t) ⊘ (ththeorems (hd t)))) (thlookup ξ))
+describe ∶ 𝕊 → 𝕊      ⍝ a line about a theory
+describe ξ ≔ ((t ↦ ((∅ t) "unknown theory" (thdoc (hd t)))) (thlookup ξ))
+checktheory ∶ 𝕊 → 𝔏 𝕊      ⍝ the theorems of a theory that do not hold in an environment with the theory on (an empty list: all hold)
+checktheory ξ ≔ (filter (η ↦ (¬ (≐ (holdsv (use ξ (envof ⊘)) η) 1))) (theoremsof ξ))

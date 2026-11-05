@@ -459,7 +459,12 @@ fn refs(t: &Term, bound: &HashSet<String>, overloads: &std::collections::BTreeMa
 pub fn load_program(files: &[SourceFile], trusted_paths: &[String], with_prelude: bool) -> R<Program> {
     let mut p = Program::new()?;
     if with_prelude {
+        // I1_SKIP_LIB=a.imo,b.imo leaves the named library files out (libsrc/build.sh translates a module that is itself part of the prelude)
+        let skip: Vec<String> = std::env::var("I1_SKIP_LIB").map(|v| v.split(',').map(|x| x.trim().to_string()).collect()).unwrap_or_default();
         for (path, text) in data::lib_files() {
+            if skip.iter().any(|x| !x.is_empty() && path.ends_with(x.as_str())) {
+                continue;
+            }
             p.add_file(&SourceFile { path: path.to_string(), text: text.to_string() }, true)?;
         }
         p.pre_count = p.statements.len();

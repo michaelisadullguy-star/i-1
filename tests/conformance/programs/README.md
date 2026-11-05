@@ -2,6 +2,13 @@
 
 * `sNNN/` — the programs a Python test-suite loaded (recorded by wrapping `Program.add_text` while the suites ran; duplicates removed), in the order the suite added them. Each directory is one program in one or more files; the cases run `check`, `translate --to spec`, `translate --to bin` and `run` on all of its files together.
 * `lib/` — the library sweep: one-line programs `main in <class> := name(arguments)`, written by `pymo/mkconformance.py`.
+* `err/` — the programs of the README's table of error messages (§7.6).
+* `misc/` — hand-written edge cases: literals, comments, sections, errors, unknowns, big numbers; each file is a case (`run FILE --n 6`).  Five of
+  its files hold **carriage returns on purpose** and are marked `-text` in `.gitattributes`, so that git never converts them: `cr_in_literal.hum.imo`
+  (a CR inside a Char and a String literal is a character of the literal, code 13; a source file is read exactly as it is) and `crlf_lines.hum.imo`,
+  `crlf_mixed.imo`, `crlf_bin.bin.imo` with `crlf_bin.sbl` (CRLF line ends in the human, spec and binary notations: a CR between tokens is white space,
+  so the file prints what its LF twin prints).  `bad_utf8.hum.imo` is not UTF-8 on purpose (the byte 0xFF): every core refuses it with status 1 and an
+  empty standard output (the text of the message on standard error is the host's own, and not compared).
 
 | directory | recorded from | files |
 |:--|:--|:--|

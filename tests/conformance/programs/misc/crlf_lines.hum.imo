@@ -1,0 +1,6 @@
+-- a file with CRLF line ends reads like the same file with LF
+x in \NN := 1 + 2   -- a trailing comment
+y in \NN := x * (   -- a parenthesis open across lines
+  4 +
+  5)
+main in String := unlines(["x = " ++ str(x), "y = " ++ str(y), "tab:\there"])

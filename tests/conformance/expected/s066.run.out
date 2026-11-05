@@ -1,0 +1,1 @@
+error: x is an unknown (it is declared and never defined, so it has no value); use it in a statement — a relation such as x == 1 — which is simplified, not evaluated

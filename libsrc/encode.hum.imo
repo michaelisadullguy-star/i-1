@@ -1,0 +1,73 @@
+-- encode.hum.imo -- encodings and checksums (human notation; lib/encode.imo is its translation, made by libsrc/build.sh).
+-- Bytes are lists of natural numbers below 256.  The language's band, bor and bxor work on the digits of the base i-1; the functions binand, binor, binxor, binshl and binshr
+-- are the usual operations on the binary digits of natural numbers.
+_dif(a, b) in \NN -> \NN -> \NN := abs(a - b)
+binand(a, b) in \NN -> \NN -> \NN := if((a == 0) or (b == 0), 0, ((a mod 2) * (b mod 2)) + 2 * binand(a div 2, b div 2))
+binor(a, b) in \NN -> \NN -> \NN := if((a == 0) and (b == 0), 0, _dif((a mod 2) + (b mod 2), (a mod 2) * (b mod 2)) + 2 * binor(a div 2, b div 2))
+binxor(a, b) in \NN -> \NN -> \NN := if((a == 0) and (b == 0), 0, (((a mod 2) + (b mod 2)) mod 2) + 2 * binxor(a div 2, b div 2))
+binshl(a, k) in \NN -> \NN -> \NN := a * 2 ^ k
+binshr(a, k) in \NN -> \NN -> \NN := a div 2 ^ k
+graycode(n) in \NN -> \NN := binxor(n, n div 2)
+fromgray(g) in \NN -> \NN := if(g == 0, 0, binxor(g, fromgray(g div 2)))
+-- UTF-8
+_utf8char(c) in Char -> List(\NN) := if(ord(c) lt 128, [ord(c)], if(ord(c) lt 2048, [192 + ord(c) div 64, 128 + ord(c) mod 64], if(ord(c) lt 65536, [224 + ord(c) div 4096, 128 + (ord(c) div 64) mod 64, 128 + ord(c) mod 64], [240 + ord(c) div 262144, 128 + (ord(c) div 4096) mod 64, 128 + (ord(c) div 64) mod 64, 128 + ord(c) mod 64])))
+utf8bytes(s) in String -> List(\NN) := concatmap(_utf8char, s)
+_iscont(b) in \NN -> Bool := (128 leq b) and (b lt 192)
+_cptwo(bs) in List(\NN) -> \NN := _dif(head(bs), 192) * 64 + _dif(nth(bs, 1), 128)
+_cpthree(bs) in List(\NN) -> \NN := (_dif(head(bs), 224) * 64 + _dif(nth(bs, 1), 128)) * 64 + _dif(nth(bs, 2), 128)
+_cpfour(bs) in List(\NN) -> \NN := ((_dif(head(bs), 240) * 64 + _dif(nth(bs, 1), 128)) * 64 + _dif(nth(bs, 2), 128)) * 64 + _dif(nth(bs, 3), 128)
+-- one character from the front of the bytes: a list of at most one pair(character code, rest), checked as strictly as Python (no overlong forms, no surrogates, nothing above U+10FFFF)
+_utf8next(bs) in List(\NN) -> List(Pair(\NN, List(\NN))) := if(isnil(bs), [], if(head(bs) lt 128, [pair(head(bs), tail(bs))], if((192 leq head(bs)) and (head(bs) lt 224), if((length(bs) geq 2) and _iscont(nth(bs, 1)) and (128 leq _cptwo(bs)), [pair(_cptwo(bs), drop(2, bs))], []), if((224 leq head(bs)) and (head(bs) lt 240), if((length(bs) geq 3) and _iscont(nth(bs, 1)) and _iscont(nth(bs, 2)) and (2048 leq _cpthree(bs)) and not ((55296 leq _cpthree(bs)) and (_cpthree(bs) lt 57344)), [pair(_cpthree(bs), drop(3, bs))], []), if((240 leq head(bs)) and (head(bs) lt 245), if((length(bs) geq 4) and _iscont(nth(bs, 1)) and _iscont(nth(bs, 2)) and _iscont(nth(bs, 3)) and (65536 leq _cpfour(bs)) and (_cpfour(bs) leq 1114111), [pair(_cpfour(bs), drop(4, bs))], []), [])))))
+_utf8go(bs, acc) in List(\NN) -> String -> List(String) := if(isnil(bs), [reverse(acc)], if(isnil(_utf8next(bs)), [], _utf8go(snd(head(_utf8next(bs))), cons(chr(fst(head(_utf8next(bs)))), acc))))
+utf8string(bs) in List(\NN) -> List(String) := _utf8go(bs, [])
+-- hexadecimal, lower case
+_hexdigit(d) in \NN -> Char := nth("0123456789abcdef", d)
+hexencode(bs) in List(\NN) -> String := concatmap((b in \NN |-> [_hexdigit(b div 16), _hexdigit(b mod 16)]), bs)
+_hexval(c) in Char -> List(\NN) := if(('0' leq c) and (c leq '9'), [_dif(ord(c), ord('0'))], if(('a' leq c) and (c leq 'f'), [_dif(ord(c), ord('a')) + 10], if(('A' leq c) and (c leq 'F'), [_dif(ord(c), ord('A')) + 10], [])))
+hexdecode(s) in String -> List(List(\NN)) := if((length(s) mod 2 == 1) or exists((c in Char |-> isnil(_hexval(c))), s), [], [map((p in List(Char) |-> head(_hexval(head(p))) * 16 + head(_hexval(head(tail(p))))), chunks(2, s))])
+-- Base 64 (RFC 4648, with padding)
+_b64char(d) in \NN -> Char := nth("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/", d)
+_b64group(bs) in List(\NN) -> String := if(length(bs) == 1, [_b64char(head(bs) div 4), _b64char((head(bs) mod 4) * 16), '=', '='], if(length(bs) == 2, [_b64char(head(bs) div 4), _b64char((head(bs) mod 4) * 16 + nth(bs, 1) div 16), _b64char((nth(bs, 1) mod 16) * 4), '='], [_b64char(head(bs) div 4), _b64char((head(bs) mod 4) * 16 + nth(bs, 1) div 16), _b64char((nth(bs, 1) mod 16) * 4 + nth(bs, 2) div 64), _b64char(nth(bs, 2) mod 64)]))
+base64encode(bs) in List(\NN) -> String := concatmap(_b64group, chunks(3, bs))
+_b64val(c) in Char -> List(\NN) := if(('A' leq c) and (c leq 'Z'), [_dif(ord(c), ord('A'))], if(('a' leq c) and (c leq 'z'), [_dif(ord(c), ord('a')) + 26], if(('0' leq c) and (c leq '9'), [_dif(ord(c), ord('0')) + 52], if(c == '+', [62], if(c == '/', [63], [])))))
+_b64decgroup(g) in List(Char) -> List(\NN) := if(nth(g, 2) == '=', [head(_b64val(nth(g, 0))) * 4 + head(_b64val(nth(g, 1))) div 16], if(nth(g, 3) == '=', [head(_b64val(nth(g, 0))) * 4 + head(_b64val(nth(g, 1))) div 16, (head(_b64val(nth(g, 1))) mod 16) * 16 + head(_b64val(nth(g, 2))) div 4], [head(_b64val(nth(g, 0))) * 4 + head(_b64val(nth(g, 1))) div 16, (head(_b64val(nth(g, 1))) mod 16) * 16 + head(_b64val(nth(g, 2))) div 4, (head(_b64val(nth(g, 2))) mod 4) * 64 + head(_b64val(nth(g, 3)))]))
+_b64wellformed(g, last) in List(Char) -> Bool -> Bool := (not isnil(_b64val(nth(g, 0)))) and (not isnil(_b64val(nth(g, 1)))) and (if(nth(g, 2) == '=', last and (nth(g, 3) == '='), not isnil(_b64val(nth(g, 2))) and (if(nth(g, 3) == '=', last, not isnil(_b64val(nth(g, 3)))))))
+_b64last(g, k, n) in List(Char) -> \NN -> \NN -> Bool := _b64wellformed(g, k + 1 == n)
+base64decode(s) in String -> List(List(\NN)) := if(isnil(s), [[]], if((length(s) mod 4 == 0) and forall((k in \NN |-> _b64last(nth(chunks(4, s), k), k, length(chunks(4, s)))), upto(0, abs(length(chunks(4, s)) - 1))), [concatmap(_b64decgroup, chunks(4, s))], []))
+-- percent-encoding of the UTF-8 bytes (RFC 3986: letters, digits and - . _ ~ stay)
+_unreserved(b) in \NN -> Bool := ((65 leq b) and (b leq 90)) or ((97 leq b) and (b leq 122)) or ((48 leq b) and (b leq 57)) or (b == 45) or (b == 46) or (b == 95) or (b == 126)
+_pcbyte(b) in \NN -> String := if(_unreserved(b), [chr(b)], ['%', nth("0123456789ABCDEF", b div 16), nth("0123456789ABCDEF", b mod 16)])
+percentencode(s) in String -> String := concatmap(_pcbyte, utf8bytes(s))
+_pcgo(s, acc) in String -> List(\NN) -> List(List(\NN)) := if(isnil(s), [reverse(acc)], if(head(s) == '%', if((length(s) geq 3) and not isnil(_hexval(nth(s, 1))) and not isnil(_hexval(nth(s, 2))), _pcgo(drop(3, s), cons(head(_hexval(nth(s, 1))) * 16 + head(_hexval(nth(s, 2))), acc)), []), if(ord(head(s)) lt 128, _pcgo(tail(s), cons(ord(head(s)), acc)), [])))
+percentdecode(s) in String -> List(String) := if(isnil(_pcgo(s, [])), [], utf8string(head(_pcgo(s, []))))
+-- checksums
+_adler(st) in Pair(\NN, \NN) -> \NN := snd(st) * 65536 + fst(st)
+adler32(bs) in List(\NN) -> \NN := _adler(foldl((st in Pair(\NN, \NN) |-> (b in \NN |-> pair((fst(st) + b) mod 65521, (snd(st) + (fst(st) + b) mod 65521) mod 65521))), pair(1, 0), bs))
+_tobits(n, w) in \NN -> \NN -> List(Bool) := if(w == 0, [], cons(n mod 2 == 1, _tobits(n div 2, abs(w - 1))))
+_frombits(bs) in List(Bool) -> \NN := if(isnil(bs), 0, (if(head(bs), 1, 0)) + 2 * _frombits(tail(bs)))
+_bxor(x, y) in Bool -> Bool -> Bool := not (x iff y)
+-- the register is a list of 32 Booleans, the least significant first: the reflected algorithm of zlib (polynomial 3988292384, start and final complement of all ones)
+_polybits in List(Bool) := _tobits(3988292384, 32)
+_crcstep(r) in List(Bool) -> List(Bool) := if(head(r), zipwith(_bxor, tail(r) ++ [false], _polybits), tail(r) ++ [false])
+_crcbyte(r, b) in List(Bool) -> \NN -> List(Bool) := applyn(8, _crcstep, zipwith(_bxor, take(8, r), _tobits(b, 8)) ++ drop(8, r))
+crc32(bs) in List(\NN) -> \NN := _frombits(map((x in Bool |-> not x), foldl(_crcbyte, _tobits(4294967295, 32), bs)))
+-- the check of Luhn for strings of digits (credit cards, IMEI numbers)
+_luhnval(c, pos) in Char -> \NN -> \NN := if(pos mod 2 == 1, (2 * _dif(ord(c), 48)) div 10 + (2 * _dif(ord(c), 48)) mod 10, _dif(ord(c), 48))
+_luhnsum(s) in String -> \NN := sumof(zipwith(_luhnval, reverse(s), upto(0, abs(length(s) - 1))))
+luhncheck(s) in String -> Bool := (not isnil(s)) and forall(isdigit, s) and (_luhnsum(s) mod 10 == 0)
+luhndigit(s) in String -> \NN := _dif(10, _luhnsum(s ++ "0") mod 10) mod 10
+-- English names of the natural numbers below 10^21: one hundred twenty-three
+_smallnames in List(String) := ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen"]
+_tensnames in List(String) := ["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"]
+_scales in List(String) := ["", " thousand", " million", " billion", " trillion", " quadrillion", " quintillion"]
+_wordshundred(n) in \NN -> String := if(n lt 20, nth(_smallnames, n), nth(_tensnames, n div 10) ++ (if(n mod 10 == 0, "", "-" ++ nth(_smallnames, n mod 10))))
+_wordsthousand(n) in \NN -> String := if(n lt 100, _wordshundred(n), nth(_smallnames, n div 100) ++ " hundred" ++ (if(n mod 100 == 0, "", " " ++ _wordshundred(n mod 100))))
+_wordsgo(n, k) in \NN -> \NN -> List(String) := if(n == 0, [], _wordsgo(n div 1000, k + 1) ++ (if(n mod 1000 == 0, [], [_wordsthousand(n mod 1000) ++ nth(_scales, k)])))
+numwords(n) in \NN -> String := if(n == 0, "zero", unwords(_wordsgo(n, 0)))
+-- the Vigenere cipher on the ASCII letters of the text (other characters stay; the key advances on letters only; the key is made of ASCII letters)
+_isletter(c) in Char -> Bool := (('A' leq c) and (c leq 'Z')) or (('a' leq c) and (c leq 'z'))
+_shiftletter(c, sh) in Char -> \NN -> Char := if(('A' leq c) and (c leq 'Z'), chr(65 + (_dif(ord(c), 65) + sh) mod 26), if(('a' leq c) and (c leq 'z'), chr(97 + (_dif(ord(c), 97) + sh) mod 26), c))
+_keyshift(k) in Char -> \NN := _dif(ord(k), if(('a' leq k) and (k leq 'z'), 97, 65)) mod 26
+_vigenerego(key, s, i, sign) in String -> String -> \NN -> \NN -> String := if(isnil(s), [], if(_isletter(head(s)), cons(_shiftletter(head(s), if(sign == 0, _keyshift(nth(key, i mod length(key))), _dif(26, _keyshift(nth(key, i mod length(key)))))), _vigenerego(key, tail(s), i + 1, sign)), cons(head(s), _vigenerego(key, tail(s), i, sign))))
+vigenere(key, s) in String -> String -> String := if(isnil(key), s, _vigenerego(key, s, 0, 0))
+unvigenere(key, s) in String -> String -> String := if(isnil(key), s, _vigenerego(key, s, 0, 1))

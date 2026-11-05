@@ -1,0 +1,6 @@
+s ∶ ℤ[i]
+s ≔ (parsebits "110101")
+p ∶ 𝕊²
+p ≔ (strpair "Hello, world!" "Welcome to i - 1!")
+main ∶ (𝔏 𝕊)
+main ≔ (∷ (showz s) (∷ (showz2 (asz2 s)) (∷ (showc (fracz (asz2 s))) (∷ (showz2 (addz2 (pairz 1101 111010000) (pairz 1 (⊖ 1100)))) (∷ (bits (gaussian p)) (∷ (showstr2 p) ⊘))))))

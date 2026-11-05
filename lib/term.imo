@@ -1,0 +1,80 @@
+⍝ lib/term.imo — spec notation — trusted prelude, part 26: terms: variables, numbers and applications, with equality, a total order, substitution and matching
+⍝ A term is a Scott value with three constructors:  tvar n (a variable; n is the code of its name), tnum q (a number q ∈ ℚ[i]) and
+⍝ tapp f xs (the symbol f applied to the list xs; f is the code of its name: a symbol is a string of digits, written back with symname).
+⍝ Take a term apart with  (t (n ↦ if-variable) (f xs ↦ if-application) (q ↦ if-number)).  The terms of a theory (lib/theory.imo) are these.
+Term ∶ 𝒦
+(↗ 𝔏)
+tvar ∶ ℕ → Term      ⍝ the variable with this index
+tvar ξ η ζ ω ≔ (η ξ)
+tapp ∶ ℕ → 𝔏 Term → Term      ⍝ the symbol f applied to arguments
+tapp ξ η ζ ω ν ≔ (ω ξ η)
+tnum ∶ ℚ[i] → Term      ⍝ a number
+tnum ξ η ζ ω ≔ (ω ξ)
+tconst ∶ ℕ → Term      ⍝ a symbol without arguments
+tconst ξ ≔ (tapp ξ ⊘)
+tapp₁ ∶ ℕ → Term → Term
+tapp₁ ξ η ≔ (tapp ξ (∷ η ⊘))
+tapp₂ ∶ ℕ → Term → Term → Term
+tapp₂ ξ η ζ ≔ (tapp ξ (∷ η (∷ ζ ⊘)))
+tisvar ∶ Term → 𝔹
+tisvar ξ ≔ (ξ (η ↦ ⊤) (η ζ ↦ ⊥) (η ↦ ⊥))
+tisapp ∶ Term → 𝔹
+tisapp ξ ≔ (ξ (η ↦ ⊥) (η ζ ↦ ⊤) (η ↦ ⊥))
+tisnum ∶ Term → 𝔹
+tisnum ξ ≔ (ξ (η ↦ ⊥) (η ζ ↦ ⊥) (η ↦ ⊤))
+thead ∶ Term → ℕ      ⍝ the symbol of an application (0 for the others)
+thead ξ ≔ (ξ (η ↦ 0) (η ζ ↦ η) (η ↦ 0))
+targs ∶ Term → 𝔏 Term      ⍝ the arguments of an application (none for the others)
+targs ξ ≔ (ξ (η ↦ ⊘) (η ζ ↦ ζ) (η ↦ ⊘))
+tisconst ∶ ℕ → Term → 𝔹      ⍝ is the term this symbol without arguments
+tisconst ξ η ≔ (η (ζ ↦ ⊥) (ζ ω ↦ (∧ (≐ ζ ξ) (∅ ω))) (ζ ↦ ⊥))
+tishead ∶ ℕ → Term → 𝔹      ⍝ is the term an application of this symbol
+tishead ξ η ≔ (η (ζ ↦ ⊥) (ζ ω ↦ (≐ ζ ξ)) (ζ ↦ ⊥))
+tnumval ∶ Term → ℚ[i]
+tnumval ξ ≔ (ξ (η ↦ 0) (η ζ ↦ 0) (η ↦ η))
+⍝ ---- equality and order
+teq ∶ Term → Term → 𝔹      ⍝ the same term
+teq ξ η ≔ (ξ (ζ ↦ (η (ω ↦ (≐ ζ ω)) (ω ν ↦ ⊥) (ω ↦ ⊥))) (ζ ω ↦ (η (ν ↦ ⊥) (ν ο ↦ (∧ (≐ ζ ν) (teql ω ο))) (ν ↦ ⊥))) (ζ ↦ (η (ω ↦ ⊥) (ω ν ↦ ⊥) (ω ↦ (≐ ζ ω)))))
+teql ∶ 𝔏 Term → 𝔏 Term → 𝔹
+teql ξ η ≔ (ξ (θ ι ↦ (η (κ′ μ ↦ (∧ (teq θ κ′) (teql ι μ))) ⊥)) (∅ η))
+qlt ∶ ℚ[i] → ℚ[i] → 𝔹      ⍝ the order on ℚ[i]: real part, then imaginary part
+qlt ξ η ≔ (∨ (≺ (ℜ ξ) (ℜ η)) (∧ (≐ (ℜ ξ) (ℜ η)) (≺ (ℑ ξ) (ℑ η))))
+idlt ∶ ℚ[i] → ℚ[i] → 𝔹      ⍝ the order on symbols: by their codes, digit by digit
+idlt ξ η ≔ (dlt (◀ ξ) (◀ η))
+dlt ∶ 𝔇 → 𝔇 → 𝔹
+dlt ξ η ≔ (ξ (θ ι ↦ (η (κ′ μ ↦ ((⊻ θ κ′) κ′ (dlt ι μ))) ⊥)) (∃ₗ (θ ↦ θ) η))
+tlt ∶ Term → Term → 𝔹      ⍝ a total order on terms: numbers, then variables, then applications (by symbol, then argument by argument; a shorter list first)
+tlt ξ η ≔ (ξ (ζ ↦ (η (ω ↦ (idlt ζ ω)) (ω ν ↦ ⊤) (ω ↦ ⊥))) (ζ ω ↦ (η (ν ↦ ⊥) (ν ο ↦ ((≐ ζ ν) (tltl ω ο) (idlt ζ ν))) (ν ↦ ⊥))) (ζ ↦ (η (ω ↦ ⊤) (ω ν ↦ ⊤) (ω ↦ (qlt ζ ω)))))
+tltl ∶ 𝔏 Term → 𝔏 Term → 𝔹
+tltl ξ η ≔ (ξ (θ ι ↦ (η (κ′ μ ↦ ((tlt θ κ′) ⊤ ((tlt κ′ θ) ⊥ (tltl ι μ)))) ⊥)) (¬ (∅ η)))
+tle ∶ Term → Term → 𝔹
+tle ξ η ≔ (¬ (tlt η ξ))
+tsort ∶ 𝔏 Term → 𝔏 Term      ⍝ sorted by tlt
+tsort ξ ≔ (sortby tle ξ)
+⍝ the sorted list without repetitions
+tnub ∶ 𝔏 Term → 𝔏 Term
+tnub ξ ≔ (ξ (θ ι ↦ (∷ θ (tnub (dropwhile (κ′ ↦ (teq θ κ′)) ι)))) ⊘)
+⍝ ---- shape
+tsize ∶ Term → ℕ      ⍝ the number of nodes
+tsize ξ ≔ (ξ (η ↦ 1) (η ζ ↦ (⊞ 1 (sumof (⫶ tsize ζ)))) (η ↦ 1))
+tvars ∶ Term → 𝔏 ℕ      ⍝ the variables, each once, in order of first occurrence
+tvars ξ ≔ (nubby ≐ (tvars′ ξ))
+tvars′ ∶ Term → 𝔏 ℕ
+tvars′ ξ ≔ (ξ (η ↦ (∷ η ⊘)) (η ζ ↦ (concatmap tvars′ ζ)) (η ↦ ⊘))
+tground ∶ Term → 𝔹      ⍝ without variables
+tground ξ ≔ (∅ (tvars′ ξ))
+⍝ ---- substitution and matching.  A substitution is a Dict Term from variable to term
+tsubst ∶ Dict Term → Term → Term      ⍝ replace the variables that the substitution binds
+tsubst ξ η ≔ (η (ζ ↦ ((ω ↦ ((∅ ω) η (hd ω))) (dkget (◀ ζ) ξ))) (ζ ω ↦ (tapp ζ (⫶ (tsubst ξ) ω))) (ζ ↦ η))
+tmatch ∶ Term → Term → Dict Term → 𝔏 (Dict Term)      ⍝ match the pattern against the term, extending the substitution: [σ] or []
+tmatch ξ η ζ ≔ (ξ (ω ↦ ((ν ↦ ((∅ ν) (∷ (dkput (◀ ω) η ζ) ⊘) ((teq (hd ν) η) (∷ ζ ⊘) ⊘))) (dkget (◀ ω) ζ))) (ω ν ↦ (η (ο ↦ ⊘) (ο ρ ↦ ((∧ (≐ ω ο) (≐ (ℓ ν) (ℓ ρ))) (tmatchl ν ρ ζ) ⊘)) (ο ↦ ⊘))) (ω ↦ (η (ν ↦ ⊘) (ν ο ↦ ⊘) (ν ↦ ((≐ ω ν) (∷ ζ ⊘) ⊘)))))
+tmatchl ∶ 𝔏 Term → 𝔏 Term → Dict Term → 𝔏 (Dict Term)
+tmatchl ξ η ζ ≔ (ξ (θ ι ↦ (η (κ′ μ ↦ ((ν ↦ ((∅ ν) ⊘ (tmatchl ι μ (hd ν)))) (tmatch θ κ′ ζ))) ⊘)) (∷ ζ ⊘))
+⍝ the term with a function applied to each argument (and the head and numbers kept)
+tmapargs ∶ (Term → Term) → Term → Term
+tmapargs ξ η ≔ (η (ζ ↦ η) (ζ ω ↦ (tapp ζ (⫶ ξ ω))) (ζ ↦ η))
+⍝ symbols are the codes of their names
+symid ∶ 𝕊 → ℕ      ⍝ the symbol (or variable) of a name: the code of the name (lib/dict.imo) read as a number, so that no arithmetic is done to make it
+symid ξ ≔ (⊗ (skey ξ) (◀ 1))
+symname ∶ ℕ → 𝕊      ⍝ the name of a symbol
+symname ξ ≔ (unskey (◀ ξ))

@@ -1,0 +1,1 @@
+main in List(Char) := repeatstr(12, ['Q', '7', 'a'])

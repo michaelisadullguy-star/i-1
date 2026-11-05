@@ -1,0 +1,1 @@
+main in List(List(\NN)) := [utf8bytes("héllo €"), [crc32(utf8bytes("123456789")), adler32(utf8bytes("Wikipedia"))], head(hexdecode("48656c6c6f")), head(base64decode("Zm9vYmFy")), [binxor(48879, 61453), binand(255, 1000), binor(10, 5), graycode(37), fromgray(55), luhndigit("7992739871")]]

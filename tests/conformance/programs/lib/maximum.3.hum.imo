@@ -1,0 +1,1 @@
+main in \ZZ := maximum([-7, 4, 9])

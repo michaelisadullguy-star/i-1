@@ -15,7 +15,7 @@ D = {
  # classes
  '𝔹':'Booleans ⊤ ⊥ (also the digits 1 and 0)', '𝔇':'digit strings = Gaussian integers in base i−1 (representation of ℤ[i]); ≣ 𝔏 𝔹', 'ℕ':'natural numbers', 'ℤ':'integers',
  'ℚ':'real rationals', 'ℝ':'real numbers (lazy streams of ℚ[i] with imaginary part 0)', 'ℤ[i]':'**the foundation**: Gaussian integers, binary strings in base i − 1', 'ℚ[i]':'Gaussian rationals: pairs (numerator, denominator) of Gaussian integers',
- 'ℝ[i]':'lazy complex numbers = streams over ℚ[i]  (= ℂ, \\R, \\CC);  ≣ 𝔖 ℚ[i]', '𝔻':'Cayley–Dickson tower over ℚ[i]  (ℂ → ℍ → 𝕆 → 𝕊 → …, depth unbounded);  ≣ 𝔗 ℚ[i]',
+ 'ℝ[i]':'lazy complex numbers = streams over ℚ[i]  (= ℂ, \\R, \\CC);  ≣ 𝔖 ℚ[i]', '𝔻':'Cayley–Dickson tower over ℚ[i]  (complex numbers → quaternions → octonions → sedenions → …, depth unbounded);  ≣ 𝔗 ℚ[i]',
  '𝕮':'characters (a code point, as a natural numeral)', '𝕊':'strings;  ≣ 𝔏 𝕮', '→':'function class  A → B', '𝔏':'lazy lists', '𝔖':'infinite streams', '𝔗':'Cayley–Dickson trees over a class',
  '𝔄':'algebra records over a class (+ × neg conj 0 1)', '𝔓':'pairs',
  # logic

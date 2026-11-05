@@ -11,7 +11,7 @@
 | `ℤ[i]` | `.1110.` | `\Z` | class | **the foundation**: Gaussian integers, binary strings in base i − 1 |
 | `ℚ[i]` | `.1111.` | `\Q` | class | Gaussian rationals: pairs (numerator, denominator) of Gaussian integers |
 | `ℝ[i]` | `.10000.` | `\R`, `\CC` | class | lazy complex numbers = streams over ℚ[i]  (= ℂ, \R, \CC);  ≣ 𝔖 ℚ[i] |
-| `𝔻` | `.10001.` | `\D` | class | Cayley–Dickson tower over ℚ[i]  (ℂ → ℍ → 𝕆 → 𝕊 → …, depth unbounded);  ≣ 𝔗 ℚ[i] |
+| `𝔻` | `.10001.` | `\D` | class | Cayley–Dickson tower over ℚ[i]  (complex numbers → quaternions → octonions → sedenions → …, depth unbounded);  ≣ 𝔗 ℚ[i] |
 | `𝕮` | `.10010.` | `Char` | class | characters (a code point, as a natural numeral) |
 | `𝕊` | `.10011.` | `String` | class | strings;  ≣ 𝔏 𝕮 |
 | `→` | `.101.` | `->` | class | function class  A → B |
@@ -858,6 +858,395 @@
 | `showstr2` | `.100010001100.` | `decode` | `𝕊² → 𝕊` | a pair of strings as text, each in double quotes (no escapes):  ("Hello, world!", "Welcome to i - 1!") |
 | `parsebits` | `.100010001101.` | `parsebits` | `𝕊 → ℤ[i]` | the Gaussian integer written by a string of 1 and 0 (most significant digit first; `bits` is the inverse): "110101" is 1 − 6i |
 
+### Lists, more: folds, scans, searching, sorting, combinatorics, combinators (`lib/lists.imo`)
+
+| spec | bin | human | class | meaning |
+|:--:|:--|:--|:--|:--|
+| `ident` | `.100010010000.` | `ident` | `α → α` | the identity function |
+| `const` | `.100010010001.` | `const` | `α → β → α` | const x y = x |
+| `flip` | `.100010010010.` | `flip` | `(α → β → γ) → β → α → γ` | flip f x y = f y x |
+| `compose` | `.100010010011.` | `compose` | `(β → γ) → (α → β) → α → γ` | compose f g x = f (g x) |
+| `curry` | `.100010010100.` | `curry` | `((𝔓 α β) → γ) → α → β → γ` | curry f x y = f (pair x y) |
+| `uncurry` | `.100010010101.` | `uncurry` | `(α → β → γ) → (𝔓 α β) → γ` | uncurry f p = f (fst p) (snd p) |
+| `swap` | `.100010010110.` | `swap` | `(𝔓 α β) → (𝔓 β α)` | swap (a, b) = (b, a) |
+| `bimap` | `.100010010111.` | `bimap` | `(α → γ) → (β → δ) → (𝔓 α β) → (𝔓 γ δ)` | bimap f g (a, b) = (f a, g b) |
+| `until` | `.100010011000.` | `until` | `(α → 𝔹) → (α → α) → α → α` | the first of x, f x, f (f x), … for which p holds |
+| `applyn` | `.100010011010.` | `applyn` | `ℕ → (α → α) → α → α` | applyn n f x = f (f (… x)) with n applications |
+| `init` | `.100010011011.` | `init` | `(𝔏 α) → (𝔏 α)` | all but the last element |
+| `takewhile` | `.100010011100.` | `takewhile` | `(α → 𝔹) → (𝔏 α) → (𝔏 α)` | the longest prefix whose elements satisfy p |
+| `dropwhile` | `.100010011101.` | `dropwhile` | `(α → 𝔹) → (𝔏 α) → (𝔏 α)` | the rest after takewhile |
+| `span` | `.100010011110.` | `span` | `(α → 𝔹) → (𝔏 α) → (𝔓 (𝔏 α) (𝔏 α))` | span p xs = (takewhile p xs, dropwhile p xs) |
+| `partition` | `.100010011111.` | `partition` | `(α → 𝔹) → (𝔏 α) → (𝔓 (𝔏 α) (𝔏 α))` | (the elements that satisfy p, the others), each in order |
+| `splitat` | `.100010100001.` | `splitat` | `ℕ → (𝔏 α) → (𝔓 (𝔏 α) (𝔏 α))` | splitat n xs = (take n xs, drop n xs), computed in one pass |
+| `tails` | `.100010100010.` | `tails` | `(𝔏 α) → (𝔏 (𝔏 α))` | the suffixes: [1,2] → [[1,2],[2],[]] |
+| `inits` | `.100010100011.` | `inits` | `(𝔏 α) → (𝔏 (𝔏 α))` | the prefixes: [1,2] → [[],[1],[1,2]] |
+| `rotate` | `.100010100100.` | `rotate` | `ℕ → (𝔏 α) → (𝔏 α)` | rotate left by n places (n mod length) |
+| `chunks` | `.100010100110.` | `chunks` | `ℕ → (𝔏 α) → (𝔏 (𝔏 α))` | consecutive pieces of n elements (the last may be shorter); n = 0 gives [] |
+| `windows` | `.100010100111.` | `windows` | `ℕ → (𝔏 α) → (𝔏 (𝔏 α))` | the sublists of n consecutive elements |
+| `foldl₁` | `.100010101000.` | `foldl1` | `(α → α → α) → (𝔏 α) → α` | foldl without a start value (⊥ for the empty list) |
+| `foldr₁` | `.100010101001.` | `foldr1` | `(α → α → α) → (𝔏 α) → α` | foldr without a start value (⊥ for the empty list) |
+| `scanl` | `.100010101010.` | `scanl` | `(β → α → β) → β → (𝔏 α) → (𝔏 β)` | the running folds from the left: scanl f z [a,b] = [z, f z a, f (f z a) b] |
+| `scanl₁` | `.100010101011.` | `scanl1` | `(α → α → α) → (𝔏 α) → (𝔏 α)` | scanl without a start value |
+| `scanr` | `.100010101100.` | `scanr` | `(α → β → β) → β → (𝔏 α) → (𝔏 β)` | the running folds from the right |
+| `unfoldr` | `.100010101101.` | `unfoldr` | `(β → (𝔏 (𝔓 α β))) → β → (𝔏 α)` | unfoldr f s: f s is [] (stop) or [pair(x, s′)] (emit x, go on from s′) |
+| `concatmap` | `.100010101110.` | `concatmap` | `(α → (𝔏 β)) → (𝔏 α) → (𝔏 β)` | map then concatenate |
+| `intersperse` | `.100010101111.` | `intersperse` | `α → (𝔏 α) → (𝔏 α)` | put x between the elements |
+| `intercalate` | `.100010110000.` | `intercalate` | `(𝔏 α) → (𝔏 (𝔏 α)) → (𝔏 α)` | join lists with a separator list |
+| `count` | `.100010110001.` | `count` | `(α → 𝔹) → (𝔏 α) → ℕ` | the number of elements that satisfy p |
+| `zipwith3` | `.100010110010.` | `zipwith3` | `(α → β → γ → δ) → (𝔏 α) → (𝔏 β) → (𝔏 γ) → (𝔏 δ)` | zipwith with three lists |
+| `zip3` | `.100010110011.` | `zip3` | `(𝔏 α) → (𝔏 β) → (𝔏 γ) → (𝔏 (𝔓 α (𝔓 β γ)))` | zip with three lists: pair(a, pair(b, c)) |
+| `unzip` | `.100010110100.` | `unzip` | `(𝔏 (𝔓 α β)) → (𝔓 (𝔏 α) (𝔏 β))` | a list of pairs as a pair of lists |
+| `transposel` | `.100010110111.` | `transposel` | `(𝔏 (𝔏 α)) → (𝔏 (𝔏 α))` | the transposed rows, rows may differ in length (as in Haskell) |
+| `cartesian` | `.100010111000.` | `cartesian` | `(𝔏 α) → (𝔏 β) → (𝔏 (𝔓 α β))` | all pairs (a, b), a from the first list, in order |
+| `lookupby` | `.100010111001.` | `lookupby` | `(α → α → 𝔹) → α → (𝔏 (𝔓 α β)) → (𝔏 β)` | the value of the first pair whose key is equal (the given equality) to x, as a list of at most one element |
+| `lookup` | `.100010111010.` | `lookup` | `ℚ[i] → (𝔏 (𝔓 ℚ[i] β)) → (𝔏 β)` | lookup with ≐: the value for the key x as a list of at most one element |
+| `elemby` | `.100010111011.` | `elemby` | `(α → α → 𝔹) → α → (𝔏 α) → 𝔹` | membership with a given equality |
+| `findindex` | `.100010111101.` | `findindex` | `(α → 𝔹) → (𝔏 α) → (𝔏 ℕ)` | the index of the first element that satisfies p, as a list of at most one element |
+| `find` | `.100010111110.` | `find` | `(α → 𝔹) → (𝔏 α) → (𝔏 α)` | the first element that satisfies p, as a list of at most one element |
+| `nubby` | `.100010111111.` | `nubby` | `(α → α → 𝔹) → (𝔏 α) → (𝔏 α)` | drop repeated elements (the given equality), keeping the first of each |
+| `deleteby` | `.100011000000.` | `deleteby` | `(α → α → 𝔹) → α → (𝔏 α) → (𝔏 α)` | delete the first element equal to x |
+| `unionby` | `.100011000001.` | `unionby` | `(α → α → 𝔹) → (𝔏 α) → (𝔏 α) → (𝔏 α)` | the first list, then what is new in the second |
+| `intersectby` | `.100011000010.` | `intersectby` | `(α → α → 𝔹) → (𝔏 α) → (𝔏 α) → (𝔏 α)` | the elements of the first list that occur in the second |
+| `diffby` | `.100011000011.` | `diffby` | `(α → α → 𝔹) → (𝔏 α) → (𝔏 α) → (𝔏 α)` | the elements of the first list that do not occur in the second |
+| `groupby` | `.100011000100.` | `groupby` | `(α → α → 𝔹) → (𝔏 α) → (𝔏 (𝔏 α))` | group adjacent elements that are equal to the first of the group |
+| `isprefixby` | `.100011000101.` | `isprefixby` | `(α → α → 𝔹) → (𝔏 α) → (𝔏 α) → 𝔹` | is the first list a prefix of the second (the given equality) |
+| `issuffixby` | `.100011000110.` | `issuffixby` | `(α → α → 𝔹) → (𝔏 α) → (𝔏 α) → 𝔹` | is the first list a suffix of the second |
+| `isinfixby` | `.100011000111.` | `isinfixby` | `(α → α → 𝔹) → (𝔏 α) → (𝔏 α) → 𝔹` | is the first list a sublist (contiguous) of the second |
+| `mergeby` | `.100011001000.` | `mergeby` | `(α → α → 𝔹) → (𝔏 α) → (𝔏 α) → (𝔏 α)` | merge two lists that are sorted by le (stable) |
+| `sortby` | `.100011001001.` | `sortby` | `(α → α → 𝔹) → (𝔏 α) → (𝔏 α)` | stable merge sort for any order le (le a b: a may stay before b) |
+| `insertby` | `.100011001010.` | `insertby` | `(α → α → 𝔹) → α → (𝔏 α) → (𝔏 α)` | insert into a list that is sorted by le |
+| `maximumby` | `.100011001011.` | `maximumby` | `(α → α → 𝔹) → (𝔏 α) → α` | the greatest element for the order le (the last of equal ones) |
+| `minimumby` | `.100011001100.` | `minimumby` | `(α → α → 𝔹) → (𝔏 α) → α` | the least element for the order le (the first of equal ones) |
+| `maximum` | `.100011001101.` | `maximum` | `(𝔏 ℕ) → ℕ`<br>`(𝔏 ℤ) → ℤ`<br>`(𝔏 ℚ) → ℚ` | the greatest element of a list of real numbers |
+| `minimum` | `.100011001110.` | `minimum` | `(𝔏 ℕ) → ℕ`<br>`(𝔏 ℤ) → ℤ`<br>`(𝔏 ℚ) → ℚ` | the least element of a list of real numbers |
+| `subsequences` | `.100011010000.` | `subsequences` | `(𝔏 α) → (𝔏 (𝔏 α))` | all 2ⁿ sublists (not necessarily contiguous): [1,2] → [[],[1],[2],[1,2]] |
+| `permutations` | `.100011010010.` | `permutations` | `(𝔏 α) → (𝔏 (𝔏 α))` | all n! orderings, in the order of first choice: [1,2,3] → [[1,2,3],[1,3,2],[2,1,3],…] |
+| `combinations` | `.100011010100.` | `combinations` | `ℕ → (𝔏 α) → (𝔏 (𝔏 α))` | the k-element sublists in order: combinations 2 [1,2,3] = [[1,2],[1,3],[2,3]] |
+| `cycle` | `.100011010101.` | `cycle` | `(𝔏 α) → (𝔖 α)` | the list repeated endlessly (a stream); the empty list stays empty |
+| `sumsq` | `.100011010110.` | `sumsq` | `(𝔏 ℚ[i]) → ℚ[i]` | the sum of squares |
+| `dotl` | `.100011010111.` | `dotl` | `(𝔏 ℚ[i]) → (𝔏 ℚ[i]) → ℚ[i]` | the dot product of two lists of numbers (the shorter one decides the length) |
+| `mean` | `.100011011000.` | `mean` | `(𝔏 ℚ[i]) → ℚ[i]` | the arithmetic mean (0 for the empty list) |
+| `tally` | `.100011011001.` | `tally` | `(𝔏 ℚ) → (𝔏 (𝔓 ℚ ℕ))` | [(x, how many times x occurs)] in increasing order of x |
+
+### Characters and strings: case, splitting, searching, padding, bases, Roman numerals (`lib/strings.imo`)
+
+| spec | bin | human | class | meaning |
+|:--:|:--|:--|:--|:--|
+| `isdigit` | `.100011011010.` | `isdigit` | `𝕮 → 𝔹` | 0–9 |
+| `isuppercase` | `.100011011011.` | `isuppercase` | `𝕮 → 𝔹` | an upper-case letter (ASCII, Latin-1, Greek, Cyrillic) |
+| `islowercase` | `.100011011100.` | `islowercase` | `𝕮 → 𝔹` | a lower-case letter (ASCII, Latin-1 with ß and ÿ, Greek with ς, Cyrillic) |
+| `isalpha` | `.100011011101.` | `isalpha` | `𝕮 → 𝔹` | a letter |
+| `isalnum` | `.100011011110.` | `isalnum` | `𝕮 → 𝔹` | a letter or a digit |
+| `isspace` | `.100011011111.` | `isspace` | `𝕮 → 𝔹` | white space: tab, line feed, vertical tab, form feed, carriage return, space, no-break space, U+2000–U+200A, U+3000 |
+| `ispunct` | `.100011100000.` | `ispunct` | `𝕮 → 𝔹` | an ASCII punctuation mark or symbol |
+| `upper` | `.100011100010.` | `upper` | `𝕮 → 𝕮` | the upper-case form of a letter (other characters stay) |
+| `lower` | `.100011100011.` | `lower` | `𝕮 → 𝕮` | the lower-case form of a letter (other characters stay) |
+| `toupper` | `.100011100100.` | `toupper` | `𝕊 → 𝕊` | every letter in upper case |
+| `tolower` | `.100011100101.` | `tolower` | `𝕊 → 𝕊` | every letter in lower case |
+| `capitalize` | `.100011100110.` | `capitalize` | `𝕊 → 𝕊` | the first letter in upper case, the others in lower case |
+| `ltrim` | `.100011100111.` | `ltrim` | `𝕊 → 𝕊` | without leading white space |
+| `rtrim` | `.100011101000.` | `rtrim` | `𝕊 → 𝕊` | without trailing white space |
+| `trim` | `.100011101001.` | `trim` | `𝕊 → 𝕊` | without leading and trailing white space |
+| `startswith` | `.100011101010.` | `startswith` | `𝕊 → 𝕊 → 𝔹` | startswith s p: does s begin with p |
+| `endswith` | `.100011101011.` | `endswith` | `𝕊 → 𝕊 → 𝔹` | endswith s p: does s end with p |
+| `contains` | `.100011101100.` | `contains` | `𝕊 → 𝕊 → 𝔹` | contains s p: does p occur in s |
+| `indexof` | `.100011101101.` | `indexof` | `𝕊 → 𝕊 → (𝔏 ℕ)` | indexof s p: the index of the first occurrence of p in s, as a list of at most one element |
+| `replace` | `.100011101111.` | `replace` | `𝕊 → 𝕊 → 𝕊 → 𝕊` | replace s p r: every non-overlapping occurrence of p in s (from the left) becomes r; an empty p changes nothing |
+| `split` | `.100011110000.` | `split` | `𝕮 → 𝕊 → (𝔏 𝕊)` | split c s: the fields between the characters c (empty fields kept): split ',' "a,,b" = ["a", "", "b"] |
+| `splitstr` | `.100011110010.` | `splitstr` | `𝕊 → 𝕊 → (𝔏 𝕊)` | splitstr p s: the fields between the occurrences of the string p (an empty p gives [s]) |
+| `words` | `.100011110011.` | `words` | `𝕊 → (𝔏 𝕊)` | the words: maximal runs of characters that are not white space |
+| `unwords` | `.100011110100.` | `unwords` | `(𝔏 𝕊) → 𝕊` | the words joined by single spaces |
+| `lines` | `.100011110101.` | `lines` | `𝕊 → (𝔏 𝕊)` | the lines (the line feed ends a line, it is not part of it; a final line feed starts no new line) |
+| `padleft` | `.100011110110.` | `padleft` | `ℕ → 𝕮 → 𝕊 → 𝕊` | padleft n c s: s with c in front up to length n |
+| `padright` | `.100011110111.` | `padright` | `ℕ → 𝕮 → 𝕊 → 𝕊` | padright n c s: s with c behind it up to length n |
+| `padcenter` | `.100011111000.` | `padcenter` | `ℕ → 𝕮 → 𝕊 → 𝕊` | padcenter n c s: s between c's up to length n (the extra one goes to the right) |
+| `repeatstr` | `.100011111001.` | `repeatstr` | `ℕ → 𝕊 → 𝕊` | the string n times |
+| `ispalindrome` | `.100011111010.` | `ispalindrome` | `𝕊 → 𝔹` | reads the same backwards |
+| `isanagram` | `.100011111011.` | `isanagram` | `𝕊 → 𝕊 → 𝔹` | the same letters (case and white space ignored) |
+| `caesar` | `.100011111100.` | `caesar` | `ℤ → 𝕊 → 𝕊` | caesar k s: every ASCII letter moved k places along the alphabet (cyclically), other characters stay |
+| `digitchar` | `.100011111110.` | `digitchar` | `ℕ → 𝕮` |  |
+| `showbase` | `.100100000000.` | `showbase` | `ℕ → ℕ → 𝕊` | showbase n b: n written in base b (2 ≤ b ≤ 36), most significant digit first |
+| `hex` | `.100100000001.` | `hex` | `ℕ → 𝕊` | n in base 16 |
+| `octal` | `.100100000010.` | `octal` | `ℕ → 𝕊` | n in base 8 |
+| `binary` | `.100100000011.` | `binary` | `ℕ → 𝕊` | n in base 2 |
+| `digitval` | `.100100000100.` | `digitval` | `𝕮 → (𝔏 ℕ)` | the value of a digit character (0–9, a–z, A–Z as 10 … 35), as a list of at most one element |
+| `readbase` | `.100100000101.` | `readbase` | `ℕ → 𝕊 → (𝔏 ℕ)` | readbase b s: the number written in base b, if s is non-empty and made of digits below b (a list of at most one element) |
+| `readnat` | `.100100000110.` | `readnat` | `𝕊 → (𝔏 ℕ)` | a decimal natural number, if the string is non-empty and made of digits (a list of at most one element) |
+| `readint` | `.100100000111.` | `readint` | `𝕊 → (𝔏 ℤ)` | a decimal integer with an optional sign, as a list of at most one element |
+| `romantable` | `.100100001000.` | `romantable` | `(𝔏 (𝔓 ℕ 𝕊))` |  |
+| `roman` | `.100100001010.` | `roman` | `ℕ → 𝕊` | the Roman numeral of n (1 ≤ n ≤ 3999; larger n repeat M, 0 gives the empty string) |
+| `fromroman` | `.100100001100.` | `fromroman` | `𝕊 → ℕ` | the value of a Roman numeral written as roman writes it (0 for the empty string) |
+| `levenshtein` | `.100100001111.` | `levenshtein` | `𝕊 → 𝕊 → ℕ` | the edit distance: the fewest insertions, deletions and substitutions that turn one string into the other |
+| `rle` | `.100100010000.` | `rle` | `𝕊 → 𝕊` | run-length encoding: "aaab" → "3a1b" (the count in decimal, then the character; digits in the text are not allowed) |
+| `unrle` | `.100100010001.` | `unrle` | `𝕊 → 𝕊` | the inverse of rle |
+
+### Containers as binary tries over the base i−1 digits: dictionaries, finite sets, multisets, heaps, queues (`lib/dict.imo`)
+
+| spec | bin | human | class | meaning |
+|:--:|:--|:--|:--|:--|
+| `emptydict` | `.100100101001.` | `emptydict` | `(Dict α)` | the dictionary without entries |
+| `dput` | `.100100101010.` | `dput` | `ℤ[i] → α → (Dict α) → (Dict α)` | dput k v d: d with the key k bound to v |
+| `dget` | `.100100101011.` | `dget` | `ℤ[i] → (Dict α) → (𝔏 α)` | the value of the key, as a list of at most one element |
+| `dgetd` | `.100100101100.` | `dgetd` | `ℤ[i] → α → (Dict α) → α` | dgetd k default d: the value of k, or the default |
+| `dhas` | `.100100101101.` | `dhas` | `ℤ[i] → (Dict α) → 𝔹` | is the key bound |
+| `ddel` | `.100100101110.` | `ddel` | `ℤ[i] → (Dict α) → (Dict α)` | d without the key |
+| `dsize` | `.100100101111.` | `dsize` | `(Dict α) → ℕ` | the number of entries |
+| `disempty` | `.100100110000.` | `disempty` | `(Dict α) → 𝔹` | no entries |
+| `ditems` | `.100100110001.` | `ditems` | `(Dict α) → (𝔏 (𝔓 ℤ[i] α))` | the entries (key, value) in trie order (the least significant digit of the key decides first) |
+| `dkeys` | `.100100110010.` | `dkeys` | `(Dict α) → (𝔏 ℤ[i])` | the keys in trie order |
+| `dvals` | `.100100110011.` | `dvals` | `(Dict α) → (𝔏 α)` | the values in trie order |
+| `dfromlist` | `.100100110100.` | `dfromlist` | `(𝔏 (𝔓 ℤ[i] α)) → (Dict α)` | the dictionary of a list of pairs (a later pair wins over an earlier one with the same key) |
+| `dmap` | `.100100110101.` | `dmap` | `(α → β) → (Dict α) → (Dict β)` | apply f to every value |
+| `dfilter` | `.100100110110.` | `dfilter` | `(α → 𝔹) → (Dict α) → (Dict α)` | keep the entries whose value satisfies p |
+| `dfoldr` | `.100100110111.` | `dfoldr` | `(α → β → β) → β → (Dict α) → β` | fold the values (in trie order) |
+| `dwith` | `.100100111000.` | `dwith` | `(α → α → α) → ℤ[i] → α → (Dict α) → (Dict α)` | dwith f k v d: bind k to v, or to f v old when k is already bound |
+| `dupdate` | `.100100111001.` | `dupdate` | `(α → α) → ℤ[i] → (Dict α) → (Dict α)` | apply f to the value of k when k is bound (otherwise nothing changes) |
+| `dunion` | `.100100111010.` | `dunion` | `(Dict α) → (Dict α) → (Dict α)` | all entries of both; the first dictionary wins on a common key |
+| `dunionwith` | `.100100111011.` | `dunionwith` | `(α → α → α) → (Dict α) → (Dict α) → (Dict α)` | dunionwith f a b: on a common key the value is f (value in a) (value in b) |
+| `dinter` | `.100100111100.` | `dinter` | `(Dict α) → (Dict α) → (Dict α)` | the entries of the first whose key is also in the second |
+| `ddiff` | `.100100111101.` | `ddiff` | `(Dict α) → (Dict α) → (Dict α)` | the entries of the first whose key is not in the second |
+| `deq` | `.100100111110.` | `deq` | `(α → α → 𝔹) → (Dict α) → (Dict α) → 𝔹` | the same keys and equal values (equality of values given) |
+| `dfromvals` | `.100100111111.` | `dfromvals` | `(𝔏 α) → (Dict α)` | the dictionary of a list: the key of the k-th element is k (an array) |
+| `dtovals` | `.100101000000.` | `dtovals` | `(Dict α) → (𝔏 α)` | the values of the keys 0, 1, 2, … up to the size (the inverse of dfromvals) |
+| `dkput` | `.101011011010.` |  | `𝔇 → α → (Dict α) → (Dict α)` | dkput digits v d |
+| `dkwith` | `.101011011101.` |  | `(α → α → α) → 𝔇 → α → (Dict α) → (Dict α)` | dkwith f digits v d: bind to v, or to f v old |
+| `skey` | `.101011011111.` |  | `𝕊 → 𝔇` | the code of a string as a digit string (prefix-free, so a trie keyed by it holds strings) |
+| `ukchar` | `.101011100000.` |  | `𝔇 → (𝔓 𝔇 𝔇)` | the digits of the first character of a code and the rest |
+| `unskey` | `.101011100001.` |  | `𝔇 → 𝕊` | the string of a code |
+| `dputs` | `.100101000001.` | `dputs` | `𝕊 → α → (Dict α) → (Dict α)` | dput with a string key |
+| `dgets` | `.100101000010.` | `dgets` | `𝕊 → (Dict α) → (𝔏 α)` | dget with a string key |
+| `dhass` | `.100101000011.` | `dhass` | `𝕊 → (Dict α) → 𝔹` | dhas with a string key |
+| `ddels` | `.100101000100.` | `ddels` | `𝕊 → (Dict α) → (Dict α)` | ddel with a string key |
+| `dkeyss` | `.100101000101.` | `dkeyss` | `(Dict α) → (𝔏 𝕊)` | the keys of a dictionary with string keys |
+| `emptyfset` | `.100101000110.` | `emptyfset` | `FSet` | the empty finite set |
+| `fsadd` | `.100101000111.` | `fsadd` | `ℤ[i] → FSet → FSet` | the set with one more element |
+| `fsdel` | `.100101001000.` | `fsdel` | `ℤ[i] → FSet → FSet` | the set without the element |
+| `fshas` | `.100101001001.` | `fshas` | `ℤ[i] → FSet → 𝔹` | membership |
+| `fssize` | `.100101001010.` | `fssize` | `FSet → ℕ` | the number of elements |
+| `fsempty` | `.100101001011.` | `fsempty` | `FSet → 𝔹` | no elements |
+| `fselems` | `.100101001100.` | `fselems` | `FSet → (𝔏 ℤ[i])` | the elements in trie order |
+| `fsfromlist` | `.100101001101.` | `fsfromlist` | `(𝔏 ℤ[i]) → FSet` | the set of the elements of a list |
+| `fsunion` | `.100101001110.` | `fsunion` | `FSet → FSet → FSet` | A ∪ B |
+| `fsinter` | `.100101001111.` | `fsinter` | `FSet → FSet → FSet` | A ∩ B |
+| `fsdiff` | `.100101010000.` | `fsdiff` | `FSet → FSet → FSet` | A ∖ B |
+| `fssubset` | `.100101010001.` | `fssubset` | `FSet → FSet → 𝔹` | A ⊆ B |
+| `fseq` | `.100101010010.` | `fseq` | `FSet → FSet → 𝔹` | A = B |
+| `fsfilter` | `.100101010011.` | `fsfilter` | `(ℤ[i] → 𝔹) → FSet → FSet` | the elements that satisfy p |
+| `fsmap` | `.100101010100.` | `fsmap` | `(ℤ[i] → ℤ[i]) → FSet → FSet` | the set of the images |
+| `fspowerset` | `.100101010101.` | `fspowerset` | `FSet → (𝔏 FSet)` | all 2ⁿ subsets, as a list (the empty set first) |
+| `emptybag` | `.100101010110.` | `emptybag` | `Bag` | the empty multiset |
+| `bagadd` | `.100101010111.` | `bagadd` | `ℤ[i] → ℕ → Bag → Bag` | bagadd x n b: n more copies of x |
+| `bagcount` | `.100101011000.` | `bagcount` | `ℤ[i] → Bag → ℕ` | the multiplicity of x |
+| `bagsize` | `.100101011001.` | `bagsize` | `Bag → ℕ` | the number of elements with multiplicity |
+| `bagfromlist` | `.100101011010.` | `bagfromlist` | `(𝔏 ℤ[i]) → Bag` | the multiset of the elements of a list |
+| `bagitems` | `.100101011011.` | `bagitems` | `Bag → (𝔏 (𝔓 ℤ[i] ℕ))` | (element, multiplicity) pairs in trie order |
+| `bagunion` | `.100101011100.` | `bagunion` | `Bag → Bag → Bag` | multiplicities add |
+| `bagdel` | `.100101011101.` | `bagdel` | `ℤ[i] → ℕ → Bag → Bag` | bagdel x n b: n fewer copies of x (not below zero; no entry is left at zero) |
+| `emptyheap` | `.100101100001.` | `emptyheap` | `(Heap α)` | the empty priority queue |
+| `hpush` | `.100101100010.` | `hpush` | `ℚ → α → (Heap α) → (Heap α)` | hpush priority value h: h with one more entry |
+| `hpeek` | `.100101100011.` | `hpeek` | `(Heap α) → (𝔏 (𝔓 ℚ α))` | the entry with the smallest priority (the earliest pushed of equal ones is not guaranteed), as a list of at most one element |
+| `hpop` | `.100101100100.` | `hpop` | `(Heap α) → (Heap α)` | the heap without its smallest entry |
+| `hsize` | `.100101100101.` | `hsize` | `(Heap α) → ℕ` | the number of entries |
+| `hempty` | `.100101100110.` | `hempty` | `(Heap α) → 𝔹` | no entries |
+| `hfromlist` | `.100101100111.` | `hfromlist` | `(𝔏 (𝔓 ℚ α)) → (Heap α)` | the heap of a list of (priority, value) pairs |
+| `htolist` | `.100101101000.` | `htolist` | `(Heap α) → (𝔏 (𝔓 ℚ α))` | all entries by increasing priority (heap sort) |
+| `emptyqueue` | `.100101101001.` | `emptyqueue` | `(Queue α)` | the empty queue |
+| `qpush` | `.100101101010.` | `qpush` | `α → (Queue α) → (Queue α)` | add at the back |
+| `qpeek` | `.100101101100.` | `qpeek` | `(Queue α) → (𝔏 α)` | the front element, as a list of at most one element |
+| `qpop` | `.100101101101.` | `qpop` | `(Queue α) → (Queue α)` | the queue without its front element |
+| `qsize` | `.100101101110.` | `qsize` | `(Queue α) → ℕ` | the number of elements |
+| `qempty` | `.100101101111.` | `qempty` | `(Queue α) → 𝔹` | no elements |
+| `qtolist` | `.100101110000.` | `qtolist` | `(Queue α) → (𝔏 α)` | the elements from the front to the back |
+| `qfromlist` | `.100101110001.` | `qfromlist` | `(𝔏 α) → (Queue α)` | the queue of a list, its first element at the front |
+| `chuppers` | `.101011110001.` |  | `𝕊` | A–Z, À–Ö, Ø–Þ, Α–Ρ, Σ–Ω, А–Я |
+| `chlowers` | `.101011110010.` |  | `𝕊` | a–z, à–ö, ø–þ, α–ρ, σ–ω, а–я, ß, ÿ, ς |
+| `chpuncts` | `.101011110100.` |  | `𝕊` | the punctuation of the tokenizer |
+| `chopchars` | `.101011110101.` |  | `𝕊` | the characters that make operators in the tokenizer |
+| `chextras` | `.101011110110.` |  | `𝕊` | apostrophe, prime and the subscript digits: they may be inside an identifier |
+| `chspaces` | `.101011110111.` |  | `(𝔏 ℕ)` | tab, line feed, vertical tab, form feed, carriage return, space, no-break space, U+2000–U+200A, U+3000 |
+| `chclass` | `.101011100101.` |  | `𝕮 → Chclass` | the class of a character |
+
+### Terms: variables, numbers and applications, with equality, a total order, substitution and matching (`lib/term.imo`)
+
+| spec | bin | human | class | meaning |
+|:--:|:--|:--|:--|:--|
+| `tvar` | `.100110000110.` |  | `ℕ → Term` | the variable with this index |
+| `tapp` | `.100110000111.` |  | `ℕ → (𝔏 Term) → Term` | the symbol f applied to arguments |
+| `tnum` | `.100110001000.` |  | `ℚ[i] → Term` | a number |
+| `tconst` | `.100110001001.` |  | `ℕ → Term` | a symbol without arguments |
+| `thead` | `.100110001111.` |  | `Term → ℕ` | the symbol of an application (0 for the others) |
+| `targs` | `.100110010000.` |  | `Term → (𝔏 Term)` | the arguments of an application (none for the others) |
+| `tisconst` | `.100110010001.` |  | `ℕ → Term → 𝔹` | is the term this symbol without arguments |
+| `tishead` | `.100110010010.` |  | `ℕ → Term → 𝔹` | is the term an application of this symbol |
+| `teq` | `.100100101000.` | `teq` | `Term → Term → 𝔹` | the same term |
+| `qlt` | `.100110010101.` |  | `ℚ[i] → ℚ[i] → 𝔹` | the order on ℚ[i]: real part, then imaginary part |
+| `idlt` | `.101011100010.` |  | `ℚ[i] → ℚ[i] → 𝔹` | the order on symbols: by their codes, digit by digit |
+| `tlt` | `.100110010110.` | `tlt` | `Term → Term → 𝔹` | a total order on terms: numbers, then variables, then applications (by symbol, then argument by argument; a shorter list first) |
+| `tsort` | `.100110011001.` |  | `(𝔏 Term) → (𝔏 Term)` | sorted by tlt |
+| `tsize` | `.100100100000.` | `tsize` | `Term → ℕ` | the number of nodes |
+| `tvars` | `.100110011011.` | `tvars` | `Term → (𝔏 ℕ)` | the variables, each once, in order of first occurrence |
+| `tground` | `.100110011101.` | `tground` | `Term → 𝔹` | without variables |
+| `tsubst` | `.100110011110.` |  | `(Dict Term) → Term → Term` | replace the variables that the substitution binds |
+| `tmatch` | `.100110011111.` |  | `Term → Term → (Dict Term) → (𝔏 (Dict Term))` | match the pattern against the term, extending the substitution: [σ] or [] |
+| `symid` | `.100110100010.` | `symid` | `𝕊 → ℕ` | the symbol (or variable) of a name: the code of the name (lib/dict.imo) read as a number, so that no arithmetic is done to make it |
+| `symname` | `.100110100011.` | `symname` | `ℕ → 𝕊` | the name of a symbol |
+
+### Reading and writing terms: a tokenizer, a precedence parser and a printer driven by a signature (`lib/parse.imo`)
+
+| spec | bin | human | class | meaning |
+|:--:|:--|:--|:--|:--|
+| `istokpunct` | `.101011111010.` |  | `𝕮 → 𝔹` | ( ) , { } [ ] . |
+| `tokenize` | `.100110101001.` | `tokenize` | `𝕊 → (𝔏 (𝔓 ℕ 𝕊))` | the tokens of a text |
+| `readnum` | `.100110101010.` | `readnum` | `𝕊 → ℚ` | a decimal number: 12, 0.25 |
+| `declentry` | `.100110110001.` |  | `𝕊 → (𝔏 (𝔓 𝕊 α))` | the entry that a declaration line makes, with its token: [] for a line that declares nothing |
+| `mksig` | `.100110110011.` | `mksig` | `(𝔏 𝕊) → Sig` | a signature from declaration lines |
+| `sdgetd` | `.101011100100.` |  | `𝕊 → α → (Dict α) → α` | the value of a string key, or a default |
+| `sigmerge` | `.100110110101.` | `sigmerge` | `Sig → Sig → Sig` | the operators of both (the first signature wins on a token) |
+| `sigfind` | `.100110110110.` |  | `Sig → 𝕊 → (𝔏 ℕ) → (𝔏 α)` | the first entry of a token whose kind is one of the numbers |
+| `sigprint` | `.100110110111.` |  | `Sig → ℕ → (𝔏 α)` | the entry that prints a symbol |
+| `parseterm` | `.100111000111.` | `parseterm` | `Sig → 𝕊 → (𝔏 Term)` | the term that a text denotes, as a maybe (all of the text must be used) |
+| `tprec` | `.100111001000.` |  | `Sig → Term → ℕ` | how tightly a term binds when printed (atoms: 111001100) |
+| `tprint` | `.100111001001.` | `tprint` | `Sig → Term → 𝕊` | the text of a term |
+
+### Rewriting: the normal form of a term under rules, associative-commutative-idempotent operators and hooks (`lib/rewrite.imo`)
+
+| spec | bin | human | class | meaning |
+|:--:|:--|:--|:--|:--|
+| `mkenv` | `.100111001111.` | `mkenv` | `Sig → (Dict (𝔏 α)) → (Dict (𝔏 β)) → (𝔏 𝕊) → ℕ → Env` |  |
+| `symprops` | `.100111010101.` | `symprops` | `Env → ℕ → 𝕊` | the property letters of a symbol (A, C, I) |
+| `acnorm` | `.100111010111.` |  | `Env → Term → Term` | flatten (A), sort (C), merge equal arguments (I); one argument left: that argument |
+| `applyrule` | `.100111100000.` |  | `Env → α → Term → (𝔏 Term)` | apply one rule (⊗ lhs rhs) at the root of a term: a maybe |
+| `nf` | `.100111100110.` |  | `Env → ℕ → Term → Term` | bottom-up: children first, the laws of the operator, then hooks and rules at the root until none applies (at most k steps in a row) |
+| `normalize` | `.100111100111.` | `normalize` | `Env → Term → Term` | the normal form under the rules of the active theories |
+| `mkrule` | `.100111101000.` | `mkrule` | `Sig → 𝕊 → (𝔏 α)` | "lhs ==> rhs" as a rule (a maybe) |
+| `mkrules` | `.100111101010.` | `mkrules` | `Sig → (𝔏 𝕊) → (Dict (𝔏 α))` | the rule index of a list of lines (in order) |
+
+### Boolean algebra by reduced ordered binary decision diagrams: every propositional formula has exactly one normal form (`lib/boolalg.imo`)
+
+| spec | bin | human | class | meaning |
+|:--:|:--|:--|:--|:--|
+| `bt` | `.100111101110.` |  | `BDD` | the diagram of true |
+| `bf` | `.100111101111.` |  | `BDD` | the diagram of false |
+| `bn` | `.100111110000.` |  | `ℕ → BDD → BDD → BDD` | a node: test the atom v; lo if it is false, hi if it is true |
+| `isbool` | `.101000000010.` |  | `Term → 𝔹` | is the root of the term a connective or a truth constant |
+| `bnorm` | `.101000000100.` | `bnorm` | `(𝔏 Term) → (𝔏 Term)` |  |
+| `bcanon` | `.101000001100.` | `bcanon` | `Term → Term` |  |
+| `bdecide` | `.101000001101.` | `bdecide` | `Term → 𝔹` | ⊤ if the formula is a tautology, ⊥ if it is a contradiction, ⍰ otherwise |
+| `boolpass` | `.101000001110.` | `boolpass` | `Term → Term` |  |
+| `boolatoms` | `.101000001111.` |  | `Term → Term` | the formula with every atom passed through boolpass |
+
+### Polynomials as normal forms of arithmetic terms, with the sign analysis that decides equations and inequalities (`lib/polynf.imo`)
+
+| spec | bin | human | class | meaning |
+|:--:|:--|:--|:--|:--|
+| `mbefore` | `.101000100011.` |  | `(𝔏 α) → (𝔏 α) → 𝔹` | a monomial comes before another: higher degree first, then by atoms |
+| `psubst` | `.101011111011.` |  | `(Term → Poly) → Poly → Poly` | replace every atom by a polynomial |
+| `acdeep` | `.101000110010.` |  | `Env → Term → Term` | the laws of the operators applied everywhere, bottom-up |
+| `monosign` | `.101000110101.` |  | `𝔹 → α → ℕ` | the sign of one term c·m: 2 non-negative, 1 non-positive, 4 unknown (a zero-degree term is a number) |
+| `pfsign` | `.101000111000.` |  | `Env → Poly → ℕ` | the sign of a polynomial that is not zero: by its monomials, and for polynomials of degree 2 by an exact positive semidefiniteness test (lib/psd.imo) |
+| `hasconst` | `.101000111010.` |  | `Poly → 𝔹` | is there a term of degree 0 (it comes last) |
+
+### Linear arithmetic by Fourier–Motzkin elimination, and Boolean simplification modulo the order of the numbers (DPLL(T) with diagrams) (`lib/fm.imo`)
+
+| spec | bin | human | class | meaning |
+|:--:|:--|:--|:--|:--|
+| `pcoef` | `.101001110100.` |  | `Poly → (𝔏 α) → ℚ[i]` | the coefficient of a monomial in a polynomial |
+| `pmonos` | `.101001110101.` |  | `Poly → (𝔏 (𝔏 α))` | the monomials of positive degree |
+| `pconst` | `.101001110110.` |  | `Poly → ℚ[i]` | the constant term |
+| `isrealpoly` | `.101001110111.` |  | `Poly → 𝔹` | all coefficients real |
+| `peq` | `.101011111100.` |  | `Poly → Poly → 𝔹` | the same polynomial |
+| `fmvarp` | `.101011111101.` |  | `Poly → Poly` | the terms of positive degree |
+| `fmisconst` | `.101011111110.` |  | `(𝔓 Poly ℕ) → 𝔹` | a row without a variable (the terms come in decreasing degree and a constant comes last) |
+| `fmcheck` | `.101100000000.` |  | `(𝔓 Poly ℕ) → 𝔹` | does a row without a variable hold |
+| `fmbad` | `.101100000001.` |  | `(𝔏 (𝔓 Poly ℕ))` | the rows that say 0 > 0 |
+| `fmsame` | `.101100000011.` |  | `(𝔓 Poly ℕ) → (𝔓 Poly ℕ) → 𝔹` | the same terms of positive degree |
+| `fmstronger` | `.101100000100.` |  | `(𝔓 Poly ℕ) → (𝔓 Poly ℕ) → 𝔹` | for two inequalities with the same terms of positive degree: the first implies the second |
+| `fmsigns` | `.101100000110.` |  | `(𝔏 α) → (𝔏 (𝔓 Poly ℕ)) → ℕ` | the number of new rows when the monomial is eliminated |
+| `fmispure` | `.101100000111.` |  | `(𝔏 α) → (𝔏 (𝔓 Poly ℕ)) → 𝔹` | the monomial has one sign in all rows |
+| `fmdrop` | `.101100001000.` |  | `(𝔏 α) → (𝔏 (𝔓 Poly ℕ)) → (𝔏 (𝔓 Poly ℕ))` | the rows without the monomial |
+| `fmbest` | `.101100001001.` |  | `(𝔏 (𝔏 α)) → (𝔏 (𝔓 Poly ℕ)) → (𝔏 α)` | the monomial with the fewest new rows |
+| `fmcomb` | `.101001111110.` |  | `(𝔏 α) → (𝔓 Poly ℕ) → (𝔓 Poly ℕ) → (𝔓 Poly ℕ)` | p has a positive coefficient a for m, q a negative one b: (−b)·p + a·q has none; strict if one of the two is |
+| `fmfm` | `.101100001010.` |  | `(𝔏 α) → (𝔏 (𝔓 Poly ℕ)) → (𝔏 (𝔓 Poly ℕ))` | eliminate the monomial: the rows without it, and each lower bound combined with each upper bound |
+| `fmpick` | `.101100001011.` |  | `(𝔓 Poly ℕ) → (𝔏 (𝔓 Poly ℕ)) → (𝔏 α)` | the monomial of an equality that occurs in the fewest other rows |
+| `fmelim` | `.101100001100.` |  | `(𝔓 Poly ℕ) → (𝔏 (𝔓 Poly ℕ)) → (𝔏 (𝔓 Poly ℕ))` | solve the equality for a monomial and put it into the other rows |
+| `fmsubst` | `.101100001101.` |  | `ℕ → (𝔏 (𝔓 Poly ℕ)) → (𝔏 (𝔓 Poly ℕ))` | eliminate the equality at this index |
+| `fmfeasible` | `.101001111000.` |  | `(𝔏 (𝔓 Poly ℕ)) → 𝔹` | can all the rows hold at the same time (over the ordered field of the rationals, each monomial a variable) |
+| `fmsign` | `.101100010011.` |  | `(𝔓 Poly ℕ) → (𝔓 Poly ℕ)` | an equation with a positive first coefficient |
+| `fmfeasibleb` | `.101100001110.` |  | `𝔹 → (𝔏 (𝔓 Poly ℕ)) → 𝔹` | with True: the variables are integers |
+| `atomalts` | `.101001111111.` |  | `Term → 𝔹 → (𝔏 (𝔏 (𝔓 Poly ℕ)))` | the alternatives (each a list of constraints) that make the atom have the value; [] if it is not a relation |
+| `fmprep` | `.101100011001.` |  | `Env → (𝔏 (𝔓 Poly ℕ)) → (𝔏 (𝔓 Poly ℕ))` | the rows with the facts about the variables (and, in the Kolmogorov theory, written with the probabilities of the minterms) |
+| `issetatom` | `.101010001101.` |  | `Env → Term → 𝔹` | subset(S, T), or eq(S, T) with a Boolean expression on a side, or any eq if the sets are the only domain (no arithmetic) |
+| `tomem` | `.101010001110.` |  | `Term → Term → Term` | the Boolean formula "element w is in the set S" |
+| `bsetatom` | `.101010110011.` |  | `Env → Term → (𝔏 Term)` | the hook of the sets: a set atom that is decided by one element |
+| `isrel` | `.101010000110.` |  | `Term → 𝔹` | a relation atom: eq, lt or le of two terms |
+
+### Intuitionistic propositional logic by the contraction-free sequent calculus G4ip (Dyckhoff), a decision procedure (`lib/intuit.imo`)
+
+| spec | bin | human | class | meaning |
+|:--:|:--|:--|:--|:--|
+| `ia` | `.101010011011.` |  | `Term → Term` | first argument |
+| `ib` | `.101010011100.` |  | `Term → Term` | second argument |
+| `iatom` | `.101010011110.` |  | `Term → 𝔹` | not a connective and not a constant |
+| `inorm′` | `.101010100000.` |  | `ℕ → (𝔏 Term) → Term` | a connective applied to several arguments: nested to the right |
+
+### Theories (axiomatic packages): records, activation with requirements and conflicts, and the simplifier (`lib/theory.imo`)
+
+| spec | bin | human | class | meaning |
+|:--:|:--|:--|:--|:--|
+| `theorynames` | `.101001001110.` | `theorynames` | `(𝔏 𝕊)` | the names of all the theories |
+| `thconflict` | `.101001010001.` |  | `𝕊 → 𝕊 → 𝔹` | do two theories exclude each other (either one says so) |
+| `use` | `.101001010100.` | `use` | `𝕊 → Env → Env` | use name env: switch a theory on, with its requirements; every active theory that conflicts with it, and those that need one that goes, are switched off |
+| `unuse` | `.101001010111.` | `unuse` | `𝕊 → Env → Env` | unuse name env: switch a theory off, and every active theory that requires it |
+| `usetheories` | `.101001011000.` | `usetheories` | `(𝔏 𝕊) → Env → Env` | use, one after the other |
+| `defaultenv` | `.101001011010.` | `defaultenv` | `Env` | the theories that are on by default |
+| `envwith` | `.101001011011.` | `envwith` | `(𝔏 𝕊) → Env` | the default theories, then these (each may switch some off) |
+| `activetheories` | `.101001011100.` | `activetheories` | `Env → (𝔏 𝕊)` | the names of the active theories, requirements first |
+| `isactive` | `.101001011101.` | `isactive` | `𝕊 → Env → 𝔹` |  |
+| `simplifyt` | `.101001011111.` | `simplifyt` | `Env → Term → Term` | the simplest form of a term under the active theories (rewriting, then Boolean canonical forms, until nothing changes) |
+| `simpe` | `.101001100000.` | `simpe` | `Env → 𝕊 → 𝕊` | simpe env "text": the simplest form of a statement or an expression, as text (the text itself if it does not parse) |
+| `simp` | `.101001100001.` | `simp` | `𝕊 → 𝕊` | the simplest form under the default theories |
+| `holdsv` | `.101001100010.` | `holdsv` | `Env → 𝕊 → ℕ` | the verdict as a number: 1 true for all values, 0 false for all, 2 undetermined |
+| `holdse` | `.101001100011.` | `holdse` | `Env → 𝕊 → 𝔹` | holdse env "statement": ⊤ if it is true for all values of its variables, ⊥ if for none, ⍰ if the theories cannot tell |
+| `holds` | `.101001100100.` | `holds` | `𝕊 → 𝔹` | holds "statement": under the default theories |
+| `axiomsof` | `.101001100101.` | `axiomsof` | `𝕊 → (𝔏 𝕊)` | the axioms of a theory, as text |
+| `theoremsof` | `.101001100110.` | `theoremsof` | `𝕊 → (𝔏 𝕊)` | the theorems of a theory (each is checked by checktheory) |
+| `describe` | `.101001100111.` | `describe` | `𝕊 → 𝕊` | a line about a theory |
+| `checktheory` | `.101001101000.` | `checktheory` | `𝕊 → (𝔏 𝕊)` | the theorems of a theory that do not hold in an environment with the theory on (an empty list: all hold) |
+
+### The registry of theories, their compiled forms, and the first packages: core (logic and equality), arith (commutative rings and (`lib/theories.imo`)
+
+| spec | bin | human | class | meaning |
+|:--:|:--|:--|:--|:--|
+| `registry` | `.101001001101.` |  | `(𝔏 Theory)` | every theory of the library, in the order of definition |
+| `compilesig` | `.101001101111.` |  | `𝕊 → Sig` | the operators of a theory and of its requirements, the theory itself last (it wins on a clash) |
+| `envof` | `.101001010110.` |  | `(𝔏 𝕊) → Env` | the environment of a list of theory names (requirements first) |
+
+### Logic modes and algebraic theories: classical and intuitionistic logic, groups, abelian groups, the algebra of sets, lattices (`lib/th_algebra.imo`)
+
+| spec | bin | human | class | meaning |
+|:--:|:--|:--|:--|:--|
+| `latticehook` | `.101101001001.` |  | `Env → Term → (𝔏 Term)` | eq(a, b) with a lattice term on a side: true if the free lattice proves it |
+
+### Foundations: ZFC (hereditarily finite sets, evaluated) and ETCS, Lawvere's elementary theory of the category of sets (morphisms, normalised) (`lib/th_found.imo`)
+
+| spec | bin | human | class | meaning |
+|:--:|:--|:--|:--|:--|
+| `zknown` | `.101010111010.` |  | `Term → 𝔹` | a set whose elements are all ground |
+| `zopair` | `.101011000101.` |  | `Term → Term → Term` | Kuratowski: (a, b) = {{a}, {a, b}} |
+| `zeqhook` | `.101011000110.` |  | `Env → Term → (𝔏 Term)` | two different sets (or numbers) with known elements are different |
+| `zmemhook` | `.101011001000.` |  | `Env → Term → (𝔏 Term)` | x ∈ {a, b, …} is x = a ∨ x = b ∨ … |
+| `zsubhook` | `.101011001001.` |  | `Env → Term → (𝔏 Term)` | {a, b, …} ⊆ B is a ∈ B ∧ b ∈ B ∧ … |
+
+### Kolmogorov's probability, decided exactly for any finite number of events (`lib/th_prob.imo`)
+
+| spec | bin | human | class | meaning |
+|:--:|:--|:--|:--|:--|
+| `isconj` | `.101011001110.` |  | `Term → 𝔹` | an event, or a conjunction of events |
+| `probof` | `.101011010000.` |  | `(𝔏 Term) → Term` | P of the intersection of a list of events (P of the empty intersection is 1) |
+| `probsub` | `.101101011001.` |  | `(𝔏 Term) → Term → Poly` | the events that occur, an atom: P(∩J) as a sum over the minterms |
+| `probmt` | `.101101011011.` |  | `(𝔏 Term) → (𝔏 (𝔓 Poly ℕ))` | the minterm probabilities are ≥ 0 and their sum is 1 |
+| `probprep` | `.101100011010.` |  | `Env → (𝔏 (𝔓 Poly ℕ)) → (𝔏 (𝔓 Poly ℕ))` | rows over the probabilities of intersections, written over the probabilities of the minterms (up to five events) |
+
 ### Internal helpers (trusted, not meant to be called directly)
 
 | spec | bin | human | class | meaning |
@@ -891,4 +1280,4 @@
 | `↓ᶻ` | `.10101110.` |  | `ℚ[i] → 𝔇` | the Gaussian integer of an integral value |
 | `decⁿ` | `.101001110.` |  | `𝔇 → 𝕊 → 𝕊` | decimal digits of a natural (generated tables) |
 
-**Further helpers** (named in doc 1, described in the source files): `+ˡ` `+ᵈ` `=ᶻ` `abel_gr` `abinv_gr` `absᶻ` `acosF_cx` `acoshF_cx` `acoshX_cx` `acoshq_cx` `ad_fd` `ad_pl` `add_pl` `add_rg` `add_sv` `addb_sv` `addf_sv` `adds_sv` `adm_pl` `adr_pl` `adv_nt` `adz_pl` `aff_sv` `agl_cx` `agmq_cx` `allreal_sv` `andl_sv` `ap_gr` `apps` `apr_sv` `ap′_gr` `ar_rg` `args²` `args¹` `arl_rg` `asinhC_cx` `asinhF_cx` `asinhR_cx` `asinhX_cx` `asinhq_cx` `asl_cx` `asm_sv` `assoc_gr` `at2S_cx` `atF_sv` `atS_cx` `at_cx` `atan2R_cx` `atan2q_cx` `atanR_cx` `atanq_cx` `atom_sv` `atomᴾ` `atp_cx` `atpos_cx` `ats_sv` `atser_cx` `b32_nt` `back′` `bat_nt` `bby_nt` `bern_cx` `berns_cx` `bfsn_gr` `bfsn′_gr` `bgen′_gr` `biS_cx` `bi_sv` `bits_nt` `bjS_cx` `bk_nt` `blc_sv` `blen_cx` `blf_sv` `blk_sv` `blz_cx` `bo_fd` `bpv_gr` `bq_sv` `bre_sv` `brw_nt` `bsc_nt` `bsgs_nt` `btq_cx` `buch_rg` `burn_gr` `bz_cx` `cands_gr` `cat_sv` `cauchyᵖ` `cb_pl` `ccl_gr` `ccl′_gr` `cd_pl` `cells_sv` `cent_gr` `cf_fd` `cf_nt` `cfq_nt` `cfs_nt` `chiS_cx` `choose′` `chz_pl` `ciS_cx` `cj_fd` `cj_sv` `cl_fd` `cl_gl` `clen_gr` `clen′_gr` `clo_sv` `clos_gr` `cm_fd` `cmb_pl` `cmd_pl` `cmp_nt` `cmp_pl` `cmp_sv` `cmpl_sv` `cmpo_gr` `cmpp_gr` `cmps_gr` `cmpu_gr` `cn_pl` `cn_sv` `cnd_fd` `cnt_sv` `cof_sv` `colr_gr` `comm_gr` `comp_gr` `conjR_cx` `conj_gr` `constᴾ` `cop_rg` `cosR_cx` `cosS_cx` `coshS_cx` `coshᴾ` `cos′_gr` `cp_la` `cp_pl` `cplx_sv` `cpr_pl` `cpxR_cx` `crf_pl` `crow_gr` `crs_nt` `cst_sv` `ctg_pl` `ctl_pl` `ctx_nt` `ctz_pl` `cvp_nt` `cyc_gr` `cyc_nt` `cycap_gr` `cycl_gr` `cycs_gr` `cycz_gr` `cyc′_gr` `cysub_gr` `cz_sv` `czr_sv` `czz_sv` `d^` `daS_cx` `dd_fd` `dd_la` `ddf_pl` `ddh_pl` `ddp_nt` `ddp_pl` `dd′_gr` `decᵈ` `dec⁸` `degs_gr` `dep_sv` `der_pl` `dfb_sv` `dg_pl` `dgq_cx` `dgs_pl` `diag2_cx` `difR_cx` `diff_gr` `dih_gr` `disc` `divR_cx` `divu_gr` `dk_pl` `dks_pl` `dl_fd` `dlz_nt` `dlz_pl` `dlz′_nt` `dmm_pl` `dn_cx` `dnr_cx` `domU_sv` `dpp_nt` `dprod_gr` `dq_pl` `dr_fd` `dr_nt` `dr_pl` `dred_nt` `dropj4_cx` `dropj_cx` `dropl_cx` `dropl_pl` `dropn4_cx` `dropn_cx` `dropu_gr` `dropz′` `drop′` `drw_nt` `drz_pl` `dsm_nt` `dstu_gr` `dv_fd` `dv_nt` `dv_pl` `dvd_rg` `dvdu_gr` `dvg_nt` `dvm_pl` `dvn_pl` `dvo_nt` `dvq_pl` `dvr_pl` `dvs_pl` `dvs′_pl` `dz⁰` `d²ˡ` `d×` `d⁺` `ech_sv` `ed_fd` `edf_pl` `edg_gr` `eds_pl` `edv_pl` `edz_pl` `eeq_cx` `eg_fd` `eg_nt` `egg_nt` `egi_nt` `egm_pl` `egz_nt` `egz_pl` `eiS_cx` `einR_cx` `einS_cx` `ekl_cx` `ekq_cx` `el2u_cx` `elim′` `elm_sv` `emq_cx` `encᴾ` `encᵃ` `encᵐ` `eord_gr` `epos_sv` `eqe_rg` `eql_gr` `eqo_gr` `eqs_gr` `eqterm_rg` `equ_gr` `equp_gr` `eqz_nt` `erfS_cx` `es_pl` `eul_cx` `eur_cx` `evQ′` `ev_pl` `evl_gr` `evs_sv` `evz_sv` `ev²` `ev¹` `evᵖ` `excess_cx` `expR_cx` `expS_cx` `exp_sv` `expd_sv` `expq_cx` `expqz_cx` `expᴾ` `fA_sv` `fAnd_sv` `fC_sv` `fO_sv` `fOr_sv` `fa_fd` `fa_sv` `fact′` `fb_sv` `fbp_nt` `fc_fd` `fc_sv` `fcl_sv` `fcq_nt` `fcr_nt` `fct_nt` `fdb_nt` `fi_la` `fi_nt` `fi_sv` `fin_sv` `first_sv` `fixΦ_sv` `fix′_gr` `fl_cx` `fl_sv` `flip_sv` `flo_sv` `fls_nt` `fnde_gr` `fnz_gr` `fo′` `fr_pl` `frc_nt` `fs_pl` `fsf_pl` `fsm_pl` `fst_rg` `fuel` `fwd′` `fxc_pl` `fxm_pl` `fxq_pl` `fy_nt` `gamS_cx` `gb_rg` `gc_fd` `gcd_pl` `gcdᶻ′` `gcmp_nt` `gcp_pl` `gdv_pl` `gen_gr` `gent_nt` `gen′_gr` `geu_gr` `gf_sv` `gfa_nt` `gfdeg_fd` `ggcdᶻ` `ggen_gr` `ggen′_gr` `gi_pl` `gl_sv` `gminv_nt` `gmq_cx` `gp3_nt` `gpe_nt` `gpi_nt` `gpm_nt` `gpq_pl` `gpr_pl` `gps_nt` `gpw_pl` `grp_gr` `grp_sv` `grp′_gr` `gz_pl` `gzi_pl` `hasO_sv` `hasop_sv` `hb_cx` `hfx_pl` `hl_pl` `hla_pl` `hlf_nt` `hlp_cx` `hm_gr` `hp_fd` `hpr_nt` `hs_pl` `hsum_cx` `hsum_nt` `hv_pl` `idx_la` `idx_sv` `idx′_gr` `idz_sv` `ieg_pl` `ig_pl` `igp_nt` `imR_cx` `in_fd` `ing2_gr` `ing_gr` `inl_gr` `inp_gr` `ins_gr` `ins_rg` `ins_sv` `insk_sv` `insl_rg` `insp_sv` `insr_sv` `insᴾ` `insᵐ` `ins′` `invR_cx` `inv_gr` `inv_pl` `invs_gr` `iotau_gr` `iotau′_gr` `ip_pl` `ipr_pl` `ipw_nt` `irc_sv` `irt_nt` `irt′_nt` `irun_sv` `isC_sv` `isU_sv` `isaff_sv` `isc_sv` `isd_pl` `isg_gl` `isg_nt` `isint_cx` `isneg_cx` `isneg_sv` `iso_gr` `iso_pl` `isol_pl` `ispr_nt` `isreal_cx` `issq_nt` `it_pl` `ivl_cx` `jac_nt` `jn_cx` `jn_nt` `kdec_nt` `kenc_nt` `kle_sv` `kmerge_gr` `kmul_nt` `knrm_nt` `ko_sv` `kone_nt` `kpw_nt` `kpw′_nt` `ksort_gr` `lAdd_sv` `lCnj_sv` `lDiv_sv` `lEmb_sv` `lEq_sv` `lGe_sv` `lGt_sv` `lIm_sv` `lLe_sv` `lLt_sv` `lMul_sv` `lNe_sv` `lNeg_sv` `lNoUnf_sv` `lPow_sv` `lRe_sv` `lSplit_sv` `lSqrt_sv` `lSub_sv` `lastrun_sv` `lb_cx` `lbk_cx` `lbq_cx` `lcl_nt` `lcmu_gr` `lcmu′_gr` `lcn_nt` `lco_sv` `lcode_sv` `ldv_sv` `le_cx` `lens_gr` `lenu_gr` `leq_cx` `lex_rg` `lex_sv` `lfa_sv` `lfb_sv` `lg2_cx` `lg2d_cx` `lg2u_cx` `lg_fd` `lgl_cx` `lgq_cx` `lgs_cx` `lgw_cx` `lgz_cx` `lhs_sv` `liS_cx` `lin_pl` `lku_sv` `ll_sv` `lmul_cx` `ln2_cx` `ln2a_cx` `logR_cx` `logS_cx` `logcR_cx` `logpos_cx` `logq_cx` `look` `lpS_cx` `lpe_nt` `lsp_nt` `lst_nt` `lt_cx` `lt_nt` `ltc_pl` `lub_la` `lud_la` `luf_la` `lug_la` `lun_la` `lup_la` `lv_pl` `lwS_cx` `lwdom_cx` `lwl_cx` `lwn_cx` `lwq_cx` `m35_nt` `m3_nt` `mag_cx` `magp_cx` `maxu_gr` `mb_pl` `mcmp_rg` `mctx_nt` `md_fd` `mdp_pl` `mdv_rg` `mem_gr` `mem_sv` `meq_la` `mexp_la` `mfac_pl` `mflat_la` `mid′` `minim_rg` `minv_nt` `mir_sv` `mk_cx` `mkq_cx` `ml_fd` `mlm_pl` `mlr_pl` `mlt_nt` `mlz_pl` `mm_pl` `mn_nt` `mnc_fd` `mnm_pl` `mo_fd` `mod_nt` `mon_pl` `mon_rg` `mono_rg` `mono_sv` `mp_fd` `mp_la` `mpadd_sv` `mpc_sv` `mpconst_sv` `mpl_pl` `mpmap_sv` `mpmul_sv` `mpneg_sv` `mpow_la` `mppow_sv` `mpscale_sv` `mpv_sv` `mpw_nt` `mr_nt` `mrb_nt` `mrg_nt` `mrg_rg` `mrg_sv` `mrgc_nt` `mrgl_nt` `mrl_nt` `msim_sv` `msort_nt` `mtm_rg` `mu_fd` `mu_sv` `mulR_cx` `mul_pl` `mul_rg` `mult_la` `mulu_gr` `mv_sv` `mz_cx` `n2_rg` `n_gr` `nats_cx` `nc_pl` `ndv_pl` `negR_cx` `neg_cx` `neg_pl` `negΦ_sv` `nf_rg` `nfc_pl` `ng_fd` `ng_pl` `ngp_nt` `nl_rg` `nm_gl` `nn_rg` `nocst_sv` `normR_cx` `normR′` `norm_gr` `norm_sv` `npi_cx` `nr_sv` `nrm_nt` `nrm_rg` `nsr_pl` `nt_sv` `nthu_gr` `nums_gr` `nw_cx` `nwt_cx` `nxo_nt` `nxp_nt` `nz_nt` `nz_pl` `nzr_gr` `nzr_la` `n′_gr` `odd_gr` `odd_nt` `odl_nt` `okb_sv` `ol_pl` `olp_pl` `one_rg` `opr_pl` `or_gl` `orb_gr` `orbs_gr` `orbs′_gr` `orb′_gr` `ord_nt` `ordu_gr` `orl_sv` `orq_nt` `orth_pl` `ot_pl` `outA_sv` `outI_sv` `outR_sv` `out_sv` `outg_gr` `outp_gr` `p2_pl` `p4_nt` `pa_sv` `pad_gr` `pad_rg` `pad′_gr` `pairs_rg` `pat_nt` `pb_sv` `pch_cx` `pchain_pl` `pctx_nt` `pdq_pl` `perm_gl` `permi_gr` `permm_la` `perms_gr` `pf_sv` `pfa_sv` `pfb_sv` `pf′_pl` `pi_cx` `pia_cx` `pick′` `pih_cx` `pin_gl` `plS_cx` `pld_cx` `plneg_cx` `plq_cx` `pm_sv` `pmd_nt` `pol_sv` `polysqfree_pl` `pos_cx` `posr_gr` `pos′_gr` `pow_rg` `powu_gr` `powᶻ′` `pp_pl` `ppl_nt` `ppos_pl` `pps_nt` `ppw_cx` `ppw_gr` `pr_fd` `prep` `primeu_gr` `prl_nt` `prm_nt` `prs_nt` `prt_nt` `prz_pl` `ps_pl` `ps_rg` `psr_pl` `pst_pl` `psum` `psw_cx` `pts_sv` `pvo_nt` `pvp_nt` `pvt_la` `pw2_cx` `pw_fd` `pw_gr` `pw_nt` `pw_pl` `pw_rg` `pwl_pl` `pwm_pl` `pwq_pl` `pwr_sv` `pwz_nt` `q4_gl` `qa_pl` `qadd_cx` `qd_sv` `qdiv_cx` `qk_sv` `qmul_cx` `qnr_nt` `qo_fd` `qr_sv` `qrc_sv` `qrl_nt` `qs_pl` `qsub_cx` `quo_pl` `quoᶻ` `qz_pl` `qzi_pl` `ratQ′` `rb_pl` `rb_sv` `rc_pl` `rcd_pl` `rcf_sv` `rcn_sv` `rd_pl` `rdc_nt` `reR_cx` `realᶻ` `red_la` `red_rg` `redr_gr` `refls_gr` `reg_gr` `regs_sv` `reg′_gr` `rel_cx` `rel_sv` `relsym_sv` `relt_sv` `rem_pl` `remᶻ` `reqs′_gr` `res_pl` `rf_pl` `rfc_pl` `rg_pl` `rgc_pl` `rgp_pl` `rgq_cx` `rgt_pl` `rhc_nt` `rhi_sv` `rhl_sv` `rho_nt` `rhu_sv` `rkl_sv` `rl_pl` `rl_sv` `rle_gr` `rle′_gr` `rlo_sv` `rm_fd` `rm_pl` `rmm_pl` `rmv_la` `rmv_pl` `rnd_nt` `rnd²` `rndᶻ` `ro_fd` `rootS_cx` `rootu_cx` `rots_gr` `rq_pl` `rq_sv` `rqf_sv` `rqg_sv` `rr_gl` `rr_pl` `rrefp_la` `rr²` `rr¹` `rs_pl` `rsc_pl` `rsf_pl` `rsix_cx` `rst_nt` `rsz_pl` `rt_fd` `rt_pl` `rts_sv` `ru_sv` `rul2_cx` `ruler_cx` `runc_sv` `runs_sv` `r×` `r÷` `r⁺` `r⁻` `r∗` `s2c_nt` `s2p_nt` `s2s_nt` `sEs_cx` `sa_pl` `sb_fd` `sbm_pl` `sbq_fd` `sbz_pl` `sc4_cx` `sc_fd` `sca_rg` `sched` `sclR_cx` `scl_cx` `scl_pl` `scm_pl` `scz_pl` `serE_cx` `serEl_cx` `serN_cx` `serNl_cx` `ser_cx` `serl_cx` `sf_fd` `sfd_nt` `sfl_nt` `sfr_nt` `sg_nt` `sg_pl` `sg_sv` `sgn_pl` `sgn_sv` `sgp_gr` `sgrs_gr` `sgr′_gr` `shiS_cx` `shn_cx` `showⁱ` `siS_cx` `sim_sv` `simp′` `sinR_cx` `sinS_cx` `single_sv` `sinhS_cx` `sinhᴾ` `sinv_gr` `sl_pl` `slm_pl` `slq_nt` `slr_nt` `snf_gr` `snp_gr` `solv_gr` `sorted_rg` `sosD_sv` `sosF_sv` `sosG_sv` `spS_cx` `sp_fd` `spf_cx` `spine` `spine′` `spl_gl` `spl_nt` `split_gr` `spoly_rg` `spr_nt` `spr_pl` `spsp_nt` `spt_gl` `sq2_cx` `sq_fd` `sqchain_pl` `sqfp_sv` `sqj_cx` `sqm_nt` `sqn_nt` `sqp_pl` `sqq_gl` `sqr_nt` `sqrtR_cx` `sqrtS_cx` `sqrtpos_cx` `sqrtq_cx` `sqs_nt` `sqz_nt` `sq⁺` `sr2_sv` `sr3_sv` `sr_sv` `srs_pl` `srt_gl` `srt_sv` `ssl_nt` `ssr_nt` `st_pl` `stp_nt` `sub_pl` `sub_rg` `sub_sv` `subs_gr` `subs_la` `subu_gr` `subΦ_sv` `sumR_cx` `sum_gl` `sv_nt` `sv_sv` `swap_gr` `swp_gr` `sy_pl` `syl_gr` `syl′_gr` `symᶜ` `sz_pl` `ta_sv` `tab_gl` `takeu_gr` `take′` `tan_nt` `tang_cx` `tb_sv` `tcj_sv` `td_nt` `tdp_nt` `tds_nt` `tdv_sv` `tg_nt` `tk_nt` `tm_pl` `tm_rg` `tm_sv` `tmp_sv` `tmpa_sv` `tmpb_sv` `tpo_sv` `tpw_sv` `tr2_fd` `tr3_fd` `tr_cx` `tr_fd` `tr_sv` `tre_gr` `trim_pl` `trimᵖ` `trj_cx` `trows_cx` `trp_cx` `trz_pl` `ts_nt` `tsc_cx` `tsc_nt` `tsp_cx` `tsq_pl` `tsq_sv` `tsr_nt` `tups_gr` `tval_gr` `tz_nt` `u_gr` `ub_cx` `ube_cx` `ubs_cx` `uc_gr` `uc′_gr` `ud_nt` `ukh_cx` `ul_nt` `um_nt` `umerge_gr` `un_sv` `unary_cx` `unk_sv` `up_cx` `up_nt` `up_pl` `upl_nt` `up²` `use_sv` `usort_gr` `uvec_gr` `u′_gr` `v2_nt` `v2′_nt` `valid` `varof_sv` `vat_pl` `vmi_pl` `vn_rg` `vpi_pl` `vr_pl` `vuse_sv` `wil_nt` `wix_gr` `wix′_gr` `xeg_pl` `xm_pl` `xs_pl` `yl_pl` `yun_pl` `z_pl` `zemS_cx` `zem_cx` `zer_sv` `zetaS_cx` `zf_pl` `zfe_cx` `zis_cx` `zl_cx` `zl_fd` `zm_pl` `zm_sv` `zneg_cx` `zpl_cx` `zq_pl` `zs_pl` `zset_sv` `zw_gr` `¬³` `·ᴾ` `·ᵖ` `½ᶻ` `×⁴ᵈ` `÷ᴴ` `Σᴾ` `Ω` `βs` `βᶜ` `λᶜ` `ᶜ^` `ᶜ^ᴿ` `ᶜatan` `ᶜcos` `ᶜcosh` `ᶜexp` `ᶜlog` `ᶜroot` `ᶜsin` `ᶜsinh` `ᶜ¬` `ᶜ÷` `ᶜ÷ᴿ` `ᶜΣ` `ᶜℑ` `ᶜℑᴿ` `ᶜℜ` `ᶜℜᴿ` `ᶜ⇒` `ᶜ⇔` `ᶜ⇡` `ᶜ∗` `ᶜ∗ᴿ` `ᶜ√` `ᶜ∧` `ᶜ∨` `ᶜ∷` `ᶜ≐` `ᶜ≐ᴿ` `ᶜ≠` `ᶜ≠ᴿ` `ᶜ≺` `ᶜ≺ᴿ` `ᶜ≻` `ᶜ≻ᴿ` `ᶜ⊕` `ᶜ⊖` `ᶜ⊖ᴿ` `ᶜ⊘` `ᶜ⊛` `ᶜ⊞` `ᶜ⊟` `ᶜ⊟ᴿ` `ᶜ⊠` `ᶜ⊤` `ᶜ⊥` `ᶜ⩽` `ᶜ⩽ᴿ` `ᶜ⩾` `ᶜ⩾ᴿ` `ᶜ𝔲` `‖` `⁴ᴸ` `⁴ᶻ` `ℑᶻ′` `ℚ[i][x]` `ℚ[i][𝐱]` `ℜᶻ′` `ℤ²` `⇑ᶜ` `⇓ᶜ` `∂′` `∅ᵖ` `∗ᴾ` `∗ᵃ` `∗ᵖ` `√?ᶜ` `√merge` `√ᑫ` `√ᶜ′` `√ᶻ` `√ᶻ′` `√ᶻⁱ` `√⁺?ᵃ` `√⁺′` `∧³` `∧ᵈ` `∨³` `∨ᵈ` `≡ᵃ` `≡ᵐ` `≡ᶜ` `⊖ᴾ` `⊖ᵖ` `⊞ᴾ` `⊞ᵖ` `⊞ᶜ′` `⊟ᶜ` `⊟ᶜ′` `⊠ᴾ` `⊠ᵐ` `⊠ᵖ` `⊡′` `⊻ᵈ` `⋚ʳ′` `⋚ⁱ′` `⌄⁴` `⌊½⌋ᶻ` `⌊ᶻ` `⌜ᶻ` `①` `②` `③` `④` `⑤` `⑥` `⑦` `⑧` `⑨` `⓪` `⟐′` `⩾⁰` `⫽ᶻ′` `𝒦` `𝒮` `𝔡` `𝔲` `𝕊²` `𝕓⁴`
+**Further helpers** (named in doc 1, described in the source files): `+ˡ` `+ᵈ` `=ᶻ` `BDD` `Bag` `Chclass` `Dict` `Env` `FSet` `Heap` `Poly` `Queue` `Sig` `Term` `Theory` `abel_gr` `abinv_gr` `absᶻ` `acm` `acnorm′` `acosF_cx` `acoshF_cx` `acoshX_cx` `acoshq_cx` `ad_fd` `ad_pl` `add_pl` `add_rg` `add_sv` `addb_sv` `addf_sv` `addrule` `adds_sv` `adm_pl` `adr_pl` `adv_nt` `adz_pl` `aff_sv` `agl_cx` `agmq_cx` `allreal_sv` `am` `andl_sv` `ap_gr` `applya` `applyac` `applyc` `applyexact` `applyn′` `applyrule′` `applyrule″` `apps` `apr_sv` `ap′_gr` `ar_rg` `args²` `args¹` `arl_rg` `asinhC_cx` `asinhF_cx` `asinhR_cx` `asinhX_cx` `asinhq_cx` `asl_cx` `asm_sv` `assoc_gr` `at2S_cx` `atF_sv` `atS_cx` `at_cx` `atan2R_cx` `atan2q_cx` `atanR_cx` `atanq_cx` `atom_sv` `atomindex` `atomᴾ` `atp_cx` `atpos_cx` `ats_sv` `atser_cx` `b32_nt` `back′` `bat_nt` `batoms` `bby_nt` `bdand` `bdiff` `bdimp` `bdnot` `bdor` `bdxor` `beq` `bern_cx` `berns_cx` `bevalc` `bevalt` `bfrompaths` `bfsn_gr` `bfsn′_gr` `bgen′_gr` `biS_cx` `bi_sv` `bits_nt` `bjS_cx` `bk_nt` `blc_sv` `blen_cx` `blf_sv` `blk_sv` `blz_cx` `bmk` `bo_fd` `boolatomsT` `boolpassT` `boolsyms` `bpaths` `bpv_gr` `bq_sv` `bre_sv` `brw_nt` `bsatisfiable` `bsc_nt` `bsetverdict` `bsgs_nt` `btq_cx` `buch_rg` `burn_gr` `bz_cx` `caesar′` `cands_gr` `canonT` `cat_sv` `cauchyᵖ` `cb_pl` `ccl_gr` `ccl′_gr` `cd_pl` `cells_sv` `cent_gr` `cf_fd` `cf_nt` `cfq_nt` `cfs_nt` `chadd` `chcd` `chci` `chcl` `chcn` `chco` `chcp` `chcs` `chcu` `chcx` `chdigits` `chiS_cx` `chkey` `choose′` `chtable` `chunks′` `chz_pl` `ciS_cx` `cj_fd` `cj_sv` `ckey` `cl_fd` `cl_gl` `clen_gr` `clen′_gr` `clo_sv` `clos_gr` `cm_fd` `cmb_pl` `cmd_pl` `cmp_nt` `cmp_pl` `cmp_sv` `cmpl_sv` `cmpo_gr` `cmpp_gr` `cmps_gr` `cmpu_gr` `cn_pl` `cn_sv` `cnd_fd` `cnt_sv` `cof_sv` `colr_gr` `combinations′` `comm_gr` `comp_gr` `compile` `compiledof` `compiledtable` `conjR_cx` `conj_gr` `conjevents` `constᴾ` `cop_rg` `corehook` `cosR_cx` `cosS_cx` `coshS_cx` `coshᴾ` `cos′_gr` `cp_la` `cp_pl` `cplx_sv` `cpr_pl` `cpxR_cx` `crf_pl` `crow_gr` `crs_nt` `cst_sv` `ctg_pl` `ctl_pl` `ctx_nt` `ctz_pl` `cvp_nt` `cyc_gr` `cyc_nt` `cycap_gr` `cycl_gr` `cycs_gr` `cycz_gr` `cyc′_gr` `cysub_gr` `cz_sv` `czr_sv` `czz_sv` `d^` `daS_cx` `dd_fd` `dd_la` `ddf_pl` `ddh_pl` `ddp_nt` `ddp_pl` `dd′_gr` `decᵈ` `dec⁸` `defaultnames` `degs_gr` `dep_sv` `der_pl` `dfb_sv` `dg_pl` `dgq_cx` `dgs_pl` `diag2_cx` `difR_cx` `diff_gr` `dih_gr` `disc` `divR_cx` `divu_gr` `dk_pl` `dkget` `dkgetd` `dks_pl` `dl_fd` `dlt` `dlz_nt` `dlz_pl` `dlz′_nt` `dmm_pl` `dn_cx` `dnr_cx` `domU_sv` `domaincons` `dpp_nt` `dprod_gr` `dq_pl` `dr_fd` `dr_nt` `dr_pl` `dred_nt` `dropj4_cx` `dropj_cx` `dropl_cx` `dropl_pl` `dropn4_cx` `dropn_cx` `dropu_gr` `dropz′` `drop′` `drw_nt` `drz_pl` `dsm_nt` `dstu_gr` `dv_fd` `dv_nt` `dv_pl` `dvd_rg` `dvdu_gr` `dvg_nt` `dvm_pl` `dvn_pl` `dvo_nt` `dvq_pl` `dvr_pl` `dvs_pl` `dvs′_pl` `dz⁰` `d²ˡ` `d×` `d⁺` `ech_sv` `ed_fd` `edf_pl` `edg_gr` `eds_pl` `edv_pl` `edz_pl` `eeq_cx` `efuel` `eg_fd` `eg_nt` `egg_nt` `egi_nt` `egm_pl` `egz_nt` `egz_pl` `ehooks` `eiS_cx` `einR_cx` `einS_cx` `ekind` `ekl_cx` `ekq_cx` `el2u_cx` `elemT` `elem′` `elim′` `elm_sv` `emq_cx` `enames` `encᴾ` `encᵃ` `encᵐ` `eord_gr` `epos_sv` `eprec` `eprops` `eqe_rg` `eql_gr` `eqo_gr` `eqs_gr` `eqterm_rg` `equ_gr` `equp_gr` `eqz_nt` `erfS_cx` `erules` `es_pl` `esig` `esym` `etok` `eul_cx` `eur_cx` `evQ′` `ev_pl` `evl_gr` `evs_sv` `evz_sv` `ev²` `ev¹` `evᵖ` `excess_cx` `expR_cx` `expS_cx` `exp_sv` `expd_sv` `expq_cx` `expqz_cx` `expᴾ` `fA_sv` `fAnd_sv` `fC_sv` `fO_sv` `fOr_sv` `fa_fd` `fa_sv` `fact′` `fb_sv` `fbp_nt` `fc_fd` `fc_sv` `fcl_sv` `fcq_nt` `fcr_nt` `fct_nt` `fdb_nt` `fi_la` `fi_nt` `fi_sv` `fin_sv` `findindex′` `first_sv` `firstjust` `fixΦ_sv` `fix′_gr` `fl_cx` `fl_sv` `flip_sv` `flo_sv` `fls_nt` `fmabs` `fmadd` `fmisbad` `fmloopb` `fmloopb′` `fmnormb` `fmpathok` `fmscale` `fmscaleb` `fmtight` `fmtight′` `fmvarsonly` `fnde_gr` `fnz_gr` `fo′` `fr_pl` `frc_nt` `frombdd` `fromfactor` `frommono` `frompoly` `fromroman′` `fromterm` `fs_pl` `fsf_pl` `fsm_pl` `fst_rg` `fuel` `fwd′` `fxc_pl` `fxm_pl` `fxq_pl` `fy_nt` `gamS_cx` `gb_rg` `gc_fd` `gcd_pl` `gcdᶻ′` `gcmp_nt` `gcp_pl` `gdv_pl` `gen_gr` `gent_nt` `gen′_gr` `geu_gr` `gf_sv` `gfa_nt` `gfdeg_fd` `ggcdᶻ` `ggen_gr` `ggen′_gr` `gi_pl` `gl_sv` `gminv_nt` `gmq_cx` `gp3_nt` `gpe_nt` `gpi_nt` `gpm_nt` `gpq_pl` `gpr_pl` `gps_nt` `gpw_pl` `grp_gr` `grp_sv` `grp′_gr` `gz_pl` `gzi_pl` `hasO_sv` `hasop_sv` `hasprop` `hb_cx` `heads′` `hfx_pl` `hl_pl` `hla_pl` `hlf_nt` `hlp_cx` `hm_gr` `hmerge` `hmk` `hp_fd` `hpr_nt` `hrank` `hs_pl` `hsum_cx` `hsum_nt` `hv_pl` `iand` `iapply` `iapplyimp` `idchar` `idecide` `idstart` `idx_la` `idx_sv` `idx′_gr` `idz_sv` `ieccoef` `ieg_pl` `ig_pl` `igp_nt` `iimp` `iinvl` `ileft` `imR_cx` `in_fd` `ing2_gr` `ing_gr` `inl_gr` `inon` `inorm` `inp_gr` `ins_gr` `ins_rg` `ins_sv` `insk_sv` `insl_rg` `insp_sv` `insr_sv` `insᴾ` `insᵐ` `ins′` `intatoms` `intpass` `invR_cx` `inv_gr` `inv_pl` `invs_gr` `ior` `iotau_gr` `iotau′_gr` `ip_pl` `ipr_pl` `iprove` `iprove′` `ipw_nt` `irc_sv` `irt_nt` `irt′_nt` `irun_sv` `isC_sv` `isU_sv` `isaff_sv` `isc_sv` `isd_pl` `isg_gl` `isg_nt` `isimp` `isint_cx` `islat` `islower′` `isneg_cx` `isneg_sv` `iso_gr` `iso_pl` `isol_pl` `isopchar` `ispr_nt` `ispunc` `isreal_cx` `issq_nt` `it_pl` `ivl_cx` `jac_nt` `jn_cx` `jn_nt` `kdec_nt` `kenc_nt` `kindnum` `kle_sv` `kmerge_gr` `kmul_nt` `knrm_nt` `ko_sv` `kone_nt` `kpw_nt` `kpw′_nt` `ksort_gr` `lAdd_sv` `lCnj_sv` `lDiv_sv` `lEmb_sv` `lEq_sv` `lGe_sv` `lGt_sv` `lIm_sv` `lLe_sv` `lLt_sv` `lMul_sv` `lNe_sv` `lNeg_sv` `lNoUnf_sv` `lPow_sv` `lRe_sv` `lSplit_sv` `lSqrt_sv` `lSub_sv` `lastrun_sv` `lb_cx` `lbk_cx` `lbq_cx` `lcl_nt` `lcmu_gr` `lcmu′_gr` `lcn_nt` `lco_sv` `lcode_sv` `ldv_sv` `le_cx` `lens_gr` `lenu_gr` `leq_cx` `levfold′` `lev′` `lex_rg` `lex_sv` `lfa_sv` `lfb_sv` `lg2_cx` `lg2d_cx` `lg2u_cx` `lg_fd` `lgl_cx` `lgq_cx` `lgs_cx` `lgw_cx` `lgz_cx` `lhs_sv` `liS_cx` `lin_pl` `lku_sv` `ll_sv` `lmul_cx` `ln2_cx` `ln2a_cx` `logR_cx` `logS_cx` `logcR_cx` `logpos_cx` `logq_cx` `look` `lpS_cx` `lpe_nt` `lsp_nt` `lst_nt` `lt_cx` `lt_nt` `ltc_pl` `lub_la` `lud_la` `luf_la` `lug_la` `lun_la` `lup_la` `lv_pl` `lwS_cx` `lwdom_cx` `lwl_cx` `lwn_cx` `lwq_cx` `m35_nt` `m3_nt` `mag_cx` `magp_cx` `maxu_gr` `mb_pl` `mcmp_rg` `mctx_nt` `md_fd` `mdeg` `mdp_pl` `mdv_rg` `mem_gr` `mem_sv` `meq` `meq_la` `mexp_la` `mfac_pl` `mflat_la` `mid′` `minim_rg` `minv_nt` `mir_sv` `mk_cx` `mkhooks` `mkq_cx` `mktheory` `ml_fd` `mlex` `mlm_pl` `mlr_pl` `mlt_nt` `mlz_pl` `mm_pl` `mn_nt` `mnc_fd` `mnm_pl` `mo_fd` `mod_nt` `mon_pl` `mon_rg` `mono_rg` `mono_sv` `mp_fd` `mp_la` `mpadd_sv` `mpc_sv` `mpconst_sv` `mpl_pl` `mpmap_sv` `mpmul_sv` `mpneg_sv` `mpow_la` `mppow_sv` `mpscale_sv` `mpv_sv` `mpw_nt` `mr_nt` `mrb_nt` `mrg_nt` `mrg_rg` `mrg_sv` `mrgc_nt` `mrgl_nt` `mrl_nt` `msim_sv` `msort_nt` `mtm_rg` `mu_fd` `mu_sv` `mulR_cx` `mul_pl` `mul_rg` `mult_la` `mulu_gr` `mv_sv` `mz_cx` `n2_rg` `n_gr` `natmode` `nats_cx` `nc_pl` `ndv_pl` `negR_cx` `neg_cx` `neg_pl` `negΦ_sv` `nf_rg` `nfc_pl` `ng_fd` `ng_pl` `ngp_nt` `nl_rg` `nm_gl` `nn_rg` `nocst_sv` `normR_cx` `normR′` `norm_gr` `norm_sv` `npi_cx` `nr_sv` `nrm_nt` `nrm_rg` `nsr_pl` `nt_sv` `nthu_gr` `nums_gr` `numtok` `nw_cx` `nwt_cx` `nxo_nt` `nxp_nt` `nz_nt` `nz_pl` `nzr_gr` `nzr_la` `n′_gr` `odd_gr` `odd_nt` `odl_nt` `okb_sv` `ol_pl` `olp_pl` `one_rg` `opr_pl` `or_gl` `orb_gr` `orbs_gr` `orbs′_gr` `orb′_gr` `ord_nt` `ordu_gr` `orl_sv` `orq_nt` `orth_pl` `ot_pl` `outA_sv` `outI_sv` `outR_sv` `out_sv` `outg_gr` `outp_gr` `p2_pl` `p4_nt` `pa_sv` `pad_gr` `pad_rg` `padd` `pad′_gr` `pairs_rg` `pargs` `pargsend` `pargs′` `pat_nt` `pathalts` `pathconsistent` `patom` `patorder` `pb_sv` `pbinder` `pcall` `pcallorvar` `pch_cx` `pchain_pl` `pcst` `pctx_nt` `pdq_pl` `perm_gl` `permi_gr` `permm_la` `perms_gr` `pexpr` `pf_sv` `pfa_sv` `pfb_sv` `pfmmul` `pfpow` `pf′_pl` `pi_cx` `pia_cx` `picks′` `pick′` `pident` `pih_cx` `pin_gl` `plS_cx` `pld_cx` `plneg_cx` `ploop` `plq_cx` `pm_sv` `pmd_nt` `pmul` `pneg` `pol_sv` `polyhook` `polysqfree_pl` `pop` `pos_cx` `posr_gr` `pos′_gr` `pow_rg` `powu_gr` `powᶻ′` `pp_pl` `ppl_nt` `ppos_pl` `pprefix` `pprefixop` `pps_nt` `ppunct` `ppw_cx` `ppw_gr` `pr_fd` `prep` `primeu_gr` `prl_nt` `prm_nt` `probatoms` `probevents` `probhook` `probrows` `prs_nt` `prt_nt` `prz_pl` `ps_pl` `ps_rg` `pscale` `psr_pl` `pst_pl` `psum` `psw_cx` `pts_sv` `pvo_nt` `pvp_nt` `pvt_la` `pw2_cx` `pw_fd` `pw_gr` `pw_nt` `pw_pl` `pw_rg` `pwl_pl` `pwm_pl` `pwq_pl` `pwr_sv` `pwz_nt` `q4_gl` `qa_pl` `qadd_cx` `qd_sv` `qdiv_cx` `qk_sv` `qmul_cx` `qnorm` `qnr_nt` `qo_fd` `qr_sv` `qrc_sv` `qrl_nt` `qs_pl` `qsub_cx` `quo_pl` `quoᶻ` `qz_pl` `qzi_pl` `ratQ′` `rb_pl` `rb_sv` `rc_pl` `rcd_pl` `rcf_sv` `rcn_sv` `rd_pl` `rdc_nt` `reR_cx` `realᶻ` `red_la` `red_rg` `redr_gr` `refls_gr` `reg_gr` `regs_sv` `reg′_gr` `rel_cx` `rel_sv` `relcanon` `relhook` `relhook′` `relsym_sv` `relt_sv` `rem_pl` `remᶻ` `replace′` `reqs′_gr` `res_pl` `rf_pl` `rfc_pl` `rg_pl` `rgc_pl` `rgp_pl` `rgq_cx` `rgt_pl` `rhc_nt` `rhi_sv` `rhl_sv` `rho_nt` `rhu_sv` `rkl_sv` `rl_pl` `rl_sv` `rle_gr` `rle′_gr` `rlo_sv` `rm` `rm_fd` `rm_pl` `rmac` `rmc` `rml` `rmm_pl` `rmv_la` `rmv_pl` `rnd_nt` `rnd²` `rndᶻ` `ro_fd` `roman′` `rootS_cx` `rootu_cx` `rots_gr` `rq_pl` `rq_sv` `rqf_sv` `rqg_sv` `rr_gl` `rr_pl` `rrefp_la` `rr²` `rr¹` `rs_pl` `rsc_pl` `rsf_pl` `rsix_cx` `rst_nt` `rsz_pl` `rt_fd` `rt_pl` `rts_sv` `ru_sv` `rul2_cx` `ruler_cx` `runc_sv` `runs_sv` `r×` `r÷` `r⁺` `r⁻` `r∗` `s2c_nt` `s2p_nt` `s2s_nt` `sEs_cx` `sa_pl` `sadd` `sb_fd` `sbig` `sbm_pl` `sbq_fd` `sbz_pl` `sc4_cx` `sc_fd` `sca_rg` `scard` `sched` `sclR_cx` `scl_cx` `scl_pl` `scm_pl` `scz_pl` `sdiff` `serE_cx` `serEl_cx` `serN_cx` `serNl_cx` `ser_cx` `serl_cx` `setrel` `setrelneg` `setscheck` `setsok` `sf_fd` `sfd_nt` `sfl_nt` `sfr_nt` `sg_nt` `sg_pl` `sg_sv` `sgn_pl` `sgn_sv` `sgp_gr` `sgrs_gr` `sgr′_gr` `shiS_cx` `shn_cx` `showbase′` `showⁱ` `siS_cx` `sigadd` `sim_sv` `simplifyl` `simp′` `sinR_cx` `sinS_cx` `single_sv` `sinhS_cx` `sinhᴾ` `sinter` `sinv_gr` `sjoin` `sl_pl` `slm_pl` `slq_nt` `slr_nt` `smeet` `smem` `sminterm` `smul` `sneg` `snf_gr` `snp_gr` `solv_gr` `sord` `sorted_rg` `sosD_sv` `sosF_sv` `sosG_sv` `spS_cx` `sp_fd` `spf_cx` `spine` `spine′` `spl_gl` `spl_nt` `split_gr` `splitat′` `splitneg` `splitpos` `spl′` `spoly_rg` `spow` `spower` `spr_nt` `spr_pl` `sprob` `sprod` `spsp_nt` `spt_gl` `sq2_cx` `sq_fd` `sqchain_pl` `sqfp_sv` `sqj_cx` `sqm_nt` `sqn_nt` `sqp_pl` `sqq_gl` `sqr_nt` `sqrtR_cx` `sqrtS_cx` `sqrtpos_cx` `sqrtq_cx` `sqs_nt` `sqz_nt` `sq⁺` `sr2_sv` `sr3_sv` `sr_sv` `srdiv` `srs_pl` `srt_gl` `srt_sv` `sset` `ssl_nt` `ssr_nt` `ssub` `ssubset` `ssubsetz` `st_pl` `step` `stp_nt` `sub_pl` `sub_rg` `sub_sv` `subs_gr` `subs_la` `subsequences′` `subsetl` `subu_gr` `subΦ_sv` `sumR_cx` `sum_gl` `sunion` `sv_nt` `sv_sv` `swap_gr` `swp_gr` `sy_pl` `syeq` `syl_gr` `syle` `sylt` `syl′_gr` `symᶜ` `sz_pl` `s¬` `sⁱᶠ` `s⇒` `s⇔` `s∧` `s∨` `s⊤` `s⊥` `s⊻` `ta_sv` `tab_gl` `tails′` `takeu_gr` `take′` `tan_nt` `tand` `tang_cx` `tapp₁` `tapp₂` `tb_sv` `tcj_sv` `td_nt` `tdp_nt` `tds_nt` `tdv_sv` `teql` `tfalse` `tg_nt` `thabelian` `thabelianaxioms` `thabeliandoc` `thabeliansig` `thabeliantheorems` `tharith` `tharithaxioms` `tharithdoc` `tharithrules` `tharithsig` `thariththeorems` `thaxioms` `thclassical` `thclassicalaxioms` `thclassicaldoc` `thclassicaltheorems` `thclosure` `thclosure′` `thconflicts` `thcore` `thcoreaxioms` `thcoredoc` `thcorerules` `thcoresig` `thcoretheorems` `thdefault` `thdoc` `thetcs` `thetcsaxioms` `thetcsdoc` `thetcsrules` `thetcssig` `thetcstheorems` `thgroup` `thgroupaxioms` `thgroupdoc` `thgrouprules` `thgroupsig` `thgrouptheorems` `thhooks` `thintegers` `thintegersaxioms` `thintegersdoc` `thintegersrules` `thintegerstheorems` `thintuitionistic` `thintuitionisticaxioms` `thintuitionisticdoc` `thintuitionistictheorems` `thlattice` `thlatticeaxioms` `thlatticedoc` `thlatticerules` `thlatticesig` `thlatticetheorems` `thlookup` `thname` `thpeano` `thpeanoaxioms` `thpeanodoc` `thpeanorules` `thpeanosig` `thpeanotheorems` `thprob` `thprobaxioms` `thprobdoc` `thprobrules` `thprobsig` `thprobtheorems` `thprune` `threals` `threalsaxioms` `threalsdoc` `threalstheorems` `threquires` `thrules` `thsets` `thsetsaxioms` `thsetsdoc` `thsetsrules` `thsetssig` `thsetstheorems` `thsig` `ththeorems` `thzfc` `thzfcaxioms` `thzfcdoc` `thzfcrules` `thzfcsig` `thzfctheorems` `tisapp` `tisnum` `tisvar` `tk_nt` `tle` `tltl` `tm_pl` `tm_rg` `tm_sv` `tmapargs` `tmatchl` `tmp_sv` `tmpa_sv` `tmpb_sv` `tnot` `tnub` `tnumval` `tobdd` `tobdd′` `topoly` `topolyapp` `tor` `tpo_sv` `tprintapp` `tprintapp′` `tprintarg` `tprintcall` `tpw_sv` `tr2_fd` `tr3_fd` `tr_cx` `tr_fd` `tr_sv` `trc₀` `trc₁` `trdel` `trdiff` `tre_gr` `treq` `trfilter` `trfoldr` `trget` `trim_pl` `trimᵖ` `trint` `trinter` `tritems` `trj_cx` `trkey` `trmap` `trmk` `trows_cx` `trp_cx` `trput` `trsize` `trunion` `trv` `trz_pl` `ts_nt` `tsc_cx` `tsc_nt` `tsp_cx` `tsq_pl` `tsq_sv` `tsr_nt` `ttrue` `tups_gr` `tval_gr` `tvars′` `tz_nt` `u_gr` `ub_cx` `ube_cx` `ubs_cx` `uc_gr` `uc′_gr` `ud_nt` `ukh_cx` `ul_nt` `um_nt` `umerge_gr` `un_sv` `unary_cx` `unk_sv` `up_cx` `up_nt` `up_pl` `upl_nt` `up²` `use_sv` `usort_gr` `uvec_gr` `u′_gr` `v2_nt` `v2′_nt` `valid` `varof_sv` `vat_pl` `vmi_pl` `vn` `vn_rg` `vpi_pl` `vr_pl` `vuse_sv` `whit` `wil_nt` `wix_gr` `wix′_gr` `xeg_pl` `xm_pl` `xs_pl` `yl_pl` `yun_pl` `z_pl` `zelems` `zemS_cx` `zem_cx` `zer_sv` `zetaS_cx` `zf_pl` `zfchook` `zfe_cx` `zis_cx` `zl_cx` `zl_fd` `zm_pl` `zm_sv` `zmk` `zneg_cx` `zpl_cx` `zq_pl` `zs_pl` `zset` `zset_sv` `zw_gr` `¬³` `·ᴾ` `·ᵖ` `½ᶻ` `×⁴ᵈ` `÷ᴴ` `Σᴾ` `Ω` `βs` `βᶜ` `λᶜ` `ᶜ^` `ᶜ^ᴿ` `ᶜatan` `ᶜcos` `ᶜcosh` `ᶜexp` `ᶜlog` `ᶜroot` `ᶜsin` `ᶜsinh` `ᶜ¬` `ᶜ÷` `ᶜ÷ᴿ` `ᶜΣ` `ᶜℑ` `ᶜℑᴿ` `ᶜℜ` `ᶜℜᴿ` `ᶜ⇒` `ᶜ⇔` `ᶜ⇡` `ᶜ∗` `ᶜ∗ᴿ` `ᶜ√` `ᶜ∧` `ᶜ∨` `ᶜ∷` `ᶜ≐` `ᶜ≐ᴿ` `ᶜ≠` `ᶜ≠ᴿ` `ᶜ≺` `ᶜ≺ᴿ` `ᶜ≻` `ᶜ≻ᴿ` `ᶜ⊕` `ᶜ⊖` `ᶜ⊖ᴿ` `ᶜ⊘` `ᶜ⊛` `ᶜ⊞` `ᶜ⊟` `ᶜ⊟ᴿ` `ᶜ⊠` `ᶜ⊤` `ᶜ⊥` `ᶜ⩽` `ᶜ⩽ᴿ` `ᶜ⩾` `ᶜ⩾ᴿ` `ᶜ𝔲` `‖` `⁴ᴸ` `⁴ᶻ` `ℑᶻ′` `ℚ[i][x]` `ℚ[i][𝐱]` `ℜᶻ′` `ℤ²` `⇑ᶜ` `⇓ᶜ` `∂′` `∅ᵖ` `∗ᴾ` `∗ᵃ` `∗ᵖ` `√?ᶜ` `√merge` `√ᑫ` `√ᶜ′` `√ᶻ` `√ᶻ′` `√ᶻⁱ` `√⁺?ᵃ` `√⁺′` `∧³` `∧ᵈ` `∨³` `∨ᵈ` `≡ᵃ` `≡ᵐ` `≡ᶜ` `⊖ᴾ` `⊖ᵖ` `⊞ᴾ` `⊞ᵖ` `⊞ᶜ′` `⊟ᶜ` `⊟ᶜ′` `⊠ᴾ` `⊠ᵐ` `⊠ᵖ` `⊡′` `⊻ᵈ` `⋚ʳ′` `⋚ⁱ′` `⌄⁴` `⌊½⌋ᶻ` `⌊ᶻ` `⌜ᶻ` `①` `②` `③` `④` `⑤` `⑥` `⑦` `⑧` `⑨` `⓪` `⟐′` `⩾⁰` `⫽ᶻ′` `𝒦` `𝒮` `𝔡` `𝔲` `𝕊²` `𝕓⁴`

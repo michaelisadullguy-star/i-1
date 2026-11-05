@@ -1,0 +1,266 @@
+⍝ lib/dict.imo — spec notation — trusted prelude, part 25: containers as binary tries over the base i−1 digits: dictionaries, finite sets, multisets, heaps, queues
+⍝ (Dict α, keys in ℤ[i]), finite sets (FSet, elements in ℤ[i]), multisets (Bag), priority queues (Heap α, leftist heaps) and queues (Queue α).
+⍝ A key is its digit string (⊡ (↓ᶻ k), least significant digit first): lookup, insertion and deletion walk the digits, 0 to the left and
+⍝ 1 to the right, and compare nothing; the trie of a given set of keys is unique (empty branches are pruned), so equal contents give
+⍝ identical structure.  Keys that are strings go through strnat (dputs, dgets, …).  Everything is persistent: an update returns a new value.
+⍝ A maybe is a list of at most one element.
+Dict ∶ 𝒦 → 𝒦
+FSet ∶ 𝒦
+Bag ∶ 𝒦
+Heap ∶ 𝒦 → 𝒦
+Queue ∶ 𝒦 → 𝒦
+(↗ Dict)
+(↗ Heap)
+(↗ Queue)
+⍝ ---- the trie.  empty: ⊘;  node: (∷ (⊗ v (⊗ c₀ c₁)) ⊘) with v a maybe (the value at this node) and c₀ c₁ tries
+trmk ∶ 𝔏 α → β → β → γ
+trmk ξ η ζ ≔ ((∧ (∅ ξ) (∧ (∅ η) (∅ ζ))) ⊘ (∷ (⊗ ξ (⊗ η ζ)) ⊘))
+trv ∶ α → 𝔏 β
+trv ξ ≔ (ξ (η ζ ↦ (◀ η)) ⊘)
+trc₀ ∶ α → β
+trc₀ ξ ≔ (ξ (η ζ ↦ (◀ (▶ η))) ⊘)
+trc₁ ∶ α → β
+trc₁ ξ ≔ (ξ (η ζ ↦ (▶ (▶ η))) ⊘)
+trkey ∶ ℤ[i] → 𝔇
+trkey ξ ≔ (⊡ (↓ᶻ ξ))
+trint ∶ 𝔇 → ℤ[i]
+trint ξ ≔ (⊗ ξ (◀ 1))
+trget ∶ α → 𝔇 → 𝔏 β
+trget ξ η ≔ ((∅ ξ) ⊘ (η (θ ι ↦ (trget (θ (trc₁ ξ) (trc₀ ξ)) ι)) (trv ξ)))
+trput ∶ α → 𝔇 → β → α
+trput ξ η ζ ≔ (η (θ ι ↦ (trmk (trv ξ) (θ (trc₀ ξ) (trput (trc₀ ξ) ι ζ)) (θ (trput (trc₁ ξ) ι ζ) (trc₁ ξ)))) (trmk (∷ ζ ⊘) (trc₀ ξ) (trc₁ ξ)))
+trdel ∶ α → 𝔇 → α
+trdel ξ η ≔ ((∅ ξ) ⊘ (η (θ ι ↦ (trmk (trv ξ) (θ (trc₀ ξ) (trdel (trc₀ ξ) ι)) (θ (trdel (trc₁ ξ) ι) (trc₁ ξ)))) (trmk ⊘ (trc₀ ξ) (trc₁ ξ))))
+trsize ∶ α → ℕ
+trsize ξ ≔ (ξ (η ζ ↦ (⊞ (ℓ (◀ η)) (⊞ (trsize (◀ (▶ η))) (trsize (▶ (▶ η)))))) 0)
+⍝ the (key, value) pairs in trie order, the path being accumulated backwards
+tritems ∶ α → 𝔇 → 𝔏 (𝔓 ℤ[i] β)
+tritems ξ η ≔ (ξ (θ ι ↦ (⧺ (⫶ (κ′ ↦ (⊗ (trint (reverse η)) κ′)) (◀ θ)) (⧺ (tritems (◀ (▶ θ)) (∷ ⊥ η)) (tritems (▶ (▶ θ)) (∷ ⊤ η))))) ⊘)
+trfoldr ∶ (α → β → β) → β → γ → β
+trfoldr ξ ζ η ≔ (η (θ ι ↦ (foldr ξ (trfoldr ξ (trfoldr ξ ζ (▶ (▶ θ))) (◀ (▶ θ))) (◀ θ))) ζ)
+trmap ∶ (α → β) → γ → γ
+trmap ξ η ≔ (η (θ ι ↦ (trmk (⫶ ξ (◀ θ)) (trmap ξ (◀ (▶ θ))) (trmap ξ (▶ (▶ θ))))) ⊘)
+trfilter ∶ (α → 𝔹) → γ → γ
+trfilter ξ η ≔ (η (θ ι ↦ (trmk (filter ξ (◀ θ)) (trfilter ξ (◀ (▶ θ))) (trfilter ξ (▶ (▶ θ))))) ⊘)
+⍝ union where f combines the values of a key that is in both:  f x y,  x from the first trie
+trunion ∶ (α → α → α) → β → β → β
+trunion ξ η ζ ≔ ((∅ η) ζ ((∅ ζ) η (trmk ((∅ (trv η)) (trv ζ) ((∅ (trv ζ)) (trv η) (∷ (ξ (hd (trv η)) (hd (trv ζ))) ⊘))) (trunion ξ (trc₀ η) (trc₀ ζ)) (trunion ξ (trc₁ η) (trc₁ ζ)))))
+trinter ∶ α → α → α
+trinter ξ η ≔ ((∨ (∅ ξ) (∅ η)) ⊘ (trmk ((∨ (∅ (trv ξ)) (∅ (trv η))) ⊘ (trv ξ)) (trinter (trc₀ ξ) (trc₀ η)) (trinter (trc₁ ξ) (trc₁ η))))
+trdiff ∶ α → α → α
+trdiff ξ η ≔ ((∅ ξ) ⊘ ((∅ η) ξ (trmk ((∅ (trv η)) (trv ξ) ⊘) (trdiff (trc₀ ξ) (trc₀ η)) (trdiff (trc₁ ξ) (trc₁ η)))))
+⍝ equality of two tries when eq decides the values
+treq ∶ (α → α → 𝔹) → β → β → 𝔹
+treq ε ξ η ≔ ((∅ ξ) (∅ η) ((∅ η) ⊥ (∧ (eqlist ε (trv ξ) (trv η)) (∧ (treq ε (trc₀ ξ) (trc₀ η)) (treq ε (trc₁ ξ) (trc₁ η))))))
+⍝ ---- dictionaries
+emptydict ∶ Dict α      ⍝ the dictionary without entries
+emptydict ≔ ⊘
+dput ∶ ℤ[i] → α → Dict α → Dict α      ⍝ dput k v d: d with the key k bound to v
+dput ξ η ζ ≔ (trput ζ (trkey ξ) η)
+dget ∶ ℤ[i] → Dict α → 𝔏 α      ⍝ the value of the key, as a list of at most one element
+dget ξ η ≔ (trget η (trkey ξ))
+dgetd ∶ ℤ[i] → α → Dict α → α      ⍝ dgetd k default d: the value of k, or the default
+dgetd ξ η ζ ≔ ((θ ↦ ((∅ θ) η (hd θ))) (dget ξ ζ))
+dhas ∶ ℤ[i] → Dict α → 𝔹      ⍝ is the key bound
+dhas ξ η ≔ (¬ (∅ (dget ξ η)))
+ddel ∶ ℤ[i] → Dict α → Dict α      ⍝ d without the key
+ddel ξ η ≔ (trdel η (trkey ξ))
+dsize ∶ Dict α → ℕ      ⍝ the number of entries
+dsize ξ ≔ (trsize ξ)
+disempty ∶ Dict α → 𝔹      ⍝ no entries
+disempty ξ ≔ (∅ ξ)
+ditems ∶ Dict α → 𝔏 (𝔓 ℤ[i] α)      ⍝ the entries (key, value) in trie order (the least significant digit of the key decides first)
+ditems ξ ≔ (tritems ξ ⊘)
+dkeys ∶ Dict α → 𝔏 ℤ[i]      ⍝ the keys in trie order
+dkeys ξ ≔ (⫶ ◀ (ditems ξ))
+dvals ∶ Dict α → 𝔏 α      ⍝ the values in trie order
+dvals ξ ≔ (trfoldr ∷ ⊘ ξ)
+dfromlist ∶ 𝔏 (𝔓 ℤ[i] α) → Dict α      ⍝ the dictionary of a list of pairs (a later pair wins over an earlier one with the same key)
+dfromlist ξ ≔ (foldl (η θ ↦ (dput (◀ θ) (▶ θ) η)) ⊘ ξ)
+dmap ∶ (α → β) → Dict α → Dict β      ⍝ apply f to every value
+dmap ξ η ≔ (trmap ξ η)
+dfilter ∶ (α → 𝔹) → Dict α → Dict α      ⍝ keep the entries whose value satisfies p
+dfilter ξ η ≔ (trfilter ξ η)
+dfoldr ∶ (α → β → β) → β → Dict α → β      ⍝ fold the values (in trie order)
+dfoldr ξ ζ η ≔ (trfoldr ξ ζ η)
+dwith ∶ (α → α → α) → ℤ[i] → α → Dict α → Dict α      ⍝ dwith f k v d: bind k to v, or to f v old when k is already bound
+dwith ξ η ζ ω ≔ (trput ω (trkey η) ((θ ↦ ((∅ θ) ζ (ξ ζ (hd θ)))) (dget η ω)))
+dupdate ∶ (α → α) → ℤ[i] → Dict α → Dict α      ⍝ apply f to the value of k when k is bound (otherwise nothing changes)
+dupdate ξ η ζ ≔ ((θ ↦ ((∅ θ) ζ (dput η (ξ (hd θ)) ζ))) (dget η ζ))
+dunion ∶ Dict α → Dict α → Dict α      ⍝ all entries of both; the first dictionary wins on a common key
+dunion ξ η ≔ (trunion (θ ι ↦ θ) ξ η)
+dunionwith ∶ (α → α → α) → Dict α → Dict α → Dict α      ⍝ dunionwith f a b: on a common key the value is f (value in a) (value in b)
+dunionwith ξ η ζ ≔ (trunion ξ η ζ)
+dinter ∶ Dict α → Dict α → Dict α      ⍝ the entries of the first whose key is also in the second
+dinter ξ η ≔ (trinter ξ η)
+ddiff ∶ Dict α → Dict α → Dict α      ⍝ the entries of the first whose key is not in the second
+ddiff ξ η ≔ (trdiff ξ η)
+deq ∶ (α → α → 𝔹) → Dict α → Dict α → 𝔹      ⍝ the same keys and equal values (equality of values given)
+deq ξ η ζ ≔ (treq ξ η ζ)
+dfromvals ∶ 𝔏 α → Dict α      ⍝ the dictionary of a list: the key of the k-th element is k (an array)
+dfromvals ξ ≔ (dfromlist (zip (⍳ (ℓ ξ)) ξ))
+dtovals ∶ Dict α → 𝔏 α      ⍝ the values of the keys 0, 1, 2, … up to the size (the inverse of dfromvals)
+dtovals ξ ≔ (⫶ (θ ↦ (hd (dget θ ξ))) (⍳ (dsize ξ)))
+⍝ digit keys: a key given as its digit string, as it is (no conversion of a number; used where a key is already a list of digits, as the code of a string)
+dkput ∶ 𝔇 → α → Dict α → Dict α      ⍝ dkput digits v d
+dkput ξ η ζ ≔ (trput ζ ξ η)
+dkget ∶ 𝔇 → Dict α → 𝔏 α
+dkget ξ η ≔ (trget η ξ)
+dkgetd ∶ 𝔇 → α → Dict α → α
+dkgetd ξ η ζ ≔ ((θ ↦ ((∅ θ) η (hd θ))) (trget ζ ξ))
+dkwith ∶ (α → α → α) → 𝔇 → α → Dict α → Dict α      ⍝ dkwith f digits v d: bind to v, or to f v old
+dkwith ξ η ζ ω ≔ (trput ω η ((θ ↦ ((∅ θ) ζ (ξ ζ (hd θ)))) (trget ω η)))
+⍝ string keys: the code of a string is the list of its characters' digits, each digit written as 1 then the digit and each character ended by 0 (no arithmetic)
+ckey ∶ 𝔇 → 𝔇
+ckey ξ ≔ (⧺ (concatmap (η ↦ (∷ ⊤ (∷ η ⊘))) ξ) (∷ ⊥ ⊘))
+skey ∶ 𝕊 → 𝔇      ⍝ the code of a string as a digit string (prefix-free, so a trie keyed by it holds strings)
+skey ξ ≔ (concatmap (η ↦ (ckey (chkey η))) ξ)
+ukchar ∶ 𝔇 → 𝔓 𝔇 𝔇      ⍝ the digits of the first character of a code and the rest
+ukchar ξ ≔ (ξ (η ζ ↦ (η ((ρ ↦ (⊗ (∷ (hd ζ) (◀ ρ)) (▶ ρ))) (ukchar (⌄ ζ))) (⊗ ⊘ ζ))) (⊗ ⊘ ⊘))
+unskey ∶ 𝔇 → 𝕊      ⍝ the string of a code
+unskey ξ ≔ ((∅ ξ) ⊘ ((ι ↦ (∷ (chr (⊗ (⊡ (◀ ι)) (◀ 1))) (unskey (▶ ι)))) (ukchar ξ)))
+dputs ∶ 𝕊 → α → Dict α → Dict α      ⍝ dput with a string key
+dputs ξ η ζ ≔ (trput ζ (skey ξ) η)
+dgets ∶ 𝕊 → Dict α → 𝔏 α      ⍝ dget with a string key
+dgets ξ η ≔ (trget η (skey ξ))
+dhass ∶ 𝕊 → Dict α → 𝔹      ⍝ dhas with a string key
+dhass ξ η ≔ (¬ (∅ (trget η (skey ξ))))
+ddels ∶ 𝕊 → Dict α → Dict α      ⍝ ddel with a string key
+ddels ξ η ≔ (trdel η (skey ξ))
+dkeyss ∶ Dict α → 𝔏 𝕊      ⍝ the keys of a dictionary with string keys
+dkeyss ξ ≔ (⫶ (p ↦ (unskey (◀ (◀ p)))) (ditems ξ))
+⍝ ---- finite sets of integers (a set is a trie whose values are ⊤)
+emptyfset ∶ FSet      ⍝ the empty finite set
+emptyfset ≔ ⊘
+fsadd ∶ ℤ[i] → FSet → FSet      ⍝ the set with one more element
+fsadd ξ η ≔ (trput η (trkey ξ) ⊤)
+fsdel ∶ ℤ[i] → FSet → FSet      ⍝ the set without the element
+fsdel ξ η ≔ (trdel η (trkey ξ))
+fshas ∶ ℤ[i] → FSet → 𝔹      ⍝ membership
+fshas ξ η ≔ (¬ (∅ (trget η (trkey ξ))))
+fssize ∶ FSet → ℕ      ⍝ the number of elements
+fssize ξ ≔ (trsize ξ)
+fsempty ∶ FSet → 𝔹      ⍝ no elements
+fsempty ξ ≔ (∅ ξ)
+fselems ∶ FSet → 𝔏 ℤ[i]      ⍝ the elements in trie order
+fselems ξ ≔ (⫶ ◀ (tritems ξ ⊘))
+fsfromlist ∶ 𝔏 ℤ[i] → FSet      ⍝ the set of the elements of a list
+fsfromlist ξ ≔ (foldl (η θ ↦ (fsadd θ η)) ⊘ ξ)
+fsunion ∶ FSet → FSet → FSet      ⍝ A ∪ B
+fsunion ξ η ≔ (trunion (θ ι ↦ θ) ξ η)
+fsinter ∶ FSet → FSet → FSet      ⍝ A ∩ B
+fsinter ξ η ≔ (trinter ξ η)
+fsdiff ∶ FSet → FSet → FSet      ⍝ A ∖ B
+fsdiff ξ η ≔ (trdiff ξ η)
+fssubset ∶ FSet → FSet → 𝔹      ⍝ A ⊆ B
+fssubset ξ η ≔ (∅ (trdiff ξ η))
+fseq ∶ FSet → FSet → 𝔹      ⍝ A = B
+fseq ξ η ≔ (treq (θ ι ↦ ⊤) ξ η)
+fsfilter ∶ (ℤ[i] → 𝔹) → FSet → FSet      ⍝ the elements that satisfy p
+fsfilter ξ η ≔ (fsfromlist (filter ξ (fselems η)))
+fsmap ∶ (ℤ[i] → ℤ[i]) → FSet → FSet      ⍝ the set of the images
+fsmap ξ η ≔ (fsfromlist (⫶ ξ (fselems η)))
+fspowerset ∶ FSet → 𝔏 FSet      ⍝ all 2ⁿ subsets, as a list (the empty set first)
+fspowerset ξ ≔ (⫶ fsfromlist (subsequences (fselems ξ)))
+⍝ ---- multisets: a dictionary from the element to its multiplicity
+emptybag ∶ Bag      ⍝ the empty multiset
+emptybag ≔ ⊘
+bagadd ∶ ℤ[i] → ℕ → Bag → Bag      ⍝ bagadd x n b: n more copies of x
+bagadd ξ η ζ ≔ (dwith ⊞ ξ η ζ)
+bagcount ∶ ℤ[i] → Bag → ℕ      ⍝ the multiplicity of x
+bagcount ξ η ≔ (dgetd ξ 0 η)
+bagsize ∶ Bag → ℕ      ⍝ the number of elements with multiplicity
+bagsize ξ ≔ (sumof (dvals ξ))
+bagfromlist ∶ 𝔏 ℤ[i] → Bag      ⍝ the multiset of the elements of a list
+bagfromlist ξ ≔ (foldl (η θ ↦ (bagadd θ 1 η)) ⊘ ξ)
+bagitems ∶ Bag → 𝔏 (𝔓 ℤ[i] ℕ)      ⍝ (element, multiplicity) pairs in trie order
+bagitems ξ ≔ (ditems ξ)
+bagunion ∶ Bag → Bag → Bag      ⍝ multiplicities add
+bagunion ξ η ≔ (dunionwith ⊞ ξ η)
+bagdel ∶ ℤ[i] → ℕ → Bag → Bag      ⍝ bagdel x n b: n fewer copies of x (not below zero; no entry is left at zero)
+bagdel ξ η ζ ≔ ((θ ↦ ((⩽ θ η) (ddel ξ ζ) (dput ξ (⊟ θ η) ζ))) (bagcount ξ ζ))
+⍝ ---- priority queues: leftist heaps.  empty: ⊘;  node: (∷ (⊗ rank (⊗ (⊗ priority value) (⊗ left right))) ⊘);  the smallest priority is on top
+hrank ∶ α → ℕ
+hrank ξ ≔ (ξ (η ζ ↦ (◀ η)) 0)
+hmk ∶ α → β → γ → γ → γ
+hmk ξ η ζ ω ≔ ((⩾ (hrank ζ) (hrank ω)) (∷ (⊗ (⊞ (hrank ω) 1) (⊗ (⊗ ξ η) (⊗ ζ ω))) ⊘) (∷ (⊗ (⊞ (hrank ζ) 1) (⊗ (⊗ ξ η) (⊗ ω ζ))) ⊘))
+hmerge ∶ α → α → α
+hmerge ξ η ≔ (ξ (θ ι ↦ (η (κ′ μ ↦ ((⩽ (◀ (◀ (▶ θ))) (◀ (◀ (▶ κ′)))) (hmk (◀ (◀ (▶ θ))) (▶ (◀ (▶ θ))) (◀ (▶ (▶ θ))) (hmerge (▶ (▶ (▶ θ))) η)) (hmk (◀ (◀ (▶ κ′))) (▶ (◀ (▶ κ′))) (◀ (▶ (▶ κ′))) (hmerge ξ (▶ (▶ (▶ κ′))))))) ξ)) η)
+emptyheap ∶ Heap α      ⍝ the empty priority queue
+emptyheap ≔ ⊘
+hpush ∶ ℚ → α → Heap α → Heap α      ⍝ hpush priority value h: h with one more entry
+hpush ξ η ζ ≔ (hmerge (∷ (⊗ 1 (⊗ (⊗ ξ η) (⊗ ⊘ ⊘))) ⊘) ζ)
+hpeek ∶ Heap α → 𝔏 (𝔓 ℚ α)      ⍝ the entry with the smallest priority (the earliest pushed of equal ones is not guaranteed), as a list of at most one element
+hpeek ξ ≔ (ξ (θ ι ↦ (∷ (◀ (▶ θ)) ⊘)) ⊘)
+hpop ∶ Heap α → Heap α      ⍝ the heap without its smallest entry
+hpop ξ ≔ (ξ (θ ι ↦ (hmerge (◀ (▶ (▶ θ))) (▶ (▶ (▶ θ))))) ⊘)
+hsize ∶ Heap α → ℕ      ⍝ the number of entries
+hsize ξ ≔ (ξ (θ ι ↦ (⊞ 1 (⊞ (hsize (◀ (▶ (▶ θ)))) (hsize (▶ (▶ (▶ θ))))))) 0)
+hempty ∶ Heap α → 𝔹      ⍝ no entries
+hempty ξ ≔ (∅ ξ)
+hfromlist ∶ 𝔏 (𝔓 ℚ α) → Heap α      ⍝ the heap of a list of (priority, value) pairs
+hfromlist ξ ≔ (foldl (η θ ↦ (hpush (◀ θ) (▶ θ) η)) ⊘ ξ)
+htolist ∶ Heap α → 𝔏 (𝔓 ℚ α)      ⍝ all entries by increasing priority (heap sort)
+htolist ξ ≔ (ξ (θ ι ↦ (∷ (◀ (▶ θ)) (htolist (hpop ξ)))) ⊘)
+⍝ ---- queues: a front list and a rear list (reversed); amortised O(1)
+emptyqueue ∶ Queue α      ⍝ the empty queue
+emptyqueue ≔ (⊗ ⊘ ⊘)
+qpush ∶ α → Queue α → Queue α      ⍝ add at the back
+qpush ξ η ≔ (⊗ (◀ η) (∷ ξ (▶ η)))
+qnorm ∶ Queue α → Queue α
+qnorm ξ ≔ ((∅ (◀ ξ)) (⊗ (reverse (▶ ξ)) ⊘) ξ)
+qpeek ∶ Queue α → 𝔏 α      ⍝ the front element, as a list of at most one element
+qpeek ξ ≔ ((θ ↦ ((◀ θ) (ι κ′ ↦ (∷ ι ⊘)) ⊘)) (qnorm ξ))
+qpop ∶ Queue α → Queue α      ⍝ the queue without its front element
+qpop ξ ≔ ((θ ↦ ((◀ θ) (ι κ′ ↦ (⊗ κ′ (▶ θ))) θ)) (qnorm ξ))
+qsize ∶ Queue α → ℕ      ⍝ the number of elements
+qsize ξ ≔ (⊞ (ℓ (◀ ξ)) (ℓ (▶ ξ)))
+qempty ∶ Queue α → 𝔹      ⍝ no elements
+qempty ξ ≔ (∧ (∅ (◀ ξ)) (∅ (▶ ξ)))
+qtolist ∶ Queue α → 𝔏 α      ⍝ the elements from the front to the back
+qtolist ξ ≔ (⧺ (◀ ξ) (reverse (▶ ξ)))
+qfromlist ∶ 𝔏 α → Queue α      ⍝ the queue of a list, its first element at the front
+qfromlist ξ ≔ (⊗ ξ ⊘)
+⍝ ---- classes of characters.  A table keyed by the digits of the code point gives the class in one look-up (about 26 steps); the comparisons that the ranges need cost far more.
+⍝ A class is a selector of nine alternatives: upper-case letter, lower-case letter, digit, white space, punctuation of the tokenizer (lib/parse.imo), operator character of the tokenizer, underscore, another character of identifiers, none.
+Chclass ∶ 𝒦
+chcu ∶ Chclass
+chcu ≔ (ξ η ζ ω ν ο ρ σ τ ↦ ξ)
+chcl ∶ Chclass
+chcl ≔ (ξ η ζ ω ν ο ρ σ τ ↦ η)
+chcd ∶ Chclass
+chcd ≔ (ξ η ζ ω ν ο ρ σ τ ↦ ζ)
+chcs ∶ Chclass
+chcs ≔ (ξ η ζ ω ν ο ρ σ τ ↦ ω)
+chcp ∶ Chclass
+chcp ≔ (ξ η ζ ω ν ο ρ σ τ ↦ ν)
+chco ∶ Chclass
+chco ≔ (ξ η ζ ω ν ο ρ σ τ ↦ ο)
+chci ∶ Chclass
+chci ≔ (ξ η ζ ω ν ο ρ σ τ ↦ ρ)
+chcx ∶ Chclass
+chcx ≔ (ξ η ζ ω ν ο ρ σ τ ↦ σ)
+chcn ∶ Chclass
+chcn ≔ (ξ η ζ ω ν ο ρ σ τ ↦ τ)
+chuppers ∶ 𝕊      ⍝ A–Z, À–Ö, Ø–Þ, Α–Ρ, Σ–Ω, А–Я
+chuppers ≔ "ABCDEFGHIJKLMNOPQRSTUVWXYZÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩАБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ"
+chlowers ∶ 𝕊      ⍝ a–z, à–ö, ø–þ, α–ρ, σ–ω, а–я, ß, ÿ, ς
+chlowers ≔ "abcdefghijklmnopqrstuvwxyzàáâãäåæçèéêëìíîïðñòóôõöøùúûüýþαβγδεζηθικλμνξοπρστυφχψωабвгдежзийклмнопрстуфхцчшщъыьэюяßÿς"
+chdigits ∶ 𝕊
+chdigits ≔ "0123456789"
+chpuncts ∶ 𝕊      ⍝ the punctuation of the tokenizer
+chpuncts ≔ "(),{}[]."
+chopchars ∶ 𝕊      ⍝ the characters that make operators in the tokenizer
+chopchars ≔ "+-*/^=<>!&|~%@#$:;?\\"
+chextras ∶ 𝕊      ⍝ apostrophe, prime and the subscript digits: they may be inside an identifier
+chextras ≔ "'′₀₁₂₃₄₅₆₇₈₉"
+chspaces ∶ 𝔏 ℕ      ⍝ tab, line feed, vertical tab, form feed, carriage return, space, no-break space, U+2000–U+200A, U+3000
+chspaces ≔ (∷ 111000001 (∷ 111001100 (∷ 111001101 (∷ 100010000 (∷ 100010001 (∷ 110000000000 (∷ 11100110000000000 (∷ 1100000000000000000000000000 (∷ 1100000000000000000000000001 (∷ 1100000000000000000000001100 (∷ 1100000000000000000000001101 (∷ 1100000000000000000111010000 (∷ 1100000000000000000111010001 (∷ 1100000000000000000111011100 (∷ 1100000000000000000111011101 (∷ 1100000000000000000111000000 (∷ 1100000000000000000111000001 (∷ 1100000000000000000111001100 (∷ 1101000000000000000000000000 ⊘)))))))))))))))))))
+chkey ∶ 𝕮 → 𝔇
+chkey ξ ≔ ((≡ (▶ ξ) (◀ 1)) (⊡ (◀ ξ)) (⊡ (↓ᶻ ξ)))
+chadd ∶ Dict Chclass → 𝔓 Chclass (𝔏 ℕ) → Dict Chclass
+chadd ξ η ≔ (foldl (ζ ω ↦ (dkput (chkey ω) (◀ η) ζ)) ξ (▶ η))
+chtable ∶ Dict Chclass
+chtable ≔ (foldl chadd ⊘ (∷ (⊗ chcu chuppers) (∷ (⊗ chcl chlowers) (∷ (⊗ chcd chdigits) (∷ (⊗ chcs chspaces) (∷ (⊗ chcp chpuncts) (∷ (⊗ chco chopchars) (∷ (⊗ chci "_") (∷ (⊗ chcx chextras) ⊘)))))))))
+chclass ∶ 𝕮 → Chclass      ⍝ the class of a character
+chclass ξ ≔ (dkgetd (chkey ξ) chcn chtable)

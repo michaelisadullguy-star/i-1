@@ -40,7 +40,7 @@ Classes are *terms of the language itself*: atoms, and constructors applied to c
 | `𝔇` | digit strings (the representation of ℤ[i]) | `Digits` |
 | `𝔏 A` `𝔖 A` `𝔗 A` `𝔄 A` `𝔓 A B` `A → B` | lists, streams, Cayley–Dickson trees, algebra records, pairs, functions | `List(A)` `Stream(A)` `Tree(A)` `Alg(A)` `Pair(A, B)` `A -> B` |
 
-Class variables are `α β γ` (human: `alpha beta gamma`); in a declaration they are universally quantified, in the *body* of a definition they are rigid.
+Class variables are `α β γ δ ε` (human: `alpha beta gamma`; the human `delta` is the function δ, so `δ` and `ε` are written in spec only); in a declaration they are universally quantified, in the *body* of a definition they are rigid.
 
 ### 7.3 The class lattice
 
@@ -60,7 +60,7 @@ flowchart BT
 
 Solid arrows are **subclass facts** `(⊆ A B)`: a value of class A may be used wherever B is expected, at no cost.  Dotted arrows are **canonical coercions** `(↪ f)`: a declared function that is inserted automatically when it makes an argument fit.  Coercions only ever *widen*; there is no implicit narrowing (`𝔻 → ℚ[i]` and `ℝ[i] → ℝ` are errors), which is the class-level counterpart of "dimension never reduces".
 
-Four **class equations** `(≣ A B)` are used: `𝔇 ≣ 𝔏 𝔹`, `𝕊 ≣ 𝔏 𝕮`, `ℝ[i] ≣ 𝔖 ℚ[i]`, `𝔻 ≣ 𝔗 ℚ[i]` (so a `String` *is* a list of characters, and ℝ[i] *is* the class of streams over ℚ[i]).  Error messages show classes with equations expanded, e.g. `(𝔖 ℚ[i])` for ℝ[i].
+Seven **class equations** `(≣ A B)` are used: `𝔇 ≣ 𝔏 𝔹`, `𝕊 ≣ 𝔏 𝕮`, `ℝ[i] ≣ 𝔖 ℚ[i]`, `ℝ ≣ 𝔖 ℚ`, `𝔻 ≣ 𝔗 ℚ[i]`, and the two polynomial classes `ℚ[i][x] ≣ 𝔏 ℚ[i]`, `ℚ[i][𝐱] ≣ 𝔏 (𝔓 ℚ[i] (𝔏 ℕ))` (so a `String` *is* a list of characters, and ℝ[i] *is* the class of streams over ℚ[i]).  Error messages show classes with equations expanded, e.g. `(𝔖 ℚ[i])` for ℝ[i].  Besides the subclass facts of the figure there are seven canonical coercions: `⇡` (ℚ → ℝ, ℚ[i] → ℝ[i]), `↑` (ℚ[i] → 𝔻), `asz2` and `asstr2` (ℤ[i] → ℤ², ℤ[i] → 𝕊², §6.6), `ι` (𝔹 → ℕ), `prop` (𝔹 → Ω) and `decide` (Ω → 𝔹, cost 2).  The three checkers are tested against each other and against a model written from this section only (`tests/test_classes.py`): every pair of 137 classes fits or does not fit identically, and so does every overload set of the prelude.
 
 Subclassing between compound classes: `A → B` is contravariant in A and covariant in B; `𝔏`, `𝔖`, `𝔗`, `𝔓` are covariant; `𝔄` is invariant.
 
@@ -119,7 +119,7 @@ The human notation can state subclass facts between existing classes (`\NN subse
 | **Char** `𝕮` | the Unicode **code point as a natural numeral** — `'A'` is 65, `'λ'` is 955 | `(⊆ 𝕮 ℕ)`: a `Char` widens to ℕ (and so to ℤ, ℚ, ℚ[i]); `ord ∶ 𝕮 → ℕ` |
 | **String** `𝕊` | a lazy list of `Char`: `"hi"` = `(∷ 'h' (∷ 'i' ⊘))` | `(≣ 𝕊 (𝔏 𝕮))`: all list operations apply |
 
-* **Literals** exist in spec and hum: `'λ'` (exactly one code point), `"text"`; escapes `\n \t \\ \" \'`.  Strings are sequences of *code points*, not UTF-8 bytes.  In the binary notation a literal is **expanded** to `(𝕔 numeral)` (`'A'` → `𝕔` of the numeral of 65, in base i − 1; `𝕔 ∶ ℕ → 𝕮` keeps the class) or to nested `∷` applications ending in `⊘`.
+* **Literals** exist in spec and hum: `'λ'` (exactly one code point), `"text"`; escapes `\n \t \\ \" \'`.  A backslash before any other character stands for that character (`"\r"` is the letter r, `"\x41"` is x41): there are no escapes for other control characters, so such a character is typed itself.  A source file is UTF-8 and is read exactly as it is — a carriage return is white space between tokens and a character inside a literal, a file with CRLF line ends reads like one with LF, and a file that is not valid UTF-8 is an error (status 1), never a text with replacement characters — and the printer writes every character but `\ \n \t` and the quote of the literal as it is.  Strings are sequences of *code points*, not UTF-8 bytes.  In the binary notation a literal is **expanded** to `(𝕔 numeral)` (`'A'` → `𝕔` of the numeral of 65, in base i − 1; `𝕔 ∶ ℕ → 𝕮` keeps the class) or to nested `∷` applications ending in `⊘`.
 * **Operations in the prelude**: `⧺` (`++`) append, `ℓ` (`length`) → ℕ, `⫶` (`map`), `ord`; comparison of characters with `==` (via ℚ[i]).
 * A `String` can be infinite (it is a lazy list); `length` of an infinite string does not terminate.
 * `chr ∶ ℕ → 𝕮` is total: a number that is not a Unicode scalar value (above U+10FFFF, or a surrogate) gives U+FFFD.  `dec`, `showq`, `showc`, `decimals`, `unlines`, `join` turn numbers and lists into text ([§14](#14-standard-library-reference)).

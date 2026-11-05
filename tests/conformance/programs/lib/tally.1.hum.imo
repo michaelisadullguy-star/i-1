@@ -1,0 +1,1 @@
+main in List(Pair(\QQ, \NN)) := tally([3/4, -5/2, 7/3])

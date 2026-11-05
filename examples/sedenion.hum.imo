@@ -1,0 +1,11 @@
+-- the sedenions: Cayley-Dickson trees of depth 3 over Q[i]  (16 dimensions over Q);  python3 pymo/i1.py examples/sedenion.hum.imo
+-- basis e0 = 1, e1 = i, e2 = j, e3 = k, ..., e(8+n) = (0, en); a number where a tree is expected becomes a leaf
+z1 in \D := node(0, 0)                                 -- the zero of depth 1
+z2 in \D := node(z1, z1)                               -- the zero of depth 2
+e1 in \D := node(node(node(i, 0), z1), z2)
+e4 in \D := node(node(z1, node(1, 0)), z2)
+e10 in \D := node(z2, node(node(0, 1), z1))
+e15 in \D := node(z2, node(z1, node(0, i)))
+x in \D := e1 + e10                                    -- |x|^2 = 2, so x is not zero
+y in \D := e4 - e15                                    -- |y|^2 = 2, so y is not zero
+main in \D := x * y                                    -- but x * y is the zero of depth 3: sedenions have zero divisors (octonions have none)

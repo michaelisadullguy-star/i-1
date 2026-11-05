@@ -1,6 +1,6 @@
 """run_suites.py -- run the test suites on the cores that they support.
 
-The test suite is shared by the three cores of i-1 (README §2.1, §16.3).  Fourteen of the eighteen suites use only the program-and-value API
+The test suite is shared by the three cores of i-1 (README §2.1, §16.3).  Nineteen of the twenty-three suites use only the program-and-value API
 of tests/harness.py and run on Pymo, Haskimo and Rustimo alike (`--core pymo`, `--core haskimo`, `--core rustimo`); four test the Python API
 of Pymo itself (its readers, its printer, its quoting) and run on Pymo only — what they check has command-line counterparts in
 tests/conformance, which runs on all the cores.
@@ -21,7 +21,7 @@ BOTH, PYMO = ('pymo', 'haskimo', 'rustimo'), ('pymo',)
 SUITES = [   # (suite, cores) — heavy ones first
     ('complex', BOTH), ('linalg', BOTH), ('galois', BOTH), ('numtheory', BOTH), ('predicates', PYMO), ('solve', BOTH), ('output', PYMO),
     ('field', BOTH), ('ring', BOTH), ('prove', BOTH), ('codec', BOTH), ('poly', BOTH), ('algebra', BOTH), ('group', BOTH), ('axioms', BOTH),
-    ('layers', PYMO), ('library', BOTH), ('readme', PYMO)]
+    ('layers', PYMO), ('library', BOTH), ('classes', BOTH), ('lists', BOTH), ('strings', BOTH), ('dict', BOTH), ('calendar', BOTH), ('graph', BOTH), ('stats', BOTH), ('geom', BOTH), ('regex', BOTH), ('encode', BOTH), ('prng', BOTH), ('combin', BOTH), ('theory', BOTH), ('readme', PYMO)]
 LABEL = {'pymo': 'Pymo', 'haskimo': 'Haskimo', 'rustimo': 'Rustimo'}
 
 

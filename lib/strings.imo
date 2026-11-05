@@ -1,0 +1,121 @@
+⍝ lib/strings.imo — spec notation — trusted prelude, part 24: characters and strings: case, splitting, searching, padding, bases, Roman numerals
+⍝ (classes of characters, edit distance, run lengths).  A string is a list of characters (𝕊 = 𝔏 𝕮) and a character is a natural
+⍝ number (its code point), so every list function applies.  Case mapping covers ASCII, Latin-1, Greek and Cyrillic letters (offset 32).
+⍝ ---- characters
+⍝ (the table of the classes of characters is in lib/dict.imo, because it is a dictionary)
+isdigit ∶ 𝕮 → 𝔹      ⍝ 0–9
+isdigit ξ ≔ ((chclass ξ) ⊥ ⊥ ⊤ ⊥ ⊥ ⊥ ⊥ ⊥ ⊥)
+isuppercase ∶ 𝕮 → 𝔹      ⍝ an upper-case letter (ASCII, Latin-1, Greek, Cyrillic)
+isuppercase ξ ≔ ((chclass ξ) ⊤ ⊥ ⊥ ⊥ ⊥ ⊥ ⊥ ⊥ ⊥)
+islowercase ∶ 𝕮 → 𝔹      ⍝ a lower-case letter (ASCII, Latin-1 with ß and ÿ, Greek with ς, Cyrillic)
+islowercase ξ ≔ ((chclass ξ) ⊥ ⊤ ⊥ ⊥ ⊥ ⊥ ⊥ ⊥ ⊥)
+isalpha ∶ 𝕮 → 𝔹      ⍝ a letter
+isalpha ξ ≔ ((chclass ξ) ⊤ ⊤ ⊥ ⊥ ⊥ ⊥ ⊥ ⊥ ⊥)
+isalnum ∶ 𝕮 → 𝔹      ⍝ a letter or a digit
+isalnum ξ ≔ ((chclass ξ) ⊤ ⊤ ⊤ ⊥ ⊥ ⊥ ⊥ ⊥ ⊥)
+isspace ∶ 𝕮 → 𝔹      ⍝ white space: tab, line feed, vertical tab, form feed, carriage return, space, no-break space, U+2000–U+200A, U+3000
+isspace ξ ≔ ((chclass ξ) ⊥ ⊥ ⊥ ⊤ ⊥ ⊥ ⊥ ⊥ ⊥)
+ispunct ∶ 𝕮 → 𝔹      ⍝ an ASCII punctuation mark or symbol
+ispunct ξ ≔ (∨ (∧ (⩾ ξ '!') (⩽ ξ '/')) (∨ (∧ (⩾ ξ ':') (⩽ ξ '@')) (∨ (∧ (⩾ ξ '[') (⩽ ξ '`')) (∧ (⩾ ξ '{') (⩽ ξ '~')))))
+islower′ ∶ 𝕮 → 𝔹
+islower′ ξ ≔ (∨ (∧ (⩾ ξ 'a') (⩽ ξ 'z')) (∨ (∧ (⩾ ξ 'à') (⩽ ξ 'ö')) (∨ (∧ (⩾ ξ 'ø') (⩽ ξ 'þ')) (∨ (∧ (⩾ ξ 'α') (⩽ ξ 'ρ')) (∨ (∧ (⩾ ξ 'σ') (⩽ ξ 'ω')) (∧ (⩾ ξ 'а') (⩽ ξ 'я')))))))
+upper ∶ 𝕮 → 𝕮      ⍝ the upper-case form of a letter (other characters stay)
+upper ξ ≔ ((islower′ ξ) (chr (⊟ ξ 110000000000)) ξ)
+lower ∶ 𝕮 → 𝕮      ⍝ the lower-case form of a letter (other characters stay)
+lower ξ ≔ ((isuppercase ξ) (chr (⊞ ξ 110000000000)) ξ)
+⍝ ---- strings
+toupper ∶ 𝕊 → 𝕊      ⍝ every letter in upper case
+toupper ξ ≔ (⫶ upper ξ)
+tolower ∶ 𝕊 → 𝕊      ⍝ every letter in lower case
+tolower ξ ≔ (⫶ lower ξ)
+capitalize ∶ 𝕊 → 𝕊      ⍝ the first letter in upper case, the others in lower case
+capitalize ξ ≔ (ξ (θ ι ↦ (∷ (upper θ) (tolower ι))) ⊘)
+ltrim ∶ 𝕊 → 𝕊      ⍝ without leading white space
+ltrim ξ ≔ (dropwhile isspace ξ)
+rtrim ∶ 𝕊 → 𝕊      ⍝ without trailing white space
+rtrim ξ ≔ (reverse (ltrim (reverse ξ)))
+trim ∶ 𝕊 → 𝕊      ⍝ without leading and trailing white space
+trim ξ ≔ (rtrim (ltrim ξ))
+startswith ∶ 𝕊 → 𝕊 → 𝔹      ⍝ startswith s p: does s begin with p
+startswith ξ η ≔ (isprefixby ≐ η ξ)
+endswith ∶ 𝕊 → 𝕊 → 𝔹      ⍝ endswith s p: does s end with p
+endswith ξ η ≔ (issuffixby ≐ η ξ)
+contains ∶ 𝕊 → 𝕊 → 𝔹      ⍝ contains s p: does p occur in s
+contains ξ η ≔ (isinfixby ≐ η ξ)
+indexof ∶ 𝕊 → 𝕊 → 𝔏 ℕ      ⍝ indexof s p: the index of the first occurrence of p in s, as a list of at most one element
+indexof ξ η ≔ (findindex (θ ↦ (isprefixby ≐ η θ)) (tails ξ))
+replace′ ∶ 𝕊 → 𝕊 → 𝕊 → 𝕊
+replace′ ξ η ζ ≔ (ξ (θ ι ↦ ((isprefixby ≐ η ξ) (⧺ ζ (replace′ (drop (ℓ η) ξ) η ζ)) (∷ θ (replace′ ι η ζ)))) ⊘)
+replace ∶ 𝕊 → 𝕊 → 𝕊 → 𝕊      ⍝ replace s p r: every non-overlapping occurrence of p in s (from the left) becomes r; an empty p changes nothing
+replace ξ η ζ ≔ ((∅ η) ξ (replace′ ξ η ζ))
+split ∶ 𝕮 → 𝕊 → 𝔏 𝕊      ⍝ split c s: the fields between the characters c (empty fields kept): split ',' "a,,b" = ["a", "", "b"]
+split ξ η ≔ ((ρ ↦ (∷ (◀ ρ) ((∅ (▶ ρ)) ⊘ (split ξ (⌄ (▶ ρ)))))) (span (θ ↦ (¬ (≐ θ ξ))) η))
+spl′ ∶ 𝕊 → 𝕊 → 𝔏 𝕊
+spl′ ξ η ≔ (η (θ ι ↦ ((isprefixby ≐ ξ η) (∷ ⊘ (spl′ ξ (drop (ℓ ξ) η))) ((ρ ↦ (∷ (∷ θ (hd ρ)) (⌄ ρ))) (spl′ ξ ι)))) (∷ ⊘ ⊘))
+splitstr ∶ 𝕊 → 𝕊 → 𝔏 𝕊      ⍝ splitstr p s: the fields between the occurrences of the string p (an empty p gives [s])
+splitstr ξ η ≔ ((∅ ξ) (∷ η ⊘) (spl′ ξ η))
+words ∶ 𝕊 → 𝔏 𝕊      ⍝ the words: maximal runs of characters that are not white space
+words ξ ≔ ((ρ ↦ ((∅ ρ) ⊘ ((σ ↦ (∷ (◀ σ) (words (▶ σ)))) (span (θ ↦ (¬ (isspace θ))) ρ)))) (dropwhile isspace ξ))
+unwords ∶ 𝔏 𝕊 → 𝕊      ⍝ the words joined by single spaces
+unwords ξ ≔ (join " " ξ)
+lines ∶ 𝕊 → 𝔏 𝕊      ⍝ the lines (the line feed ends a line, it is not part of it; a final line feed starts no new line)
+lines ξ ≔ ((∅ ξ) ⊘ ((ρ ↦ (∷ (◀ ρ) ((∅ (▶ ρ)) ⊘ (lines (⌄ (▶ ρ)))))) (span (θ ↦ (¬ (≐ θ '\n'))) ξ)))
+padleft ∶ ℕ → 𝕮 → 𝕊 → 𝕊      ⍝ padleft n c s: s with c in front up to length n
+padleft ν ξ η ≔ ((⩾ (ℓ η) ν) η (⧺ (replicate (⊟ ν (ℓ η)) ξ) η))
+padright ∶ ℕ → 𝕮 → 𝕊 → 𝕊      ⍝ padright n c s: s with c behind it up to length n
+padright ν ξ η ≔ ((⩾ (ℓ η) ν) η (⧺ η (replicate (⊟ ν (ℓ η)) ξ)))
+padcenter ∶ ℕ → 𝕮 → 𝕊 → 𝕊      ⍝ padcenter n c s: s between c's up to length n (the extra one goes to the right)
+padcenter ν ξ η ≔ ((⩾ (ℓ η) ν) η ((ρ ↦ (⧺ (replicate (div ρ 1100) ξ) (⧺ η (replicate (⊟ ρ (div ρ 1100)) ξ)))) (⊟ ν (ℓ η))))
+repeatstr ∶ ℕ → 𝕊 → 𝕊      ⍝ the string n times
+repeatstr ν ξ ≔ (concat (replicate ν ξ))
+ispalindrome ∶ 𝕊 → 𝔹      ⍝ reads the same backwards
+ispalindrome ξ ≔ (≐ˢ ξ (reverse ξ))
+isanagram ∶ 𝕊 → 𝕊 → 𝔹      ⍝ the same letters (case and white space ignored)
+isanagram ξ η ≔ (≐ˢ (sortby ⩽ (filter (θ ↦ (¬ (isspace θ))) (tolower ξ))) (sortby ⩽ (filter (θ ↦ (¬ (isspace θ))) (tolower η))))
+caesar ∶ ℤ → 𝕊 → 𝕊      ⍝ caesar k s: every ASCII letter moved k places along the alphabet (cyclically), other characters stay
+caesar′ ∶ ℤ → ℕ → 𝕮 → 𝕮
+caesar′ ξ η ζ ≔ (chr (⊞ η (mod (⊞ (⊟ ζ η) ξ) 110011001100)))
+caesar ξ η ≔ (⫶ (θ ↦ ((∧ (⩾ θ 'a') (⩽ θ 'z')) (caesar′ ξ 'a' θ) ((∧ (⩾ θ 'A') (⩽ θ 'Z')) (caesar′ ξ 'A' θ) θ))) η)
+⍝ ---- numbers as text in any base (2 … 36), lower-case digits
+digitchar ∶ ℕ → 𝕮
+digitchar ξ ≔ ((⩽ ξ 111000001) (chr (⊞ ξ '0')) (chr (⊞ (⊟ ξ 111001100) 'a')))
+showbase′ ∶ ℕ → ℕ → 𝕊
+showbase′ ξ η ≔ ((≐ ξ 0) ⊘ (⧺ (showbase′ (div ξ η) η) (∷ (digitchar (mod ξ η)) ⊘)))
+showbase ∶ ℕ → ℕ → 𝕊      ⍝ showbase n b: n written in base b (2 ≤ b ≤ 36), most significant digit first
+showbase ξ η ≔ ((≐ ξ 0) "0" (showbase′ ξ η))
+hex ∶ ℕ → 𝕊      ⍝ n in base 16
+hex ξ ≔ (showbase ξ 100000000)
+octal ∶ ℕ → 𝕊      ⍝ n in base 8
+octal ξ ≔ (showbase ξ 111000000)
+binary ∶ ℕ → 𝕊      ⍝ n in base 2
+binary ξ ≔ (showbase ξ 1100)
+digitval ∶ 𝕮 → 𝔏 ℕ      ⍝ the value of a digit character (0–9, a–z, A–Z as 10 … 35), as a list of at most one element
+digitval ξ ≔ ((isdigit ξ) (∷ (⊟ ξ '0') ⊘) ((∧ (⩾ ξ 'a') (⩽ ξ 'z')) (∷ (⊞ (⊟ ξ 'a') 111001100) ⊘) ((∧ (⩾ ξ 'A') (⩽ ξ 'Z')) (∷ (⊞ (⊟ ξ 'A') 111001100) ⊘) ⊘)))
+readbase ∶ ℕ → 𝕊 → 𝔏 ℕ      ⍝ readbase b s: the number written in base b, if s is non-empty and made of digits below b (a list of at most one element)
+readbase ξ η ≔ ((∨ (∅ η) (∃ₗ (θ ↦ ((∅ (digitval θ)) ⊤ (⩾ (hd (digitval θ)) ξ))) η)) ⊘ (∷ (foldl (ι κ′ ↦ (⊞ (⊠ ι ξ) (hd (digitval κ′)))) 0 η) ⊘))
+readnat ∶ 𝕊 → 𝔏 ℕ      ⍝ a decimal natural number, if the string is non-empty and made of digits (a list of at most one element)
+readnat ξ ≔ (readbase 111001100 ξ)
+readint ∶ 𝕊 → 𝔏 ℤ      ⍝ a decimal integer with an optional sign, as a list of at most one element
+readint ξ ≔ (ξ (θ ι ↦ ((≐ θ '-') (⫶ ⊖ (readnat ι)) ((≐ θ '+') (readnat ι) (readnat ξ)))) ⊘)
+⍝ ---- Roman numerals
+romantable ∶ 𝔏 (𝔓 ℕ 𝕊)
+romantable ≔ (∷ (⊗ 1110100000001110111000000 "M") (∷ (⊗ 1110100001100000111010000 "CM") (∷ (⊗ 11000000000011010000 "D") (∷ (⊗ 11001100000100000000 "CD") (∷ (⊗ 11101110111010000 "C") (∷ (⊗ 11101110011001100 "XC") (∷ (⊗ 110100001100 "L") (∷ (⊗ 110111000000 "XL") (∷ (⊗ 111001100 "X") (∷ (⊗ 111000001 "IX") (∷ (⊗ 111010001 "V") (∷ (⊗ 111010000 "IV") (∷ (⊗ 1 "I") ⊘)))))))))))))
+roman′ ∶ 𝔏 (𝔓 ℕ 𝕊) → ℕ → 𝕊
+roman′ ξ η ≔ (ξ (θ ι ↦ ((⩾ η (◀ θ)) (⧺ (▶ θ) (roman′ ξ (⊟ η (◀ θ)))) (roman′ ι η))) ⊘)
+roman ∶ ℕ → 𝕊      ⍝ the Roman numeral of n (1 ≤ n ≤ 3999; larger n repeat M, 0 gives the empty string)
+roman ξ ≔ (roman′ romantable ξ)
+fromroman′ ∶ 𝕊 → ℕ
+fromroman′ ξ ≔ ((ρ ↦ ((∅ ρ) 0 (⊞ (◀ (hd ρ)) (fromroman′ (drop (ℓ (▶ (hd ρ))) ξ))))) (filter (θ ↦ (isprefixby ≐ (▶ θ) ξ)) romantable))
+fromroman ∶ 𝕊 → ℕ      ⍝ the value of a Roman numeral written as roman writes it (0 for the empty string)
+fromroman ξ ≔ (fromroman′ ξ)
+⍝ ---- edit distance, run lengths
+lev′ ∶ 𝕊 → 𝕮 → 𝔏 ℕ → ℕ → 𝔏 ℕ
+lev′ ξ η ζ ω ≔ (ξ (θ ι ↦ (ζ (κ′ ρ ↦ (ρ (μ σ ↦ ((ν ↦ (∷ ν (lev′ ι η ρ ν))) (minimum (∷ (⊞ κ′ ((≐ θ η) 0 1)) (∷ (⊞ μ 1) (∷ (⊞ ω 1) ⊘)))))) ⊘)) ⊘)) ⊘)
+levfold′ ∶ 𝕊 → 𝕊 → 𝔏 ℕ → 𝔏 ℕ
+levfold′ ξ η ζ ≔ (ξ (θ ι ↦ (levfold′ ι η (∷ (⊞ (hd ζ) 1) (lev′ η θ ζ (⊞ (hd ζ) 1))))) ζ)
+levenshtein ∶ 𝕊 → 𝕊 → ℕ      ⍝ the edit distance: the fewest insertions, deletions and substitutions that turn one string into the other
+levenshtein ξ η ≔ (last (levfold′ ξ η (⍳ (⊞ (ℓ η) 1))))
+rle ∶ 𝕊 → 𝕊      ⍝ run-length encoding: "aaab" → "3a1b" (the count in decimal, then the character; digits in the text are not allowed)
+rle ξ ≔ (concat (⫶ (θ ↦ (⧺ (dec (ℓ θ)) (∷ (hd θ) ⊘))) (groupby ≐ ξ)))
+unrle ∶ 𝕊 → 𝕊      ⍝ the inverse of rle
+unrle ξ ≔ ((ρ ↦ ((∅ (▶ ρ)) ⊘ (⧺ (replicate (hd (readnat (◀ ρ))) (hd (▶ ρ))) (unrle (⌄ (▶ ρ)))))) (span isdigit ξ))

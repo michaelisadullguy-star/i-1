@@ -1,0 +1,1 @@
+main in \NN := fromroman(['a', 'z', 'Q'])

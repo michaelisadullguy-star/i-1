@@ -1,0 +1,6 @@
+# Carriage returns in these conformance programs are the point of the test (a CR inside a literal; CRLF line ends in every
+# notation).  Git must keep their bytes exactly, whatever core.autocrlf says on the machine that checks them out.
+tests/conformance/programs/misc/cr*.imo  -text
+tests/conformance/programs/misc/cr*.sbl  -text
+# bad_utf8.hum.imo is not UTF-8 on purpose (the byte 0xFF): every core must refuse it.
+tests/conformance/programs/misc/bad_utf8.hum.imo  -text

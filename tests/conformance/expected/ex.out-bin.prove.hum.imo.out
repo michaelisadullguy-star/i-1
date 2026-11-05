@@ -1,0 +1,10 @@
+pi + e - pi == e                    true
+exp(1) == e                         true
+4 * atan(1) == pi                   true
+e * e == exp(2)                     true
+sin(1/2)^2 + cos(1/2)^2 == 1        true
+exp(i/2) == cos(1/2) + i*sin(1/2)   true
+sqrt(3) * sqrt(2) == sqrt(6)        true
+pi == e                             false
+pi lt 22/7                          true
+true + false, 1 + true              true, 2

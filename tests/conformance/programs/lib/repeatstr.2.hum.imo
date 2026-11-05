@@ -1,0 +1,1 @@
+main in List(Char) := repeatstr(5, ['7', 'a', 'z'])

@@ -1,0 +1,1 @@
+node(node(node(leaf(0), leaf(0)), node(leaf(0), leaf(0))), node(node(leaf(0), leaf(0)), node(leaf(0), leaf(0))))

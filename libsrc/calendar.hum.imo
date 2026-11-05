@@ -1,0 +1,33 @@
+-- calendar.hum.imo -- the Gregorian calendar (human notation; lib/calendar.imo is its translation, made by libsrc/build.sh).
+-- A date is a triple (year, month, day) written as nested pairs pair(y, pair(m, d)).  A day number is the ordinal of Python's date.toordinal(): day 1 is 0001-01-01.
+-- The weekday is 0 for Monday … 6 for Sunday, as Python's date.weekday().
+isleap(y) in \ZZ -> Bool := (y mod 400 == 0) or ((y mod 4 == 0) and not (y mod 100 == 0))
+yearlen(y) in \ZZ -> \ZZ := if(isleap(y), 366, 365)
+monthlen(y, m) in \ZZ -> \ZZ -> \ZZ := if(m == 2, if(isleap(y), 29, 28), if((m == 4) or (m == 6) or (m == 9) or (m == 11), 30, 31))
+daysbefore(y, m) in \ZZ -> \ZZ -> \ZZ := if(m leq 1, 0, monthlen(y, m - 1) + daysbefore(y, m - 1))
+isvalid(y, m, d) in \ZZ -> \ZZ -> \ZZ -> Bool := (y geq 1) and (m geq 1) and (m leq 12) and (d geq 1) and (d leq monthlen(y, m))
+dayofyear(y, m, d) in \ZZ -> \ZZ -> \ZZ -> \ZZ := daysbefore(y, m) + d
+daynumber(y, m, d) in \ZZ -> \ZZ -> \ZZ -> \ZZ := 365 * (y - 1) + (y - 1) div 4 - (y - 1) div 100 + (y - 1) div 400 + daysbefore(y, m) + d
+_monthof(y, k, m) in \ZZ -> \ZZ -> \ZZ -> \ZZ := if(k lt monthlen(y, m), m, _monthof(y, k - monthlen(y, m), m + 1))
+_dayof(y, k, m) in \ZZ -> \ZZ -> \ZZ -> \ZZ := if(k lt monthlen(y, m), k + 1, _dayof(y, k - monthlen(y, m), m + 1))
+_centuryc(n) in \ZZ -> \ZZ := min(((n mod 146097) div 36524), 3)
+_quadc(n) in \ZZ -> \ZZ := (((n mod 146097) - _centuryc(n) * 36524) div 1461)
+_yearc(n) in \ZZ -> \ZZ := min((((n mod 146097) - _centuryc(n) * 36524) mod 1461) div 365, 3)
+_cycleyear(n) in \ZZ -> \ZZ := (n div 146097) * 400 + _centuryc(n) * 100 + _quadc(n) * 4 + _yearc(n) + 1
+fromdaynumber(n) in \ZZ -> Pair(\ZZ, Pair(\ZZ, \ZZ)) := pair(_cycleyear(n - 1), pair(_monthof(_cycleyear(n - 1), n - daynumber(_cycleyear(n - 1), 1, 1), 1), _dayof(_cycleyear(n - 1), n - daynumber(_cycleyear(n - 1), 1, 1), 1)))
+weekday(n) in \ZZ -> \ZZ := (n + 6) mod 7
+weekdayof(y, m, d) in \ZZ -> \ZZ -> \ZZ -> \ZZ := weekday(daynumber(y, m, d))
+datediff(ya, ma, da, yb, mb, db) in \ZZ -> \ZZ -> \ZZ -> \ZZ -> \ZZ -> \ZZ -> \ZZ := daynumber(yb, mb, db) - daynumber(ya, ma, da)
+adddays(y, m, d, k) in \ZZ -> \ZZ -> \ZZ -> \ZZ -> Pair(\ZZ, Pair(\ZZ, \ZZ)) := fromdaynumber(daynumber(y, m, d) + k)
+isoyear(n) in \ZZ -> \ZZ := fst(fromdaynumber(n - weekday(n) + 3))
+isoweek(n) in \ZZ -> \ZZ := (n - weekday(n) + 3 - daynumber(isoyear(n), 1, 1)) div 7 + 1
+_easterh(y) in \ZZ -> \ZZ := (19 * (y mod 19) + (y div 100) - ((y div 100) div 4) - (((y div 100) - (((y div 100) + 8) div 25) + 1) div 3) + 15) mod 30
+_easterl(y) in \ZZ -> \ZZ := (32 + 2 * ((y div 100) mod 4) + 2 * ((y mod 100) div 4) - _easterh(y) - ((y mod 100) mod 4)) mod 7
+_easterm(y) in \ZZ -> \ZZ := ((y mod 19) + 11 * _easterh(y) + 22 * _easterl(y)) div 451
+_easterx(y) in \ZZ -> \ZZ := _easterh(y) + _easterl(y) - 7 * _easterm(y) + 114
+easter(y) in \ZZ -> Pair(\ZZ, \ZZ) := pair(_easterx(y) div 31, _easterx(y) mod 31 + 1)
+monthname(m) in \NN -> String := nth(["", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"], m)
+dayname(w) in \NN -> String := nth(["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"], w)
+isodate(y, m, d) in \NN -> \NN -> \NN -> String := padleft(4, '0', showbase(y, 10)) ++ "-" ++ padleft(2, '0', showbase(m, 10)) ++ "-" ++ padleft(2, '0', showbase(d, 10))
+_isofield(s, k) in String -> \NN -> List(\NN) := readnat(nth(splitstr("-", s), k))
+parseisodate(s) in String -> List(Pair(\NN, Pair(\NN, \NN))) := if((length(splitstr("-", s)) == 3) and not isnil(_isofield(s, 0)) and not isnil(_isofield(s, 1)) and not isnil(_isofield(s, 2)) and isvalid(head(_isofield(s, 0)), head(_isofield(s, 1)), head(_isofield(s, 2))), [pair(head(_isofield(s, 0)), pair(head(_isofield(s, 1)), head(_isofield(s, 2))))], [])

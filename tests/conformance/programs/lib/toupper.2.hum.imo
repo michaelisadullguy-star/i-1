@@ -1,0 +1,1 @@
+main in List(Char) := toupper(['z', 'Q', '7'])

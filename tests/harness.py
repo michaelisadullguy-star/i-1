@@ -19,8 +19,8 @@ def _core():
     c = os.environ.get('I1_CORE', 'pymo')
     if '--core' in sys.argv:
         i = sys.argv.index('--core'); c = sys.argv[i + 1]; del sys.argv[i:i + 2]
-    c = {'py': 'pymo', 'hs': 'haskimo', 'rs': 'rustimo'}.get(c, c)
-    if c not in ('pymo', 'haskimo', 'rustimo'): raise SystemExit(f"--core takes pymo, haskimo or rustimo, not {c!r}")
+    c = {'py': 'pymo', 'hs': 'haskimo', 'rs': 'rustimo', 'cs': 'compimo', 'oc': 'ocamimo', 'sm': 'schimo', 'ci': 'cimo', 'ri': 'rimo'}.get(c, c)
+    if c not in ('pymo', 'haskimo', 'rustimo', 'compimo', 'ocamimo', 'schimo', 'cimo', 'rimo'): raise SystemExit(f"--core takes pymo, haskimo, rustimo, compimo, ocamimo, schimo, cimo or rimo, not {c!r}")
     return c
 CORE = _core()
 

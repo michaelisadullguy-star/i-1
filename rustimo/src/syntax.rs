@@ -85,7 +85,7 @@ pub fn loc_names(loc: &Loc) -> Vec<String> {
     loc.iter().map(|e| e.0.clone()).collect()
 }
 
-pub const CLASS_VARS: [&str; 3] = ["α", "β", "γ"];
+pub const CLASS_VARS: [&str; 5] = ["α", "β", "γ", "δ", "ε"];
 
 pub fn is_class_var(n: &str) -> bool {
     CLASS_VARS.contains(&n)

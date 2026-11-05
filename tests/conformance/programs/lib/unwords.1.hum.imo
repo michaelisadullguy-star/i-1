@@ -1,0 +1,1 @@
+main in List(Char) := unwords([['a', 'z', 'Q'], ['z', 'Q', '7'], ['Q', '7', 'a']])

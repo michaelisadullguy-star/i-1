@@ -1,0 +1,87 @@
+⍝ lib/boolalg.imo — spec notation — trusted prelude, part 29: Boolean algebra by reduced ordered binary decision diagrams: every propositional formula has exactly one normal form
+⍝ The connectives are the symbols and, or, not, imp, iff, xor, ite (if-then-else) and the constants true, false; everything else in a formula is an ATOM (a variable, an
+⍝ equation, a membership …).  A formula over n atoms becomes a diagram whose nodes (v, lo, hi) test the v-th atom (atoms are sorted by the order on terms);
+⍝ two formulas are equivalent exactly when their diagrams are equal, so a tautology is the diagram ⊤ and a contradiction the diagram ⊥, and the formula written back from the
+⍝ diagram is the simplest form this engine knows.  Costs: linear in the diagram, which is exponential only for pathological formulas (parity of many atoms stays small).
+BDD ∶ 𝒦
+bt ∶ BDD      ⍝ the diagram of true
+bt ξ η ζ ≔ ξ
+bf ∶ BDD      ⍝ the diagram of false
+bf ξ η ζ ≔ η
+bn ∶ ℕ → BDD → BDD → BDD      ⍝ a node: test the atom v; lo if it is false, hi if it is true
+bn ξ η ζ ω ν ο ≔ (ο ξ η ζ)
+beq ∶ BDD → BDD → 𝔹
+beq ξ η ≔ (ξ (η ⊤ ⊥ (ζ ω ν ↦ ⊥)) (η ⊥ ⊤ (ζ ω ν ↦ ⊥)) (ζ ω ν ↦ (η ⊥ ⊥ (ο ρ σ ↦ (∧ (≐ ζ ο) (∧ (beq ω ρ) (beq ν σ)))))))
+bmk ∶ ℕ → BDD → BDD → BDD
+bmk ξ η ζ ≔ ((beq η ζ) η (bn ξ η ζ))
+bdnot ∶ BDD → BDD
+bdnot ξ ≔ (ξ bf bt (η ζ ω ↦ (bmk η (bdnot ζ) (bdnot ω))))
+bdand ∶ BDD → BDD → BDD
+bdand ξ η ≔ (ξ η bf (ζ ω ν ↦ (η ξ bf (ο ρ σ ↦ ((≐ ζ ο) (bmk ζ (bdand ω ρ) (bdand ν σ)) ((≺ ζ ο) (bmk ζ (bdand ω η) (bdand ν η)) (bmk ο (bdand ξ ρ) (bdand ξ σ))))))))
+bdor ∶ BDD → BDD → BDD
+bdor ξ η ≔ (ξ bt η (ζ ω ν ↦ (η bt ξ (ο ρ σ ↦ ((≐ ζ ο) (bmk ζ (bdor ω ρ) (bdor ν σ)) ((≺ ζ ο) (bmk ζ (bdor ω η) (bdor ν η)) (bmk ο (bdor ξ ρ) (bdor ξ σ))))))))
+bdxor ∶ BDD → BDD → BDD
+bdxor ξ η ≔ (ξ (bdnot η) η (ζ ω ν ↦ (η (bdnot ξ) ξ (ο ρ σ ↦ ((≐ ζ ο) (bmk ζ (bdxor ω ρ) (bdxor ν σ)) ((≺ ζ ο) (bmk ζ (bdxor ω η) (bdxor ν η)) (bmk ο (bdxor ξ ρ) (bdxor ξ σ))))))))
+bdimp ∶ BDD → BDD → BDD
+bdimp ξ η ≔ (bdor (bdnot ξ) η)
+bdiff ∶ BDD → BDD → BDD
+bdiff ξ η ≔ (bdnot (bdxor ξ η))
+⍝ ---- the vocabulary
+s∧ ∶ ℕ
+s∧ ≔ (symid "and")
+s∨ ∶ ℕ
+s∨ ≔ (symid "or")
+s¬ ∶ ℕ
+s¬ ≔ (symid "not")
+s⇒ ∶ ℕ
+s⇒ ≔ (symid "imp")
+s⇔ ∶ ℕ
+s⇔ ≔ (symid "iff")
+s⊻ ∶ ℕ
+s⊻ ≔ (symid "xor")
+sⁱᶠ ∶ ℕ
+sⁱᶠ ≔ (symid "ite")
+s⊤ ∶ ℕ
+s⊤ ≔ (symid "true")
+s⊥ ∶ ℕ
+s⊥ ≔ (symid "false")
+ttrue ∶ Term
+ttrue ≔ (tconst s⊤)
+tfalse ∶ Term
+tfalse ≔ (tconst s⊥)
+boolsyms ∶ 𝔏 ℕ
+boolsyms ≔ (∷ s∧ (∷ s∨ (∷ s¬ (∷ s⇒ (∷ s⇔ (∷ s⊻ (∷ sⁱᶠ (∷ s⊤ (∷ s⊥ ⊘)))))))))
+isbool ∶ Term → 𝔹      ⍝ is the root of the term a connective or a truth constant
+isbool ξ ≔ (ξ (η ↦ ⊥) (η ζ ↦ (elem η boolsyms)) (η ↦ ⊥))
+⍝ the atoms of a formula: the subterms below the connectives (each once, sorted)
+batoms ∶ Term → 𝔏 Term
+batoms ξ ≔ ((isbool ξ) (concatmap batoms (targs ξ)) (∷ ξ ⊘))
+bnorm ∶ 𝔏 Term → 𝔏 Term
+bnorm ξ ≔ (tnub (tsort ξ))
+atomindex ∶ 𝔏 Term → Term → ℕ
+atomindex ξ η ≔ (hd (findindex (θ ↦ (teq θ η)) ξ))
+⍝ the diagram of a formula over the given (sorted) atoms
+tobdd ∶ 𝔏 Term → Term → BDD
+tobdd ξ η ≔ ((isbool η) (tobdd′ ξ (thead η) (targs η)) (bn (atomindex ξ η) bf bt))
+tobdd′ ∶ 𝔏 Term → ℕ → 𝔏 Term → BDD
+tobdd′ ξ η ζ ≔ ((≐ η s⊤) bt ((≐ η s⊥) bf ((≐ η s∧) (foldl (ω ν ↦ (bdand ω (tobdd ξ ν))) bt ζ) ((≐ η s∨) (foldl (ω ν ↦ (bdor ω (tobdd ξ ν))) bf ζ) ((≐ η s¬) (bdnot (tobdd ξ (hd ζ))) ((≐ η s⇒) (bdimp (tobdd ξ (hd ζ)) (tobdd ξ (hd (⌄ ζ)))) ((≐ η s⇔) (bdiff (tobdd ξ (hd ζ)) (tobdd ξ (hd (⌄ ζ)))) ((≐ η s⊻) (bdxor (tobdd ξ (hd ζ)) (tobdd ξ (hd (⌄ ζ)))) (bdor (bdand (tobdd ξ (hd ζ)) (tobdd ξ (hd (⌄ ζ)))) (bdand (bdnot (tobdd ξ (hd ζ))) (tobdd ξ (hd (⌄ (⌄ ζ))))))))))))))
+⍝ smart constructors: no constants left inside a conjunction or disjunction
+tand ∶ Term → Term → Term
+tand ξ η ≔ ((teq η ttrue) ξ ((teq ξ ttrue) η (tapp₂ s∧ ξ η)))
+tor ∶ Term → Term → Term
+tor ξ η ≔ ((teq η tfalse) ξ ((teq ξ tfalse) η (tapp₂ s∨ ξ η)))
+tnot ∶ Term → Term
+tnot ξ ≔ (tapp₁ s¬ ξ)
+⍝ the formula of a diagram
+frombdd ∶ 𝔏 Term → BDD → Term
+frombdd ξ η ≔ (η ttrue tfalse (ζ ω ν ↦ ((ς ↦ ((beq ω bf) (tand ς (frombdd ξ ν)) ((beq ν bf) (tand (tnot ς) (frombdd ξ ω)) ((beq ω bt) (tor (tnot ς) (frombdd ξ ν)) ((beq ν bt) (tor ς (frombdd ξ ω)) (tor (tand ς (frombdd ξ ν)) (tand (tnot ς) (frombdd ξ ω)))))))) (nth ξ ζ))))
+⍝ the canonical form of a formula: its diagram written back as a formula
+bcanon ∶ Term → Term
+bcanon ξ ≔ ((ς ↦ (frombdd ς (tobdd ς ξ))) (bnorm (batoms ξ)))
+bdecide ∶ Term → 𝔹      ⍝ ⊤ if the formula is a tautology, ⊥ if it is a contradiction, ⍰ otherwise
+bdecide ξ ≔ ((b ↦ ((beq b bt) ⊤ ((beq b bf) ⊥ ⍰))) (tobdd (bnorm (batoms ξ)) ξ))
+⍝ run bcanon on every maximal Boolean subterm (the atoms inside are treated first, recursively)
+boolpass ∶ Term → Term
+boolpass ξ ≔ ((isbool ξ) (bcanon (boolatoms ξ)) (tmapargs boolpass ξ))
+boolatoms ∶ Term → Term      ⍝ the formula with every atom passed through boolpass
+boolatoms ξ ≔ ((isbool ξ) (tapp (thead ξ) (⫶ boolatoms (targs ξ))) (boolpass ξ))

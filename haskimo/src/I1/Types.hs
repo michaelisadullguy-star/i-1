@@ -71,6 +71,7 @@ data Checker = Checker
   , cFactIdx :: M.Map Ty [Ty]                  -- ^ normalised sub -> its supers, in order
   , cEqs :: M.Map String Ty                    -- ^ atom -> class
   , cCoercions :: [String]
+  , cCov :: S.Set String                       -- ^ the covariant class constructors: the built-in ones and those declared with (↗ C)
   , cDefined :: S.Set String
   , cOverloads :: M.Map String [String]        -- ^ human symbol -> spec symbols
   , cUnknowns :: [(String, Maybe Int)]         -- ^ unknown -> its domain code, in declaration order
@@ -82,7 +83,7 @@ data Checker = Checker
 emptyChecker :: Checker
 emptyChecker = Checker
   { cClasses = M.fromList [("→", 2), ("𝒦", 0), ("𝒮", 0)]
-  , cFormers = S.empty, cSigs = M.empty, cFacts = [], cFactIdx = M.empty, cEqs = M.empty, cCoercions = []
+  , cFormers = S.empty, cSigs = M.empty, cFacts = [], cFactIdx = M.empty, cEqs = M.empty, cCoercions = [], cCov = S.fromList cov
   , cDefined = S.empty, cOverloads = M.empty, cUnknowns = [], cUserDefined = S.empty, cRawTaint = S.empty, cTaint = M.empty }
 
 -- ---------------------------------------------------------------- class terms
@@ -144,6 +145,12 @@ wf c (K name args) = case M.lookup name (cClasses c) of
     | k /= length args -> Left ("class " ++ name ++ " takes " ++ show k ++ " argument(s), got " ++ show (length args))
     | otherwise -> mapM_ (wf c) args
 
+-- | the same class, where the flexible class ⊥ (an unconstrained polymorphic constant, e.g. emptydict ∶ Dict α) equals anything
+flexEq :: Ty -> Ty -> Bool
+flexEq x y = x == y || x == F || y == F || case (x, y) of
+  (K n xs, K m ys) -> n == m && length xs == length ys && and (zipWith flexEq xs ys)
+  _ -> False
+
 leq :: Checker -> Ty -> Ty -> Bool
 leq c = leqS c S.empty
 
@@ -157,8 +164,8 @@ leqS c seen a0 b0 =
       (K n as, K m bs)
         | n == m, not (null as), length as == length bs ->
             if n == arrow then leqS c seen (head bs) (head as) && leqS c seen (as !! 1) (bs !! 1)
-            else if n `elem` cov then and (zipWith (leqS c seen) as bs)
-            else False
+            else if S.member n (cCov c) then and (zipWith (leqS c seen) as bs)
+            else flexEq a b
       _ -> False
     viaFacts = or [ leqS c (S.insert (a, y) seen) y b | y <- M.findWithDefault [] a (cFactIdx c), not (S.member (a, y) seen) ]
 
@@ -178,7 +185,7 @@ join c a0 b0 =
       b = norm c b0
   in case (a, b) of
        (K n as, K m bs)
-         | n == m, n `elem` cov, not (null as), length as == length bs ->
+         | n == m, S.member n (cCov c), not (null as), length as == length bs ->
              let js = [ if leq c y x then Just x else if leq c x y then Just y else join c x y | (x, y) <- zip as bs ]
              in if any (== Nothing) js then Nothing else Just (K n [j | Just j <- js])
        _ ->
@@ -202,7 +209,9 @@ match c p0 a0 s mode =
   case p of
     V pn -> case M.lookup pn s of
       Just b
-        | mode == Eq -> if b == a then Just s else Nothing
+        | a == F -> Just s
+        | b == F -> Just (M.insert pn a s)
+        | mode == Eq -> if flexEq b a then Just s else Nothing
         | leq c a b -> Just s
         | leq c b a -> Just (if mode == Pos then M.insert pn a s else s)
         | mode == Pos -> case join c a b of
@@ -213,7 +222,7 @@ match c p0 a0 s mode =
     _
       | not (hasVar p) ->
           if a == F then Just s
-          else if (case mode of Pos -> leq c a p; Neg -> leq c p a; Eq -> p == a) then Just s else Nothing
+          else if (case mode of Pos -> leq c a p; Neg -> leq c p a; Eq -> flexEq p a) then Just s else Nothing
       | a == F -> Just s
       | otherwise ->
           let structural = case (p, a) of
@@ -221,7 +230,7 @@ match c p0 a0 s mode =
                   | pn == an, length pas == length aas ->
                       foldM (\s' (i, (pp, aa)) ->
                                let m | pn == arrow = if i == (0 :: Int) then flipMode mode else mode
-                                     | pn `elem` cov = mode
+                                     | S.member pn (cCov c) = mode
                                      | otherwise = Eq
                                in match c pp aa s' m) s (zip [0 ..] (zip pas aas))
                 _ -> Nothing
@@ -304,6 +313,11 @@ fact c term = case term of
         case a of
           K n [] -> Right (reindex c { cEqs = M.insert n b (cEqs c) })
           _ -> throwParse "class equation: left side must be an atomic class"
+      "↗" -> case args of
+        (TVar n : _) ->
+          if M.findWithDefault 0 n (cClasses c) >= 1 then Right c { cCov = S.insert n (cCov c) }
+          else Left ("covariant: " ++ n ++ " is not a class constructor")
+        _ -> Left "covariant:  is not a class constructor"
       "↪" -> case args of
         (TVar f : _) ->
           if M.member f (cSigs c) then Right c { cCoercions = cCoercions c ++ [f] }

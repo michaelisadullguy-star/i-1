@@ -1,0 +1,34 @@
+-- prng.hum.imo -- pseudo-random numbers as pure functions of an explicit state, low-discrepancy sequences, and hash functions (human notation; lib/prng.imo is its translation, made by libsrc/build.sh).
+-- A generator is a function from a state to the next state, both natural numbers; the output is the state itself.  Nothing is hidden: the same seed gives the same numbers in every implementation.
+-- the multiplicative generator of Lehmer (Park and Miller, minimal standard): states 1 to 2^31 - 2, all bits are good
+minstd(s) in \NN -> \NN := (48271 * s) mod 2147483647
+-- linear congruential generators: the low bits have short periods, use the high ones
+lcgansi(s) in \NN -> \NN := (1103515245 * s + 12345) mod 2147483648
+lcgmmix(s) in \NN -> \NN := (6364136223846793005 * s + 1442695040888963407) mod 18446744073709551616
+-- the xorshift generators of Marsaglia on a register of Booleans (the least significant bit first); the state is taken modulo 2^32 or 2^64 and must not be zero
+_pbits(n, w) in \NN -> \NN -> List(Bool) := if(w == 0, [], cons(n mod 2 == 1, _pbits(n div 2, abs(w - 1))))
+_punbits(bs) in List(Bool) -> \NN := if(isnil(bs), 0, (if(head(bs), 1, 0)) + 2 * _punbits(tail(bs)))
+_pxorl(a, b) in List(Bool) -> List(Bool) -> List(Bool) := zipwith((x in Bool |-> (y in Bool |-> not (x iff y))), a, b)
+_pfalses(k) in \NN -> List(Bool) := if(k == 0, [], cons(false, _pfalses(abs(k - 1))))
+_pshl(k, a) in \NN -> List(Bool) -> List(Bool) := take(length(a), _pfalses(k) ++ a)
+_pshr(k, a) in \NN -> List(Bool) -> List(Bool) := drop(k, a) ++ _pfalses(k)
+_pxs(a, k, left) in List(Bool) -> \NN -> Bool -> List(Bool) := _pxorl(a, if(left, _pshl(k, a), _pshr(k, a)))
+xorshift32(s) in \NN -> \NN := _punbits(_pxs(_pxs(_pxs(_pbits(s, 32), 13, true), 17, false), 5, true))
+xorshift64(s) in \NN -> \NN := _punbits(_pxs(_pxs(_pxs(_pbits(s, 64), 13, true), 7, false), 17, true))
+-- the first n states after the seed
+_pgo(next, s, n) in (\NN -> \NN) -> \NN -> \NN -> List(\NN) := if(n == 0, [], cons(s, _pgo(next, next(s), abs(n - 1))))
+prngstream(next, seed, n) in (\NN -> \NN) -> \NN -> \NN -> List(\NN) := _pgo(next, next(seed), n)
+-- n numbers below bound, by the remainder of the states (good for the generators whose low bits are good)
+prngbelow(next, seed, bound, n) in (\NN -> \NN) -> \NN -> \NN -> \NN -> List(\NN) := map((x in \NN |-> x mod bound), prngstream(next, seed, n))
+-- a permutation by successive selection: the state t picks the element at the place t mod (the length of what remains)
+_pickgo(next, t, xs, acc) in (\NN -> \NN) -> \NN -> List(alpha) -> List(alpha) -> List(alpha) := if(isnil(xs), acc, _pickgo(next, next(t), take(t mod length(xs), xs) ++ drop(t mod length(xs) + 1, xs), cons(nth(xs, t mod length(xs)), acc)))
+shuffle(next, seed, xs) in (\NN -> \NN) -> \NN -> List(alpha) -> List(alpha) := reverse(_pickgo(next, next(seed), xs, []))
+sample(next, seed, k, xs) in (\NN -> \NN) -> \NN -> \NN -> List(alpha) -> List(alpha) := take(k, shuffle(next, seed, xs))
+choice(next, seed, xs) in (\NN -> \NN) -> \NN -> List(alpha) -> List(alpha) := if(isnil(xs), [], [nth(xs, next(seed) mod length(xs))])
+-- low-discrepancy sequences, exact: the radical inverse of n in the base b (b at least 2) and the Halton point
+vandercorput(b, n) in \NN -> \NN -> \QQ := if((n == 0) or (b lt 2), 0, (n mod b + vandercorput(b, n div b)) / b)
+halton(n) in \NN -> Pair(\QQ, \QQ) := pair(vandercorput(2, n), vandercorput(3, n))
+-- hash functions of byte lists: FNV-1a (the xor touches the low byte only) and djb2
+fnvhash32(bs) in List(\NN) -> \NN := foldl((h in \NN |-> (b in \NN |-> ((abs(h - h mod 256) + binxor(h mod 256, b)) * 16777619) mod 4294967296)), 2166136261, bs)
+fnvhash64(bs) in List(\NN) -> \NN := foldl((h in \NN |-> (b in \NN |-> ((abs(h - h mod 256) + binxor(h mod 256, b)) * 1099511628211) mod 18446744073709551616)), 14695981039346656037, bs)
+djbhash(bs) in List(\NN) -> \NN := foldl((h in \NN |-> (b in \NN |-> (h * 33 + b) mod 4294967296)), 5381, bs)

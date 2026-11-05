@@ -1,0 +1,1 @@
+main in List(Char) := padcenter(12, 'Q', ['a', 'z', 'Q'])

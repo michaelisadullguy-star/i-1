@@ -1,0 +1,1 @@
+main in List(Char) := padleft(5, '7', ['z', 'Q', '7'])

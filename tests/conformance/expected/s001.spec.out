@@ -1,0 +1,398 @@
+a1 ∶ 𝕊
+a1 ≔ (showz (parsebits "110101"))
+a2 ∶ 𝕊
+a2 ≔ (showz2 (asz2 (parsebits "110101")))
+a3 ∶ ℚ
+a3 ≔ (fracz (asz2 (parsebits "110101")))
+a4 ∶ 𝕊
+a4 ≔ (showz 111010001)
+a5 ∶ 𝕊
+a5 ≔ (showz2 (asz2 111010001))
+a6 ∶ 𝕊
+a6 ≔ (showc (⊞ (÷ 1 1100) (÷ 11 1101)))
+a7 ∶ 𝕊
+a7 ≔ (bits (parsebits "110101"))
+a8 ∶ ℤ[i]
+a8 ≔ (parsebits "110101")
+a9 ∶ 𝕊
+a9 ≔ (showstr2 (asstr2 (parsebits "110101")))
+z0 ∶ ℤ[i]
+z0 ≔ (parsebits "100010101110")
+y0 ∶ 𝕊
+y0 ≔ (bits (gaussian (pairz 110000010001 110011010001)))
+w0 ∶ ℤ²
+w0 ≔ (pairz 110000010001 110011010001)
+f0 ∶ ℤ
+f0 ≔ (fstz w0)
+g0 ∶ ℤ
+g0 ≔ (sndz w0)
+t0 ∶ 𝕊
+t0 ≔ (showz2 w0)
+z1 ∶ ℤ[i]
+z1 ≔ (parsebits "110011010011000")
+y1 ∶ 𝕊
+y1 ≔ (bits (gaussian (pairz 110111011100 110111001100)))
+w1 ∶ ℤ²
+w1 ≔ (pairz 110111011100 110111001100)
+f1 ∶ ℤ
+f1 ≔ (fstz w1)
+g1 ∶ ℤ
+g1 ≔ (sndz w1)
+t1 ∶ 𝕊
+t1 ≔ (showz2 w1)
+z2 ∶ ℤ[i]
+z2 ≔ (parsebits "11100010110111")
+y2 ∶ 𝕊
+y2 ≔ (bits (gaussian (pairz 110011000000 (⊖ 110100010001))))
+w2 ∶ ℤ²
+w2 ≔ (pairz 110011000000 (⊖ 110100010001))
+f2 ∶ ℤ
+f2 ≔ (fstz w2)
+g2 ∶ ℤ
+g2 ≔ (sndz w2)
+t2 ∶ 𝕊
+t2 ≔ (showz2 w2)
+z3 ∶ ℤ[i]
+z3 ≔ (parsebits "101110110011")
+y3 ∶ 𝕊
+y3 ≔ (bits (gaussian (pairz 110011000000 110111010001)))
+w3 ∶ ℤ²
+w3 ≔ (pairz 110011000000 110111010001)
+f3 ∶ ℤ
+f3 ≔ (fstz w3)
+g3 ∶ ℤ
+g3 ≔ (sndz w3)
+t3 ∶ 𝕊
+t3 ≔ (showz2 w3)
+z4 ∶ ℤ[i]
+z4 ≔ (parsebits "1110100110110101")
+y4 ∶ 𝕊
+y4 ≔ (bits (gaussian (pairz (⊖ 110011011101) (⊖ 110100011100))))
+w4 ∶ ℤ²
+w4 ≔ (pairz (⊖ 110011011101) (⊖ 110100011100))
+f4 ∶ ℤ
+f4 ≔ (fstz w4)
+g4 ∶ ℤ
+g4 ≔ (sndz w4)
+t4 ∶ 𝕊
+t4 ≔ (showz2 w4)
+z5 ∶ ℤ[i]
+z5 ≔ (parsebits "111000011010")
+y5 ∶ 𝕊
+y5 ≔ (bits (gaussian (pairz 100010001 100001101)))
+w5 ∶ ℤ²
+w5 ≔ (pairz 100010001 100001101)
+f5 ∶ ℤ
+f5 ≔ (fstz w5)
+g5 ∶ ℤ
+g5 ≔ (sndz w5)
+t5 ∶ 𝕊
+t5 ≔ (showz2 w5)
+z6 ∶ ℤ[i]
+z6 ≔ (parsebits "1110101100000111")
+y6 ∶ 𝕊
+y6 ≔ (bits (gaussian (pairz (⊖ 110000000000) (⊖ 100000001))))
+w6 ∶ ℤ²
+w6 ≔ (pairz (⊖ 110000000000) (⊖ 100000001))
+f6 ∶ ℤ
+f6 ≔ (fstz w6)
+g6 ∶ ℤ
+g6 ≔ (sndz w6)
+t6 ∶ 𝕊
+t6 ≔ (showz2 w6)
+z7 ∶ ℤ[i]
+z7 ≔ (parsebits "1000101011100")
+y7 ∶ 𝕊
+y7 ≔ (bits (gaussian (pairz (⊖ 110100001100) 111000000)))
+w7 ∶ ℤ²
+w7 ≔ (pairz (⊖ 110100001100) 111000000)
+f7 ∶ ℤ
+f7 ≔ (fstz w7)
+g7 ∶ ℤ
+g7 ≔ (sndz w7)
+t7 ∶ 𝕊
+t7 ≔ (showz2 w7)
+z8 ∶ ℤ[i]
+z8 ≔ (parsebits "1100110001001")
+y8 ∶ 𝕊
+y8 ≔ (bits (gaussian (pairz (⊖ 110011010001) 110011001100)))
+w8 ∶ ℤ²
+w8 ≔ (pairz (⊖ 110011010001) 110011001100)
+f8 ∶ ℤ
+f8 ≔ (fstz w8)
+g8 ∶ ℤ
+g8 ≔ (sndz w8)
+t8 ∶ 𝕊
+t8 ≔ (showz2 w8)
+z9 ∶ ℤ[i]
+z9 ≔ (parsebits "1100110000001")
+y9 ∶ 𝕊
+y9 ≔ (bits (gaussian (pairz (⊖ 110011011101) 110011000000)))
+w9 ∶ ℤ²
+w9 ≔ (pairz (⊖ 110011011101) 110011000000)
+f9 ∶ ℤ
+f9 ≔ (fstz w9)
+g9 ∶ ℤ
+g9 ≔ (sndz w9)
+t9 ∶ 𝕊
+t9 ≔ (showz2 w9)
+z10 ∶ ℤ[i]
+z10 ≔ (parsebits "101100001111")
+y10 ∶ 𝕊
+y10 ≔ (bits (gaussian (pairz 110000001100 110100000001)))
+w10 ∶ ℤ²
+w10 ≔ (pairz 110000001100 110100000001)
+f10 ∶ ℤ
+f10 ≔ (fstz w10)
+g10 ∶ ℤ
+g10 ≔ (sndz w10)
+t10 ∶ 𝕊
+t10 ≔ (showz2 w10)
+z11 ∶ ℤ[i]
+z11 ≔ (parsebits "110011000010011")
+y11 ∶ 𝕊
+y11 ≔ (bits (gaussian (pairz 110100010000 110100000001)))
+w11 ∶ ℤ²
+w11 ≔ (pairz 110100010000 110100000001)
+f11 ∶ ℤ
+f11 ≔ (fstz w11)
+g11 ∶ ℤ
+g11 ≔ (sndz w11)
+t11 ∶ 𝕊
+t11 ≔ (showz2 w11)
+z12 ∶ ℤ[i]
+z12 ≔ (parsebits "0")
+y12 ∶ 𝕊
+y12 ≔ (bits (gaussian (pairz 0 0)))
+w12 ∶ ℤ²
+w12 ≔ (pairz 0 0)
+f12 ∶ ℤ
+f12 ≔ (fstz w12)
+g12 ∶ ℤ
+g12 ≔ (sndz w12)
+t12 ∶ 𝕊
+t12 ≔ (showz2 w12)
+z13 ∶ ℤ[i]
+z13 ≔ (parsebits "1")
+y13 ∶ 𝕊
+y13 ≔ (bits (gaussian (pairz 1 0)))
+w13 ∶ ℤ²
+w13 ≔ (pairz 1 0)
+f13 ∶ ℤ
+f13 ≔ (fstz w13)
+g13 ∶ ℤ
+g13 ≔ (sndz w13)
+t13 ∶ 𝕊
+t13 ≔ (showz2 w13)
+z14 ∶ ℤ[i]
+z14 ≔ (parsebits "11")
+y14 ∶ 𝕊
+y14 ≔ (bits (gaussian (pairz 0 1)))
+w14 ∶ ℤ²
+w14 ≔ (pairz 0 1)
+f14 ∶ ℤ
+f14 ≔ (fstz w14)
+g14 ∶ ℤ
+g14 ≔ (sndz w14)
+t14 ∶ 𝕊
+t14 ≔ (showz2 w14)
+z15 ∶ ℤ[i]
+z15 ≔ (parsebits "110101")
+y15 ∶ 𝕊
+y15 ≔ (bits (gaussian (pairz 1 (⊖ 111011100))))
+w15 ∶ ℤ²
+w15 ≔ (pairz 1 (⊖ 111011100))
+f15 ∶ ℤ
+f15 ≔ (fstz w15)
+g15 ∶ ℤ
+g15 ≔ (sndz w15)
+t15 ∶ 𝕊
+t15 ≔ (showz2 w15)
+z16 ∶ ℤ[i]
+z16 ≔ (parsebits "11001010")
+y16 ∶ 𝕊
+y16 ≔ (bits (gaussian (pairz (⊖ 111011101) 1101)))
+w16 ∶ ℤ²
+w16 ≔ (pairz (⊖ 111011101) 1101)
+f16 ∶ ℤ
+f16 ≔ (fstz w16)
+g16 ∶ ℤ
+g16 ≔ (sndz w16)
+t16 ∶ 𝕊
+t16 ≔ (showz2 w16)
+p0 ∶ ℤ²
+p0 ≔ (addz2 (pairz 110000010000 (⊖ 110000010000)) (pairz 111000000 (⊖ 1101)))
+q0 ∶ ℤ²
+q0 ≔ (subz2 (pairz 110000010000 (⊖ 110000010000)) (pairz 111000000 (⊖ 1101)))
+r0 ∶ ℤ²
+r0 ≔ (negz2 (pairz 110000010000 (⊖ 110000010000)))
+s0 ∶ ℤ²
+s0 ≔ (scalez2 111000000 (pairz 110000010000 (⊖ 110000010000)))
+e0 ∶ 𝔹
+e0 ≔ (eqz2 (pairz 110000010000 (⊖ 110000010000)) (pairz 111000000 (⊖ 1101)))
+e0x ∶ 𝔹
+e0x ≔ (eqz2 (pairz 110000010000 (⊖ 110000010000)) (pairz 110000010000 (⊖ 110000010000)))
+p1 ∶ ℤ²
+p1 ≔ (addz2 (pairz 111011101 110011000000) (pairz (⊖ 111010000) (⊖ 1101)))
+q1 ∶ ℤ²
+q1 ≔ (subz2 (pairz 111011101 110011000000) (pairz (⊖ 111010000) (⊖ 1101)))
+r1 ∶ ℤ²
+r1 ≔ (negz2 (pairz 111011101 110011000000))
+s1 ∶ ℤ²
+s1 ≔ (scalez2 (⊖ 111010000) (pairz 111011101 110011000000))
+e1 ∶ 𝔹
+e1 ≔ (eqz2 (pairz 111011101 110011000000) (pairz (⊖ 111010000) (⊖ 1101)))
+e1x ∶ 𝔹
+e1x ≔ (eqz2 (pairz 111011101 110011000000) (pairz 111011101 110011000000))
+p2 ∶ ℤ²
+p2 ≔ (addz2 (pairz (⊖ 110000011100) (⊖ 100000001)) (pairz 111010000 0))
+q2 ∶ ℤ²
+q2 ≔ (subz2 (pairz (⊖ 110000011100) (⊖ 100000001)) (pairz 111010000 0))
+r2 ∶ ℤ²
+r2 ≔ (negz2 (pairz (⊖ 110000011100) (⊖ 100000001)))
+s2 ∶ ℤ²
+s2 ≔ (scalez2 111010000 (pairz (⊖ 110000011100) (⊖ 100000001)))
+e2 ∶ 𝔹
+e2 ≔ (eqz2 (pairz (⊖ 110000011100) (⊖ 100000001)) (pairz 111010000 0))
+e2x ∶ 𝔹
+e2x ≔ (eqz2 (pairz (⊖ 110000011100) (⊖ 100000001)) (pairz (⊖ 110000011100) (⊖ 100000001)))
+p3 ∶ ℤ²
+p3 ≔ (addz2 (pairz (⊖ 1) (⊖ 111010000)) (pairz 111011100 0))
+q3 ∶ ℤ²
+q3 ≔ (subz2 (pairz (⊖ 1) (⊖ 111010000)) (pairz 111011100 0))
+r3 ∶ ℤ²
+r3 ≔ (negz2 (pairz (⊖ 1) (⊖ 111010000)))
+s3 ∶ ℤ²
+s3 ≔ (scalez2 111011100 (pairz (⊖ 1) (⊖ 111010000)))
+e3 ∶ 𝔹
+e3 ≔ (eqz2 (pairz (⊖ 1) (⊖ 111010000)) (pairz 111011100 0))
+e3x ∶ 𝔹
+e3x ≔ (eqz2 (pairz (⊖ 1) (⊖ 111010000)) (pairz (⊖ 1) (⊖ 111010000)))
+p4 ∶ ℤ²
+p4 ≔ (addz2 (pairz (⊖ 111000000) 100010001) (pairz 1100 (⊖ 111011100)))
+q4 ∶ ℤ²
+q4 ≔ (subz2 (pairz (⊖ 111000000) 100010001) (pairz 1100 (⊖ 111011100)))
+r4 ∶ ℤ²
+r4 ≔ (negz2 (pairz (⊖ 111000000) 100010001))
+s4 ∶ ℤ²
+s4 ≔ (scalez2 1100 (pairz (⊖ 111000000) 100010001))
+e4 ∶ 𝔹
+e4 ≔ (eqz2 (pairz (⊖ 111000000) 100010001) (pairz 1100 (⊖ 111011100)))
+e4x ∶ 𝔹
+e4x ≔ (eqz2 (pairz (⊖ 111000000) 100010001) (pairz (⊖ 111000000) 100010001))
+p5 ∶ ℤ²
+p5 ≔ (addz2 (pairz 100010000 (⊖ 100000001)) (pairz (⊖ 111011100) 0))
+q5 ∶ ℤ²
+q5 ≔ (subz2 (pairz 100010000 (⊖ 100000001)) (pairz (⊖ 111011100) 0))
+r5 ∶ ℤ²
+r5 ≔ (negz2 (pairz 100010000 (⊖ 100000001)))
+s5 ∶ ℤ²
+s5 ≔ (scalez2 (⊖ 111011100) (pairz 100010000 (⊖ 100000001)))
+e5 ∶ 𝔹
+e5 ≔ (eqz2 (pairz 100010000 (⊖ 100000001)) (pairz (⊖ 111011100) 0))
+e5x ∶ 𝔹
+e5x ≔ (eqz2 (pairz 100010000 (⊖ 100000001)) (pairz 100010000 (⊖ 100000001)))
+qp0 ∶ ℤ²
+qp0 ≔ (qpair (÷ (⊖ 1) 111011100))
+qf0 ∶ ℚ
+qf0 ≔ (fracz qp0)
+qd0 ∶ 𝕊
+qd0 ≔ (showz2 qp0)
+qp1 ∶ ℤ²
+qp1 ≔ (qpair (÷ 1101 111010000))
+qf1 ∶ ℚ
+qf1 ≔ (fracz qp1)
+qd1 ∶ 𝕊
+qd1 ≔ (showz2 qp1)
+qp2 ∶ ℤ²
+qp2 ≔ (qpair 111010001)
+qf2 ∶ ℚ
+qf2 ≔ (fracz qp2)
+qd2 ∶ 𝕊
+qd2 ≔ (showz2 qp2)
+qp3 ∶ ℤ²
+qp3 ≔ (qpair 0)
+qf3 ∶ ℚ
+qf3 ≔ (fracz qp3)
+qd3 ∶ 𝕊
+qd3 ≔ (showz2 qp3)
+qp4 ∶ ℤ²
+qp4 ≔ (qpair (÷ (⊖ 111011101) 1101))
+qf4 ∶ ℚ
+qf4 ≔ (fracz qp4)
+qd4 ∶ 𝕊
+qd4 ≔ (showz2 qp4)
+qp5 ∶ ℤ²
+qp5 ≔ (qpair (÷ 1 1100))
+qf5 ∶ ℚ
+qf5 ≔ (fracz qp5)
+qd5 ∶ 𝕊
+qd5 ≔ (showz2 qp5)
+zf ∶ ℚ
+zf ≔ (fracz (pairz 1101 0))
+zg ∶ ℚ
+zg ≔ (fracz (pairz 0 111010001))
+n0 ∶ ℕ
+n0 ≔ (strnat "")
+m0 ∶ 𝕊
+m0 ≔ (natstr (strnat ""))
+n1 ∶ ℕ
+n1 ≔ (strnat "a")
+m1 ∶ 𝕊
+m1 ≔ (natstr (strnat "a"))
+n2 ∶ ℕ
+n2 ≔ (strnat "Hi")
+m2 ∶ 𝕊
+m2 ≔ (natstr (strnat "Hi"))
+n3 ∶ ℕ
+n3 ≔ (strnat "yo")
+m3 ∶ 𝕊
+m3 ≔ (natstr (strnat "yo"))
+n5 ∶ ℕ
+n5 ≔ (strnat "abé")
+m5 ∶ 𝕊
+m5 ≔ (natstr (strnat "abé"))
+n6 ∶ ℕ
+n6 ≔ (strnat "😀!")
+m6 ∶ 𝕊
+m6 ≔ (natstr (strnat "😀!"))
+n7 ∶ ℕ
+n7 ≔ (strnat "i - 1")
+m7 ∶ 𝕊
+m7 ≔ (natstr (strnat "i - 1"))
+nz1 ∶ 𝕊
+nz1 ≔ (natstr 0)
+nz2 ∶ 𝕊
+nz2 ≔ (natstr 1)
+nz3 ∶ ℕ
+nz3 ≔ (strnat "")
+nz4 ∶ 𝕊
+nz4 ≔ (natstr 1100)
+c1 ∶ 𝕊²
+c1 ≔ (strpair "Hi" "yo")
+c2 ∶ 𝕊
+c2 ≔ (strfst c1)
+c3 ∶ 𝕊
+c3 ≔ (strsnd c1)
+c4 ∶ 𝕊
+c4 ≔ (showstr2 c1)
+c5 ∶ 𝕊
+c5 ≔ (bits (gaussian c1))
+c6 ∶ 𝕊²
+c6 ≔ (strpair "" "a")
+c7 ∶ 𝕊
+c7 ≔ (showstr2 c6)
+c8 ∶ 𝕊
+c8 ≔ (showstr2 (asstr2 (parsebits "1100")))
+c9 ∶ 𝕊
+c9 ≔ (showstr2 (asstr2 (parsebits "11101")))
+u1 ∶ 𝕊²
+u1 ≔ (strpair "Hello, world!" "Welcome to i - 1!")
+u2 ∶ 𝕊
+u2 ≔ (bits (gaussian u1))
+u3 ∶ 𝕊
+u3 ≔ (strfst u1)
+u4 ∶ 𝕊
+u4 ≔ (strsnd u1)
+u5 ∶ 𝕊
+u5 ≔ (showstr2 u1)

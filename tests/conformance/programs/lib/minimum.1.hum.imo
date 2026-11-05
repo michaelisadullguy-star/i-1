@@ -1,0 +1,1 @@
+main in \NN := minimum([12, 5, 7])

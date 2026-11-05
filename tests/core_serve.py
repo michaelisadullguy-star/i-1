@@ -24,7 +24,7 @@ CORE_NAME = 'haskimo'                                        # set by harness.py
 
 def find_exe(core=None):
     core = core or CORE_NAME
-    env = {'haskimo': 'I1_HASKIMO', 'rustimo': 'I1_RUSTIMO'}[core]
+    env = {'haskimo': 'I1_HASKIMO', 'rustimo': 'I1_RUSTIMO', 'compimo': 'I1_COMPIMO', 'ocamimo': 'I1_OCAMIMO', 'schimo': 'I1_SCHIMO', 'cimo': 'I1_CIMO', 'rimo': 'I1_RIMO'}[core]
     for c in (os.environ.get(env), os.path.join(ROOT, 'build', core), os.path.join(ROOT, 'dist', core)):
         if c and os.path.isfile(c) and os.access(c, os.X_OK): return os.path.abspath(c)
     raise SystemExit(f"the {core.capitalize()} executable was not found: build it with  make {core}  (or set ${env})")

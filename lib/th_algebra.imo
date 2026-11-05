@@ -1,0 +1,82 @@
+⍝ lib/th_algebra.imo — spec notation — trusted prelude, part 35: logic modes and algebraic theories: classical and intuitionistic logic, groups, abelian groups, the algebra of sets, lattices
+⍝ classical (the default) decides propositional statements by diagrams; intuitionistic decides them by the sequent calculus G4ip (no excluded middle) and conflicts with it.
+⍝ group: the complete rewriting system of group theory (modulo associativity), so that two words are equal in every group exactly when they have the same normal form.  abelian adds commutativity.
+⍝ sets: the Boolean algebra of sets — ∪ ∩ ᶜ \ ∅ U are or, and, not, false, true, so every identity between set expressions is decided by diagrams, and ⊆ and = between sets
+⍝ are decided exactly (a witness for every non-inclusion).  lattice: join and meet with absorption, and the order they define.
+thclassical ∶ Theory
+thclassicalaxioms ∶ 𝔏 𝕊
+thclassicalaxioms ≔ (lines "excluded middle: p ∨ ¬p\ndouble negation: ¬¬p ⇒ p\nPeirce's law: ((p ⇒ q) ⇒ p) ⇒ p")
+thclassicaltheorems ∶ 𝔏 𝕊
+thclassicaltheorems ≔ (lines "p ∨ ¬p\n¬(p ∧ ¬p)\n¬¬p ⇔ p\n(p ⇒ q) ⇔ (¬q ⇒ ¬p)\n¬(p ∧ q) ⇔ (¬p ∨ ¬q)\n¬(p ∨ q) ⇔ (¬p ∧ ¬q)\n(p ∧ (p ⇒ q)) ⇒ q\n((p ⇒ q) ∧ (q ⇒ r)) ⇒ (p ⇒ r)\n(p ∧ (q ∨ r)) ⇔ ((p ∧ q) ∨ (p ∧ r))\n(p ∨ (p ∧ q)) ⇔ p\n(p ⇔ q) ⇔ ((p ⇒ q) ∧ (q ⇒ p))\n¬((p ⇒ q) ∧ p ∧ ¬q)\n((p ⇒ q) ⇒ p) ⇒ p\n(p ⇒ q) ⇔ (¬p ∨ q)\n¬(p ⇒ q) ⇔ (p ∧ ¬q)")
+thclassicaldoc ∶ 𝕊
+thclassicaldoc ≔ "classical two-valued logic: excluded middle, double negation and Peirce's law are theorems"
+thclassical ≔ (mktheory "classical" (∷ "core" ⊘) (∷ "intuitionistic" ⊘) ⊤ ⊘ ⊘ ⊘ thclassicalaxioms thclassicaltheorems thclassicaldoc)
+thintuitionistic ∶ Theory
+thintuitionisticaxioms ∶ 𝔏 𝕊
+thintuitionisticaxioms ≔ (lines "no excluded middle, no double-negation elimination\nex falso: ⊥ ⇒ p\np ⇒ (q ⇒ p), (p ⇒ (q ⇒ r)) ⇒ ((p ⇒ q) ⇒ (p ⇒ r))\np ∧ q ⇒ p, p ∧ q ⇒ q, p ⇒ (q ⇒ p ∧ q)\np ⇒ p ∨ q, q ⇒ p ∨ q, (p ⇒ r) ⇒ ((q ⇒ r) ⇒ (p ∨ q ⇒ r))")
+thintuitionistictheorems ∶ 𝔏 𝕊
+thintuitionistictheorems ≔ (lines "p ⇒ p\np ⇒ ¬¬p\n¬¬¬p ⇔ ¬p\n(p ⇒ q) ⇒ (¬q ⇒ ¬p)\n¬(p ∨ q) ⇔ (¬p ∧ ¬q)\n(¬p ∨ q) ⇒ (p ⇒ q)\n(p ∧ q) ⇒ (q ∧ p)\n¬(p ∧ ¬p)\n(p ⇒ (q ⇒ r)) ⇔ ((p ∧ q) ⇒ r)\n¬¬(p ∨ ¬p)\n⊥ ⇒ p")
+thintuitionisticdoc ∶ 𝕊
+thintuitionisticdoc ≔ "intuitionistic logic (decided by G4ip): a statement is true if it is a theorem, false if its negation is, otherwise undetermined — p ∨ ¬p is undetermined"
+thintuitionistic ≔ (mktheory "intuitionistic" (∷ "core" ⊘) (∷ "classical" ⊘) ⊥ ⊘ ⊘ ⊘ thintuitionisticaxioms thintuitionistictheorems thintuitionisticdoc)
+⍝ ---- groups
+thgroup ∶ Theory
+thgroupsig ∶ 𝔏 𝕊
+thgroupsig ≔ (lines "infixl 7 · gmul A\ninfixl 7 ** gmul A\nfn 0 gmul gmul A\nfn 0 inv ginv\npostfix 9 ⁻¹ ginv\nconst 0 e gone")
+thgrouprules ∶ 𝔏 𝕊
+thgrouprules ≔ (lines "e · x ==> x\nx · e ==> x\nx · inv(x) ==> e\ninv(x) · x ==> e\ninv(e) ==> e\ninv(inv(x)) ==> x\ninv(x · y) ==> inv(y) · inv(x)")
+thgroupaxioms ∶ 𝔏 𝕊
+thgroupaxioms ≔ (lines "closure: x · y is in G\nassociativity: (x · y) · z = x · (y · z)\nidentity: e · x = x and x · e = x\ninverses: x · x⁻¹ = e and x⁻¹ · x = e")
+thgrouptheorems ∶ 𝔏 𝕊
+thgrouptheorems ≔ (lines "x · e = x\ne · x = x\nx · inv(x) = e\ninv(x) · x = e\ninv(inv(x)) = x\ninv(e) = e\ninv(x · y) = inv(y) · inv(x)\n(x · y) · z = x · (y · z)\nx · y · inv(y) · inv(x) = e\ninv(x) · (x · y) = y\n(x · y) · inv(y) = x\ninv(x · y) · x = inv(y)\ninv(x · inv(y)) = y · inv(x)\nx · (inv(x) · y) = y\ninv(inv(x) · inv(y)) = y · x")
+thgroupdoc ∶ 𝕊
+thgroupdoc ≔ "groups: the word problem is decided by the confluent rewriting system (identity, inverses, and the inverse of a product)"
+thgroup ≔ (mktheory "group" (∷ "core" ⊘) ⊘ ⊥ thgroupsig thgrouprules ⊘ thgroupaxioms thgrouptheorems thgroupdoc)
+thabelian ∶ Theory
+thabeliansig ∶ 𝔏 𝕊
+thabeliansig ≔ (lines "infixl 7 · gmul AC\ninfixl 7 ** gmul AC\nfn 0 gmul gmul AC")
+thabelianaxioms ∶ 𝔏 𝕊
+thabelianaxioms ≔ (lines "commutativity: x · y = y · x")
+thabeliantheorems ∶ 𝔏 𝕊
+thabeliantheorems ≔ (lines "x · y = y · x\nx · y · inv(x) = y\ninv(x · y) = inv(x) · inv(y)\ninv(x) · inv(y) · x · y = e\nx · y · z = z · y · x\nx · y · inv(x · y) = e")
+thabeliandoc ∶ 𝕊
+thabeliandoc ≔ "abelian groups: the product is commutative as well as associative"
+thabelian ≔ (mktheory "abelian" (∷ "group" ⊘) ⊘ ⊥ thabeliansig ⊘ ⊘ thabelianaxioms thabeliantheorems thabeliandoc)
+⍝ ---- sets
+thsets ∶ Theory
+thsetssig ∶ 𝔏 𝕊
+thsetssig ≔ (lines "infixr 7 ∩ and ACI\ninfixr 7 intersect and ACI\ninfixr 6 ∪ or ACI\ninfixr 6 union or ACI\npostfix 9 ᶜ not\nprefix 4 compl not\ninfixl 6 \\ setminus\nconst 0 ∅ false\nconst 0 emptyset false\nconst 0 U true\nconst 0 universe true\ninfix 5 ⊆ subset\ninfix 5 subseteq subset\ninfix 5 ∈ mem\ninfix 5 in mem")
+thsetsrules ∶ 𝔏 𝕊
+thsetsrules ≔ (lines "setminus(x, y) ==> and(x, not(y))\nmem(z, or(x, y)) ==> or(mem(z, x), mem(z, y))\nmem(z, and(x, y)) ==> and(mem(z, x), mem(z, y))\nmem(z, not(x)) ==> not(mem(z, x))\nmem(z, false) ==> false\nmem(z, true) ==> true")
+thsetsaxioms ∶ 𝔏 𝕊
+thsetsaxioms ≔ (lines "extensionality: A = B ⇔ ∀x (x ∈ A ⇔ x ∈ B)\nx ∈ A ∪ B ⇔ x ∈ A ∨ x ∈ B\nx ∈ A ∩ B ⇔ x ∈ A ∧ x ∈ B\nx ∈ Aᶜ ⇔ x ∉ A\nx ∉ ∅\nA ⊆ B ⇔ ∀x (x ∈ A ⇒ x ∈ B)")
+thsetstheorems ∶ 𝔏 𝕊
+thsetstheorems ≔ (lines "A ∪ B = B ∪ A\nA ∩ B = B ∩ A\n(A ∪ B) ∪ C = A ∪ (B ∪ C)\nA ∩ (B ∪ C) = (A ∩ B) ∪ (A ∩ C)\nA ∪ (B ∩ C) = (A ∪ B) ∩ (A ∪ C)\n(A ∪ B)ᶜ = Aᶜ ∩ Bᶜ\n(A ∩ B)ᶜ = Aᶜ ∪ Bᶜ\nAᶜᶜ = A\nA ∪ (A ∩ B) = A\nA ∩ (A ∪ B) = A\nA ∪ ∅ = A\nA ∩ U = A\nA ∪ Aᶜ = U\nA ∩ Aᶜ = ∅\nA ∩ B ⊆ A\nA ⊆ A ∪ B\n(A ⊆ B ∧ B ⊆ C) ⇒ A ⊆ C\n(A ⊆ B ∧ B ⊆ A) ⇒ A = B\nA ⊆ B ⇔ A ∪ B = B\nA ⊆ B ⇔ A ∩ B = A\nA ⊆ B ⇔ Bᶜ ⊆ Aᶜ\nA \\ B = A ∩ Bᶜ\nA ⊆ ∅ ⇒ A = ∅\n(A ∪ B) \\ B ⊆ A")
+thsetsdoc ∶ 𝕊
+thsetsdoc ≔ "the algebra of sets: identities and inclusions between ∪ ∩ ᶜ \\ ∅ U are decided exactly"
+thsets ≔ (mktheory "sets" (∷ "core" ⊘) ⊘ ⊥ thsetssig thsetsrules (∷ (⊗ "eq" bsetatom) (∷ (⊗ "subset" bsetatom) ⊘)) thsetsaxioms thsetstheorems thsetsdoc)
+⍝ ---- lattices
+sjoin ∶ ℕ
+sjoin ≔ (symid "join")
+smeet ∶ ℕ
+smeet ≔ (symid "meet")
+⍝ Whitman's condition decides a ≤ b in the free lattice (what holds in every lattice): equal; a join is below b if all its parts are; a is below a meet if it is below all its parts; otherwise a meet is below b if one of its
+⍝ parts is, or a is below a join if it is below one of its parts.  An equation of lattices is true in every lattice exactly when both inequalities are.
+whit ∶ Term → Term → 𝔹
+whit ξ η ≔ ((teq ξ η) ⊤ ((tishead sjoin ξ) (∀ₗ (a ↦ (whit a η)) (targs ξ)) ((tishead smeet η) (∀ₗ (b ↦ (whit ξ b)) (targs η)) (∨ ((tishead smeet ξ) (∃ₗ (a ↦ (whit a η)) (targs ξ)) ⊥) ((tishead sjoin η) (∃ₗ (b ↦ (whit ξ b)) (targs η)) ⊥)))))
+islat ∶ Term → 𝔹
+islat ξ ≔ (∨ (tishead sjoin ξ) (tishead smeet ξ))
+latticehook ∶ Env → Term → 𝔏 Term      ⍝ eq(a, b) with a lattice term on a side: true if the free lattice proves it
+latticehook ξ η ≔ ((∧ (≐ (ℓ (targs η)) 1100) (∧ (∨ (islat (hd (targs η))) (islat (hd (⌄ (targs η))))) (∧ (whit (hd (targs η)) (hd (⌄ (targs η)))) (whit (hd (⌄ (targs η))) (hd (targs η)))))) (∷ ttrue ⊘) ⊘)
+thlattice ∶ Theory
+thlatticesig ∶ 𝔏 𝕊
+thlatticesig ≔ (lines "infixl 6 ⊔ join ACI\ninfixl 6 join join ACI\ninfixl 7 ⊓ meet ACI\ninfixl 7 meet meet ACI\ninfix 5 ⊑ leq")
+thlatticerules ∶ 𝔏 𝕊
+thlatticerules ≔ (lines "x ⊔ (x ⊓ y) ==> x\nx ⊓ (x ⊔ y) ==> x\nleq(x, x) ==> true\nleq(x, join(x, y)) ==> true\nleq(meet(x, y), x) ==> true\nleq(x, y) ==> eq(join(x, y), y)")
+thlatticeaxioms ∶ 𝔏 𝕊
+thlatticeaxioms ≔ (lines "x ⊔ y = y ⊔ x, x ⊓ y = y ⊓ x\n(x ⊔ y) ⊔ z = x ⊔ (y ⊔ z), (x ⊓ y) ⊓ z = x ⊓ (y ⊓ z)\nx ⊔ x = x, x ⊓ x = x\nabsorption: x ⊔ (x ⊓ y) = x and x ⊓ (x ⊔ y) = x\nx ⊑ y ⇔ x ⊔ y = y")
+thlatticetheorems ∶ 𝔏 𝕊
+thlatticetheorems ≔ (lines "x ⊔ x = x\nx ⊓ x = x\nx ⊔ (x ⊓ y) = x\nx ⊓ (x ⊔ y) = x\nx ⊑ x ⊔ y\nx ⊓ y ⊑ x\nx ⊑ x\nx ⊔ y = y ⊔ x\n(x ⊔ y) ⊔ z = x ⊔ (y ⊔ z)")
+thlatticedoc ∶ 𝕊
+thlatticedoc ≔ "lattices: join and meet are associative, commutative, idempotent and absorb each other"
+thlattice ≔ (mktheory "lattice" (∷ "core" ⊘) ⊘ ⊥ thlatticesig thlatticerules (∷ (⊗ "eq" latticehook) ⊘) thlatticeaxioms thlatticetheorems thlatticedoc)

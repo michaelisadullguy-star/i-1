@@ -1,0 +1,1 @@
+main in List(\NN) := indexof(['a', 'z', 'Q'], ['Q', '7', 'a'])

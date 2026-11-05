@@ -1,0 +1,1 @@
+error in e05.imo: no declaration of ⊞ accepts (ℕ, 𝕊);  candidates: ⊞ ∶ ℕ → ℕ → ℕ, ⊞ ∶ ℤ → ℤ → ℤ, ⊞ ∶ ℚ → ℚ → ℚ, ⊞ ∶ ℤ[i] → ℤ[i] → ℤ[i], ⊞ ∶ ℚ[i] → ℚ[i] → ℚ[i]

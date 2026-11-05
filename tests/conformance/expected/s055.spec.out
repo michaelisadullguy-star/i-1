@@ -1,0 +1,4 @@
+f ∶ (→ ℚ[i] ℚ[i])
+f x ≔ x
+main ∶ (→ ℚ[i] ℚ[i])
+main ≔ f

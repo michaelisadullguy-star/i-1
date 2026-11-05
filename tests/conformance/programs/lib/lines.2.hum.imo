@@ -1,0 +1,1 @@
+main in List(List(Char)) := lines(['z', 'Q', '7'])

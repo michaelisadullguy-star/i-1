@@ -1,0 +1,2 @@
+main ∶ (𝔖 𝕊)
+main ≔ (tabulate (k ∶ ℕ ↦ (dec (^ 1100 k))))

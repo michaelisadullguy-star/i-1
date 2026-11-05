@@ -1,0 +1,2 @@
+-- switching packages on and off
+main in List(List(String)) := [activetheories(defaultenv), activetheories(use("peano", defaultenv)), activetheories(use("etcs", use("zfc", defaultenv))), activetheories(unuse("arith", defaultenv)), activetheories(use("intuitionistic", defaultenv)), activetheories(use("sets", use("kolmogorov", defaultenv))), theorynames]

@@ -107,6 +107,7 @@ class Checker:
         self.facts = []                         # (sub, super)
         self.eqs = {}                           # atom -> class
         self.coercions = []                     # symbols
+        self.cov = set(COV)                     # the covariant class constructors: the built-in ones and those declared with (↗ C)
         self.defined = set()
         self.overloads = {}                     # human symbol -> [spec symbols]   (set by the human reader)
         self.unknowns = {}                      # unknown -> its domain code (0 ℂ … 6 ℕ), in declaration order
@@ -129,14 +130,21 @@ class Checker:
             raise ImoTypeError(f"class {name} takes {self.classes[name]} argument(s), got {len(args)}")
         for a in args: self.wf(a)
 
+    def flexeq(self, x, y):
+        """the same class, where the flexible class ⊥ (an unconstrained polymorphic constant, e.g. emptydict ∶ Dict α) equals anything"""
+        if x == y or x == BOTTOM or y == BOTTOM: return True
+        return (x[0] == 'K' and y[0] == 'K' and x[1] == y[1] and len(x[2]) == len(y[2])
+                and all(self.flexeq(p, q) for p, q in zip(x[2], y[2])))
+
     def leq(self, a, b, seen=frozenset()):
         a, b = self.norm(a), self.norm(b)
         if a == b or a == BOTTOM: return True
         if a[0] == 'K' and b[0] == 'K' and a[1] == b[1] and a[2] and len(a[2]) == len(b[2]):
             if a[1] == ARROW:
                 if self.leq(b[2][0], a[2][0], seen) and self.leq(a[2][1], b[2][1], seen): return True
-            elif a[1] in COV:
+            elif a[1] in self.cov:
                 if all(self.leq(x, y, seen) for x, y in zip(a[2], b[2])): return True
+            elif self.flexeq(a, b): return True              # an invariant constructor: equal classes (a flexible ⊥ inside equals anything)
         for x, y in self.facts:
             if self.norm(x) == a and (a, y) not in seen:
                 if self.leq(y, b, seen | {(a, y)}): return True
@@ -155,7 +163,7 @@ class Checker:
     def join(self, a, b):
         """the least class containing both a and b (e.g. ℤ[i] and ℚ give ℚ[i]); None if there is none or it is not unique"""
         a, b = self.norm(a), self.norm(b)
-        if a[0] == 'K' and b[0] == 'K' and a[1] == b[1] and a[1] in COV and a[2] and len(a[2]) == len(b[2]):      # 𝔏 x and 𝔏 y: 𝔏 (x ∨ y)
+        if a[0] == 'K' and b[0] == 'K' and a[1] == b[1] and a[1] in self.cov and a[2] and len(a[2]) == len(b[2]):      # 𝔏 x and 𝔏 y: 𝔏 (x ∨ y)
             js = [x if self.leq(y, x) else y if self.leq(x, y) else self.join(x, y) for x, y in zip(a[2], b[2])]
             return None if any(j is None for j in js) else ('K', a[1], tuple(js))
         ub = self.ups(b)
@@ -169,7 +177,9 @@ class Checker:
         if p[0] == 'V':
             if p[1] in S:
                 b = S[p[1]]
-                if mode == 'eq': return b == a
+                if a == BOTTOM: return True
+                if b == BOTTOM: S[p[1]] = a; return True
+                if mode == 'eq': return self.flexeq(b, a)
                 if self.leq(a, b): return True
                 if self.leq(b, a):
                     if mode == 'pos': S[p[1]] = a
@@ -182,13 +192,13 @@ class Checker:
             return True
         if not has_var(p):
             if a == BOTTOM: return True
-            return {'pos': self.leq(a, p), 'neg': self.leq(p, a), 'eq': p == a}[mode]
+            return {'pos': self.leq(a, p), 'neg': self.leq(p, a), 'eq': self.flexeq(p, a)}[mode]
         if a == BOTTOM: return True
         if a[0] == 'K' and a[1] == p[1] and len(a[2]) == len(p[2]):
             S0 = dict(S); ok = True
             for i, (pp, aa) in enumerate(zip(p[2], a[2])):
                 if p[1] == ARROW: m = ({'pos': 'neg', 'neg': 'pos', 'eq': 'eq'}[mode] if i == 0 else mode)
-                elif p[1] in COV: m = mode
+                elif p[1] in self.cov: m = mode
                 else: m = 'eq'
                 if not self.match(pp, aa, S, m): ok = False; break
             if ok: return True
@@ -249,6 +259,10 @@ class Checker:
             a, b = term_to_type(args[0]), term_to_type(args[1]); self.wf(a); self.wf(b)
             assert a[0] == 'K' and not a[2], "class equation: left side must be an atomic class"
             self.eqs[a[1]] = b
+        elif head == '↗':
+            n = args[0][1]
+            if self.classes.get(n, 0) < 1: raise ImoTypeError(f"covariant: {n} is not a class constructor")
+            self.cov.add(n)
         elif head == '↪':
             f = args[0][1]
             if f not in self.sigs: raise ImoTypeError(f"coercion {f} is not declared")

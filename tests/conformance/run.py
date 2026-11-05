@@ -32,7 +32,27 @@ ROOT = os.path.dirname(os.path.dirname(HERE))
 CONF = HERE
 CASES = os.path.join(CONF, 'cases.txt')
 EXPECTED = os.path.join(CONF, 'expected.json')
-LABEL = {'pymo': 'Pymo', 'haskimo': 'Haskimo', 'rustimo': 'Rustimo'}
+LABEL = {'pymo': 'Pymo', 'haskimo': 'Haskimo', 'rustimo': 'Rustimo', 'compimo': 'Compimo', 'cimo': 'Cimo', 'ocamimo': 'OCamimo', 'rimo': 'Rimo', 'lispimo': 'Lispimo', 'schimo': 'Schimo'}
+EXTRA = ('compimo', 'cimo', 'ocamimo', 'rimo', 'lispimo', 'schimo')      # further cores: run when they are named (--impl compimo), never part of 'all'
+
+
+EXPDIR = os.path.join(CONF, 'expected')
+
+
+def export_expected(expected):
+    """the recorded outputs as plain files, for run.sh (no Python): expected/ID.out holds the standard output, expected/ID.rc the exit status when it is not 0"""
+    os.makedirs(EXPDIR, exist_ok=True)
+    keep = set()
+    for cid, e in expected.items():
+        out = os.path.join(EXPDIR, cid + '.out'); keep.add(cid + '.out')
+        with open(out, 'w', encoding='utf-8', newline='') as f: f.write(e['out'])
+        rc = os.path.join(EXPDIR, cid + '.rc')
+        if e['rc'] != 0:
+            keep.add(cid + '.rc')
+            with open(rc, 'w', encoding='utf-8') as f: f.write(str(e['rc']) + '\n')
+        elif os.path.exists(rc): os.remove(rc)
+    for fn in os.listdir(EXPDIR):
+        if fn not in keep: os.remove(os.path.join(EXPDIR, fn))
 
 
 def load_cases():
@@ -56,6 +76,12 @@ def find_haskimo(arg):
 
 def find_rustimo(arg):
     for c in (arg, os.environ.get('I1_RUSTIMO'), os.environ.get('I1_RS'), os.path.join(ROOT, 'build', 'rustimo'), os.path.join(ROOT, 'dist', 'rustimo')):
+        if c and os.path.isfile(c) and os.access(c, os.X_OK): return os.path.abspath(c)
+    return None
+
+
+def find_extra(name):
+    for c in (os.environ.get('I1_' + name.upper()), os.path.join(ROOT, 'build', name), os.path.join(ROOT, 'dist', name)):
         if c and os.path.isfile(c) and os.access(c, os.X_OK): return os.path.abspath(c)
     return None
 
@@ -89,12 +115,16 @@ def main():
     ap.add_argument('--bless', action='store_true', help='record the expected output of the selected cases: the cores are run, and a case is recorded only if they all agree')
     ap.add_argument('--bless-from', choices=['pymo', 'haskimo', 'rustimo'], help='record the expected output from one core only')
     ap.add_argument('--filter', action='append', default=[], help='only the cases whose id contains this text (repeatable)')
+    ap.add_argument('--missing', action='store_true', help='only the cases that have no recorded output yet (with --bless: record just those)')
     ap.add_argument('--fast', action='store_true', help='skip the slow cases')
     ap.add_argument('--list', action='store_true')
+    ap.add_argument('--export', action='store_true', help='write the recorded outputs as plain files (expected/ID.out) for run.sh and exit')
     ap.add_argument('-j', type=int, default=max(1, (os.cpu_count() or 2)), help='parallel jobs')
     ap.add_argument('--timeout', type=int, default=1800)
     ap.add_argument('-v', action='store_true', help='show the details of failures')
     a = ap.parse_args()
+    if a.export:
+        export_expected(json.load(open(EXPECTED, encoding='utf-8'))); print('exported', len(os.listdir(EXPDIR)), 'files to', os.path.relpath(EXPDIR, ROOT)); return 0
 
     cases = load_cases()
     if a.filter: cases = [c for c in cases if any(f in c[0] for f in a.filter)]
@@ -103,15 +133,17 @@ def main():
         for cid, flags, args in cases: print(f"{cid}\t{','.join(sorted(flags)) or '-'}\t{' '.join(args)}")
         return 0
     expected = json.load(open(EXPECTED, encoding='utf-8')) if os.path.exists(EXPECTED) else {}
+    if a.missing: cases = [c for c in cases if c[0] not in expected]
 
     exes = {'haskimo': find_haskimo(a.hs), 'rustimo': find_rustimo(a.rs)}
+    for x in EXTRA: exes[x] = find_extra(x)
     short = {'py': 'pymo', 'hs': 'haskimo', 'rs': 'rustimo'}
     if a.impl == 'all': wanted = ['pymo', 'haskimo', 'rustimo']
     elif a.impl == 'both': wanted = ['pymo', 'haskimo']
     else: wanted = [short.get(x.strip(), x.strip()) for x in a.impl.split(',')]
     for w in wanted:
-        if w not in ('pymo', 'haskimo', 'rustimo'):
-            print(f"conformance: unknown core {w!r} (pymo, haskimo, rustimo)", file=sys.stderr); return 2
+        if w not in ('pymo', 'haskimo', 'rustimo') + EXTRA:
+            print(f"conformance: unknown core {w!r} (pymo, haskimo, rustimo, {', '.join(EXTRA)})", file=sys.stderr); return 2
     blessing = a.bless or a.bless_from
     impls = [a.bless_from] if a.bless_from else wanted
     missing = [i for i in impls if i != 'pymo' and exes[i] is None]
@@ -120,7 +152,7 @@ def main():
         impls = [i for i in impls if i not in missing]
     elif missing:
         for i in missing:
-            how = {'haskimo': 'make haskimo or ./haskimo/build.sh; or give --haskimo PATH / $I1_HASKIMO', 'rustimo': 'make rustimo or ./rustimo/build.sh; or give --rustimo PATH / $I1_RUSTIMO'}[i]
+            how = {'haskimo': 'make haskimo or ./haskimo/build.sh; or give --haskimo PATH / $I1_HASKIMO', 'rustimo': 'make rustimo or ./rustimo/build.sh; or give --rustimo PATH / $I1_RUSTIMO'}.get(i, f'its build script; or give $I1_{i.upper()}')
             print(f"conformance: the {i} executable was not found (build it with {how})", file=sys.stderr)
         return 2
     jobs = [(impl, cid, args) for cid, flags, args in cases for impl in impls]
@@ -144,6 +176,7 @@ def main():
         expected = {k: expected[k] for k in sorted(expected) if k in ids}
         with open(EXPECTED, 'w', encoding='utf-8') as f:
             json.dump(expected, f, ensure_ascii=False, indent=1, sort_keys=True); f.write('\n')
+        export_expected(expected)
         print(f"recorded {len(cases) - len(disagree)} of {len(cases)} cases in {os.path.relpath(EXPECTED, ROOT)}"
               + (f" (from {impls[0]} alone)" if len(impls) == 1 else f" ({', '.join(LABEL[i] for i in impls)} agree on them)"))
         for cid, rs in disagree:

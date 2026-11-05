@@ -1,0 +1,53 @@
+⍝ lib/th_prob.imo — spec notation — trusted prelude, part 37: Kolmogorov's probability, decided exactly for any finite number of events
+⍝ P(S) for an event S (a Boolean expression over events: ∪ ∩ ᶜ \ ∅ Ω) is rewritten into a sum of P(A ∩ B ∩ …) of conjunctions of the events that occur — inclusion–exclusion, computed by
+⍝ Möbius inversion of the truth table of S: if S = Σ c_J ∏_{j∈J} e_j as indicator functions then P(S) = Σ c_J P(∩ J).  The axioms (P ≥ 0, P(Ω) = 1, additivity) are then used by the
+⍝ linear arithmetic of lib/fm.imo: the probabilities of the 2ⁿ minterms of n events are ≥ 0, which is exactly the set of consistent assignments to the P(∩ J).  So statements like
+⍝ P(A ∪ B) ≤ P(A) + P(B), P(A ∩ B) ≥ P(A) + P(B) − 1, P(A | B) · P(B) = P(A ∩ B) are decided, true or false, and a statement about numbers that no probability space satisfies is false.
+sprob ∶ ℕ
+sprob ≔ (symid "prob")
+⍝ the truth value of a Boolean term when each atom has a value
+bevalt ∶ (Term → 𝔹) → Term → 𝔹
+bevalt ξ η ≔ ((isbool η) (bevalc ξ (thead η) (targs η)) (ξ η))
+bevalc ∶ (Term → 𝔹) → ℕ → 𝔏 Term → 𝔹
+bevalc ξ η ζ ≔ ((≐ η s∧) (∀ₗ (bevalt ξ) ζ) ((≐ η s∨) (∃ₗ (bevalt ξ) ζ) ((≐ η s¬) (¬ (bevalt ξ (hd ζ))) ((≐ η s⇒) (⇒ (bevalt ξ (hd ζ)) (bevalt ξ (hd (⌄ ζ)))) ((≐ η s⇔) (⇔ (bevalt ξ (hd ζ)) (bevalt ξ (hd (⌄ ζ)))) ((≐ η s⊻) (⊻ (bevalt ξ (hd ζ)) (bevalt ξ (hd (⌄ ζ)))) ((≐ η s⊤) ⊤ ⊥)))))))
+isconj ∶ Term → 𝔹      ⍝ an event, or a conjunction of events
+isconj ξ ≔ ((tishead s∧ ξ) (∀ₗ (a ↦ (¬ (isbool a))) (targs ξ)) (¬ (isbool ξ)))
+conjevents ∶ Term → 𝔏 Term
+conjevents ξ ≔ ((tishead s∧ ξ) (targs ξ) (∷ ξ ⊘))
+probof ∶ 𝔏 Term → Term      ⍝ P of the intersection of a list of events (P of the empty intersection is 1)
+probof ξ ≔ ((∅ ξ) (tnum 1) (tapp₁ sprob ((≐ (ℓ ξ) 1) (hd ξ) (tapp s∧ (tsort ξ)))))
+subsetl ∶ 𝔏 Term → 𝔏 Term → 𝔹
+subsetl ξ η ≔ (∀ₗ (a ↦ (elemT a η)) ξ)
+⍝ the coefficient of the intersection J in the indicator of S:  Σ over K ⊆ J of (−1)^{|J|−|K|} S(K)
+ieccoef ∶ Term → 𝔏 Term → ℤ
+ieccoef ξ η ≔ (sumof (⫶ (k ↦ ((bevalt (a ↦ (elemT a k)) ξ) ((≐ (mod (⊟ (ℓ η) (ℓ k)) 1100) 0) 1 (⊖ 1)) 0)) (subsequences η)))
+probhook ∶ Env → Term → 𝔏 Term
+probhook ξ η ≔ ((s ↦ ((evs ↦ ((∨ (⩾ (ℓ evs) 111011100) (∧ (isconj s) (teq s (hd (targs η))))) ⊘ (∷ (tapp sadd (⫶ (j ↦ (tapp smul (∷ (tnum (ieccoef s j)) (∷ (probof j) ⊘)))) (subsequences evs))) ⊘))) (bnorm (batoms s)))) (acdeep ξ (bcanon (hd (targs η)))))
+⍝ the axioms as constraints: write every probability of an intersection J of the events that occur as the sum of the probabilities of the minterms K ⊇ J (a minterm K: the events of K occur and the others do not);
+⍝ the minterm probabilities are ≥ 0 (K1) and add up to 1 (K2, K3), and these are all the constraints there are, so a system of rows is consistent exactly when a probability space satisfies it
+sminterm ∶ ℕ
+sminterm ≔ (symid "minterm")
+probsub ∶ 𝔏 Term → Term → Poly      ⍝ the events that occur, an atom: P(∩J) as a sum over the minterms
+probsub ξ η ≔ ((∧ (tishead sprob η) (isconj (hd (targs η)))) ((j ↦ (foldl padd ⊘ (⫶ (k ↦ (patom (tapp sminterm k))) (filter (k ↦ (subsetl j k)) (subsequences ξ))))) (conjevents (hd (targs η)))) (patom η))
+probrows ∶ 𝔏 Term → 𝔏 (𝔓 Poly ℕ) → 𝔏 (𝔓 Poly ℕ)
+probrows ξ η ≔ (⫶ (r ↦ (⊗ (psubst (probsub ξ) (◀ r)) (▶ r))) η)
+probmt ∶ 𝔏 Term → 𝔏 (𝔓 Poly ℕ)      ⍝ the minterm probabilities are ≥ 0 and their sum is 1
+probmt ξ ≔ (∷ (⊗ (padd (foldl padd ⊘ (⫶ (k ↦ (patom (tapp sminterm k))) (subsequences ξ))) (pcst (⊖ 1))) 1100) (⫶ (k ↦ (⊗ (patom (tapp sminterm k)) 1)) (subsequences ξ)))
+probatoms ∶ Env → 𝔏 Poly → 𝔏 Term
+probatoms ξ η ≔ (nubby teq (filter (a ↦ (tishead sprob a)) (concatmap (m ↦ (⫶ ◀ m)) (concatmap pmonos η))))
+probevents ∶ 𝔏 Term → 𝔏 Term
+probevents ξ ≔ (bnorm (concatmap (a ↦ (conjevents (hd (targs a)))) ξ))
+probprep ∶ Env → 𝔏 (𝔓 Poly ℕ) → 𝔏 (𝔓 Poly ℕ)      ⍝ rows over the probabilities of intersections, written over the probabilities of the minterms (up to five events)
+probprep ξ η ≔ ((es ↦ ((∨ (∅ es) (⩾ (ℓ es) 111011100)) η (⧺ (probrows es η) (probmt es)))) (probevents (probatoms ξ (⫶ ◀ η))))
+thprob ∶ Theory
+thprobsig ∶ 𝔏 𝕊
+thprobsig ≔ (lines "fn 0 P prob\nfn 0 prob prob\ninfixr 7 ∩ and ACI\ninfixr 7 intersect and ACI\ninfixr 6 ∪ or ACI\ninfixr 6 union or ACI\npostfix 9 ᶜ not\ninfixl 6 \\ setminus\nconst 0 ∅ false\nconst 0 Ω true\ninfix 2 | given\nfn 0 indep indep")
+thprobrules ∶ 𝔏 𝕊
+thprobrules ≔ (lines "setminus(x, y) ==> and(x, not(y))\nprob(given(a, b)) * prob(b) ==> prob(and(a, b))\nindep(a, b) ==> eq(prob(and(a, b)), prob(a) * prob(b))")
+thprobaxioms ∶ 𝔏 𝕊
+thprobaxioms ≔ (lines "K1  P(A) ≥ 0 for every event A\nK2  P(Ω) = 1\nK3  additivity: P(A ∪ B) = P(A) + P(B) if A ∩ B = ∅ (and for countably many disjoint events; the simplifier uses finitely many)\nconditional probability: P(A | B) · P(B) = P(A ∩ B)\nindependence: A and B are independent if P(A ∩ B) = P(A) · P(B)")
+thprobtheorems ∶ 𝔏 𝕊
+thprobtheorems ≔ (lines "P(∅) = 0\nP(Ω) = 1\nP(Aᶜ) = 1 - P(A)\nP(A ∪ B) = P(A) + P(B) - P(A ∩ B)\nP(A) <= 1\nP(A) >= 0\nP(A ∩ B) <= P(A)\nP(A) <= P(A ∪ B)\nP(A ∪ B) <= P(A) + P(B)\nP(A ∩ B) >= P(A) + P(B) - 1\nP(A \\ B) = P(A) - P(A ∩ B)\nP(A ∪ B ∪ C) <= P(A) + P(B) + P(C)\nP(A ∪ B ∪ C) = P(A) + P(B) + P(C) - P(A ∩ B) - P(A ∩ C) - P(B ∩ C) + P(A ∩ B ∩ C)\nP(A | B) * P(B) = P(B | A) * P(A)\nP(A) + P(Aᶜ) = 1\nP(A ∩ B) = P(B ∩ A)\nP(A ∪ Aᶜ) = 1\nP(A ∩ B) <= P(A ∪ B)\nindep(A, B) ⇔ P(A ∩ B) = P(A) * P(B)\nP(A) + P(B) >= 1 ⇒ P(A ∩ B) >= P(A) + P(B) - 1\n¬(P(A) = 2)\n¬(P(A ∩ B) > P(A))")
+thprobdoc ∶ 𝕊
+thprobdoc ≔ "Kolmogorov's probability on finitely many events: inclusion–exclusion by Möbius inversion, the axioms as exact linear constraints"
+thprob ≔ (mktheory "kolmogorov" (∷ "arith" ⊘) (∷ "sets" (∷ "zfc" ⊘)) ⊥ thprobsig thprobrules (∷ (⊗ "prob" probhook) ⊘) thprobaxioms thprobtheorems thprobdoc)

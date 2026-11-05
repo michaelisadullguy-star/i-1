@@ -1,0 +1,1 @@
+error in wrongclass.hum.imo: main: no declaration of hum:+ accepts (𝕊, ℕ);  candidates: ⊞ ∶ ℕ → ℕ → ℕ, ⊞ ∶ ℤ → ℤ → ℤ, ⊞ ∶ ℚ → ℚ → ℚ, ⊞ ∶ ℤ[i] → ℤ[i] → ℤ[i], ⊞ ∶ ℚ[i] → ℚ[i] → ℚ[i], ⊕ ∶ ℝ → ℝ → ℝ, ⊕ ∶ ℝ[i] → ℝ[i] → ℝ[i], ⊞𝔻 ∶ 𝔻 → 𝔻 → 𝔻, ∨ ∶ 𝔹 → 𝔹 → 𝔹, ∪ ∶ (α → 𝔹) → (α → 𝔹) → α → 𝔹, ∨Ω ∶ Ω → Ω → Ω, madd ∶ (𝔏 (𝔏 ℚ[i])) → (𝔏 (𝔏 ℚ[i])) → (𝔏 (𝔏 ℚ[i])), addz2 ∶ ℤ² → ℤ² → ℤ²

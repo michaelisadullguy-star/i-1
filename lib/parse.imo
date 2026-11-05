@@ -1,0 +1,95 @@
+⍝ lib/parse.imo — spec notation — trusted prelude, part 27: reading and writing terms: a tokenizer, a precedence parser and a printer driven by a signature
+⍝ A signature (Sig) is a table of operators that theories declare with lines of text:  "<kind> <precedence> <token> <symbol> [<properties>]"  where kind is
+⍝ const | fn | infixl | infixr | infix | prefix | postfix | binder, and the properties are letters  A (associative)  C (commutative)  I (idempotent).
+⍝ A name that no signature declares is a variable; name(…) with a name that is not declared is an application of a symbol of that name;
+⍝ {a, b} is the symbol "set" and [a, b] the symbol "list".  Numbers are decimal (12, 0.25).
+Sig ∶ 𝒦
+⍝ ---- the tokens: pair(kind, text) with kind 0 number, 1 identifier, 2 operator, 3 punctuation
+idstart ∶ 𝕮 → 𝔹
+idstart ξ ≔ ((chclass ξ) ⊤ ⊤ ⊥ ⊥ ⊥ ⊥ ⊤ ⊥ ⊥)
+idchar ∶ 𝕮 → 𝔹
+idchar ξ ≔ ((chclass ξ) ⊤ ⊤ ⊤ ⊥ ⊥ ⊥ ⊤ ⊤ ⊥)
+isopchar ∶ 𝕮 → 𝔹
+isopchar ξ ≔ ((chclass ξ) ⊥ ⊥ ⊥ ⊥ ⊥ ⊤ ⊥ ⊥ ⊥)
+istokpunct ∶ 𝕮 → 𝔹      ⍝ ( ) , { } [ ] .
+istokpunct ξ ≔ ((chclass ξ) ⊥ ⊥ ⊥ ⊥ ⊤ ⊥ ⊥ ⊥ ⊥)
+numtok ∶ 𝕊 → 𝔓 𝕊 𝕊
+numtok ξ ≔ ((σ ↦ ((∧ (¬ (∅ (▶ σ))) (∧ (≐ (hd (▶ σ)) '.') (∧ (¬ (∅ (⌄ (▶ σ)))) (isdigit (hd (⌄ (▶ σ))))))) ((τ ↦ (⊗ (⧺ (◀ σ) (∷ '.' (◀ τ))) (▶ τ))) (span isdigit (⌄ (▶ σ)))) σ)) (span isdigit ξ))
+tokenize ∶ 𝕊 → 𝔏 (𝔓 ℕ 𝕊)      ⍝ the tokens of a text
+tokenize ξ ≔ (ξ (η ζ ↦ ((isspace η) (tokenize ζ) ((isdigit η) ((σ ↦ (∷ (⊗ 0 (◀ σ)) (tokenize (▶ σ)))) (numtok ξ)) ((idstart η) ((σ ↦ (∷ (⊗ 1 (◀ σ)) (tokenize (▶ σ)))) (span idchar ξ)) ((istokpunct η) (∷ (⊗ 1101 (∷ η ⊘)) (tokenize ζ)) ((isopchar η) ((σ ↦ (∷ (⊗ 1100 (◀ σ)) (tokenize (▶ σ)))) (span isopchar ξ)) (∷ (⊗ 1100 (∷ η ⊘)) (tokenize ζ)))))))) ⊘)
+readnum ∶ 𝕊 → ℚ      ⍝ a decimal number: 12, 0.25
+readnum ξ ≔ ((σ ↦ ((∅ (▶ σ)) (hd (readnat (◀ σ))) (÷ (hd (readnat (⧺ (◀ σ) (⌄ (▶ σ))))) (^ 111001100 (ℓ (⌄ (▶ σ))))))) (span (θ ↦ (¬ (≐ θ '.'))) ξ))
+⍝ ---- signatures.  An entry is  (⊗ kind (⊗ precedence (⊗ symbol (⊗ properties token))))  with the kind as a number:
+⍝ 0 const, 1 fn, 2 infixl, 3 infixr, 4 infix, 5 prefix, 6 postfix, 7 binder
+kindnum ∶ 𝕊 → ℕ
+kindnum ξ ≔ ((≐ˢ ξ "const") 0 ((≐ˢ ξ "fn") 1 ((≐ˢ ξ "infixl") 1100 ((≐ˢ ξ "infixr") 1101 ((≐ˢ ξ "infix") 111010000 ((≐ˢ ξ "prefix") 111010001 ((≐ˢ ξ "postfix") 111011100 111011101)))))))
+ekind ∶ α → ℕ
+ekind ξ ≔ (◀ ξ)
+eprec ∶ α → ℕ
+eprec ξ ≔ (◀ (▶ ξ))
+esym ∶ α → ℕ
+esym ξ ≔ (◀ (▶ (▶ ξ)))
+eprops ∶ α → 𝕊
+eprops ξ ≔ (◀ (▶ (▶ (▶ ξ))))
+etok ∶ α → 𝕊
+etok ξ ≔ (▶ (▶ (▶ (▶ ξ))))
+declentry ∶ 𝕊 → 𝔏 (𝔓 𝕊 α)      ⍝ the entry that a declaration line makes, with its token: [] for a line that declares nothing
+declentry ξ ≔ ((ws ↦ ((≺ (ℓ ws) 111010000) ⊘ (∷ (⊗ (nth ws 1100) (⊗ (kindnum (hd ws)) (⊗ (hd (readnat (nth ws 1))) (⊗ (symid (nth ws 1101)) (⊗ ((≺ (ℓ ws) 111010001) "" (nth ws 111010000)) (nth ws 1100)))))) ⊘))) (words ξ))
+mksig ∶ 𝔏 𝕊 → Sig      ⍝ a signature from declaration lines
+mksig ξ ≔ (foldl sigadd (⊗ ⊘ ⊘) ξ)
+sdgetd ∶ 𝕊 → α → Dict α → α      ⍝ the value of a string key, or a default
+sdgetd ξ η ζ ≔ ((θ ↦ ((∅ θ) η (hd θ))) (dgets ξ ζ))
+sigadd ∶ Sig → 𝕊 → Sig
+sigadd ξ η ≔ ((r ↦ ((∅ r) ξ ((e ↦ (⊗ (dputs (◀ e) (∷ (▶ e) (sdgetd (◀ e) ⊘ (◀ ξ))) (◀ ξ)) ((∅ (dkget (◀ (esym (▶ e))) (▶ ξ))) (dkput (◀ (esym (▶ e))) (▶ e) (▶ ξ)) (▶ ξ)))) (hd r)))) (declentry η))
+sigmerge ∶ Sig → Sig → Sig      ⍝ the operators of both (the first signature wins on a token)
+sigmerge ξ η ≔ (⊗ (dunionwith (θ ι ↦ (⧺ θ ι)) (◀ ξ) (◀ η)) (dunion (▶ ξ) (▶ η)))
+sigfind ∶ Sig → 𝕊 → 𝔏 ℕ → 𝔏 α      ⍝ the first entry of a token whose kind is one of the numbers
+sigfind ξ η ζ ≔ (find (θ ↦ (elem (ekind θ) ζ)) (sdgetd η ⊘ (◀ ξ)))
+sigprint ∶ Sig → ℕ → 𝔏 α      ⍝ the entry that prints a symbol
+sigprint ξ η ≔ (dkget (◀ η) (▶ ξ))
+⍝ ---- the parser.  pexpr sig p tokens: [pair(term, remaining tokens)] or [] (a maybe)
+ispunc ∶ 𝔓 ℕ 𝕊 → 𝕊 → 𝔹
+ispunc ξ η ≔ (∧ (≐ (◀ ξ) 1101) (≐ˢ (▶ ξ) η))
+pexpr ∶ Sig → ℕ → 𝔏 (𝔓 ℕ 𝕊) → 𝔏 (𝔓 Term (𝔏 (𝔓 ℕ 𝕊)))
+pexpr ξ η ζ ≔ ((r ↦ ((∅ r) ⊘ (ploop ξ η (◀ (hd r)) (▶ (hd r))))) (pprefix ξ ζ))
+pprefix ∶ Sig → 𝔏 (𝔓 ℕ 𝕊) → 𝔏 (𝔓 Term (𝔏 (𝔓 ℕ 𝕊)))
+pprefix ξ η ≔ (η (θ ι ↦ ((≐ (◀ θ) 0) (∷ (⊗ (tnum (readnum (▶ θ))) ι) ⊘) ((≐ (◀ θ) 1) (pident ξ (▶ θ) ι) ((≐ (◀ θ) 1100) (pop ξ (▶ θ) ι) (ppunct ξ (▶ θ) ι))))) ⊘)
+pcallorvar ∶ Sig → 𝕊 → 𝔏 (𝔓 ℕ 𝕊) → 𝔏 (𝔓 Term (𝔏 (𝔓 ℕ 𝕊)))
+pcallorvar ξ η ζ ≔ (ζ (θ ι ↦ ((ispunc θ "(") (pcall ξ (symid η) ζ) (∷ (⊗ (tvar (symid η)) ζ) ⊘))) (∷ (⊗ (tvar (symid η)) ζ) ⊘))
+pident ∶ Sig → 𝕊 → 𝔏 (𝔓 ℕ 𝕊) → 𝔏 (𝔓 Term (𝔏 (𝔓 ℕ 𝕊)))
+pident ξ η ζ ≔ ((e ↦ ((∅ e) (pcallorvar ξ η ζ) ((k ↦ ((≐ k 0) (∷ (⊗ (tconst (esym (hd e))) ζ) ⊘) ((≐ k 1) (pcall ξ (esym (hd e)) ζ) ((≐ k 111010001) (pprefixop ξ (hd e) ζ) ((≐ k 111011101) (pbinder ξ (hd e) ζ) (pcallorvar ξ η ζ)))))) (ekind (hd e))))) (sigfind ξ η (∷ 0 (∷ 1 (∷ 111010001 (∷ 111011101 ⊘))))))
+pop ∶ Sig → 𝕊 → 𝔏 (𝔓 ℕ 𝕊) → 𝔏 (𝔓 Term (𝔏 (𝔓 ℕ 𝕊)))
+pop ξ η ζ ≔ ((e ↦ ((∅ e) ⊘ ((≐ (ekind (hd e)) 0) (∷ (⊗ (tconst (esym (hd e))) ζ) ⊘) ((≐ (ekind (hd e)) 1) (pcall ξ (esym (hd e)) ζ) ((≐ (ekind (hd e)) 111010001) (pprefixop ξ (hd e) ζ) (pbinder ξ (hd e) ζ)))))) (sigfind ξ η (∷ 0 (∷ 1 (∷ 111010001 (∷ 111011101 ⊘))))))
+pprefixop ∶ Sig → α → 𝔏 (𝔓 ℕ 𝕊) → 𝔏 (𝔓 Term (𝔏 (𝔓 ℕ 𝕊)))
+pprefixop ξ η ζ ≔ ((r ↦ ((∅ r) ⊘ (∷ (⊗ (tapp₁ (esym η) (◀ (hd r))) (▶ (hd r))) ⊘))) (pexpr ξ (eprec η) ζ))
+pcall ∶ Sig → ℕ → 𝔏 (𝔓 ℕ 𝕊) → 𝔏 (𝔓 Term (𝔏 (𝔓 ℕ 𝕊)))
+pcall ξ η ζ ≔ (ζ (θ ι ↦ ((ispunc θ "(") ((r ↦ ((∅ r) ⊘ (∷ (⊗ (tapp η (◀ (hd r))) (▶ (hd r))) ⊘))) (pargs ξ ι ")")) (∷ (⊗ (tconst η) ζ) ⊘))) (∷ (⊗ (tconst η) ζ) ⊘))
+⍝ the comma-separated expressions up to the closing token: [pair(list of terms, rest)] or []
+pargs ∶ Sig → 𝔏 (𝔓 ℕ 𝕊) → 𝕊 → 𝔏 (𝔓 (𝔏 Term) (𝔏 (𝔓 ℕ 𝕊)))
+pargs ξ η ζ ≔ (η (θ ι ↦ ((ispunc θ ζ) (∷ (⊗ ⊘ ι) ⊘) (pargs′ ξ η ζ))) ⊘)
+pargs′ ∶ Sig → 𝔏 (𝔓 ℕ 𝕊) → 𝕊 → 𝔏 (𝔓 (𝔏 Term) (𝔏 (𝔓 ℕ 𝕊)))
+pargs′ ξ η ζ ≔ ((r ↦ ((∅ r) ⊘ (pargsend ξ (◀ (hd r)) (▶ (hd r)) ζ))) (pexpr ξ 0 η))
+pargsend ∶ Sig → Term → 𝔏 (𝔓 ℕ 𝕊) → 𝕊 → 𝔏 (𝔓 (𝔏 Term) (𝔏 (𝔓 ℕ 𝕊)))
+pargsend ξ η ζ ω ≔ (ζ (θ ι ↦ ((ispunc θ ",") ((r ↦ ((∅ r) ⊘ (∷ (⊗ (∷ η (◀ (hd r))) (▶ (hd r))) ⊘))) (pargs′ ξ ι ω)) ((ispunc θ ω) (∷ (⊗ (∷ η ⊘) ι) ⊘) ⊘))) ⊘)
+ppunct ∶ Sig → 𝕊 → 𝔏 (𝔓 ℕ 𝕊) → 𝔏 (𝔓 Term (𝔏 (𝔓 ℕ 𝕊)))
+ppunct ξ η ζ ≔ ((≐ˢ η "(") ((r ↦ ((∅ r) ⊘ ((s ↦ ((∅ s) ⊘ ((ispunc (hd s) ")") (∷ (⊗ (◀ (hd r)) (⌄ (▶ (hd r)))) ⊘) ⊘))) (▶ (hd r))))) (pexpr ξ 0 ζ)) ((≐ˢ η "{") ((r ↦ ((∅ r) ⊘ (∷ (⊗ (tapp (symid "set") (◀ (hd r))) (▶ (hd r))) ⊘))) (pargs ξ ζ "}")) ((≐ˢ η "[") ((r ↦ ((∅ r) ⊘ (∷ (⊗ (tapp (symid "list") (◀ (hd r))) (▶ (hd r))) ⊘))) (pargs ξ ζ "]")) ⊘)))
+⍝ a binder:  ∀ x y . body  becomes  forall(x, forall(y, body))
+pbinder ∶ Sig → α → 𝔏 (𝔓 ℕ 𝕊) → 𝔏 (𝔓 Term (𝔏 (𝔓 ℕ 𝕊)))
+pbinder ξ η ζ ≔ ((sp ↦ ((∨ (∅ (▶ sp)) (¬ (ispunc (hd (▶ sp)) "."))) ⊘ ((r ↦ ((∅ r) ⊘ (∷ (⊗ (foldr (v b ↦ (tapp₂ (esym η) (tvar (symid (▶ v))) b)) (◀ (hd r)) (◀ sp)) (▶ (hd r))) ⊘))) (pexpr ξ (eprec η) (⌄ (▶ sp)))))) (span (θ ↦ (≐ (◀ θ) 1)) ζ))
+ploop ∶ Sig → ℕ → Term → 𝔏 (𝔓 ℕ 𝕊) → 𝔏 (𝔓 Term (𝔏 (𝔓 ℕ 𝕊)))
+ploop ξ η ζ ω ≔ (ω (θ ι ↦ ((∨ (≐ (◀ θ) 1100) (≐ (◀ θ) 1)) ((e ↦ ((∅ e) (∷ (⊗ ζ ω) ⊘) ((≺ (eprec (hd e)) η) (∷ (⊗ ζ ω) ⊘) ((≐ (ekind (hd e)) 111011100) (ploop ξ η (tapp₁ (esym (hd e)) ζ) ι) ((r ↦ ((∅ r) ⊘ (ploop ξ η (tapp₂ (esym (hd e)) ζ (◀ (hd r))) (▶ (hd r))))) (pexpr ξ ((≐ (ekind (hd e)) 1101) (eprec (hd e)) (⊞ (eprec (hd e)) 1)) ι)))))) (sigfind ξ (▶ θ) (∷ 1100 (∷ 1101 (∷ 111010000 (∷ 111011100 ⊘)))))) (∷ (⊗ ζ ω) ⊘))) (∷ (⊗ ζ ω) ⊘))
+parseterm ∶ Sig → 𝕊 → 𝔏 Term      ⍝ the term that a text denotes, as a maybe (all of the text must be used)
+parseterm ξ η ≔ ((r ↦ ((∨ (∅ r) (¬ (∅ (▶ (hd r))))) ⊘ (∷ (◀ (hd r)) ⊘))) (pexpr ξ 0 (tokenize η)))
+⍝ ---- the printer
+tprec ∶ Sig → Term → ℕ      ⍝ how tightly a term binds when printed (atoms: 111001100)
+tprec ξ η ≔ (η (ζ ↦ 111001100) (ζ ω ↦ ((θ ↦ ((∅ θ) 111001100 ((k ↦ ((∧ (⩾ k 1100) (⩽ k 111011100)) (eprec (hd θ)) 111001100)) (ekind (hd θ))))) (sigprint ξ ζ))) (ζ ↦ 111001100))
+tprint ∶ Sig → Term → 𝕊      ⍝ the text of a term
+tprint ξ η ≔ (η (ζ ↦ (symname ζ)) (ζ ω ↦ (tprintapp ξ ζ ω)) (ζ ↦ (showc ζ)))
+tprintarg ∶ Sig → ℕ → 𝔹 → Term → 𝕊
+tprintarg ξ η ζ ω ≔ ((ν ↦ ((∨ (≺ ν η) (∧ (≐ ν η) ζ)) (⧺ "(" (⧺ (tprint ξ ω) ")")) (tprint ξ ω))) (tprec ξ ω))
+tprintapp ∶ Sig → ℕ → 𝔏 Term → 𝕊
+tprintapp ξ η ζ ≔ ((≐ η (symid "set")) (⧺ "{" (⧺ (join ", " (⫶ (tprint ξ) ζ)) "}")) ((≐ η (symid "list")) (⧺ "[" (⧺ (join ", " (⫶ (tprint ξ) ζ)) "]")) (tprintapp′ ξ η ζ)))
+tprintapp′ ∶ Sig → ℕ → 𝔏 Term → 𝕊
+tprintapp′ ξ η ζ ≔ ((e ↦ ((∅ e) (tprintcall (symname η) ξ ζ) ((k ↦ ((≐ k 0) (etok (hd e)) ((≐ k 1) (tprintcall (etok (hd e)) ξ ζ) ((∧ (⩾ k 1100) (∧ (⩽ k 111010000) (⩾ (ℓ ζ) 1100))) (join (⧺ " " (⧺ (etok (hd e)) " ")) (⧺ (⫶ (tprintarg ξ (eprec (hd e)) (¬ (≐ k 1100))) (take 1 ζ)) (⫶ (tprintarg ξ (eprec (hd e)) (¬ (≐ k 1101))) (drop 1 ζ)))) ((∧ (≐ k 111010001) (≐ (ℓ ζ) 1)) (⧺ (etok (hd e)) (⧺ ((isalnum (last (etok (hd e)))) " " "") (tprintarg ξ (eprec (hd e)) ⊥ (hd ζ)))) ((∧ (≐ k 111011100) (≐ (ℓ ζ) 1)) (⧺ (tprintarg ξ (eprec (hd e)) ⊥ (hd ζ)) (etok (hd e))) (tprintcall (etok (hd e)) ξ ζ))))))) (ekind (hd e))))) (sigprint ξ η))
+tprintcall ∶ 𝕊 → Sig → 𝔏 Term → 𝕊
+tprintcall ξ η ζ ≔ ((∅ ζ) ξ (⧺ ξ (⧺ "(" (⧺ (join ", " (⫶ (tprint η) ζ)) ")"))))

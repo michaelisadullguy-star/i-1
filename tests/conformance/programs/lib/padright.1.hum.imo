@@ -1,0 +1,1 @@
+main in List(Char) := padright(12, 'Q', ['a', 'z', 'Q'])

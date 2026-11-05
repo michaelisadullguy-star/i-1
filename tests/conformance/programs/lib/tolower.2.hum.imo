@@ -1,0 +1,1 @@
+main in List(Char) := tolower(['z', 'Q', '7'])

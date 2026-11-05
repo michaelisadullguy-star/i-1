@@ -1,0 +1,1 @@
+main in List(List(\NN)) := [prngstream(minstd, 1, 4), prngstream(xorshift32, 2463534242, 3), prngstream(lcgmmix, 42, 2), shuffle(minstd, 7, [1, 2, 3, 4, 5, 6]), sample(minstd, 9, 3, [10, 20, 30, 40, 50]), [fnvhash32(utf8bytes("a")), djbhash(utf8bytes("hello")), xorshift64(1)]]

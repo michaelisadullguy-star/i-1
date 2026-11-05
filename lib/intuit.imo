@@ -1,0 +1,52 @@
+⍝ lib/intuit.imo — spec notation — trusted prelude, part 34: intuitionistic propositional logic by the contraction-free sequent calculus G4ip (Dyckhoff), a decision procedure
+⍝ A formula is a term over and, or, imp, not (¬A is A ⇒ false), iff (two implications), true, false; every other subterm is an atom.  A sequent is Γ ⊢ C with Γ a list of formulas.  The rules
+⍝ never copy a formula that they keep, so the search terminates.  A formula is a theorem if the sequent ⊢ F can be derived, refuted if ⊢ ¬F can; otherwise it is neither (excluded middle and
+⍝ double-negation elimination are not theorems here — that is why this package conflicts with the classical one, which decides by diagrams).
+isimp ∶ Term → 𝔹
+isimp ξ ≔ (tishead s⇒ ξ)
+iand ∶ Term → 𝔹
+iand ξ ≔ (tishead s∧ ξ)
+ior ∶ Term → 𝔹
+ior ξ ≔ (tishead s∨ ξ)
+ia ∶ Term → Term      ⍝ first argument
+ia ξ ≔ (hd (targs ξ))
+ib ∶ Term → Term      ⍝ second argument
+ib ξ ≔ (hd (⌄ (targs ξ)))
+iimp ∶ Term → Term → Term
+iimp ξ η ≔ (tapp₂ s⇒ ξ η)
+iatom ∶ Term → 𝔹      ⍝ not a connective and not a constant
+iatom ξ ≔ (¬ (∨ (iand ξ) (∨ (ior ξ) (∨ (isimp ξ) (∨ (teq ξ ttrue) (teq ξ tfalse))))))
+⍝ not and iff and xor are written with imp, and, or; and and or are binary
+inorm ∶ Term → Term
+inorm ξ ≔ ((tishead s¬ ξ) (iimp (inorm (ia ξ)) tfalse) ((tishead s⇔ ξ) (tapp₂ s∧ (iimp (inorm (ia ξ)) (inorm (ib ξ))) (iimp (inorm (ib ξ)) (inorm (ia ξ)))) ((tishead s⊻ ξ) (inorm (tapp₂ s∨ (tapp₂ s∧ (ia ξ) (tapp₁ s¬ (ib ξ))) (tapp₂ s∧ (ib ξ) (tapp₁ s¬ (ia ξ))))) ((∨ (iand ξ) (∨ (ior ξ) (isimp ξ))) (inorm′ (thead ξ) (⫶ inorm (targs ξ))) ξ))))
+inorm′ ∶ ℕ → 𝔏 Term → Term      ⍝ a connective applied to several arguments: nested to the right
+inorm′ ξ η ≔ ((≐ (ℓ η) 1100) (tapp ξ η) ((≺ (ℓ η) 1100) (hd η) (tapp₂ ξ (hd η) (inorm′ ξ (⌄ η)))))
+elemT ∶ Term → 𝔏 Term → 𝔹
+elemT ξ η ≔ (∃ₗ (θ ↦ (teq ξ θ)) η)
+⍝ may the formula f be decomposed without losing anything (an invertible left rule)?
+iinvl ∶ 𝔏 Term → Term → 𝔹
+iinvl ξ η ≔ (∨ (iand η) (∨ (ior η) (∨ (teq η ttrue) (∧ (isimp η) ((a ↦ (∨ (teq a ttrue) (∨ (teq a tfalse) (∨ (iand a) (∨ (ior a) (∧ (iatom a) (elemT a ξ))))))) (ia η))))))
+⍝ iprove gamma goal: is the sequent derivable
+iprove ∶ 𝔏 Term → Term → 𝔹
+iprove ξ η ≔ ((∨ (elemT tfalse ξ) (∨ (elemT η ξ) (teq η ttrue))) ⊤ (iprove′ ξ η))
+iprove′ ∶ 𝔏 Term → Term → 𝔹
+iprove′ ξ η ≔ ((iand η) (∧ (iprove ξ (ia η)) (iprove ξ (ib η))) ((isimp η) (iprove (∷ (ia η) ξ) (ib η)) (ileft ξ η)))
+ileft ∶ 𝔏 Term → Term → 𝔹
+ileft ξ η ≔ ((sp ↦ ((∅ (▶ sp)) (inon ξ η) (iapply (hd (▶ sp)) (⧺ (◀ sp) (⌄ (▶ sp))) η))) (span (θ ↦ (¬ (iinvl ξ θ))) ξ))
+⍝ apply an invertible rule to f; rest = the other hypotheses
+iapply ∶ Term → 𝔏 Term → Term → 𝔹
+iapply ξ η ζ ≔ ((iand ξ) (iprove (∷ (ia ξ) (∷ (ib ξ) η)) ζ) ((ior ξ) (∧ (iprove (∷ (ia ξ) η) ζ) (iprove (∷ (ib ξ) η) ζ)) ((teq ξ ttrue) (iprove η ζ) (iapplyimp (ia ξ) (ib ξ) η ζ))))
+iapplyimp ∶ Term → Term → 𝔏 Term → Term → 𝔹
+iapplyimp ξ η ζ ω ≔ ((teq ξ ttrue) (iprove (∷ η ζ) ω) ((teq ξ tfalse) (iprove ζ ω) ((iand ξ) (iprove (∷ (iimp (ia ξ) (iimp (ib ξ) η)) ζ) ω) ((ior ξ) (iprove (∷ (iimp (ia ξ) η) (∷ (iimp (ib ξ) η) ζ)) ω) (iprove (∷ η ζ) ω)))))
+⍝ no invertible rule: split a disjunction on the right, or use a hypothesis (a ⇒ b) ⇒ d
+inon ∶ 𝔏 Term → Term → 𝔹
+inon ξ η ≔ (∨ ((ior η) (∨ (iprove ξ (ia η)) (iprove ξ (ib η))) ⊥) (∃ₗ (p ↦ ((∧ (isimp (◀ p)) (isimp (ia (◀ p)))) (∧ (iprove (∷ (iimp (ib (ia (◀ p))) (ib (◀ p))) (∷ (ia (ia (◀ p))) (▶ p))) (ib (ia (◀ p)))) (iprove (∷ (ib (◀ p)) (▶ p)) η)) ⊥)) (picks′ ξ)))
+⍝ the verdict on a formula: 1 theorem, 0 refutable, 2 neither.  Glivenko's theorem (¬A is provable intuitionistically exactly when it is a classical tautology) lets the diagram of the formula decide
+⍝ everything except the classical tautologies that are not negations, and only these need the search: a contradiction is refutable, a satisfiable formula that is not a tautology is neither
+idecide ∶ Term → ℕ
+idecide ξ ≔ ((b ↦ ((beq b bf) 0 ((beq b bt) ((f ↦ ((∨ (∧ (isimp f) (teq (ib f) tfalse)) (iprove ⊘ f)) 1 1100)) (inorm ξ)) 1100))) (tobdd (bnorm (batoms ξ)) ξ))
+⍝ every maximal Boolean subterm that is a theorem becomes true, every refutable one false; the others stay
+intpass ∶ Term → Term
+intpass ξ ≔ ((isbool ξ) ((v ↦ ((≐ v 1) ttrue ((≐ v 0) tfalse (tapp (thead ξ) (⫶ intatoms (targs ξ)))))) (idecide ξ)) (tmapargs intpass ξ))
+intatoms ∶ Term → Term
+intatoms ξ ≔ ((isbool ξ) (tapp (thead ξ) (⫶ intatoms (targs ξ))) (intpass ξ))

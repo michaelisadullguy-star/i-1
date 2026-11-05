@@ -1,0 +1,1 @@
+main in List(Char) := trim(['a', 'z', 'Q'])

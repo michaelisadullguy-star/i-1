@@ -1,0 +1,1 @@
+main in List(List(List(\NN))) := [pascaltriangle(5), partitionlist(5), compositions(3), lyndonwords(3, 2), [pascalrow(6), eulerianrow(5), [derangements(7), motzkin(9), schroeder(6), permrank([2, 0, 3, 1])], head(permunrank(4, 11)), lehmer([2, 0, 3, 1])], concat(setpartitions([1, 2, 3])), [[descents([2, 0, 3, 1]), inversions([2, 0, 3, 1])], head(nextperm([1, 3, 2, 0]))]]

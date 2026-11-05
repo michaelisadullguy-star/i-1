@@ -61,7 +61,7 @@ The test suite is shared by the three cores; nothing in it is specific to Haskim
 python3 tests/conformance/run.py --impl haskimo      # the shared command-line cases, against the bytes on which all the cores agree
 python3 tests/conformance/run.py                     # every core that is built
 python3 tests/conformance/run.py --impl haskimo -v --filter prove
-python3 tests/test_poly.py --core haskimo            # a library suite on Haskimo (fourteen of the eighteen suites can)
+python3 tests/test_poly.py --core haskimo            # a library suite on Haskimo (eighteen of the twenty-two suites can)
 python3 tests/run_suites.py --core haskimo           # all of them
 ```
 

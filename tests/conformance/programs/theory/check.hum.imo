@@ -1,0 +1,2 @@
+-- the embedded theorems of a package: those that the simplifier cannot prove (none)
+main in List(List(String)) := [checktheory("core"), checktheory("classical"), checktheory("intuitionistic"), checktheory("group"), checktheory("lattice")]

@@ -1,0 +1,1 @@
+main in \NN := maximum([5, 7, 3])

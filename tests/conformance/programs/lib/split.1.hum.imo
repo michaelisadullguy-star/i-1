@@ -1,0 +1,1 @@
+main in List(List(Char)) := split('a', ['Q', '7', 'a'])

@@ -15,7 +15,7 @@ of all the cases of the suite (tests/conformance/cases.txt) from the files that 
   python3 pymo/mkconformance.py [--variants N] [--limit K] [--only NAME]     write the sweep programs
   python3 pymo/mkconformance.py --cases                                      (re)write tests/conformance/cases.txt from the programs
 """
-import argparse, os, re, sys
+import zlib, argparse, os, re, sys
 HERE = os.path.dirname(os.path.abspath(__file__)); ROOT = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
 import imo, hum
@@ -32,6 +32,7 @@ SLOW_CASES = {'ex.run.decode.hum.imo', 'ex.run.main.hum.imo'}
 # the documented eval commands (README §2, §15)
 EVALS = [('target.hum.imo', 'pi', 14), ('target.hum.imo', 'e', 14), ('target.hum.imo', 'z', 14), ('analysis.hum.imo', 'euler', 14),
          ('quaternion.hum.imo', 'q1', None), ('quaternion.hum.imo', 'q2', None), ('quaternion.hum.imo', 'q3', None), ('quaternion.hum.imo', 'q4', None),
+         ('sedenion.hum.imo', 'x', None), ('sedenion.hum.imo', 'y', None),
          ('spaces.hum.imo', 'ip', 6), ('spaces.hum.imo', 'norm2', 6), ('hello.hum.imo', 'greeting', None), ('hello.bin.imo', 'main', None),
          ('main.hum.imo', 'x', None), ('main.hum.imo', 'pi', 20), ('norm.hum.imo', 'v', None), ('predicates.hum.imo', 'x', None)]
 
@@ -142,7 +143,7 @@ def write_cases():
         ex = rel('examples', f)
         add(f'ex.run.{f}', ['run', ex]); add(f'ex.check.{f}', ['check', ex])
         add(f'ex.spec.{f}', ['translate', ex, '--to', 'spec']); add(f'ex.bin.{f}', ['translate', ex, '--to', 'bin'])
-    for f in ('point.hum.imo', 'hello.hum.imo', 'main.hum.imo', 'prove.hum.imo', 'predicates.hum.imo'):
+    for f in ('point.hum.imo', 'hello.hum.imo', 'main.hum.imo', 'prove.hum.imo', 'predicates.hum.imo', 'sedenion.hum.imo'):
         for m in ('bin', 'spec', 'hum'): add(f'ex.out-{m}.{f}', ['run', rel('examples', f), '--out', m])
     for f, name, n in EVALS:
         add(f'ex.eval.{f}.{name}', ['eval', rel('examples', f), name] + ([str(n)] if n is not None else []))
@@ -168,11 +169,12 @@ def write_cases():
     for f in sorted(os.listdir(mdir)):
         if f.endswith('.imo'): add(f'misc.{f[:-4]}', ['run', rel('tests', 'conformance', 'programs', 'misc', f), '--n', '6'])
     libs = sorted(f for f in os.listdir(OUT) if f.endswith('.hum.imo'))
-    for k, f in enumerate(libs):
+    for f in libs:
         stem = f[:-len('.hum.imo')]; path = rel('tests', 'conformance', 'programs', 'lib', f)
+        h = zlib.crc32(stem.encode('utf-8'))             # which programs also run in the spec and bin output notations: by the name, so that a new library function moves none
         add(f'lib.{stem}', ['run', path, '--n', '4'])
-        if k % 5 == 0: add(f'lib.{stem}.spec', ['run', path, '--n', '4', '--out', 'spec'])
-        if k % 10 == 3: add(f'lib.{stem}.bin', ['run', path, '--n', '4', '--out', 'bin'])
+        if h % 5 == 0: add(f'lib.{stem}.spec', ['run', path, '--n', '4', '--out', 'spec'])
+        if h % 10 == 3: add(f'lib.{stem}.bin', ['run', path, '--n', '4', '--out', 'bin'])
     with open(os.path.join(CONF, 'cases.txt'), 'w', encoding='utf-8') as f:
         f.write('# id <TAB> flags <TAB> command line (relative to the repository root); written by pymo/mkconformance.py --cases\n')
         for cid, flags, args in L: f.write(f"{cid}\t{flags}\t{' '.join(args)}\n")

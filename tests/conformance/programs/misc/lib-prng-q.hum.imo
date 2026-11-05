@@ -1,0 +1,1 @@
+main in List(\QQ) := [vandercorput(2, 6), vandercorput(3, 5), fst(halton(7)), snd(halton(7))]

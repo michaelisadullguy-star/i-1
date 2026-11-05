@@ -1,0 +1,7 @@
+-- a carriage return inside a literal is a character, not a line end: the source is read exactly as it is
+main in String := unlines([
+  "char: " ++ str(ord('')),
+  "length: " ++ str(length("ab")),
+  "reversed: " ++ reverse("abcd"),
+  "backslash r: " ++ str(ord('\r')),
+  "backslash x: " ++ "\x41"])

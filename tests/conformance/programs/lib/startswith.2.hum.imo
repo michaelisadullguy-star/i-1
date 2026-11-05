@@ -1,0 +1,1 @@
+main in Bool := startswith(['z', 'Q', '7'], ['7', 'a', 'z'])

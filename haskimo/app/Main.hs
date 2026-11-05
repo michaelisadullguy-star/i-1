@@ -16,6 +16,7 @@ import qualified Data.Map.Strict as M
 import Data.Maybe (fromMaybe)
 import Data.Ratio
 import System.Directory (doesFileExist)
+import GHC.IO.Encoding (setFileSystemEncoding)
 import System.Environment (getArgs)
 import System.Exit
 import System.IO
@@ -153,6 +154,9 @@ main = do
   hSetEncoding stderr utf8
   tty <- hIsTerminalDevice stdout
   hSetBuffering stdout (if tty then NoBuffering else BlockBuffering Nothing)      -- a terminal sees the output as it is produced, a pipe gets blocks
+  -- the command line and the file names are UTF-8 whatever the locale (under LANG=C GHC would decode  eval FILE 𝕫  as ASCII and lose the name);
+  -- bytes that are not UTF-8 survive as they are, so a file with such a name can still be opened
+  mkTextEncoding "UTF-8//ROUNDTRIP" >>= setFileSystemEncoding
   args <- getArgs
   code <- dispatch args `catches`
     [ Handler (\(e :: ExitCode) -> throwIO e)

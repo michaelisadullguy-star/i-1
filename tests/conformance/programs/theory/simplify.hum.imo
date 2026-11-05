@@ -1,0 +1,2 @@
+-- the simplest forms under the default theories (core, classical, arith, reals) and under other packages
+main in List(String) := [simpe(defaultenv, "x * 1 + 0 * y"), simpe(defaultenv, "p && p"), simpe(defaultenv, "¬¬p"), simpe(defaultenv, "2 + 3 * 4"), simpe(defaultenv, "x - x"), simpe(defaultenv, "(x + 1)^2 - x^2 - 2*x"), simpe(defaultenv, "p || ¬p"), simpe(envwith(["sets"]), "A ∪ A"), simpe(envwith(["sets"]), "(A ∪ B)ᶜ"), simpe(envwith(["kolmogorov"]), "P(Ω)")]

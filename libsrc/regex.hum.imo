@@ -1,0 +1,57 @@
+-- regex.hum.imo -- regular expressions by Brzozowski derivatives (human notation; lib/regex.imo is its translation, made by libsrc/build.sh).
+-- A regular expression is a Term (lib/term.imo): the symbol 1 is the empty set, 2 the empty string, 3 c a character, 5 the concatenation, 6 the union, 7 the star, 8 a class of characters
+-- (the number 0 or 1 for negation, then ranges: the symbol 9 applied to the first and the last character).  rxparse reads the usual notation: | * + ? ( ) . [a-z] [^a-z] and the escapes
+-- \d \w \s \D \W \S \n \t, any other character after a backslash standing for itself.  A match is the longest one at the leftmost position (the language decides, not an order of trying).
+_rxlparen in Char := chr(40)
+_rxrparen in Char := chr(41)
+_rxlbrack in Char := chr(91)
+_rxrbrack in Char := chr(93)
+_rxl(x, f) in alpha -> (alpha -> beta) -> beta := f(x)
+rxempty in Term := tconst(1)
+rxeps in Term := tconst(2)
+rxchar(c) in Char -> Term := tapp(3, [tnum(c)])
+rxrange(lo, hi) in Char -> Char -> Term := tapp(9, [tnum(lo), tnum(hi)])
+rxclass(neg, rs) in \NN -> List(Term) -> Term := tapp(8, cons(tnum(neg), rs))
+rxany in Term := rxclass(1, [rxrange('\n', '\n')])
+rxcat(a, b) in Term -> Term -> Term := if(tisconst(1, a) or tisconst(1, b), rxempty, if(tisconst(2, a), b, if(tisconst(2, b), a, tapp(5, [a, b]))))
+rxalt(a, b) in Term -> Term -> Term := if(tisconst(1, a), b, if(tisconst(1, b), a, if(teq(a, b), a, tapp(6, [a, b]))))
+rxstar(a) in Term -> Term := if(tisconst(1, a) or tisconst(2, a), rxeps, if(tishead(7, a), a, tapp(7, [a])))
+rxnullable(r) in Term -> Bool := if(tishead(2, r) or tishead(7, r), true, if(tishead(5, r), rxnullable(head(targs(r))) and rxnullable(head(tail(targs(r)))), if(tishead(6, r), rxnullable(head(targs(r))) or rxnullable(head(tail(targs(r)))), false)))
+_inrange(c, r) in Char -> Term -> Bool := (re(tnumval(head(targs(r)))) leq c) and (c leq re(tnumval(head(tail(targs(r))))))
+_inclass(c, r) in Char -> Term -> Bool := exists((q in Term |-> _inrange(c, q)), tail(targs(r))) == (re(tnumval(head(targs(r)))) == 0)
+rxderiv(c, r) in Char -> Term -> Term := if(tishead(3, r), if(re(tnumval(head(targs(r)))) == c, rxeps, rxempty), if(tishead(8, r), if(_inclass(c, r), rxeps, rxempty), if(tishead(5, r), rxalt(rxcat(rxderiv(c, head(targs(r))), head(tail(targs(r)))), if(rxnullable(head(targs(r))), rxderiv(c, head(tail(targs(r)))), rxempty)), if(tishead(6, r), rxalt(rxderiv(c, head(targs(r))), rxderiv(c, head(tail(targs(r))))), if(tishead(7, r), rxcat(rxderiv(c, head(targs(r))), r), rxempty)))))
+rxderivs(s, r) in String -> Term -> Term := foldl((q in Term |-> (c in Char |-> rxderiv(c, q))), r, s)
+rxmatches(r, s) in Term -> String -> Bool := rxnullable(rxderivs(s, r))
+-- the parser: each function returns the term read and the rest of the string
+_rxsub(neg, rs) in \NN -> List(Term) -> Term := rxclass(neg, rs)
+_rxdigits in List(Term) := [rxrange('0', '9')]
+_rxword in List(Term) := [rxrange('0', '9'), rxrange('A', 'Z'), rxrange('_', '_'), rxrange('a', 'z')]
+_rxspace in List(Term) := [rxrange(' ', ' '), rxrange('\t', chr(13))]
+_rxescape(c) in Char -> Term := if(c == 'd', rxclass(0, _rxdigits), if(c == 'w', rxclass(0, _rxword), if(c == 's', rxclass(0, _rxspace), if(c == 'D', rxclass(1, _rxdigits), if(c == 'W', rxclass(1, _rxword), if(c == 'S', rxclass(1, _rxspace), if(c == 'n', rxchar('\n'), if(c == 't', rxchar('\t'), rxchar(c)))))))))
+_rxescchar(c) in Char -> Char := if(c == 'n', '\n', if(c == 't', '\t', c))
+-- the items of a class up to the closing bracket: single characters, ranges a-z and the escapes \d \w \s
+_rxitems(s, acc) in String -> List(Term) -> Pair(List(Term), String) := if(isnil(s), pair(reverse(acc), s), if(head(s) == _rxrbrack, pair(reverse(acc), tail(s)), if(head(s) == '\\', if(isnil(tail(s)), pair(reverse(acc), tail(s)), if(head(tail(s)) == 'd', _rxitems(tail(tail(s)), reverse(_rxdigits) ++ acc), if(head(tail(s)) == 'w', _rxitems(tail(tail(s)), reverse(_rxword) ++ acc), if(head(tail(s)) == 's', _rxitems(tail(tail(s)), reverse(_rxspace) ++ acc), _rxitems(tail(tail(s)), cons(rxrange(_rxescchar(head(tail(s))), _rxescchar(head(tail(s)))), acc)))))), if((length(s) geq 3) and (head(tail(s)) == '-') and not (head(tail(tail(s))) == _rxrbrack), _rxitems(drop(3, s), cons(rxrange(head(s), head(tail(tail(s)))), acc)), _rxitems(tail(s), cons(rxrange(head(s), head(s)), acc))))))
+_rxclassp(s) in String -> Pair(Term, String) := if((not isnil(s)) and (head(s) == '^'), _rxl(_rxitems(tail(s), []), (r in Pair(List(Term), String) |-> pair(rxclass(1, fst(r)), snd(r)))), _rxl(_rxitems(s, []), (r in Pair(List(Term), String) |-> pair(rxclass(0, fst(r)), snd(r)))))
+_rxatom(palt, s) in (String -> Pair(Term, String)) -> String -> Pair(Term, String) := if(head(s) == _rxlparen, _rxl(palt(tail(s)), (r in Pair(Term, String) |-> pair(fst(r), if(isnil(snd(r)), snd(r), tail(snd(r)))))), if(head(s) == _rxlbrack, _rxclassp(tail(s)), if(head(s) == '.', pair(rxany, tail(s)), if((head(s) == '\\') and not isnil(tail(s)), pair(_rxescape(head(tail(s))), tail(tail(s))), pair(rxchar(head(s)), tail(s))))))
+_rxsuffix(a, s) in Term -> String -> Pair(Term, String) := if(isnil(s), pair(a, s), if(head(s) == '*', _rxsuffix(rxstar(a), tail(s)), if(head(s) == '+', _rxsuffix(rxcat(a, rxstar(a)), tail(s)), if(head(s) == '?', _rxsuffix(rxalt(a, rxeps), tail(s)), pair(a, s)))))
+_rxrep(palt, s) in (String -> Pair(Term, String)) -> String -> Pair(Term, String) := _rxl(_rxatom(palt, s), (r in Pair(Term, String) |-> _rxsuffix(fst(r), snd(r))))
+_rxcat(palt, s) in (String -> Pair(Term, String)) -> String -> Pair(Term, String) := if(isnil(s) or (head(s) == '|') or (head(s) == _rxrparen), pair(rxeps, s), _rxl(_rxrep(palt, s), (r in Pair(Term, String) |-> _rxl(_rxcat(palt, snd(r)), (q in Pair(Term, String) |-> pair(rxcat(fst(r), fst(q)), snd(q)))))))
+_rxalt(s) in String -> Pair(Term, String) := _rxl(_rxcat(_rxalt, s), (r in Pair(Term, String) |-> if((not isnil(snd(r))) and (head(snd(r)) == '|'), _rxl(_rxalt(tail(snd(r))), (q in Pair(Term, String) |-> pair(rxalt(fst(r), fst(q)), snd(q)))), r)))
+rxparse(s) in String -> Term := _rxl(_rxalt(s), (r in Pair(Term, String) |-> if(isnil(snd(r)), fst(r), rxempty)))
+-- matching strings
+rxfull(pattern, s) in String -> String -> Bool := rxmatches(rxparse(pattern), s)
+-- the length of the longest prefix of s that the expression matches, as a list of at most one number
+_rxlongest(r, s, k, best) in Term -> String -> \NN -> List(\NN) -> List(\NN) := _rxl(if(rxnullable(r), [k], best), (b in List(\NN) |-> if(isnil(s) or tishead(1, r), b, _rxlongest(rxderiv(head(s), r), tail(s), k + 1, b))))
+rxprefix(pattern, s) in String -> String -> List(\NN) := _rxlongest(rxparse(pattern), s, 0, [])
+-- the leftmost longest match: a list of at most one pair(start, length)
+_rxsearchgo(r, s, i) in Term -> String -> \NN -> List(Pair(\NN, \NN)) := if(isnil(_rxlongest(r, s, 0, [])), if(isnil(s), [], _rxsearchgo(r, tail(s), i + 1)), [pair(i, head(_rxlongest(r, s, 0, [])))])
+rxsearch(pattern, s) in String -> String -> List(Pair(\NN, \NN)) := _rxsearchgo(rxparse(pattern), s, 0)
+-- the non-empty matches, left to right, without overlap
+_rxfindgo(r, s) in Term -> String -> List(String) := if(isnil(s), [], if(isnil(_rxlongest(r, s, 0, [])) or (head(_rxlongest(r, s, 0, [])) == 0), _rxfindgo(r, tail(s)), cons(take(head(_rxlongest(r, s, 0, [])), s), _rxfindgo(r, drop(head(_rxlongest(r, s, 0, [])), s)))))
+rxfindall(pattern, s) in String -> String -> List(String) := _rxfindgo(rxparse(pattern), s)
+-- replace every non-empty match by a literal string
+_rxreplacego(r, t, s) in Term -> String -> String -> String := if(isnil(s), [], if(isnil(_rxlongest(r, s, 0, [])) or (head(_rxlongest(r, s, 0, [])) == 0), cons(head(s), _rxreplacego(r, t, tail(s))), t ++ _rxreplacego(r, t, drop(head(_rxlongest(r, s, 0, [])), s))))
+rxreplace(pattern, t, s) in String -> String -> String -> String := _rxreplacego(rxparse(pattern), t, s)
+-- split at the non-empty matches (the pieces between them, empty ones included)
+_rxsplitgo(r, s, cur) in Term -> String -> String -> List(String) := if(isnil(s), [reverse(cur)], if(isnil(_rxlongest(r, s, 0, [])) or (head(_rxlongest(r, s, 0, [])) == 0), _rxsplitgo(r, tail(s), cons(head(s), cur)), cons(reverse(cur), _rxsplitgo(r, drop(head(_rxlongest(r, s, 0, [])), s), []))))
+rxsplit(pattern, s) in String -> String -> List(String) := _rxsplitgo(rxparse(pattern), s, [])

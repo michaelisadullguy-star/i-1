@@ -1,0 +1,8 @@
+ex ∶ ℝ[i]
+ex ≔ (exp 1)
+s ∶ ℝ
+s ≔ (sin (÷ 1 1100))
+c ∶ ℝ
+c ≔ (cos (÷ 1 1100))
+euler ∶ ℝ[i]
+euler ≔ (exp (÷ 11 1100))

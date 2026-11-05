@@ -1,0 +1,1 @@
+main in Bool := contains(['z', 'Q', '7'], ['7', 'a', 'z'])

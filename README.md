@@ -56,7 +56,7 @@ pi lt 22/7                               true      (certified error bounds)
 | **Types are decoding keys** | A type tells how to read a binary string and never changes the string: `110101` is 1 − 6i in ℤ[i], the pair (1, −6) in ℤ², the fraction −1/6; a pair of strings, `("Hello, world!", "Welcome to i - 1!")`, is one binary string read as `String²` ([§6.6](#66-types-are-decoding-keys)). |
 | **Number system** | Base **i − 1**, digits `0` and `1`.  Every Gaussian integer has a unique finite expansion, so ℤ[i] needs no sign and no separate real/imaginary parts.  `11` is *i*, `1100` is 2, `11101` is −1. |
 | **ℝ[i] is lazy** | A real or complex number is an infinite stream of ℚ[i] elements (its approximants).  Nothing is computed until an element is demanded. |
-| **Dimension only goes up** | Cayley–Dickson trees ℂ → ℍ → 𝕆 → 𝕊 → … of unbounded depth.  Lower-depth values are lifted by *a ↦ (a, 0)*; no operation ever trims a tree, so a zero of depth 3 stays a zero of depth 3. |
+| **Dimension only goes up** | Cayley–Dickson trees: complex numbers → quaternions → octonions → sedenions → … of unbounded depth.  Lower-depth values are lifted by *a ↦ (a, 0)*; no operation ever trims a tree, so a zero of depth 3 stays a zero of depth 3. |
 | **Infinite dimensions** | `𝔉 A` is the algebra of all functions ℚ[i] → A, with pointwise operations; inner products are streams of partial sums. |
 | **Classes first** | Every value, variant and function must be declared with its class (domain → codomain) before it is defined.  Classes form a lattice (ℕ ⊆ ℤ ⊆ ℚ ⊆ ℚ[i] …) with a few explicit widening coercions. |
 | **Everything from ℚ[i]** | Booleans are digits, `Char` is a natural number (a code point), `String` is a list of `Char`, lists and pairs are lambda terms over numerals. |
@@ -96,13 +96,13 @@ z in \R := pi + e * i
 ```text
 .1010100010. ... .1101.
 .1010100010. .. (.1100010. 1100 (.11011. ... .1100. . (.111110. .11011. (.111010. (.111011. 1100 .11011.) 1))))
-.100010010000. ... .1101.
-.100010010000. .. (.1100010. 1 (.11011. ... .1100. . (.111110. 1 .11011.)))
-.100010010001. ... .10000.
-.100010010001. .. (.1011011. .1010100010. (.1011100. .100010010000. (.1011010. 11)))
+.101101100001. ... .1101.
+.101101100001. .. (.1100010. 1 (.11011. ... .1100. . (.111110. 1 .11011.)))
+.101101100010. ... .10000.
+.101101100010. .. (.1011011. .1010100010. (.1011100. .101101100001. (.1011010. 11)))
 ```
 
-The binary program refers to the prelude (the standard library), which itself ships in all-binary form as `lib/prelude.bin.imo` (**630,848 characters**).  The symbol table for the three program-local names is `examples/target.sbl`.
+The binary program refers to the prelude (the standard library), which itself ships in all-binary form as `lib/prelude.bin.imo` (**1,307,269 characters**).  The symbol table for the three program-local names is `examples/target.sbl`.
 
 ---
 
@@ -129,11 +129,16 @@ python3 pymo/i1.py eval      examples/target.hum.imo z 14
 python3 pymo/i1.py translate examples/target.hum.imo --to spec
 python3 pymo/i1.py translate examples/target.hum.imo --to bin
 
-# run the test-suites (each prints PASS/FAIL lines; together a few minutes).  Fourteen of them also run on Haskimo and Rustimo: add  --core haskimo  or  --core rustimo
+# run the test-suites (each prints PASS/FAIL lines; together a few minutes).  Nineteen of them also run on Haskimo and Rustimo: add  --core haskimo  or  --core rustimo
 # (all of them on every core they support:  python3 tests/run_suites.py)
 python3 tests/test_layers.py       # notations, docs, class checker, Char/String, order, quantifiers, analysis
 python3 tests/test_algebra.py      # ℤ[i], ℚ[i], Cayley–Dickson tower, lazy ℝ[i], function spaces
 python3 tests/test_axioms.py       # the axiom audit of ℚ[i]: field, meadow, order, conjugation, canonical forms
+python3 tests/test_classes.py      # the class system: lattice, overload sets, human operators (all three cores agree)
+python3 tests/test_lists.py        # lists: folds, scans, sorting, searching, combinatorics (against Python)
+python3 tests/test_strings.py      # characters and strings: case, splitting, bases, Roman numerals, edit distance
+python3 tests/test_dict.py         # dictionaries, sets, multisets, heaps, queues (tries over the digits)
+python3 tests/test_theory.py       # theories: packages of axioms, and the decision of statements (true / false / undetermined)
 python3 tests/test_library.py      # the library: arithmetic, lists, analysis, linear algebra, sets (from the human notation)
 python3 tests/test_output.py       # main, the three output notations, round trips
 python3 tests/test_prove.py       # predicates: relations on ℝ[i] decided by logic
@@ -157,12 +162,12 @@ Files choose their notation by extension — `x.hum.imo` human, `x.bin.imo` bina
 
 ### 2.1 Three interpreters: Pymo, Haskimo and Rustimo
 
-i-1 is an **interpreted** language: a program is read, class-checked and evaluated every time it runs, and nothing compiles it into a file ([§9](#9-evaluation-model) says what the evaluator does inside).  The language is defined by what the repository **shares**: the `.imo` files (the standard library `lib/`, the examples, and the two system documents `docs/doc1.sbl` and `docs/doc2.sbl`), the `.md` files (this README and `docs/`) and the test suite (`tests/`).  Everything else is one of three **parallel cores**, three interpreters of that one specification, which read the same files and print the same bytes.  They are peers: none is the reference, and a core is right when the shared test suite passes on it.
+i-1 has three **interpreters**: a program is read, class-checked and evaluated every time it runs ([§9](#9-evaluation-model) says what the evaluator does inside); a fourth program, **Compimo** ([§2.2](#22-compimo-the-compiler)), translates a program to C and compiles it.  The language is defined by what the repository **shares**: the `.imo` files (the standard library `lib/`, the examples, and the two system documents `docs/doc1.sbl` and `docs/doc2.sbl`), the `.md` files (this README and `docs/`) and the test suite (`tests/`).  Everything else is one of three **parallel cores**, three interpreters of that one specification, which read the same files and print the same bytes.  They are peers: none is the reference, and a core is right when the shared test suite passes on it.
 
 ```text
 lib/  examples/  docs/*.sbl               the language: the .imo files and the system documents                          shared
 README.md  readme/  docs/*.md             the documentation                                                              shared
-tests/                                    the test suite (tests/conformance and 14 of the 18 suites run on all cores)    shared
+tests/                                    the test suite (tests/conformance and 19 of the 23 suites run on all cores)    shared
 pymo/                                     Pymo, the Python core, with the scripts that write the generated files         parallel
 haskimo/                                  Haskimo, the Haskell core                                                      parallel
 rustimo/                                  Rustimo, the Rust core                                                         parallel
@@ -196,6 +201,21 @@ i1 --impl all     run examples/main.hum.imo    # all of them at the same time: t
 
 `py`, `hs` and `rs` are accepted for `pymo`, `haskimo` and `rustimo` (`--impl rs`, `--default py`).  From a checkout, without installing: `make` builds `build/haskimo` and `build/rustimo` (`make rustimo`, or `./rustimo/build.sh`, for the Rust one alone), and `./i1 --impl rustimo run examples/main.hum.imo` works in place.  `cabal install exe:haskimo` installs Haskimo alone.  `i1` takes the commands and options of `pymo/i1.py` unchanged.  How the three interpreters are kept identical — one interpreter-neutral test that all of them must pass, `tests/conformance/run.py` — is described in [§16.5](#165-the-three-cores-and-the-shared-test-suite).
 
+
+### 2.2 Compimo, the compiler
+
+**Compimo** is the compiled version of i-1 (`compimo/`, Rust and C, no Python; [`docs/compimo.md`](docs/compimo.md)).  It uses the front end of Rustimo (readers, class checker, printer), translates the
+program to C, compiles it together with the prelude (compiled once and cached) and a small run-time system, and runs it; it prints the same bytes as the interpreters (all the cases of
+`tests/conformance`).  Its speed comes from three things: constructors and pattern matches become data objects and switches, small functions are inlined, and the arithmetic on digit strings —
+almost all that i-1 does — is done on arrays of digits by native versions that return *the same lists* as the definitions (`compimo selftest` checks it on random strings).
+
+```bash
+make compimo                       # needs cargo, a C compiler and libgc-dev; build/compimo
+build/compimo prelude              # once: compile the prelude (about 3 minutes)
+build/compimo run examples/prove.hum.imo
+i1 --impl compimo run examples/prove.hum.imo       # it is chosen by name only (not part of auto, both or all)
+```
+
 ---
 
 ## 3. Design principles
@@ -210,6 +230,18 @@ i1 --impl all     run examples/main.hum.imo    # all of them at the same time: t
 8. **Honest scope.**  The prelude's class signatures are *trusted declarations* (they are tested, not proved).  User programs are fully checked against them.  Limits are listed in [§17](#17-status-limits-and-roadmap), not hidden.
 9. **Purity at level i − 1.**  Everything is a function and every computation goes through the base-(i−1) digits: arithmetic, gcd, decimal text, the canonical forms printed as output, and the proofs of the predicates all run *in the language* — the all-binary programs give the same answers.  The host only reads digits back (the isomorphism digit string ↔ Gaussian integer) and spells them.
 10. **One system.**  The digits are the truth values, so a relation's answer is a number, and the joins of the different structures — `+` on truth values, `or`, `max`, `union` — are one operation in different places ([§13.5](#135-one-system)).
+
+### 2.3 More interpreters: OCamimo, Schimo, Cimo and Rimo
+
+**OCamimo** (`ocamimo/`, OCaml, standard library only; [`docs/ocamimo.md`](docs/ocamimo.md)) is a fourth interpreter, a peer of Pymo, Haskimo and Rustimo: it reads the same files and prints the same
+bytes for every command (`python3 tests/conformance/run.py --impl ocamimo`: all the cases conform).  Build it with `make ocamimo` and choose it by name, `./i1 --impl ocamimo run program.hum.imo`; it is not part of `auto`, `both` or `all`.
+
+**Schimo** (`schimo/`, Racket, a Scheme; [`docs/schimo.md`](docs/schimo.md)) is a fifth one: `make schimo`, `./i1 --impl schimo run program.hum.imo`, and all the cases conform too.
+
+**Cimo** (`cimo/`, C with the Boehm collector; [`docs/cimo.md`](docs/cimo.md)) is a sixth one: `make cimo`, `./i1 --impl cimo run program.hum.imo`, and all the cases conform too.  (It interprets; the compiler of i-1 to C is Compimo, §2.2.)
+
+**Rimo** (`rimo/`, R with the package gmp; [`docs/rimo.md`](docs/rimo.md)) is a seventh one: `make rimo`, `./i1 --impl rimo run program.hum.imo`.  It is two to three orders of magnitude slower than Rustimo (R is not made for this), so it
+was run on the conformance cases that are not slow, with one in twelve of the library sweep (726 cases, all conform), and on the self-checking `.imo` tests of `tests/imo/small` (33 files, 4057 checks, all pass; [`docs/rimo.md`](docs/rimo.md) says what was run and how long it takes).
 
 ---
 
@@ -317,7 +349,7 @@ Spec is bin with readable glyphs, plus three conveniences that the translator re
 * **literals**: `'λ'` is a `Char`, `"text"` a `String` ([§8](#8-characters-and-strings)); escapes `\n \t \\ \" \'`;
 * **comments**: everything after the name `⍝` up to the end of the line.
 
-The reserved glyphs are `≔` (definition), `↦` (lambda), `∶` (class).  Class variables are `α β γ`.  Lambda binders **must** carry a class: `(ξ ∶ ℚ ↦ ÷ ξ 1100)`; definition parameters take their classes from the declaration.
+The reserved glyphs are `≔` (definition), `↦` (lambda), `∶` (class).  Class variables are `α β γ δ ε`.  Lambda binders **must** carry a class: `(ξ ∶ ℚ ↦ ÷ ξ 1100)`; definition parameters take their classes from the declaration.
 
 ### 4.4 Human notation
 
@@ -431,7 +463,7 @@ One line per spec symbol:
 ```
 
 * **Bijection.**  Every spec symbol has exactly one binary symbol and vice versa.  Class names (`ℕ`, `ℚ[i]`, `𝔏`), statement formers (`⊆`, `≣`, `↪`), library symbols and even the bound-variable names used inside the prelude (`ξ`, `η`, …) are all listed — a binary program has no other way to name them.
-* **Codes are ordinals.**  The code of the *n*-th symbol is *n* written in binary: `.1.`, `.10.`, `.11.`, `.100.`, … (2191 symbols at the moment).
+* **Codes are ordinals.**  The code of the *n*-th symbol is *n* written in binary: `.1.`, `.10.`, `.11.`, `.100.`, … (2912 symbols at the moment).
 * **Append-only.**  A released code is never reassigned; new symbols get the next ordinal.  `pymo/mkdoc1.py` reads the existing doc 1 first and only appends, so a symbol keeps its code wherever in the prelude it is used first (the 129 codes of the first release are unchanged).  One entry, `main`, is not a prelude symbol: it is the entry point, listed so that a bin program can name it without a local table.
 * **Reserved tokens** are not listed: `↦` = `.`, `≔` = `..`, `∶` = `...`.
 * **Program-local symbols.**  Names introduced by a user program (`π`, `𝕖`, `𝕫` in the target) are *not* in doc 1; their codes live in the program's own `.sbl` file, in the same line format, always above the highest doc 1 code.
@@ -1071,6 +1103,404 @@ The whole of doc 2 as it stands, generated from `docs/doc2.sbl`:
 | `strsnd` | `strsnd` | value |  |
 | `parsebits` | `parsebits` | value |  |
 | `decode` | `showz` \| `showc` \| `showz2` \| `showstr2` | value |  |
+| `ident` | `ident` | value |  |
+| `const` | `const` | value |  |
+| `flip` | `flip` | value |  |
+| `compose` | `compose` | value |  |
+| `curry` | `curry` | value |  |
+| `uncurry` | `uncurry` | value |  |
+| `swap` | `swap` | value |  |
+| `bimap` | `bimap` | value |  |
+| `until` | `until` | value |  |
+| `applyn` | `applyn` | value |  |
+| `init` | `init` | value |  |
+| `takewhile` | `takewhile` | value |  |
+| `dropwhile` | `dropwhile` | value |  |
+| `span` | `span` | value |  |
+| `partition` | `partition` | value |  |
+| `splitat` | `splitat` | value |  |
+| `tails` | `tails` | value |  |
+| `inits` | `inits` | value |  |
+| `rotate` | `rotate` | value |  |
+| `chunks` | `chunks` | value |  |
+| `windows` | `windows` | value |  |
+| `foldl1` | `foldl₁` | value |  |
+| `foldr1` | `foldr₁` | value |  |
+| `scanl` | `scanl` | value |  |
+| `scanl1` | `scanl₁` | value |  |
+| `scanr` | `scanr` | value |  |
+| `unfoldr` | `unfoldr` | value |  |
+| `concatmap` | `concatmap` | value |  |
+| `intersperse` | `intersperse` | value |  |
+| `intercalate` | `intercalate` | value |  |
+| `count` | `count` | value |  |
+| `zipwith3` | `zipwith3` | value |  |
+| `zip3` | `zip3` | value |  |
+| `unzip` | `unzip` | value |  |
+| `transposel` | `transposel` | value |  |
+| `cartesian` | `cartesian` | value |  |
+| `lookupby` | `lookupby` | value |  |
+| `lookup` | `lookup` | value |  |
+| `elemby` | `elemby` | value |  |
+| `findindex` | `findindex` | value |  |
+| `find` | `find` | value |  |
+| `nubby` | `nubby` | value |  |
+| `deleteby` | `deleteby` | value |  |
+| `unionby` | `unionby` | value |  |
+| `intersectby` | `intersectby` | value |  |
+| `diffby` | `diffby` | value |  |
+| `groupby` | `groupby` | value |  |
+| `isprefixby` | `isprefixby` | value |  |
+| `issuffixby` | `issuffixby` | value |  |
+| `isinfixby` | `isinfixby` | value |  |
+| `mergeby` | `mergeby` | value |  |
+| `sortby` | `sortby` | value |  |
+| `insertby` | `insertby` | value |  |
+| `maximumby` | `maximumby` | value |  |
+| `minimumby` | `minimumby` | value |  |
+| `maximum` | `maximum` | value |  |
+| `minimum` | `minimum` | value |  |
+| `subsequences` | `subsequences` | value |  |
+| `permutations` | `permutations` | value |  |
+| `combinations` | `combinations` | value |  |
+| `cycle` | `cycle` | value |  |
+| `sumsq` | `sumsq` | value |  |
+| `dotl` | `dotl` | value |  |
+| `mean` | `mean` | value |  |
+| `tally` | `tally` | value |  |
+| `isdigit` | `isdigit` | value |  |
+| `isuppercase` | `isuppercase` | value |  |
+| `islowercase` | `islowercase` | value |  |
+| `isalpha` | `isalpha` | value |  |
+| `isalnum` | `isalnum` | value |  |
+| `isspace` | `isspace` | value |  |
+| `ispunct` | `ispunct` | value |  |
+| `upper` | `upper` | value |  |
+| `lower` | `lower` | value |  |
+| `toupper` | `toupper` | value |  |
+| `tolower` | `tolower` | value |  |
+| `capitalize` | `capitalize` | value |  |
+| `ltrim` | `ltrim` | value |  |
+| `rtrim` | `rtrim` | value |  |
+| `trim` | `trim` | value |  |
+| `startswith` | `startswith` | value |  |
+| `endswith` | `endswith` | value |  |
+| `contains` | `contains` | value |  |
+| `indexof` | `indexof` | value |  |
+| `replace` | `replace` | value |  |
+| `split` | `split` | value |  |
+| `splitstr` | `splitstr` | value |  |
+| `words` | `words` | value |  |
+| `unwords` | `unwords` | value |  |
+| `lines` | `lines` | value |  |
+| `padleft` | `padleft` | value |  |
+| `padright` | `padright` | value |  |
+| `padcenter` | `padcenter` | value |  |
+| `repeatstr` | `repeatstr` | value |  |
+| `ispalindrome` | `ispalindrome` | value |  |
+| `isanagram` | `isanagram` | value |  |
+| `caesar` | `caesar` | value |  |
+| `digitchar` | `digitchar` | value |  |
+| `showbase` | `showbase` | value |  |
+| `hex` | `hex` | value |  |
+| `octal` | `octal` | value |  |
+| `binary` | `binary` | value |  |
+| `digitval` | `digitval` | value |  |
+| `readbase` | `readbase` | value |  |
+| `readnat` | `readnat` | value |  |
+| `readint` | `readint` | value |  |
+| `romantable` | `romantable` | value |  |
+| `roman` | `roman` | value |  |
+| `fromroman` | `fromroman` | value |  |
+| `levenshtein` | `levenshtein` | value |  |
+| `rle` | `rle` | value |  |
+| `unrle` | `unrle` | value |  |
+| `Dict` | `Dict` | class |  |
+| `FSet` | `FSet` | class |  |
+| `Bag` | `Bag` | class |  |
+| `Heap` | `Heap` | class |  |
+| `Queue` | `Queue` | class |  |
+| `emptydict` | `emptydict` | value |  |
+| `dput` | `dput` | value |  |
+| `dget` | `dget` | value |  |
+| `dgetd` | `dgetd` | value |  |
+| `dhas` | `dhas` | value |  |
+| `ddel` | `ddel` | value |  |
+| `dsize` | `dsize` | value |  |
+| `disempty` | `disempty` | value |  |
+| `ditems` | `ditems` | value |  |
+| `dkeys` | `dkeys` | value |  |
+| `dvals` | `dvals` | value |  |
+| `dfromlist` | `dfromlist` | value |  |
+| `dmap` | `dmap` | value |  |
+| `dfilter` | `dfilter` | value |  |
+| `dfoldr` | `dfoldr` | value |  |
+| `dwith` | `dwith` | value |  |
+| `dupdate` | `dupdate` | value |  |
+| `dunion` | `dunion` | value |  |
+| `dunionwith` | `dunionwith` | value |  |
+| `dinter` | `dinter` | value |  |
+| `ddiff` | `ddiff` | value |  |
+| `deq` | `deq` | value |  |
+| `dfromvals` | `dfromvals` | value |  |
+| `dtovals` | `dtovals` | value |  |
+| `dputs` | `dputs` | value |  |
+| `dgets` | `dgets` | value |  |
+| `dhass` | `dhass` | value |  |
+| `ddels` | `ddels` | value |  |
+| `dkeyss` | `dkeyss` | value |  |
+| `emptyfset` | `emptyfset` | value |  |
+| `fsadd` | `fsadd` | value |  |
+| `fsdel` | `fsdel` | value |  |
+| `fshas` | `fshas` | value |  |
+| `fssize` | `fssize` | value |  |
+| `fsempty` | `fsempty` | value |  |
+| `fselems` | `fselems` | value |  |
+| `fsfromlist` | `fsfromlist` | value |  |
+| `fsunion` | `fsunion` | value |  |
+| `fsinter` | `fsinter` | value |  |
+| `fsdiff` | `fsdiff` | value |  |
+| `fssubset` | `fssubset` | value |  |
+| `fseq` | `fseq` | value |  |
+| `fsfilter` | `fsfilter` | value |  |
+| `fsmap` | `fsmap` | value |  |
+| `fspowerset` | `fspowerset` | value |  |
+| `emptybag` | `emptybag` | value |  |
+| `bagadd` | `bagadd` | value |  |
+| `bagcount` | `bagcount` | value |  |
+| `bagsize` | `bagsize` | value |  |
+| `bagfromlist` | `bagfromlist` | value |  |
+| `bagitems` | `bagitems` | value |  |
+| `bagunion` | `bagunion` | value |  |
+| `bagdel` | `bagdel` | value |  |
+| `emptyheap` | `emptyheap` | value |  |
+| `hpush` | `hpush` | value |  |
+| `hpeek` | `hpeek` | value |  |
+| `hpop` | `hpop` | value |  |
+| `hsize` | `hsize` | value |  |
+| `hempty` | `hempty` | value |  |
+| `hfromlist` | `hfromlist` | value |  |
+| `htolist` | `htolist` | value |  |
+| `emptyqueue` | `emptyqueue` | value |  |
+| `qpush` | `qpush` | value |  |
+| `qpeek` | `qpeek` | value |  |
+| `qpop` | `qpop` | value |  |
+| `qsize` | `qsize` | value |  |
+| `qempty` | `qempty` | value |  |
+| `qtolist` | `qtolist` | value |  |
+| `qfromlist` | `qfromlist` | value |  |
+| `Term` | `Term` | class |  |
+| `Sig` | `Sig` | class |  |
+| `symid` | `symid` | value |  |
+| `symname` | `symname` | value |  |
+| `teq` | `teq` | value |  |
+| `tlt` | `tlt` | value |  |
+| `tsize` | `tsize` | value |  |
+| `tvars` | `tvars` | value |  |
+| `tground` | `tground` | value |  |
+| `tokenize` | `tokenize` | value |  |
+| `mksig` | `mksig` | value |  |
+| `sigmerge` | `sigmerge` | value |  |
+| `parseterm` | `parseterm` | value |  |
+| `tprint` | `tprint` | value |  |
+| `readnum` | `readnum` | value |  |
+| `Env` | `Env` | class |  |
+| `mkenv` | `mkenv` | value |  |
+| `normalize` | `normalize` | value |  |
+| `mkrule` | `mkrule` | value |  |
+| `mkrules` | `mkrules` | value |  |
+| `symprops` | `symprops` | value |  |
+| `BDD` | `BDD` | class |  |
+| `bcanon` | `bcanon` | value |  |
+| `bdecide` | `bdecide` | value |  |
+| `boolpass` | `boolpass` | value |  |
+| `bnorm` | `bnorm` | value |  |
+| `Theory` | `Theory` | class |  |
+| `simp` | `simp` | value |  |
+| `simpe` | `simpe` | value |  |
+| `holds` | `holds` | value |  |
+| `holdse` | `holdse` | value |  |
+| `holdsv` | `holdsv` | value |  |
+| `use` | `use` | value |  |
+| `unuse` | `unuse` | value |  |
+| `usetheories` | `usetheories` | value |  |
+| `envwith` | `envwith` | value |  |
+| `defaultenv` | `defaultenv` | value |  |
+| `activetheories` | `activetheories` | value |  |
+| `isactive` | `isactive` | value |  |
+| `theorynames` | `theorynames` | value |  |
+| `axiomsof` | `axiomsof` | value |  |
+| `theoremsof` | `theoremsof` | value |  |
+| `describe` | `describe` | value |  |
+| `checktheory` | `checktheory` | value |  |
+| `simplifyt` | `simplifyt` | value |  |
+| `isleap` | `isleap` | value |  |
+| `yearlen` | `yearlen` | value |  |
+| `monthlen` | `monthlen` | value |  |
+| `daysbefore` | `daysbefore` | value |  |
+| `isvalid` | `isvalid` | value |  |
+| `dayofyear` | `dayofyear` | value |  |
+| `daynumber` | `daynumber` | value |  |
+| `fromdaynumber` | `fromdaynumber` | value |  |
+| `weekday` | `weekday` | value |  |
+| `weekdayof` | `weekdayof` | value |  |
+| `datediff` | `datediff` | value |  |
+| `adddays` | `adddays` | value |  |
+| `isoyear` | `isoyear` | value |  |
+| `isoweek` | `isoweek` | value |  |
+| `easter` | `easter` | value |  |
+| `monthname` | `monthname` | value |  |
+| `dayname` | `dayname` | value |  |
+| `isodate` | `isodate` | value |  |
+| `parseisodate` | `parseisodate` | value |  |
+| `digraph` | `digraph` | value |  |
+| `ugraph` | `ugraph` | value |  |
+| `neighbors` | `neighbors` | value |  |
+| `vertices` | `vertices` | value |  |
+| `degree` | `degree` | value |  |
+| `edges` | `edges` | value |  |
+| `reversed` | `reversed` | value |  |
+| `bfs` | `bfs` | value |  |
+| `dfs` | `dfs` | value |  |
+| `reachable` | `reachable` | value |  |
+| `components` | `components` | value |  |
+| `distances` | `distances` | value |  |
+| `shortestpath` | `shortestpath` | value |  |
+| `toposort` | `toposort` | value |  |
+| `isacyclic` | `isacyclic` | value |  |
+| `isbipartite` | `isbipartite` | value |  |
+| `isconnected` | `isconnected` | value |  |
+| `wdigraph` | `wdigraph` | value |  |
+| `wugraph` | `wugraph` | value |  |
+| `dijkstra` | `dijkstra` | value |  |
+| `kruskal` | `kruskal` | value |  |
+| `mstweight` | `mstweight` | value |  |
+| `total` | `total` | value |  |
+| `average` | `average` | value |  |
+| `spread` | `spread` | value |  |
+| `median` | `median` | value |  |
+| `modes` | `modes` | value |  |
+| `variance` | `variance` | value |  |
+| `svariance` | `svariance` | value |  |
+| `quantile` | `quantile` | value |  |
+| `iqr` | `iqr` | value |  |
+| `covariance` | `covariance` | value |  |
+| `correlation2` | `correlation2` | value |  |
+| `linreg` | `linreg` | value |  |
+| `cumsum` | `cumsum` | value |  |
+| `movingavg` | `movingavg` | value |  |
+| `weightedmean` | `weightedmean` | value |  |
+| `ranks` | `ranks` | value |  |
+| `ptx` | `ptx` | value |  |
+| `pty` | `pty` | value |  |
+| `vsub2` | `vsub2` | value |  |
+| `vadd2` | `vadd2` | value |  |
+| `vscale2` | `vscale2` | value |  |
+| `dotp` | `dotp` | value |  |
+| `crossp` | `crossp` | value |  |
+| `dist2` | `dist2` | value |  |
+| `cross3` | `cross3` | value |  |
+| `orient` | `orient` | value |  |
+| `triarea2` | `triarea2` | value |  |
+| `iscollinear` | `iscollinear` | value |  |
+| `midpoint` | `midpoint` | value |  |
+| `centroid` | `centroid` | value |  |
+| `bbox` | `bbox` | value |  |
+| `onsegment` | `onsegment` | value |  |
+| `segmentsintersect` | `segmentsintersect` | value |  |
+| `lineintersection` | `lineintersection` | value |  |
+| `circumcenter` | `circumcenter` | value |  |
+| `polyarea2` | `polyarea2` | value |  |
+| `polyarea` | `polyarea` | value |  |
+| `signedarea2` | `signedarea2` | value |  |
+| `polyperimeter2` | `polyperimeter2` | value |  |
+| `inpolygon` | `inpolygon` | value |  |
+| `isconvex` | `isconvex` | value |  |
+| `convexhull` | `convexhull` | value |  |
+| `closestpair2` | `closestpair2` | value |  |
+| `rxempty` | `rxempty` | value |  |
+| `rxeps` | `rxeps` | value |  |
+| `rxchar` | `rxchar` | value |  |
+| `rxrange` | `rxrange` | value |  |
+| `rxclass` | `rxclass` | value |  |
+| `rxany` | `rxany` | value |  |
+| `rxcat` | `rxcat` | value |  |
+| `rxalt` | `rxalt` | value |  |
+| `rxstar` | `rxstar` | value |  |
+| `rxnullable` | `rxnullable` | value |  |
+| `rxderiv` | `rxderiv` | value |  |
+| `rxderivs` | `rxderivs` | value |  |
+| `rxmatches` | `rxmatches` | value |  |
+| `rxparse` | `rxparse` | value |  |
+| `rxfull` | `rxfull` | value |  |
+| `rxprefix` | `rxprefix` | value |  |
+| `rxsearch` | `rxsearch` | value |  |
+| `rxfindall` | `rxfindall` | value |  |
+| `rxreplace` | `rxreplace` | value |  |
+| `rxsplit` | `rxsplit` | value |  |
+| `binand` | `binand` | value |  |
+| `binor` | `binor` | value |  |
+| `binxor` | `binxor` | value |  |
+| `binshl` | `binshl` | value |  |
+| `binshr` | `binshr` | value |  |
+| `graycode` | `graycode` | value |  |
+| `fromgray` | `fromgray` | value |  |
+| `utf8bytes` | `utf8bytes` | value |  |
+| `utf8string` | `utf8string` | value |  |
+| `hexencode` | `hexencode` | value |  |
+| `hexdecode` | `hexdecode` | value |  |
+| `base64encode` | `base64encode` | value |  |
+| `base64decode` | `base64decode` | value |  |
+| `percentencode` | `percentencode` | value |  |
+| `percentdecode` | `percentdecode` | value |  |
+| `adler32` | `adler32` | value |  |
+| `crc32` | `crc32` | value |  |
+| `luhncheck` | `luhncheck` | value |  |
+| `luhndigit` | `luhndigit` | value |  |
+| `numwords` | `numwords` | value |  |
+| `vigenere` | `vigenere` | value |  |
+| `unvigenere` | `unvigenere` | value |  |
+| `minstd` | `minstd` | value |  |
+| `lcgansi` | `lcgansi` | value |  |
+| `lcgmmix` | `lcgmmix` | value |  |
+| `xorshift32` | `xorshift32` | value |  |
+| `xorshift64` | `xorshift64` | value |  |
+| `prngstream` | `prngstream` | value |  |
+| `prngbelow` | `prngbelow` | value |  |
+| `shuffle` | `shuffle` | value |  |
+| `sample` | `sample` | value |  |
+| `choice` | `choice` | value |  |
+| `vandercorput` | `vandercorput` | value |  |
+| `halton` | `halton` | value |  |
+| `fnvhash32` | `fnvhash32` | value |  |
+| `fnvhash64` | `fnvhash64` | value |  |
+| `djbhash` | `djbhash` | value |  |
+| `pascalrow` | `pascalrow` | value |  |
+| `pascaltriangle` | `pascaltriangle` | value |  |
+| `multinomial` | `multinomial` | value |  |
+| `multichoose` | `multichoose` | value |  |
+| `fallingfactorial` | `fallingfactorial` | value |  |
+| `risingfactorial` | `risingfactorial` | value |  |
+| `derangements` | `derangements` | value |  |
+| `rencontres` | `rencontres` | value |  |
+| `eulerianrow` | `eulerianrow` | value |  |
+| `eulerian` | `eulerian` | value |  |
+| `narayana` | `narayana` | value |  |
+| `motzkin` | `motzkin` | value |  |
+| `schroeder` | `schroeder` | value |  |
+| `compositions` | `compositions` | value |  |
+| `partitionlist` | `partitionlist` | value |  |
+| `dyckpaths` | `dyckpaths` | value |  |
+| `lyndonwords` | `lyndonwords` | value |  |
+| `lehmer` | `lehmer` | value |  |
+| `unlehmer` | `unlehmer` | value |  |
+| `permrank` | `permrank` | value |  |
+| `permunrank` | `permunrank` | value |  |
+| `nextperm` | `nextperm` | value |  |
+| `inversions` | `inversions` | value |  |
+| `descents` | `descents` | value |  |
+| `permsign` | `permsign` | value |  |
+| `setpartitions` | `setpartitions` | value |  |
 
 Notes on the table: `\R` and `\CC` are the same class ℝ[i] (`\R == \CC`); `-` appears twice because infix and prefix minus are different symbols; `embed` is the overload set of the two canonical coercions `⇡` (to streams) and `↑` (to the Cayley–Dickson tower); `+ * max min or and` are one overload family across numbers, truth values and sets ([§13.5](#135-one-system)); `==`, `!=`, `lt`, `leq`, `gt`, `geq` include the relations on ℝ[i] that the prover decides.
 
@@ -1296,7 +1726,7 @@ Classes are *terms of the language itself*: atoms, and constructors applied to c
 | `𝔇` | digit strings (the representation of ℤ[i]) | `Digits` |
 | `𝔏 A` `𝔖 A` `𝔗 A` `𝔄 A` `𝔓 A B` `A → B` | lists, streams, Cayley–Dickson trees, algebra records, pairs, functions | `List(A)` `Stream(A)` `Tree(A)` `Alg(A)` `Pair(A, B)` `A -> B` |
 
-Class variables are `α β γ` (human: `alpha beta gamma`); in a declaration they are universally quantified, in the *body* of a definition they are rigid.
+Class variables are `α β γ δ ε` (human: `alpha beta gamma`; the human `delta` is the function δ, so `δ` and `ε` are written in spec only); in a declaration they are universally quantified, in the *body* of a definition they are rigid.
 
 ### 7.3 The class lattice
 
@@ -1316,7 +1746,7 @@ flowchart BT
 
 Solid arrows are **subclass facts** `(⊆ A B)`: a value of class A may be used wherever B is expected, at no cost.  Dotted arrows are **canonical coercions** `(↪ f)`: a declared function that is inserted automatically when it makes an argument fit.  Coercions only ever *widen*; there is no implicit narrowing (`𝔻 → ℚ[i]` and `ℝ[i] → ℝ` are errors), which is the class-level counterpart of "dimension never reduces".
 
-Four **class equations** `(≣ A B)` are used: `𝔇 ≣ 𝔏 𝔹`, `𝕊 ≣ 𝔏 𝕮`, `ℝ[i] ≣ 𝔖 ℚ[i]`, `𝔻 ≣ 𝔗 ℚ[i]` (so a `String` *is* a list of characters, and ℝ[i] *is* the class of streams over ℚ[i]).  Error messages show classes with equations expanded, e.g. `(𝔖 ℚ[i])` for ℝ[i].
+Seven **class equations** `(≣ A B)` are used: `𝔇 ≣ 𝔏 𝔹`, `𝕊 ≣ 𝔏 𝕮`, `ℝ[i] ≣ 𝔖 ℚ[i]`, `ℝ ≣ 𝔖 ℚ`, `𝔻 ≣ 𝔗 ℚ[i]`, and the two polynomial classes `ℚ[i][x] ≣ 𝔏 ℚ[i]`, `ℚ[i][𝐱] ≣ 𝔏 (𝔓 ℚ[i] (𝔏 ℕ))` (so a `String` *is* a list of characters, and ℝ[i] *is* the class of streams over ℚ[i]).  Error messages show classes with equations expanded, e.g. `(𝔖 ℚ[i])` for ℝ[i].  Besides the subclass facts of the figure there are seven canonical coercions: `⇡` (ℚ → ℝ, ℚ[i] → ℝ[i]), `↑` (ℚ[i] → 𝔻), `asz2` and `asstr2` (ℤ[i] → ℤ², ℤ[i] → 𝕊², §6.6), `ι` (𝔹 → ℕ), `prop` (𝔹 → Ω) and `decide` (Ω → 𝔹, cost 2).  The three checkers are tested against each other and against a model written from this section only (`tests/test_classes.py`): every pair of 137 classes fits or does not fit identically, and so does every overload set of the prelude.
 
 Subclassing between compound classes: `A → B` is contravariant in A and covariant in B; `𝔏`, `𝔖`, `𝔗`, `𝔓` are covariant; `𝔄` is invariant.
 
@@ -1375,7 +1805,7 @@ The human notation can state subclass facts between existing classes (`\NN subse
 | **Char** `𝕮` | the Unicode **code point as a natural numeral** — `'A'` is 65, `'λ'` is 955 | `(⊆ 𝕮 ℕ)`: a `Char` widens to ℕ (and so to ℤ, ℚ, ℚ[i]); `ord ∶ 𝕮 → ℕ` |
 | **String** `𝕊` | a lazy list of `Char`: `"hi"` = `(∷ 'h' (∷ 'i' ⊘))` | `(≣ 𝕊 (𝔏 𝕮))`: all list operations apply |
 
-* **Literals** exist in spec and hum: `'λ'` (exactly one code point), `"text"`; escapes `\n \t \\ \" \'`.  Strings are sequences of *code points*, not UTF-8 bytes.  In the binary notation a literal is **expanded** to `(𝕔 numeral)` (`'A'` → `𝕔` of the numeral of 65, in base i − 1; `𝕔 ∶ ℕ → 𝕮` keeps the class) or to nested `∷` applications ending in `⊘`.
+* **Literals** exist in spec and hum: `'λ'` (exactly one code point), `"text"`; escapes `\n \t \\ \" \'`.  A backslash before any other character stands for that character (`"\r"` is the letter r, `"\x41"` is x41): there are no escapes for other control characters, so such a character is typed itself.  A source file is UTF-8 and is read exactly as it is — a carriage return is white space between tokens and a character inside a literal, a file with CRLF line ends reads like one with LF, and a file that is not valid UTF-8 is an error (status 1), never a text with replacement characters — and the printer writes every character but `\ \n \t` and the quote of the literal as it is.  Strings are sequences of *code points*, not UTF-8 bytes.  In the binary notation a literal is **expanded** to `(𝕔 numeral)` (`'A'` → `𝕔` of the numeral of 65, in base i − 1; `𝕔 ∶ ℕ → 𝕮` keeps the class) or to nested `∷` applications ending in `⊘`.
 * **Operations in the prelude**: `⧺` (`++`) append, `ℓ` (`length`) → ℕ, `⫶` (`map`), `ord`; comparison of characters with `==` (via ℚ[i]).
 * A `String` can be infinite (it is a lazy list); `length` of an infinite string does not terminate.
 * `chr ∶ ℕ → 𝕮` is total: a number that is not a Unicode scalar value (above U+10FFFF, or a surrogate) gives U+FFFD.  `dec`, `showq`, `showc`, `decimals`, `unlines`, `join` turn numbers and lists into text ([§14](#14-standard-library-reference)).
@@ -1398,14 +1828,14 @@ greeting ≔ (⧺ "Hello, " "λ")
 **bin**
 
 ```text
-.100010010000. ... .10011.
-.100010010000. .. (.110000. (.101000. (.11111000. 11101000111000000) (.101000. (.11111000. 11101110111010001) (.101000. (.11111000. 11101110100010000) (.101000. (.11111000. 11101110100010000) (.101000. (.11111000. 11101110100011101) (.101000. (.11111000. 110100010000) (.101000. (.11111000. 110000000000) .101010.))))))) (.101000. (.11111000. 1110100000001000011001101) .101010.))
+.101101100001. ... .10011.
+.101101100001. .. (.110000. (.101000. (.11111000. 11101000111000000) (.101000. (.11111000. 11101110111010001) (.101000. (.11111000. 11101110100010000) (.101000. (.11111000. 11101110100010000) (.101000. (.11111000. 11101110100011101) (.101000. (.11111000. 110100010000) (.101000. (.11111000. 110000000000) .101010.))))))) (.101000. (.11111000. 1110100000001000011001101) .101010.))
 ```
 
 program-local symbols the bin text introduced (same line format as doc 1; this is the `.sbl` file that goes with it):
 
 ```text
-greeting := .100010010000.
+greeting := .101101100001.
 ```
 `i1.py eval examples/hello.hum.imo greeting` prints `Hello, i-1 — λ`.
 
@@ -1500,8 +1930,30 @@ node  ❁ a b  =  (a, b)    two trees; depth = 1 + max(depth a, depth b)
   * depth 1 — associative but not commutative: `j² = −1`, `ij = k = −ji`, `k² = −1`;
   * depth 2 — not associative (`(e₁e₂)e₄ ≠ e₁(e₂e₄)`) but alternative (`(xx)y = x(xy)`), and no zero divisors among the sums `(eₐ ± e_b)(e_c ± e_d)`;
   * depth 3 — **zero divisors**: with the basis e₀ = 1, e₁ = *i*, e₂ = *j*, e₃ = *ij*, …, e_{2^d + n} = (0, eₙ), the product `(e₁ + e₁₀)(e₄ − e₁₅)` is `0` although both factors have norm² 2.  So the norm is not multiplicative from depth 3 on.
+* **Names and notation.**  The whole tower is one class, `𝔻` (human `\D`; `𝔗 A` is the same construction over any class `A`), and its algebras are named by depth, not by letters: ℍ and 𝕆 are not symbols of the language, and the letter 𝕊 that mathematics uses for the sedenions is the class of strings here ([§8](#8-characters-and-strings)) — this document says *sedenions*.  A tree is written `node(a, b)` and `leaf(x)` in human notation (a number where a tree is expected becomes a leaf, so `node(i, 0)` is `node(leaf(i), leaf(0))`), `(❁ a b)` and `(❀ x)` in spec, and with the doc 1 codes of `❁` and `❀` in bin; the printer writes the same three spellings and what it prints reads back, and `eval` shows a tree as `⟨a, b⟩`.  There is no `==` on trees in the human notation yet (`≐ᵀ` is spec only): a zero is recognised by its printed form (the example below).
 * **`𝕋` is generic**: `𝕋 𝔸ℝ[i]` is trees of lazy reals (a quaternion `(z, π)·(e, z)` is computed stream-wise and agrees with the exact partial sums), `𝕋 (𝔉 A)` is trees of functions, and `𝕋 (𝕋 A)` is a tower of towers.
 * Equality of trees is `≐ᵀ` (up to lifting) given an equality on the base.
+
+The sedenions in human notation, [`examples/sedenion.hum.imo`](examples/sedenion.hum.imo): the factors `x = e₁ + e₁₀` and `y = e₄ − e₁₅` have norm² 2 (`eval examples/sedenion.hum.imo x` shows them), and their product is the zero of depth 3.
+
+```text
+$ python3 pymo/i1.py examples/sedenion.hum.imo
+node(node(node(leaf(0), leaf(0)), node(leaf(0), leaf(0))), node(node(leaf(0), leaf(0)), node(leaf(0), leaf(0))))
+```
+
+```text
+-- the sedenions: Cayley-Dickson trees of depth 3 over Q[i]  (16 dimensions over Q);  python3 pymo/i1.py examples/sedenion.hum.imo
+-- basis e0 = 1, e1 = i, e2 = j, e3 = k, ..., e(8+n) = (0, en); a number where a tree is expected becomes a leaf
+z1 in \D := node(0, 0)                                 -- the zero of depth 1
+z2 in \D := node(z1, z1)                               -- the zero of depth 2
+e1 in \D := node(node(node(i, 0), z1), z2)
+e4 in \D := node(node(z1, node(1, 0)), z2)
+e10 in \D := node(z2, node(node(0, 1), z1))
+e15 in \D := node(z2, node(z1, node(0, i)))
+x in \D := e1 + e10                                    -- |x|^2 = 2, so x is not zero
+y in \D := e4 - e15                                    -- |y|^2 = 2, so y is not zero
+main in \D := x * y                                    -- but x * y is the zero of depth 3: sedenions have zero divisors (octonions have none)
+```
 
 ### 10.4 Function spaces, including infinite-dimensional ones
 
@@ -1786,7 +2238,7 @@ number 1 or 0 (`1 + true` is `2`).  Inside the prover, *and* and *or* are litera
 
 ## 14. Standard library reference
 
-The prelude is twenty-one spec files in `lib/`, loaded in this order — `logic` (classes, Booleans, pairs, lists), `number` (base-(i−1) arithmetic, ℚ[i], order), `algebra` (algebras, lazy ℝ[i], series, Cayley–Dickson, function spaces), `bounded` (bounded quantifiers), `analysis` (exp, sin, cos), `arith` (exact division, gcd, canonical form, floor, powers, factorial, integer roots), `list` (list functions, sorting, digit-wise operations, characters), `real` (√, log, atan, hyperbolic functions, tan, derivative, integral), `linalg` (vectors, matrices, determinant, solving, inverse — and §14.1), `set` (sets as membership tests), `text` (decimal output), `poly`, `complex`, `numtheory`, `ring`, `field`, `group`, `galois` (§14.1), `prove` (§13), `solve` (the simplifier of §13) and `codec` (§6.6) — and their all-binary form `lib/prelude.bin.imo`.  The tables below are **generated** from doc 1, doc 2 and the declared classes (`pymo/mkref.py`), so they cannot drift from the implementation.  *Class* lists every declaration of the symbol (an overload set has several); *human* lists the human symbols that can resolve to it; *bin* is its doc 1 code.
+The prelude is twenty-four spec files in `lib/`, listed in `lib/MANIFEST` (the one list every core reads) and loaded in this order — `logic` (classes, Booleans, pairs, lists), `number` (base-(i−1) arithmetic, ℚ[i], order), `algebra` (algebras, lazy ℝ[i], series, Cayley–Dickson, function spaces), `bounded` (bounded quantifiers), `analysis` (exp, sin, cos), `arith` (exact division, gcd, canonical form, floor, powers, factorial, integer roots), `list` (list functions, sorting, digit-wise operations, characters), `real` (√, log, atan, hyperbolic functions, tan, derivative, integral), `linalg` (vectors, matrices, determinant, solving, inverse — and §14.1), `set` (sets as membership tests), `text` (decimal output), `poly`, `complex`, `numtheory`, `ring`, `field`, `group`, `galois` (§14.1), `prove` (§13), `solve` (the simplifier of §13), `codec` (§6.6), `lists` (folds, scans, sorting, searching, combinatorics), `strings` (characters, case, splitting, bases, Roman numerals, edit distance) and `dict` (dictionaries, finite sets, multisets, heaps, queues as tries over the digits of the keys) — and their all-binary form `lib/prelude.bin.imo`.  The tables below are **generated** from doc 1, doc 2 and the declared classes (`pymo/mkref.py`), so they cannot drift from the implementation.  *Class* lists every declaration of the symbol (an overload set has several); *human* lists the human symbols that can resolve to it; *bin* is its doc 1 code.
 
 ### 14.1 The mathematical library by area
 
@@ -1806,6 +2258,18 @@ fields are values (a group is the sorted list of its permutations, `GF(pⁿ)` th
 | field theory | `lib/field.imo` | [`docs/lib-field.md`](docs/lib-field.md) | polynomials over GF(p) and their factorisation (Yun, Cantor–Zassenhaus), irreducible and primitive polynomials, GF(pⁿ) (order, primitive element, logarithm, Frobenius, trace, norm, minimal polynomial), number fields ℚ(α), minimal polynomials of α+β, αβ, αᵏ, α^(1/k) |
 | types as decoding keys | `lib/codec.imo` | [`docs/lib-codec.md`](docs/lib-codec.md) | ordered pairs of integers as Gaussian integers (**a + b·i := (a, b)**, with `+ - * ==`), fractions as pairs, strings as natural numbers (bijective numeration), pairs of strings as one Gaussian integer; `decode` reads one binary string by the key its class names ([§6.6](#66-types-are-decoding-keys)) |
 | Galois theory | `lib/galois.imo` | [`docs/lib-galois.md`](docs/lib-galois.md) | Galois groups of polynomials of degree ≤ 4 over ℚ (as permutation groups, with the subfield degrees), Gal(ℚ(ζₙ)/ℚ) = (ℤ/n)×, Gal(GF(pⁿ)/GF(p)), Frobenius patterns (Dedekind), Eisenstein |
+| lists, more | `lib/lists.imo` | [`docs/lib-lists.md`](docs/lib-lists.md) | folds, scans, unfolds, zips and transposes, searching with a given equality, stable merge sort on any order, subsequences, permutations, combinations, combinators |
+| characters and strings | `lib/strings.imo` | [`docs/lib-strings.md`](docs/lib-strings.md) | classes of characters and case (ASCII, Latin-1, Greek, Cyrillic), trim, split, words, lines, replace, search, padding, numbers in bases 2–36, Roman numerals, Levenshtein distance, run lengths |
+| theories | `lib/term.imo` … `lib/th_topo.imo` | [`docs/lib-theory.md`](docs/lib-theory.md) | 23 packages of axioms (logic, arithmetic, Peano, groups, monoids, sets, lattices, topology, ZFC, ETCS, Kolmogorov, piecewise functions, Euclidean, Hilbert, hyperbolic and elliptic geometry) that are switched on and off, with their conflicts, and the fast decision of a statement as true / false / undetermined or its simplest form: diagrams, polynomial normal forms, Fourier–Motzkin, positive semidefiniteness of quadratics, G4ip |
+| containers | `lib/dict.imo` | [`docs/lib-dict.md`](docs/lib-dict.md) | dictionaries, finite sets, multisets, leftist heaps, queues — persistent binary tries over the base-(i − 1) digits of the keys, covariant classes `(↗ Dict)` |
+| the calendar | `lib/calendar.imo` | [`docs/lib-calendar.md`](docs/lib-calendar.md) | the proleptic Gregorian calendar: leap years, month lengths, day numbers (`date.toordinal`) and their inverse, weekdays, differences, the ISO year and week, Easter, month and day names, ISO date strings |
+| graphs | `lib/graph.imo` | [`docs/lib-graph.md`](docs/lib-graph.md) | directed and undirected graphs as dictionaries of neighbour lists: breadth- and depth-first search, distances, shortest paths, components, topological order, bipartiteness, Dijkstra, Kruskal |
+| statistics | `lib/stats.imo` | [`docs/lib-stats.md`](docs/lib-stats.md) | exact descriptive statistics on lists of rationals: median, modes, variance, quantiles, covariance, least-squares line, ranks, moving averages |
+| plane geometry | `lib/geom.imo` | [`docs/lib-geom.md`](docs/lib-geom.md) | exact plane geometry on rational points: orientation, segment and line intersection, circumcentres, polygon areas, point in polygon, convex hulls, closest pair (no square roots: squared distances) |
+| regular expressions | `lib/regex.imo` | [`docs/lib-regex.md`](docs/lib-regex.md) | regular expressions by Brzozowski derivatives, with a parser for the usual notation: full match, longest prefix, leftmost-longest search, find all, replace, split |
+| encodings and checksums | `lib/encode.imo` | [`docs/lib-encode.md`](docs/lib-encode.md) | UTF-8, hexadecimal, Base 64 and percent-encoding, binary and Gray-code operations on naturals, Adler-32, CRC-32, Luhn, English names of numbers, the Vigenère cipher |
+| pseudo-random numbers | `lib/prng.imo` | [`docs/lib-prng.md`](docs/lib-prng.md) | generators as functions of an explicit state (minstd, LCG, xorshift), streams, shuffle, sample, choice, exact Van der Corput and Halton sequences, FNV-1a and djb2 hashes |
+| enumerative combinatorics | `lib/combin.imo` | [`docs/lib-combin.md`](docs/lib-combin.md) | Pascal, Eulerian, Narayana, Motzkin and Schröder numbers, derangements, lists of compositions, partitions, Dyck words, Lyndon words and set partitions, Lehmer codes and the rank and unrank of permutations |
 
 ### Classes
 
@@ -1820,7 +2284,7 @@ fields are values (a group is the sorted list of its permutations, `GF(pⁿ)` th
 | `ℤ[i]` | `.1110.` | `\Z` | class | **the foundation**: Gaussian integers, binary strings in base i − 1 |
 | `ℚ[i]` | `.1111.` | `\Q` | class | Gaussian rationals: pairs (numerator, denominator) of Gaussian integers |
 | `ℝ[i]` | `.10000.` | `\R`, `\CC` | class | lazy complex numbers = streams over ℚ[i]  (= ℂ, \R, \CC);  ≣ 𝔖 ℚ[i] |
-| `𝔻` | `.10001.` | `\D` | class | Cayley–Dickson tower over ℚ[i]  (ℂ → ℍ → 𝕆 → 𝕊 → …, depth unbounded);  ≣ 𝔗 ℚ[i] |
+| `𝔻` | `.10001.` | `\D` | class | Cayley–Dickson tower over ℚ[i]  (complex numbers → quaternions → octonions → sedenions → …, depth unbounded);  ≣ 𝔗 ℚ[i] |
 | `𝕮` | `.10010.` | `Char` | class | characters (a code point, as a natural numeral) |
 | `𝕊` | `.10011.` | `String` | class | strings;  ≣ 𝔏 𝕮 |
 | `→` | `.101.` | `->` | class | function class  A → B |
@@ -2667,6 +3131,395 @@ fields are values (a group is the sorted list of its permutations, `GF(pⁿ)` th
 | `showstr2` | `.100010001100.` | `decode` | `𝕊² → 𝕊` | a pair of strings as text, each in double quotes (no escapes):  ("Hello, world!", "Welcome to i - 1!") |
 | `parsebits` | `.100010001101.` | `parsebits` | `𝕊 → ℤ[i]` | the Gaussian integer written by a string of 1 and 0 (most significant digit first; `bits` is the inverse): "110101" is 1 − 6i |
 
+### Lists, more: folds, scans, searching, sorting, combinatorics, combinators (`lib/lists.imo`)
+
+| spec | bin | human | class | meaning |
+|:--:|:--|:--|:--|:--|
+| `ident` | `.100010010000.` | `ident` | `α → α` | the identity function |
+| `const` | `.100010010001.` | `const` | `α → β → α` | const x y = x |
+| `flip` | `.100010010010.` | `flip` | `(α → β → γ) → β → α → γ` | flip f x y = f y x |
+| `compose` | `.100010010011.` | `compose` | `(β → γ) → (α → β) → α → γ` | compose f g x = f (g x) |
+| `curry` | `.100010010100.` | `curry` | `((𝔓 α β) → γ) → α → β → γ` | curry f x y = f (pair x y) |
+| `uncurry` | `.100010010101.` | `uncurry` | `(α → β → γ) → (𝔓 α β) → γ` | uncurry f p = f (fst p) (snd p) |
+| `swap` | `.100010010110.` | `swap` | `(𝔓 α β) → (𝔓 β α)` | swap (a, b) = (b, a) |
+| `bimap` | `.100010010111.` | `bimap` | `(α → γ) → (β → δ) → (𝔓 α β) → (𝔓 γ δ)` | bimap f g (a, b) = (f a, g b) |
+| `until` | `.100010011000.` | `until` | `(α → 𝔹) → (α → α) → α → α` | the first of x, f x, f (f x), … for which p holds |
+| `applyn` | `.100010011010.` | `applyn` | `ℕ → (α → α) → α → α` | applyn n f x = f (f (… x)) with n applications |
+| `init` | `.100010011011.` | `init` | `(𝔏 α) → (𝔏 α)` | all but the last element |
+| `takewhile` | `.100010011100.` | `takewhile` | `(α → 𝔹) → (𝔏 α) → (𝔏 α)` | the longest prefix whose elements satisfy p |
+| `dropwhile` | `.100010011101.` | `dropwhile` | `(α → 𝔹) → (𝔏 α) → (𝔏 α)` | the rest after takewhile |
+| `span` | `.100010011110.` | `span` | `(α → 𝔹) → (𝔏 α) → (𝔓 (𝔏 α) (𝔏 α))` | span p xs = (takewhile p xs, dropwhile p xs) |
+| `partition` | `.100010011111.` | `partition` | `(α → 𝔹) → (𝔏 α) → (𝔓 (𝔏 α) (𝔏 α))` | (the elements that satisfy p, the others), each in order |
+| `splitat` | `.100010100001.` | `splitat` | `ℕ → (𝔏 α) → (𝔓 (𝔏 α) (𝔏 α))` | splitat n xs = (take n xs, drop n xs), computed in one pass |
+| `tails` | `.100010100010.` | `tails` | `(𝔏 α) → (𝔏 (𝔏 α))` | the suffixes: [1,2] → [[1,2],[2],[]] |
+| `inits` | `.100010100011.` | `inits` | `(𝔏 α) → (𝔏 (𝔏 α))` | the prefixes: [1,2] → [[],[1],[1,2]] |
+| `rotate` | `.100010100100.` | `rotate` | `ℕ → (𝔏 α) → (𝔏 α)` | rotate left by n places (n mod length) |
+| `chunks` | `.100010100110.` | `chunks` | `ℕ → (𝔏 α) → (𝔏 (𝔏 α))` | consecutive pieces of n elements (the last may be shorter); n = 0 gives [] |
+| `windows` | `.100010100111.` | `windows` | `ℕ → (𝔏 α) → (𝔏 (𝔏 α))` | the sublists of n consecutive elements |
+| `foldl₁` | `.100010101000.` | `foldl1` | `(α → α → α) → (𝔏 α) → α` | foldl without a start value (⊥ for the empty list) |
+| `foldr₁` | `.100010101001.` | `foldr1` | `(α → α → α) → (𝔏 α) → α` | foldr without a start value (⊥ for the empty list) |
+| `scanl` | `.100010101010.` | `scanl` | `(β → α → β) → β → (𝔏 α) → (𝔏 β)` | the running folds from the left: scanl f z [a,b] = [z, f z a, f (f z a) b] |
+| `scanl₁` | `.100010101011.` | `scanl1` | `(α → α → α) → (𝔏 α) → (𝔏 α)` | scanl without a start value |
+| `scanr` | `.100010101100.` | `scanr` | `(α → β → β) → β → (𝔏 α) → (𝔏 β)` | the running folds from the right |
+| `unfoldr` | `.100010101101.` | `unfoldr` | `(β → (𝔏 (𝔓 α β))) → β → (𝔏 α)` | unfoldr f s: f s is [] (stop) or [pair(x, s′)] (emit x, go on from s′) |
+| `concatmap` | `.100010101110.` | `concatmap` | `(α → (𝔏 β)) → (𝔏 α) → (𝔏 β)` | map then concatenate |
+| `intersperse` | `.100010101111.` | `intersperse` | `α → (𝔏 α) → (𝔏 α)` | put x between the elements |
+| `intercalate` | `.100010110000.` | `intercalate` | `(𝔏 α) → (𝔏 (𝔏 α)) → (𝔏 α)` | join lists with a separator list |
+| `count` | `.100010110001.` | `count` | `(α → 𝔹) → (𝔏 α) → ℕ` | the number of elements that satisfy p |
+| `zipwith3` | `.100010110010.` | `zipwith3` | `(α → β → γ → δ) → (𝔏 α) → (𝔏 β) → (𝔏 γ) → (𝔏 δ)` | zipwith with three lists |
+| `zip3` | `.100010110011.` | `zip3` | `(𝔏 α) → (𝔏 β) → (𝔏 γ) → (𝔏 (𝔓 α (𝔓 β γ)))` | zip with three lists: pair(a, pair(b, c)) |
+| `unzip` | `.100010110100.` | `unzip` | `(𝔏 (𝔓 α β)) → (𝔓 (𝔏 α) (𝔏 β))` | a list of pairs as a pair of lists |
+| `transposel` | `.100010110111.` | `transposel` | `(𝔏 (𝔏 α)) → (𝔏 (𝔏 α))` | the transposed rows, rows may differ in length (as in Haskell) |
+| `cartesian` | `.100010111000.` | `cartesian` | `(𝔏 α) → (𝔏 β) → (𝔏 (𝔓 α β))` | all pairs (a, b), a from the first list, in order |
+| `lookupby` | `.100010111001.` | `lookupby` | `(α → α → 𝔹) → α → (𝔏 (𝔓 α β)) → (𝔏 β)` | the value of the first pair whose key is equal (the given equality) to x, as a list of at most one element |
+| `lookup` | `.100010111010.` | `lookup` | `ℚ[i] → (𝔏 (𝔓 ℚ[i] β)) → (𝔏 β)` | lookup with ≐: the value for the key x as a list of at most one element |
+| `elemby` | `.100010111011.` | `elemby` | `(α → α → 𝔹) → α → (𝔏 α) → 𝔹` | membership with a given equality |
+| `findindex` | `.100010111101.` | `findindex` | `(α → 𝔹) → (𝔏 α) → (𝔏 ℕ)` | the index of the first element that satisfies p, as a list of at most one element |
+| `find` | `.100010111110.` | `find` | `(α → 𝔹) → (𝔏 α) → (𝔏 α)` | the first element that satisfies p, as a list of at most one element |
+| `nubby` | `.100010111111.` | `nubby` | `(α → α → 𝔹) → (𝔏 α) → (𝔏 α)` | drop repeated elements (the given equality), keeping the first of each |
+| `deleteby` | `.100011000000.` | `deleteby` | `(α → α → 𝔹) → α → (𝔏 α) → (𝔏 α)` | delete the first element equal to x |
+| `unionby` | `.100011000001.` | `unionby` | `(α → α → 𝔹) → (𝔏 α) → (𝔏 α) → (𝔏 α)` | the first list, then what is new in the second |
+| `intersectby` | `.100011000010.` | `intersectby` | `(α → α → 𝔹) → (𝔏 α) → (𝔏 α) → (𝔏 α)` | the elements of the first list that occur in the second |
+| `diffby` | `.100011000011.` | `diffby` | `(α → α → 𝔹) → (𝔏 α) → (𝔏 α) → (𝔏 α)` | the elements of the first list that do not occur in the second |
+| `groupby` | `.100011000100.` | `groupby` | `(α → α → 𝔹) → (𝔏 α) → (𝔏 (𝔏 α))` | group adjacent elements that are equal to the first of the group |
+| `isprefixby` | `.100011000101.` | `isprefixby` | `(α → α → 𝔹) → (𝔏 α) → (𝔏 α) → 𝔹` | is the first list a prefix of the second (the given equality) |
+| `issuffixby` | `.100011000110.` | `issuffixby` | `(α → α → 𝔹) → (𝔏 α) → (𝔏 α) → 𝔹` | is the first list a suffix of the second |
+| `isinfixby` | `.100011000111.` | `isinfixby` | `(α → α → 𝔹) → (𝔏 α) → (𝔏 α) → 𝔹` | is the first list a sublist (contiguous) of the second |
+| `mergeby` | `.100011001000.` | `mergeby` | `(α → α → 𝔹) → (𝔏 α) → (𝔏 α) → (𝔏 α)` | merge two lists that are sorted by le (stable) |
+| `sortby` | `.100011001001.` | `sortby` | `(α → α → 𝔹) → (𝔏 α) → (𝔏 α)` | stable merge sort for any order le (le a b: a may stay before b) |
+| `insertby` | `.100011001010.` | `insertby` | `(α → α → 𝔹) → α → (𝔏 α) → (𝔏 α)` | insert into a list that is sorted by le |
+| `maximumby` | `.100011001011.` | `maximumby` | `(α → α → 𝔹) → (𝔏 α) → α` | the greatest element for the order le (the last of equal ones) |
+| `minimumby` | `.100011001100.` | `minimumby` | `(α → α → 𝔹) → (𝔏 α) → α` | the least element for the order le (the first of equal ones) |
+| `maximum` | `.100011001101.` | `maximum` | `(𝔏 ℕ) → ℕ`<br>`(𝔏 ℤ) → ℤ`<br>`(𝔏 ℚ) → ℚ` | the greatest element of a list of real numbers |
+| `minimum` | `.100011001110.` | `minimum` | `(𝔏 ℕ) → ℕ`<br>`(𝔏 ℤ) → ℤ`<br>`(𝔏 ℚ) → ℚ` | the least element of a list of real numbers |
+| `subsequences` | `.100011010000.` | `subsequences` | `(𝔏 α) → (𝔏 (𝔏 α))` | all 2ⁿ sublists (not necessarily contiguous): [1,2] → [[],[1],[2],[1,2]] |
+| `permutations` | `.100011010010.` | `permutations` | `(𝔏 α) → (𝔏 (𝔏 α))` | all n! orderings, in the order of first choice: [1,2,3] → [[1,2,3],[1,3,2],[2,1,3],…] |
+| `combinations` | `.100011010100.` | `combinations` | `ℕ → (𝔏 α) → (𝔏 (𝔏 α))` | the k-element sublists in order: combinations 2 [1,2,3] = [[1,2],[1,3],[2,3]] |
+| `cycle` | `.100011010101.` | `cycle` | `(𝔏 α) → (𝔖 α)` | the list repeated endlessly (a stream); the empty list stays empty |
+| `sumsq` | `.100011010110.` | `sumsq` | `(𝔏 ℚ[i]) → ℚ[i]` | the sum of squares |
+| `dotl` | `.100011010111.` | `dotl` | `(𝔏 ℚ[i]) → (𝔏 ℚ[i]) → ℚ[i]` | the dot product of two lists of numbers (the shorter one decides the length) |
+| `mean` | `.100011011000.` | `mean` | `(𝔏 ℚ[i]) → ℚ[i]` | the arithmetic mean (0 for the empty list) |
+| `tally` | `.100011011001.` | `tally` | `(𝔏 ℚ) → (𝔏 (𝔓 ℚ ℕ))` | [(x, how many times x occurs)] in increasing order of x |
+
+### Characters and strings: case, splitting, searching, padding, bases, Roman numerals (`lib/strings.imo`)
+
+| spec | bin | human | class | meaning |
+|:--:|:--|:--|:--|:--|
+| `isdigit` | `.100011011010.` | `isdigit` | `𝕮 → 𝔹` | 0–9 |
+| `isuppercase` | `.100011011011.` | `isuppercase` | `𝕮 → 𝔹` | an upper-case letter (ASCII, Latin-1, Greek, Cyrillic) |
+| `islowercase` | `.100011011100.` | `islowercase` | `𝕮 → 𝔹` | a lower-case letter (ASCII, Latin-1 with ß and ÿ, Greek with ς, Cyrillic) |
+| `isalpha` | `.100011011101.` | `isalpha` | `𝕮 → 𝔹` | a letter |
+| `isalnum` | `.100011011110.` | `isalnum` | `𝕮 → 𝔹` | a letter or a digit |
+| `isspace` | `.100011011111.` | `isspace` | `𝕮 → 𝔹` | white space: tab, line feed, vertical tab, form feed, carriage return, space, no-break space, U+2000–U+200A, U+3000 |
+| `ispunct` | `.100011100000.` | `ispunct` | `𝕮 → 𝔹` | an ASCII punctuation mark or symbol |
+| `upper` | `.100011100010.` | `upper` | `𝕮 → 𝕮` | the upper-case form of a letter (other characters stay) |
+| `lower` | `.100011100011.` | `lower` | `𝕮 → 𝕮` | the lower-case form of a letter (other characters stay) |
+| `toupper` | `.100011100100.` | `toupper` | `𝕊 → 𝕊` | every letter in upper case |
+| `tolower` | `.100011100101.` | `tolower` | `𝕊 → 𝕊` | every letter in lower case |
+| `capitalize` | `.100011100110.` | `capitalize` | `𝕊 → 𝕊` | the first letter in upper case, the others in lower case |
+| `ltrim` | `.100011100111.` | `ltrim` | `𝕊 → 𝕊` | without leading white space |
+| `rtrim` | `.100011101000.` | `rtrim` | `𝕊 → 𝕊` | without trailing white space |
+| `trim` | `.100011101001.` | `trim` | `𝕊 → 𝕊` | without leading and trailing white space |
+| `startswith` | `.100011101010.` | `startswith` | `𝕊 → 𝕊 → 𝔹` | startswith s p: does s begin with p |
+| `endswith` | `.100011101011.` | `endswith` | `𝕊 → 𝕊 → 𝔹` | endswith s p: does s end with p |
+| `contains` | `.100011101100.` | `contains` | `𝕊 → 𝕊 → 𝔹` | contains s p: does p occur in s |
+| `indexof` | `.100011101101.` | `indexof` | `𝕊 → 𝕊 → (𝔏 ℕ)` | indexof s p: the index of the first occurrence of p in s, as a list of at most one element |
+| `replace` | `.100011101111.` | `replace` | `𝕊 → 𝕊 → 𝕊 → 𝕊` | replace s p r: every non-overlapping occurrence of p in s (from the left) becomes r; an empty p changes nothing |
+| `split` | `.100011110000.` | `split` | `𝕮 → 𝕊 → (𝔏 𝕊)` | split c s: the fields between the characters c (empty fields kept): split ',' "a,,b" = ["a", "", "b"] |
+| `splitstr` | `.100011110010.` | `splitstr` | `𝕊 → 𝕊 → (𝔏 𝕊)` | splitstr p s: the fields between the occurrences of the string p (an empty p gives [s]) |
+| `words` | `.100011110011.` | `words` | `𝕊 → (𝔏 𝕊)` | the words: maximal runs of characters that are not white space |
+| `unwords` | `.100011110100.` | `unwords` | `(𝔏 𝕊) → 𝕊` | the words joined by single spaces |
+| `lines` | `.100011110101.` | `lines` | `𝕊 → (𝔏 𝕊)` | the lines (the line feed ends a line, it is not part of it; a final line feed starts no new line) |
+| `padleft` | `.100011110110.` | `padleft` | `ℕ → 𝕮 → 𝕊 → 𝕊` | padleft n c s: s with c in front up to length n |
+| `padright` | `.100011110111.` | `padright` | `ℕ → 𝕮 → 𝕊 → 𝕊` | padright n c s: s with c behind it up to length n |
+| `padcenter` | `.100011111000.` | `padcenter` | `ℕ → 𝕮 → 𝕊 → 𝕊` | padcenter n c s: s between c's up to length n (the extra one goes to the right) |
+| `repeatstr` | `.100011111001.` | `repeatstr` | `ℕ → 𝕊 → 𝕊` | the string n times |
+| `ispalindrome` | `.100011111010.` | `ispalindrome` | `𝕊 → 𝔹` | reads the same backwards |
+| `isanagram` | `.100011111011.` | `isanagram` | `𝕊 → 𝕊 → 𝔹` | the same letters (case and white space ignored) |
+| `caesar` | `.100011111100.` | `caesar` | `ℤ → 𝕊 → 𝕊` | caesar k s: every ASCII letter moved k places along the alphabet (cyclically), other characters stay |
+| `digitchar` | `.100011111110.` | `digitchar` | `ℕ → 𝕮` |  |
+| `showbase` | `.100100000000.` | `showbase` | `ℕ → ℕ → 𝕊` | showbase n b: n written in base b (2 ≤ b ≤ 36), most significant digit first |
+| `hex` | `.100100000001.` | `hex` | `ℕ → 𝕊` | n in base 16 |
+| `octal` | `.100100000010.` | `octal` | `ℕ → 𝕊` | n in base 8 |
+| `binary` | `.100100000011.` | `binary` | `ℕ → 𝕊` | n in base 2 |
+| `digitval` | `.100100000100.` | `digitval` | `𝕮 → (𝔏 ℕ)` | the value of a digit character (0–9, a–z, A–Z as 10 … 35), as a list of at most one element |
+| `readbase` | `.100100000101.` | `readbase` | `ℕ → 𝕊 → (𝔏 ℕ)` | readbase b s: the number written in base b, if s is non-empty and made of digits below b (a list of at most one element) |
+| `readnat` | `.100100000110.` | `readnat` | `𝕊 → (𝔏 ℕ)` | a decimal natural number, if the string is non-empty and made of digits (a list of at most one element) |
+| `readint` | `.100100000111.` | `readint` | `𝕊 → (𝔏 ℤ)` | a decimal integer with an optional sign, as a list of at most one element |
+| `romantable` | `.100100001000.` | `romantable` | `(𝔏 (𝔓 ℕ 𝕊))` |  |
+| `roman` | `.100100001010.` | `roman` | `ℕ → 𝕊` | the Roman numeral of n (1 ≤ n ≤ 3999; larger n repeat M, 0 gives the empty string) |
+| `fromroman` | `.100100001100.` | `fromroman` | `𝕊 → ℕ` | the value of a Roman numeral written as roman writes it (0 for the empty string) |
+| `levenshtein` | `.100100001111.` | `levenshtein` | `𝕊 → 𝕊 → ℕ` | the edit distance: the fewest insertions, deletions and substitutions that turn one string into the other |
+| `rle` | `.100100010000.` | `rle` | `𝕊 → 𝕊` | run-length encoding: "aaab" → "3a1b" (the count in decimal, then the character; digits in the text are not allowed) |
+| `unrle` | `.100100010001.` | `unrle` | `𝕊 → 𝕊` | the inverse of rle |
+
+### Containers as binary tries over the base i−1 digits: dictionaries, finite sets, multisets, heaps, queues (`lib/dict.imo`)
+
+| spec | bin | human | class | meaning |
+|:--:|:--|:--|:--|:--|
+| `emptydict` | `.100100101001.` | `emptydict` | `(Dict α)` | the dictionary without entries |
+| `dput` | `.100100101010.` | `dput` | `ℤ[i] → α → (Dict α) → (Dict α)` | dput k v d: d with the key k bound to v |
+| `dget` | `.100100101011.` | `dget` | `ℤ[i] → (Dict α) → (𝔏 α)` | the value of the key, as a list of at most one element |
+| `dgetd` | `.100100101100.` | `dgetd` | `ℤ[i] → α → (Dict α) → α` | dgetd k default d: the value of k, or the default |
+| `dhas` | `.100100101101.` | `dhas` | `ℤ[i] → (Dict α) → 𝔹` | is the key bound |
+| `ddel` | `.100100101110.` | `ddel` | `ℤ[i] → (Dict α) → (Dict α)` | d without the key |
+| `dsize` | `.100100101111.` | `dsize` | `(Dict α) → ℕ` | the number of entries |
+| `disempty` | `.100100110000.` | `disempty` | `(Dict α) → 𝔹` | no entries |
+| `ditems` | `.100100110001.` | `ditems` | `(Dict α) → (𝔏 (𝔓 ℤ[i] α))` | the entries (key, value) in trie order (the least significant digit of the key decides first) |
+| `dkeys` | `.100100110010.` | `dkeys` | `(Dict α) → (𝔏 ℤ[i])` | the keys in trie order |
+| `dvals` | `.100100110011.` | `dvals` | `(Dict α) → (𝔏 α)` | the values in trie order |
+| `dfromlist` | `.100100110100.` | `dfromlist` | `(𝔏 (𝔓 ℤ[i] α)) → (Dict α)` | the dictionary of a list of pairs (a later pair wins over an earlier one with the same key) |
+| `dmap` | `.100100110101.` | `dmap` | `(α → β) → (Dict α) → (Dict β)` | apply f to every value |
+| `dfilter` | `.100100110110.` | `dfilter` | `(α → 𝔹) → (Dict α) → (Dict α)` | keep the entries whose value satisfies p |
+| `dfoldr` | `.100100110111.` | `dfoldr` | `(α → β → β) → β → (Dict α) → β` | fold the values (in trie order) |
+| `dwith` | `.100100111000.` | `dwith` | `(α → α → α) → ℤ[i] → α → (Dict α) → (Dict α)` | dwith f k v d: bind k to v, or to f v old when k is already bound |
+| `dupdate` | `.100100111001.` | `dupdate` | `(α → α) → ℤ[i] → (Dict α) → (Dict α)` | apply f to the value of k when k is bound (otherwise nothing changes) |
+| `dunion` | `.100100111010.` | `dunion` | `(Dict α) → (Dict α) → (Dict α)` | all entries of both; the first dictionary wins on a common key |
+| `dunionwith` | `.100100111011.` | `dunionwith` | `(α → α → α) → (Dict α) → (Dict α) → (Dict α)` | dunionwith f a b: on a common key the value is f (value in a) (value in b) |
+| `dinter` | `.100100111100.` | `dinter` | `(Dict α) → (Dict α) → (Dict α)` | the entries of the first whose key is also in the second |
+| `ddiff` | `.100100111101.` | `ddiff` | `(Dict α) → (Dict α) → (Dict α)` | the entries of the first whose key is not in the second |
+| `deq` | `.100100111110.` | `deq` | `(α → α → 𝔹) → (Dict α) → (Dict α) → 𝔹` | the same keys and equal values (equality of values given) |
+| `dfromvals` | `.100100111111.` | `dfromvals` | `(𝔏 α) → (Dict α)` | the dictionary of a list: the key of the k-th element is k (an array) |
+| `dtovals` | `.100101000000.` | `dtovals` | `(Dict α) → (𝔏 α)` | the values of the keys 0, 1, 2, … up to the size (the inverse of dfromvals) |
+| `dkput` | `.101011011010.` |  | `𝔇 → α → (Dict α) → (Dict α)` | dkput digits v d |
+| `dkwith` | `.101011011101.` |  | `(α → α → α) → 𝔇 → α → (Dict α) → (Dict α)` | dkwith f digits v d: bind to v, or to f v old |
+| `skey` | `.101011011111.` |  | `𝕊 → 𝔇` | the code of a string as a digit string (prefix-free, so a trie keyed by it holds strings) |
+| `ukchar` | `.101011100000.` |  | `𝔇 → (𝔓 𝔇 𝔇)` | the digits of the first character of a code and the rest |
+| `unskey` | `.101011100001.` |  | `𝔇 → 𝕊` | the string of a code |
+| `dputs` | `.100101000001.` | `dputs` | `𝕊 → α → (Dict α) → (Dict α)` | dput with a string key |
+| `dgets` | `.100101000010.` | `dgets` | `𝕊 → (Dict α) → (𝔏 α)` | dget with a string key |
+| `dhass` | `.100101000011.` | `dhass` | `𝕊 → (Dict α) → 𝔹` | dhas with a string key |
+| `ddels` | `.100101000100.` | `ddels` | `𝕊 → (Dict α) → (Dict α)` | ddel with a string key |
+| `dkeyss` | `.100101000101.` | `dkeyss` | `(Dict α) → (𝔏 𝕊)` | the keys of a dictionary with string keys |
+| `emptyfset` | `.100101000110.` | `emptyfset` | `FSet` | the empty finite set |
+| `fsadd` | `.100101000111.` | `fsadd` | `ℤ[i] → FSet → FSet` | the set with one more element |
+| `fsdel` | `.100101001000.` | `fsdel` | `ℤ[i] → FSet → FSet` | the set without the element |
+| `fshas` | `.100101001001.` | `fshas` | `ℤ[i] → FSet → 𝔹` | membership |
+| `fssize` | `.100101001010.` | `fssize` | `FSet → ℕ` | the number of elements |
+| `fsempty` | `.100101001011.` | `fsempty` | `FSet → 𝔹` | no elements |
+| `fselems` | `.100101001100.` | `fselems` | `FSet → (𝔏 ℤ[i])` | the elements in trie order |
+| `fsfromlist` | `.100101001101.` | `fsfromlist` | `(𝔏 ℤ[i]) → FSet` | the set of the elements of a list |
+| `fsunion` | `.100101001110.` | `fsunion` | `FSet → FSet → FSet` | A ∪ B |
+| `fsinter` | `.100101001111.` | `fsinter` | `FSet → FSet → FSet` | A ∩ B |
+| `fsdiff` | `.100101010000.` | `fsdiff` | `FSet → FSet → FSet` | A ∖ B |
+| `fssubset` | `.100101010001.` | `fssubset` | `FSet → FSet → 𝔹` | A ⊆ B |
+| `fseq` | `.100101010010.` | `fseq` | `FSet → FSet → 𝔹` | A = B |
+| `fsfilter` | `.100101010011.` | `fsfilter` | `(ℤ[i] → 𝔹) → FSet → FSet` | the elements that satisfy p |
+| `fsmap` | `.100101010100.` | `fsmap` | `(ℤ[i] → ℤ[i]) → FSet → FSet` | the set of the images |
+| `fspowerset` | `.100101010101.` | `fspowerset` | `FSet → (𝔏 FSet)` | all 2ⁿ subsets, as a list (the empty set first) |
+| `emptybag` | `.100101010110.` | `emptybag` | `Bag` | the empty multiset |
+| `bagadd` | `.100101010111.` | `bagadd` | `ℤ[i] → ℕ → Bag → Bag` | bagadd x n b: n more copies of x |
+| `bagcount` | `.100101011000.` | `bagcount` | `ℤ[i] → Bag → ℕ` | the multiplicity of x |
+| `bagsize` | `.100101011001.` | `bagsize` | `Bag → ℕ` | the number of elements with multiplicity |
+| `bagfromlist` | `.100101011010.` | `bagfromlist` | `(𝔏 ℤ[i]) → Bag` | the multiset of the elements of a list |
+| `bagitems` | `.100101011011.` | `bagitems` | `Bag → (𝔏 (𝔓 ℤ[i] ℕ))` | (element, multiplicity) pairs in trie order |
+| `bagunion` | `.100101011100.` | `bagunion` | `Bag → Bag → Bag` | multiplicities add |
+| `bagdel` | `.100101011101.` | `bagdel` | `ℤ[i] → ℕ → Bag → Bag` | bagdel x n b: n fewer copies of x (not below zero; no entry is left at zero) |
+| `emptyheap` | `.100101100001.` | `emptyheap` | `(Heap α)` | the empty priority queue |
+| `hpush` | `.100101100010.` | `hpush` | `ℚ → α → (Heap α) → (Heap α)` | hpush priority value h: h with one more entry |
+| `hpeek` | `.100101100011.` | `hpeek` | `(Heap α) → (𝔏 (𝔓 ℚ α))` | the entry with the smallest priority (the earliest pushed of equal ones is not guaranteed), as a list of at most one element |
+| `hpop` | `.100101100100.` | `hpop` | `(Heap α) → (Heap α)` | the heap without its smallest entry |
+| `hsize` | `.100101100101.` | `hsize` | `(Heap α) → ℕ` | the number of entries |
+| `hempty` | `.100101100110.` | `hempty` | `(Heap α) → 𝔹` | no entries |
+| `hfromlist` | `.100101100111.` | `hfromlist` | `(𝔏 (𝔓 ℚ α)) → (Heap α)` | the heap of a list of (priority, value) pairs |
+| `htolist` | `.100101101000.` | `htolist` | `(Heap α) → (𝔏 (𝔓 ℚ α))` | all entries by increasing priority (heap sort) |
+| `emptyqueue` | `.100101101001.` | `emptyqueue` | `(Queue α)` | the empty queue |
+| `qpush` | `.100101101010.` | `qpush` | `α → (Queue α) → (Queue α)` | add at the back |
+| `qpeek` | `.100101101100.` | `qpeek` | `(Queue α) → (𝔏 α)` | the front element, as a list of at most one element |
+| `qpop` | `.100101101101.` | `qpop` | `(Queue α) → (Queue α)` | the queue without its front element |
+| `qsize` | `.100101101110.` | `qsize` | `(Queue α) → ℕ` | the number of elements |
+| `qempty` | `.100101101111.` | `qempty` | `(Queue α) → 𝔹` | no elements |
+| `qtolist` | `.100101110000.` | `qtolist` | `(Queue α) → (𝔏 α)` | the elements from the front to the back |
+| `qfromlist` | `.100101110001.` | `qfromlist` | `(𝔏 α) → (Queue α)` | the queue of a list, its first element at the front |
+| `chuppers` | `.101011110001.` |  | `𝕊` | A–Z, À–Ö, Ø–Þ, Α–Ρ, Σ–Ω, А–Я |
+| `chlowers` | `.101011110010.` |  | `𝕊` | a–z, à–ö, ø–þ, α–ρ, σ–ω, а–я, ß, ÿ, ς |
+| `chpuncts` | `.101011110100.` |  | `𝕊` | the punctuation of the tokenizer |
+| `chopchars` | `.101011110101.` |  | `𝕊` | the characters that make operators in the tokenizer |
+| `chextras` | `.101011110110.` |  | `𝕊` | apostrophe, prime and the subscript digits: they may be inside an identifier |
+| `chspaces` | `.101011110111.` |  | `(𝔏 ℕ)` | tab, line feed, vertical tab, form feed, carriage return, space, no-break space, U+2000–U+200A, U+3000 |
+| `chclass` | `.101011100101.` |  | `𝕮 → Chclass` | the class of a character |
+
+### Terms: variables, numbers and applications, with equality, a total order, substitution and matching (`lib/term.imo`)
+
+| spec | bin | human | class | meaning |
+|:--:|:--|:--|:--|:--|
+| `tvar` | `.100110000110.` |  | `ℕ → Term` | the variable with this index |
+| `tapp` | `.100110000111.` |  | `ℕ → (𝔏 Term) → Term` | the symbol f applied to arguments |
+| `tnum` | `.100110001000.` |  | `ℚ[i] → Term` | a number |
+| `tconst` | `.100110001001.` |  | `ℕ → Term` | a symbol without arguments |
+| `thead` | `.100110001111.` |  | `Term → ℕ` | the symbol of an application (0 for the others) |
+| `targs` | `.100110010000.` |  | `Term → (𝔏 Term)` | the arguments of an application (none for the others) |
+| `tisconst` | `.100110010001.` |  | `ℕ → Term → 𝔹` | is the term this symbol without arguments |
+| `tishead` | `.100110010010.` |  | `ℕ → Term → 𝔹` | is the term an application of this symbol |
+| `teq` | `.100100101000.` | `teq` | `Term → Term → 𝔹` | the same term |
+| `qlt` | `.100110010101.` |  | `ℚ[i] → ℚ[i] → 𝔹` | the order on ℚ[i]: real part, then imaginary part |
+| `idlt` | `.101011100010.` |  | `ℚ[i] → ℚ[i] → 𝔹` | the order on symbols: by their codes, digit by digit |
+| `tlt` | `.100110010110.` | `tlt` | `Term → Term → 𝔹` | a total order on terms: numbers, then variables, then applications (by symbol, then argument by argument; a shorter list first) |
+| `tsort` | `.100110011001.` |  | `(𝔏 Term) → (𝔏 Term)` | sorted by tlt |
+| `tsize` | `.100100100000.` | `tsize` | `Term → ℕ` | the number of nodes |
+| `tvars` | `.100110011011.` | `tvars` | `Term → (𝔏 ℕ)` | the variables, each once, in order of first occurrence |
+| `tground` | `.100110011101.` | `tground` | `Term → 𝔹` | without variables |
+| `tsubst` | `.100110011110.` |  | `(Dict Term) → Term → Term` | replace the variables that the substitution binds |
+| `tmatch` | `.100110011111.` |  | `Term → Term → (Dict Term) → (𝔏 (Dict Term))` | match the pattern against the term, extending the substitution: [σ] or [] |
+| `symid` | `.100110100010.` | `symid` | `𝕊 → ℕ` | the symbol (or variable) of a name: the code of the name (lib/dict.imo) read as a number, so that no arithmetic is done to make it |
+| `symname` | `.100110100011.` | `symname` | `ℕ → 𝕊` | the name of a symbol |
+
+### Reading and writing terms: a tokenizer, a precedence parser and a printer driven by a signature (`lib/parse.imo`)
+
+| spec | bin | human | class | meaning |
+|:--:|:--|:--|:--|:--|
+| `istokpunct` | `.101011111010.` |  | `𝕮 → 𝔹` | ( ) , { } [ ] . |
+| `tokenize` | `.100110101001.` | `tokenize` | `𝕊 → (𝔏 (𝔓 ℕ 𝕊))` | the tokens of a text |
+| `readnum` | `.100110101010.` | `readnum` | `𝕊 → ℚ` | a decimal number: 12, 0.25 |
+| `declentry` | `.100110110001.` |  | `𝕊 → (𝔏 (𝔓 𝕊 α))` | the entry that a declaration line makes, with its token: [] for a line that declares nothing |
+| `mksig` | `.100110110011.` | `mksig` | `(𝔏 𝕊) → Sig` | a signature from declaration lines |
+| `sdgetd` | `.101011100100.` |  | `𝕊 → α → (Dict α) → α` | the value of a string key, or a default |
+| `sigmerge` | `.100110110101.` | `sigmerge` | `Sig → Sig → Sig` | the operators of both (the first signature wins on a token) |
+| `sigfind` | `.100110110110.` |  | `Sig → 𝕊 → (𝔏 ℕ) → (𝔏 α)` | the first entry of a token whose kind is one of the numbers |
+| `sigprint` | `.100110110111.` |  | `Sig → ℕ → (𝔏 α)` | the entry that prints a symbol |
+| `parseterm` | `.100111000111.` | `parseterm` | `Sig → 𝕊 → (𝔏 Term)` | the term that a text denotes, as a maybe (all of the text must be used) |
+| `tprec` | `.100111001000.` |  | `Sig → Term → ℕ` | how tightly a term binds when printed (atoms: 111001100) |
+| `tprint` | `.100111001001.` | `tprint` | `Sig → Term → 𝕊` | the text of a term |
+
+### Rewriting: the normal form of a term under rules, associative-commutative-idempotent operators and hooks (`lib/rewrite.imo`)
+
+| spec | bin | human | class | meaning |
+|:--:|:--|:--|:--|:--|
+| `mkenv` | `.100111001111.` | `mkenv` | `Sig → (Dict (𝔏 α)) → (Dict (𝔏 β)) → (𝔏 𝕊) → ℕ → Env` |  |
+| `symprops` | `.100111010101.` | `symprops` | `Env → ℕ → 𝕊` | the property letters of a symbol (A, C, I) |
+| `acnorm` | `.100111010111.` |  | `Env → Term → Term` | flatten (A), sort (C), merge equal arguments (I); one argument left: that argument |
+| `applyrule` | `.100111100000.` |  | `Env → α → Term → (𝔏 Term)` | apply one rule (⊗ lhs rhs) at the root of a term: a maybe |
+| `nf` | `.100111100110.` |  | `Env → ℕ → Term → Term` | bottom-up: children first, the laws of the operator, then hooks and rules at the root until none applies (at most k steps in a row) |
+| `normalize` | `.100111100111.` | `normalize` | `Env → Term → Term` | the normal form under the rules of the active theories |
+| `mkrule` | `.100111101000.` | `mkrule` | `Sig → 𝕊 → (𝔏 α)` | "lhs ==> rhs" as a rule (a maybe) |
+| `mkrules` | `.100111101010.` | `mkrules` | `Sig → (𝔏 𝕊) → (Dict (𝔏 α))` | the rule index of a list of lines (in order) |
+
+### Boolean algebra by reduced ordered binary decision diagrams: every propositional formula has exactly one normal form (`lib/boolalg.imo`)
+
+| spec | bin | human | class | meaning |
+|:--:|:--|:--|:--|:--|
+| `bt` | `.100111101110.` |  | `BDD` | the diagram of true |
+| `bf` | `.100111101111.` |  | `BDD` | the diagram of false |
+| `bn` | `.100111110000.` |  | `ℕ → BDD → BDD → BDD` | a node: test the atom v; lo if it is false, hi if it is true |
+| `isbool` | `.101000000010.` |  | `Term → 𝔹` | is the root of the term a connective or a truth constant |
+| `bnorm` | `.101000000100.` | `bnorm` | `(𝔏 Term) → (𝔏 Term)` |  |
+| `bcanon` | `.101000001100.` | `bcanon` | `Term → Term` |  |
+| `bdecide` | `.101000001101.` | `bdecide` | `Term → 𝔹` | ⊤ if the formula is a tautology, ⊥ if it is a contradiction, ⍰ otherwise |
+| `boolpass` | `.101000001110.` | `boolpass` | `Term → Term` |  |
+| `boolatoms` | `.101000001111.` |  | `Term → Term` | the formula with every atom passed through boolpass |
+
+### Polynomials as normal forms of arithmetic terms, with the sign analysis that decides equations and inequalities (`lib/polynf.imo`)
+
+| spec | bin | human | class | meaning |
+|:--:|:--|:--|:--|:--|
+| `mbefore` | `.101000100011.` |  | `(𝔏 α) → (𝔏 α) → 𝔹` | a monomial comes before another: higher degree first, then by atoms |
+| `psubst` | `.101011111011.` |  | `(Term → Poly) → Poly → Poly` | replace every atom by a polynomial |
+| `acdeep` | `.101000110010.` |  | `Env → Term → Term` | the laws of the operators applied everywhere, bottom-up |
+| `monosign` | `.101000110101.` |  | `𝔹 → α → ℕ` | the sign of one term c·m: 2 non-negative, 1 non-positive, 4 unknown (a zero-degree term is a number) |
+| `pfsign` | `.101000111000.` |  | `Env → Poly → ℕ` | the sign of a polynomial that is not zero: by its monomials, and for polynomials of degree 2 by an exact positive semidefiniteness test (lib/psd.imo) |
+| `hasconst` | `.101000111010.` |  | `Poly → 𝔹` | is there a term of degree 0 (it comes last) |
+
+### Linear arithmetic by Fourier–Motzkin elimination, and Boolean simplification modulo the order of the numbers (DPLL(T) with diagrams) (`lib/fm.imo`)
+
+| spec | bin | human | class | meaning |
+|:--:|:--|:--|:--|:--|
+| `pcoef` | `.101001110100.` |  | `Poly → (𝔏 α) → ℚ[i]` | the coefficient of a monomial in a polynomial |
+| `pmonos` | `.101001110101.` |  | `Poly → (𝔏 (𝔏 α))` | the monomials of positive degree |
+| `pconst` | `.101001110110.` |  | `Poly → ℚ[i]` | the constant term |
+| `isrealpoly` | `.101001110111.` |  | `Poly → 𝔹` | all coefficients real |
+| `peq` | `.101011111100.` |  | `Poly → Poly → 𝔹` | the same polynomial |
+| `fmvarp` | `.101011111101.` |  | `Poly → Poly` | the terms of positive degree |
+| `fmisconst` | `.101011111110.` |  | `(𝔓 Poly ℕ) → 𝔹` | a row without a variable (the terms come in decreasing degree and a constant comes last) |
+| `fmcheck` | `.101100000000.` |  | `(𝔓 Poly ℕ) → 𝔹` | does a row without a variable hold |
+| `fmbad` | `.101100000001.` |  | `(𝔏 (𝔓 Poly ℕ))` | the rows that say 0 > 0 |
+| `fmsame` | `.101100000011.` |  | `(𝔓 Poly ℕ) → (𝔓 Poly ℕ) → 𝔹` | the same terms of positive degree |
+| `fmstronger` | `.101100000100.` |  | `(𝔓 Poly ℕ) → (𝔓 Poly ℕ) → 𝔹` | for two inequalities with the same terms of positive degree: the first implies the second |
+| `fmsigns` | `.101100000110.` |  | `(𝔏 α) → (𝔏 (𝔓 Poly ℕ)) → ℕ` | the number of new rows when the monomial is eliminated |
+| `fmispure` | `.101100000111.` |  | `(𝔏 α) → (𝔏 (𝔓 Poly ℕ)) → 𝔹` | the monomial has one sign in all rows |
+| `fmdrop` | `.101100001000.` |  | `(𝔏 α) → (𝔏 (𝔓 Poly ℕ)) → (𝔏 (𝔓 Poly ℕ))` | the rows without the monomial |
+| `fmbest` | `.101100001001.` |  | `(𝔏 (𝔏 α)) → (𝔏 (𝔓 Poly ℕ)) → (𝔏 α)` | the monomial with the fewest new rows |
+| `fmcomb` | `.101001111110.` |  | `(𝔏 α) → (𝔓 Poly ℕ) → (𝔓 Poly ℕ) → (𝔓 Poly ℕ)` | p has a positive coefficient a for m, q a negative one b: (−b)·p + a·q has none; strict if one of the two is |
+| `fmfm` | `.101100001010.` |  | `(𝔏 α) → (𝔏 (𝔓 Poly ℕ)) → (𝔏 (𝔓 Poly ℕ))` | eliminate the monomial: the rows without it, and each lower bound combined with each upper bound |
+| `fmpick` | `.101100001011.` |  | `(𝔓 Poly ℕ) → (𝔏 (𝔓 Poly ℕ)) → (𝔏 α)` | the monomial of an equality that occurs in the fewest other rows |
+| `fmelim` | `.101100001100.` |  | `(𝔓 Poly ℕ) → (𝔏 (𝔓 Poly ℕ)) → (𝔏 (𝔓 Poly ℕ))` | solve the equality for a monomial and put it into the other rows |
+| `fmsubst` | `.101100001101.` |  | `ℕ → (𝔏 (𝔓 Poly ℕ)) → (𝔏 (𝔓 Poly ℕ))` | eliminate the equality at this index |
+| `fmfeasible` | `.101001111000.` |  | `(𝔏 (𝔓 Poly ℕ)) → 𝔹` | can all the rows hold at the same time (over the ordered field of the rationals, each monomial a variable) |
+| `fmsign` | `.101100010011.` |  | `(𝔓 Poly ℕ) → (𝔓 Poly ℕ)` | an equation with a positive first coefficient |
+| `fmfeasibleb` | `.101100001110.` |  | `𝔹 → (𝔏 (𝔓 Poly ℕ)) → 𝔹` | with True: the variables are integers |
+| `atomalts` | `.101001111111.` |  | `Term → 𝔹 → (𝔏 (𝔏 (𝔓 Poly ℕ)))` | the alternatives (each a list of constraints) that make the atom have the value; [] if it is not a relation |
+| `fmprep` | `.101100011001.` |  | `Env → (𝔏 (𝔓 Poly ℕ)) → (𝔏 (𝔓 Poly ℕ))` | the rows with the facts about the variables (and, in the Kolmogorov theory, written with the probabilities of the minterms) |
+| `issetatom` | `.101010001101.` |  | `Env → Term → 𝔹` | subset(S, T), or eq(S, T) with a Boolean expression on a side, or any eq if the sets are the only domain (no arithmetic) |
+| `tomem` | `.101010001110.` |  | `Term → Term → Term` | the Boolean formula "element w is in the set S" |
+| `bsetatom` | `.101010110011.` |  | `Env → Term → (𝔏 Term)` | the hook of the sets: a set atom that is decided by one element |
+| `isrel` | `.101010000110.` |  | `Term → 𝔹` | a relation atom: eq, lt or le of two terms |
+
+### Intuitionistic propositional logic by the contraction-free sequent calculus G4ip (Dyckhoff), a decision procedure (`lib/intuit.imo`)
+
+| spec | bin | human | class | meaning |
+|:--:|:--|:--|:--|:--|
+| `ia` | `.101010011011.` |  | `Term → Term` | first argument |
+| `ib` | `.101010011100.` |  | `Term → Term` | second argument |
+| `iatom` | `.101010011110.` |  | `Term → 𝔹` | not a connective and not a constant |
+| `inorm′` | `.101010100000.` |  | `ℕ → (𝔏 Term) → Term` | a connective applied to several arguments: nested to the right |
+
+### Theories (axiomatic packages): records, activation with requirements and conflicts, and the simplifier (`lib/theory.imo`)
+
+| spec | bin | human | class | meaning |
+|:--:|:--|:--|:--|:--|
+| `theorynames` | `.101001001110.` | `theorynames` | `(𝔏 𝕊)` | the names of all the theories |
+| `thconflict` | `.101001010001.` |  | `𝕊 → 𝕊 → 𝔹` | do two theories exclude each other (either one says so) |
+| `use` | `.101001010100.` | `use` | `𝕊 → Env → Env` | use name env: switch a theory on, with its requirements; every active theory that conflicts with it, and those that need one that goes, are switched off |
+| `unuse` | `.101001010111.` | `unuse` | `𝕊 → Env → Env` | unuse name env: switch a theory off, and every active theory that requires it |
+| `usetheories` | `.101001011000.` | `usetheories` | `(𝔏 𝕊) → Env → Env` | use, one after the other |
+| `defaultenv` | `.101001011010.` | `defaultenv` | `Env` | the theories that are on by default |
+| `envwith` | `.101001011011.` | `envwith` | `(𝔏 𝕊) → Env` | the default theories, then these (each may switch some off) |
+| `activetheories` | `.101001011100.` | `activetheories` | `Env → (𝔏 𝕊)` | the names of the active theories, requirements first |
+| `isactive` | `.101001011101.` | `isactive` | `𝕊 → Env → 𝔹` |  |
+| `simplifyt` | `.101001011111.` | `simplifyt` | `Env → Term → Term` | the simplest form of a term under the active theories (rewriting, then Boolean canonical forms, until nothing changes) |
+| `simpe` | `.101001100000.` | `simpe` | `Env → 𝕊 → 𝕊` | simpe env "text": the simplest form of a statement or an expression, as text (the text itself if it does not parse) |
+| `simp` | `.101001100001.` | `simp` | `𝕊 → 𝕊` | the simplest form under the default theories |
+| `holdsv` | `.101001100010.` | `holdsv` | `Env → 𝕊 → ℕ` | the verdict as a number: 1 true for all values, 0 false for all, 2 undetermined |
+| `holdse` | `.101001100011.` | `holdse` | `Env → 𝕊 → 𝔹` | holdse env "statement": ⊤ if it is true for all values of its variables, ⊥ if for none, ⍰ if the theories cannot tell |
+| `holds` | `.101001100100.` | `holds` | `𝕊 → 𝔹` | holds "statement": under the default theories |
+| `axiomsof` | `.101001100101.` | `axiomsof` | `𝕊 → (𝔏 𝕊)` | the axioms of a theory, as text |
+| `theoremsof` | `.101001100110.` | `theoremsof` | `𝕊 → (𝔏 𝕊)` | the theorems of a theory (each is checked by checktheory) |
+| `describe` | `.101001100111.` | `describe` | `𝕊 → 𝕊` | a line about a theory |
+| `checktheory` | `.101001101000.` | `checktheory` | `𝕊 → (𝔏 𝕊)` | the theorems of a theory that do not hold in an environment with the theory on (an empty list: all hold) |
+
+### The registry of theories, their compiled forms, and the first packages: core (logic and equality), arith (commutative rings and (`lib/theories.imo`)
+
+| spec | bin | human | class | meaning |
+|:--:|:--|:--|:--|:--|
+| `registry` | `.101001001101.` |  | `(𝔏 Theory)` | every theory of the library, in the order of definition |
+| `compilesig` | `.101001101111.` |  | `𝕊 → Sig` | the operators of a theory and of its requirements, the theory itself last (it wins on a clash) |
+| `envof` | `.101001010110.` |  | `(𝔏 𝕊) → Env` | the environment of a list of theory names (requirements first) |
+
+### Logic modes and algebraic theories: classical and intuitionistic logic, groups, abelian groups, the algebra of sets, lattices (`lib/th_algebra.imo`)
+
+| spec | bin | human | class | meaning |
+|:--:|:--|:--|:--|:--|
+| `latticehook` | `.101101001001.` |  | `Env → Term → (𝔏 Term)` | eq(a, b) with a lattice term on a side: true if the free lattice proves it |
+
+### Foundations: ZFC (hereditarily finite sets, evaluated) and ETCS, Lawvere's elementary theory of the category of sets (morphisms, normalised) (`lib/th_found.imo`)
+
+| spec | bin | human | class | meaning |
+|:--:|:--|:--|:--|:--|
+| `zknown` | `.101010111010.` |  | `Term → 𝔹` | a set whose elements are all ground |
+| `zopair` | `.101011000101.` |  | `Term → Term → Term` | Kuratowski: (a, b) = {{a}, {a, b}} |
+| `zeqhook` | `.101011000110.` |  | `Env → Term → (𝔏 Term)` | two different sets (or numbers) with known elements are different |
+| `zmemhook` | `.101011001000.` |  | `Env → Term → (𝔏 Term)` | x ∈ {a, b, …} is x = a ∨ x = b ∨ … |
+| `zsubhook` | `.101011001001.` |  | `Env → Term → (𝔏 Term)` | {a, b, …} ⊆ B is a ∈ B ∧ b ∈ B ∧ … |
+
+### Kolmogorov's probability, decided exactly for any finite number of events (`lib/th_prob.imo`)
+
+| spec | bin | human | class | meaning |
+|:--:|:--|:--|:--|:--|
+| `isconj` | `.101011001110.` |  | `Term → 𝔹` | an event, or a conjunction of events |
+| `probof` | `.101011010000.` |  | `(𝔏 Term) → Term` | P of the intersection of a list of events (P of the empty intersection is 1) |
+| `probsub` | `.101101011001.` |  | `(𝔏 Term) → Term → Poly` | the events that occur, an atom: P(∩J) as a sum over the minterms |
+| `probmt` | `.101101011011.` |  | `(𝔏 Term) → (𝔏 (𝔓 Poly ℕ))` | the minterm probabilities are ≥ 0 and their sum is 1 |
+| `probprep` | `.101100011010.` |  | `Env → (𝔏 (𝔓 Poly ℕ)) → (𝔏 (𝔓 Poly ℕ))` | rows over the probabilities of intersections, written over the probabilities of the minterms (up to five events) |
+
 ### Internal helpers (trusted, not meant to be called directly)
 
 | spec | bin | human | class | meaning |
@@ -2700,7 +3553,7 @@ fields are values (a group is the sorted list of its permutations, `GF(pⁿ)` th
 | `↓ᶻ` | `.10101110.` |  | `ℚ[i] → 𝔇` | the Gaussian integer of an integral value |
 | `decⁿ` | `.101001110.` |  | `𝔇 → 𝕊 → 𝕊` | decimal digits of a natural (generated tables) |
 
-**Further helpers** (named in doc 1, described in the source files): `+ˡ` `+ᵈ` `=ᶻ` `abel_gr` `abinv_gr` `absᶻ` `acosF_cx` `acoshF_cx` `acoshX_cx` `acoshq_cx` `ad_fd` `ad_pl` `add_pl` `add_rg` `add_sv` `addb_sv` `addf_sv` `adds_sv` `adm_pl` `adr_pl` `adv_nt` `adz_pl` `aff_sv` `agl_cx` `agmq_cx` `allreal_sv` `andl_sv` `ap_gr` `apps` `apr_sv` `ap′_gr` `ar_rg` `args²` `args¹` `arl_rg` `asinhC_cx` `asinhF_cx` `asinhR_cx` `asinhX_cx` `asinhq_cx` `asl_cx` `asm_sv` `assoc_gr` `at2S_cx` `atF_sv` `atS_cx` `at_cx` `atan2R_cx` `atan2q_cx` `atanR_cx` `atanq_cx` `atom_sv` `atomᴾ` `atp_cx` `atpos_cx` `ats_sv` `atser_cx` `b32_nt` `back′` `bat_nt` `bby_nt` `bern_cx` `berns_cx` `bfsn_gr` `bfsn′_gr` `bgen′_gr` `biS_cx` `bi_sv` `bits_nt` `bjS_cx` `bk_nt` `blc_sv` `blen_cx` `blf_sv` `blk_sv` `blz_cx` `bo_fd` `bpv_gr` `bq_sv` `bre_sv` `brw_nt` `bsc_nt` `bsgs_nt` `btq_cx` `buch_rg` `burn_gr` `bz_cx` `cands_gr` `cat_sv` `cauchyᵖ` `cb_pl` `ccl_gr` `ccl′_gr` `cd_pl` `cells_sv` `cent_gr` `cf_fd` `cf_nt` `cfq_nt` `cfs_nt` `chiS_cx` `choose′` `chz_pl` `ciS_cx` `cj_fd` `cj_sv` `cl_fd` `cl_gl` `clen_gr` `clen′_gr` `clo_sv` `clos_gr` `cm_fd` `cmb_pl` `cmd_pl` `cmp_nt` `cmp_pl` `cmp_sv` `cmpl_sv` `cmpo_gr` `cmpp_gr` `cmps_gr` `cmpu_gr` `cn_pl` `cn_sv` `cnd_fd` `cnt_sv` `cof_sv` `colr_gr` `comm_gr` `comp_gr` `conjR_cx` `conj_gr` `constᴾ` `cop_rg` `cosR_cx` `cosS_cx` `coshS_cx` `coshᴾ` `cos′_gr` `cp_la` `cp_pl` `cplx_sv` `cpr_pl` `cpxR_cx` `crf_pl` `crow_gr` `crs_nt` `cst_sv` `ctg_pl` `ctl_pl` `ctx_nt` `ctz_pl` `cvp_nt` `cyc_gr` `cyc_nt` `cycap_gr` `cycl_gr` `cycs_gr` `cycz_gr` `cyc′_gr` `cysub_gr` `cz_sv` `czr_sv` `czz_sv` `d^` `daS_cx` `dd_fd` `dd_la` `ddf_pl` `ddh_pl` `ddp_nt` `ddp_pl` `dd′_gr` `decᵈ` `dec⁸` `degs_gr` `dep_sv` `der_pl` `dfb_sv` `dg_pl` `dgq_cx` `dgs_pl` `diag2_cx` `difR_cx` `diff_gr` `dih_gr` `disc` `divR_cx` `divu_gr` `dk_pl` `dks_pl` `dl_fd` `dlz_nt` `dlz_pl` `dlz′_nt` `dmm_pl` `dn_cx` `dnr_cx` `domU_sv` `dpp_nt` `dprod_gr` `dq_pl` `dr_fd` `dr_nt` `dr_pl` `dred_nt` `dropj4_cx` `dropj_cx` `dropl_cx` `dropl_pl` `dropn4_cx` `dropn_cx` `dropu_gr` `dropz′` `drop′` `drw_nt` `drz_pl` `dsm_nt` `dstu_gr` `dv_fd` `dv_nt` `dv_pl` `dvd_rg` `dvdu_gr` `dvg_nt` `dvm_pl` `dvn_pl` `dvo_nt` `dvq_pl` `dvr_pl` `dvs_pl` `dvs′_pl` `dz⁰` `d²ˡ` `d×` `d⁺` `ech_sv` `ed_fd` `edf_pl` `edg_gr` `eds_pl` `edv_pl` `edz_pl` `eeq_cx` `eg_fd` `eg_nt` `egg_nt` `egi_nt` `egm_pl` `egz_nt` `egz_pl` `eiS_cx` `einR_cx` `einS_cx` `ekl_cx` `ekq_cx` `el2u_cx` `elim′` `elm_sv` `emq_cx` `encᴾ` `encᵃ` `encᵐ` `eord_gr` `epos_sv` `eqe_rg` `eql_gr` `eqo_gr` `eqs_gr` `eqterm_rg` `equ_gr` `equp_gr` `eqz_nt` `erfS_cx` `es_pl` `eul_cx` `eur_cx` `evQ′` `ev_pl` `evl_gr` `evs_sv` `evz_sv` `ev²` `ev¹` `evᵖ` `excess_cx` `expR_cx` `expS_cx` `exp_sv` `expd_sv` `expq_cx` `expqz_cx` `expᴾ` `fA_sv` `fAnd_sv` `fC_sv` `fO_sv` `fOr_sv` `fa_fd` `fa_sv` `fact′` `fb_sv` `fbp_nt` `fc_fd` `fc_sv` `fcl_sv` `fcq_nt` `fcr_nt` `fct_nt` `fdb_nt` `fi_la` `fi_nt` `fi_sv` `fin_sv` `first_sv` `fixΦ_sv` `fix′_gr` `fl_cx` `fl_sv` `flip_sv` `flo_sv` `fls_nt` `fnde_gr` `fnz_gr` `fo′` `fr_pl` `frc_nt` `fs_pl` `fsf_pl` `fsm_pl` `fst_rg` `fuel` `fwd′` `fxc_pl` `fxm_pl` `fxq_pl` `fy_nt` `gamS_cx` `gb_rg` `gc_fd` `gcd_pl` `gcdᶻ′` `gcmp_nt` `gcp_pl` `gdv_pl` `gen_gr` `gent_nt` `gen′_gr` `geu_gr` `gf_sv` `gfa_nt` `gfdeg_fd` `ggcdᶻ` `ggen_gr` `ggen′_gr` `gi_pl` `gl_sv` `gminv_nt` `gmq_cx` `gp3_nt` `gpe_nt` `gpi_nt` `gpm_nt` `gpq_pl` `gpr_pl` `gps_nt` `gpw_pl` `grp_gr` `grp_sv` `grp′_gr` `gz_pl` `gzi_pl` `hasO_sv` `hasop_sv` `hb_cx` `hfx_pl` `hl_pl` `hla_pl` `hlf_nt` `hlp_cx` `hm_gr` `hp_fd` `hpr_nt` `hs_pl` `hsum_cx` `hsum_nt` `hv_pl` `idx_la` `idx_sv` `idx′_gr` `idz_sv` `ieg_pl` `ig_pl` `igp_nt` `imR_cx` `in_fd` `ing2_gr` `ing_gr` `inl_gr` `inp_gr` `ins_gr` `ins_rg` `ins_sv` `insk_sv` `insl_rg` `insp_sv` `insr_sv` `insᴾ` `insᵐ` `ins′` `invR_cx` `inv_gr` `inv_pl` `invs_gr` `iotau_gr` `iotau′_gr` `ip_pl` `ipr_pl` `ipw_nt` `irc_sv` `irt_nt` `irt′_nt` `irun_sv` `isC_sv` `isU_sv` `isaff_sv` `isc_sv` `isd_pl` `isg_gl` `isg_nt` `isint_cx` `isneg_cx` `isneg_sv` `iso_gr` `iso_pl` `isol_pl` `ispr_nt` `isreal_cx` `issq_nt` `it_pl` `ivl_cx` `jac_nt` `jn_cx` `jn_nt` `kdec_nt` `kenc_nt` `kle_sv` `kmerge_gr` `kmul_nt` `knrm_nt` `ko_sv` `kone_nt` `kpw_nt` `kpw′_nt` `ksort_gr` `lAdd_sv` `lCnj_sv` `lDiv_sv` `lEmb_sv` `lEq_sv` `lGe_sv` `lGt_sv` `lIm_sv` `lLe_sv` `lLt_sv` `lMul_sv` `lNe_sv` `lNeg_sv` `lNoUnf_sv` `lPow_sv` `lRe_sv` `lSplit_sv` `lSqrt_sv` `lSub_sv` `lastrun_sv` `lb_cx` `lbk_cx` `lbq_cx` `lcl_nt` `lcmu_gr` `lcmu′_gr` `lcn_nt` `lco_sv` `lcode_sv` `ldv_sv` `le_cx` `lens_gr` `lenu_gr` `leq_cx` `lex_rg` `lex_sv` `lfa_sv` `lfb_sv` `lg2_cx` `lg2d_cx` `lg2u_cx` `lg_fd` `lgl_cx` `lgq_cx` `lgs_cx` `lgw_cx` `lgz_cx` `lhs_sv` `liS_cx` `lin_pl` `lku_sv` `ll_sv` `lmul_cx` `ln2_cx` `ln2a_cx` `logR_cx` `logS_cx` `logcR_cx` `logpos_cx` `logq_cx` `look` `lpS_cx` `lpe_nt` `lsp_nt` `lst_nt` `lt_cx` `lt_nt` `ltc_pl` `lub_la` `lud_la` `luf_la` `lug_la` `lun_la` `lup_la` `lv_pl` `lwS_cx` `lwdom_cx` `lwl_cx` `lwn_cx` `lwq_cx` `m35_nt` `m3_nt` `mag_cx` `magp_cx` `maxu_gr` `mb_pl` `mcmp_rg` `mctx_nt` `md_fd` `mdp_pl` `mdv_rg` `mem_gr` `mem_sv` `meq_la` `mexp_la` `mfac_pl` `mflat_la` `mid′` `minim_rg` `minv_nt` `mir_sv` `mk_cx` `mkq_cx` `ml_fd` `mlm_pl` `mlr_pl` `mlt_nt` `mlz_pl` `mm_pl` `mn_nt` `mnc_fd` `mnm_pl` `mo_fd` `mod_nt` `mon_pl` `mon_rg` `mono_rg` `mono_sv` `mp_fd` `mp_la` `mpadd_sv` `mpc_sv` `mpconst_sv` `mpl_pl` `mpmap_sv` `mpmul_sv` `mpneg_sv` `mpow_la` `mppow_sv` `mpscale_sv` `mpv_sv` `mpw_nt` `mr_nt` `mrb_nt` `mrg_nt` `mrg_rg` `mrg_sv` `mrgc_nt` `mrgl_nt` `mrl_nt` `msim_sv` `msort_nt` `mtm_rg` `mu_fd` `mu_sv` `mulR_cx` `mul_pl` `mul_rg` `mult_la` `mulu_gr` `mv_sv` `mz_cx` `n2_rg` `n_gr` `nats_cx` `nc_pl` `ndv_pl` `negR_cx` `neg_cx` `neg_pl` `negΦ_sv` `nf_rg` `nfc_pl` `ng_fd` `ng_pl` `ngp_nt` `nl_rg` `nm_gl` `nn_rg` `nocst_sv` `normR_cx` `normR′` `norm_gr` `norm_sv` `npi_cx` `nr_sv` `nrm_nt` `nrm_rg` `nsr_pl` `nt_sv` `nthu_gr` `nums_gr` `nw_cx` `nwt_cx` `nxo_nt` `nxp_nt` `nz_nt` `nz_pl` `nzr_gr` `nzr_la` `n′_gr` `odd_gr` `odd_nt` `odl_nt` `okb_sv` `ol_pl` `olp_pl` `one_rg` `opr_pl` `or_gl` `orb_gr` `orbs_gr` `orbs′_gr` `orb′_gr` `ord_nt` `ordu_gr` `orl_sv` `orq_nt` `orth_pl` `ot_pl` `outA_sv` `outI_sv` `outR_sv` `out_sv` `outg_gr` `outp_gr` `p2_pl` `p4_nt` `pa_sv` `pad_gr` `pad_rg` `pad′_gr` `pairs_rg` `pat_nt` `pb_sv` `pch_cx` `pchain_pl` `pctx_nt` `pdq_pl` `perm_gl` `permi_gr` `permm_la` `perms_gr` `pf_sv` `pfa_sv` `pfb_sv` `pf′_pl` `pi_cx` `pia_cx` `pick′` `pih_cx` `pin_gl` `plS_cx` `pld_cx` `plneg_cx` `plq_cx` `pm_sv` `pmd_nt` `pol_sv` `polysqfree_pl` `pos_cx` `posr_gr` `pos′_gr` `pow_rg` `powu_gr` `powᶻ′` `pp_pl` `ppl_nt` `ppos_pl` `pps_nt` `ppw_cx` `ppw_gr` `pr_fd` `prep` `primeu_gr` `prl_nt` `prm_nt` `prs_nt` `prt_nt` `prz_pl` `ps_pl` `ps_rg` `psr_pl` `pst_pl` `psum` `psw_cx` `pts_sv` `pvo_nt` `pvp_nt` `pvt_la` `pw2_cx` `pw_fd` `pw_gr` `pw_nt` `pw_pl` `pw_rg` `pwl_pl` `pwm_pl` `pwq_pl` `pwr_sv` `pwz_nt` `q4_gl` `qa_pl` `qadd_cx` `qd_sv` `qdiv_cx` `qk_sv` `qmul_cx` `qnr_nt` `qo_fd` `qr_sv` `qrc_sv` `qrl_nt` `qs_pl` `qsub_cx` `quo_pl` `quoᶻ` `qz_pl` `qzi_pl` `ratQ′` `rb_pl` `rb_sv` `rc_pl` `rcd_pl` `rcf_sv` `rcn_sv` `rd_pl` `rdc_nt` `reR_cx` `realᶻ` `red_la` `red_rg` `redr_gr` `refls_gr` `reg_gr` `regs_sv` `reg′_gr` `rel_cx` `rel_sv` `relsym_sv` `relt_sv` `rem_pl` `remᶻ` `reqs′_gr` `res_pl` `rf_pl` `rfc_pl` `rg_pl` `rgc_pl` `rgp_pl` `rgq_cx` `rgt_pl` `rhc_nt` `rhi_sv` `rhl_sv` `rho_nt` `rhu_sv` `rkl_sv` `rl_pl` `rl_sv` `rle_gr` `rle′_gr` `rlo_sv` `rm_fd` `rm_pl` `rmm_pl` `rmv_la` `rmv_pl` `rnd_nt` `rnd²` `rndᶻ` `ro_fd` `rootS_cx` `rootu_cx` `rots_gr` `rq_pl` `rq_sv` `rqf_sv` `rqg_sv` `rr_gl` `rr_pl` `rrefp_la` `rr²` `rr¹` `rs_pl` `rsc_pl` `rsf_pl` `rsix_cx` `rst_nt` `rsz_pl` `rt_fd` `rt_pl` `rts_sv` `ru_sv` `rul2_cx` `ruler_cx` `runc_sv` `runs_sv` `r×` `r÷` `r⁺` `r⁻` `r∗` `s2c_nt` `s2p_nt` `s2s_nt` `sEs_cx` `sa_pl` `sb_fd` `sbm_pl` `sbq_fd` `sbz_pl` `sc4_cx` `sc_fd` `sca_rg` `sched` `sclR_cx` `scl_cx` `scl_pl` `scm_pl` `scz_pl` `serE_cx` `serEl_cx` `serN_cx` `serNl_cx` `ser_cx` `serl_cx` `sf_fd` `sfd_nt` `sfl_nt` `sfr_nt` `sg_nt` `sg_pl` `sg_sv` `sgn_pl` `sgn_sv` `sgp_gr` `sgrs_gr` `sgr′_gr` `shiS_cx` `shn_cx` `showⁱ` `siS_cx` `sim_sv` `simp′` `sinR_cx` `sinS_cx` `single_sv` `sinhS_cx` `sinhᴾ` `sinv_gr` `sl_pl` `slm_pl` `slq_nt` `slr_nt` `snf_gr` `snp_gr` `solv_gr` `sorted_rg` `sosD_sv` `sosF_sv` `sosG_sv` `spS_cx` `sp_fd` `spf_cx` `spine` `spine′` `spl_gl` `spl_nt` `split_gr` `spoly_rg` `spr_nt` `spr_pl` `spsp_nt` `spt_gl` `sq2_cx` `sq_fd` `sqchain_pl` `sqfp_sv` `sqj_cx` `sqm_nt` `sqn_nt` `sqp_pl` `sqq_gl` `sqr_nt` `sqrtR_cx` `sqrtS_cx` `sqrtpos_cx` `sqrtq_cx` `sqs_nt` `sqz_nt` `sq⁺` `sr2_sv` `sr3_sv` `sr_sv` `srs_pl` `srt_gl` `srt_sv` `ssl_nt` `ssr_nt` `st_pl` `stp_nt` `sub_pl` `sub_rg` `sub_sv` `subs_gr` `subs_la` `subu_gr` `subΦ_sv` `sumR_cx` `sum_gl` `sv_nt` `sv_sv` `swap_gr` `swp_gr` `sy_pl` `syl_gr` `syl′_gr` `symᶜ` `sz_pl` `ta_sv` `tab_gl` `takeu_gr` `take′` `tan_nt` `tang_cx` `tb_sv` `tcj_sv` `td_nt` `tdp_nt` `tds_nt` `tdv_sv` `tg_nt` `tk_nt` `tm_pl` `tm_rg` `tm_sv` `tmp_sv` `tmpa_sv` `tmpb_sv` `tpo_sv` `tpw_sv` `tr2_fd` `tr3_fd` `tr_cx` `tr_fd` `tr_sv` `tre_gr` `trim_pl` `trimᵖ` `trj_cx` `trows_cx` `trp_cx` `trz_pl` `ts_nt` `tsc_cx` `tsc_nt` `tsp_cx` `tsq_pl` `tsq_sv` `tsr_nt` `tups_gr` `tval_gr` `tz_nt` `u_gr` `ub_cx` `ube_cx` `ubs_cx` `uc_gr` `uc′_gr` `ud_nt` `ukh_cx` `ul_nt` `um_nt` `umerge_gr` `un_sv` `unary_cx` `unk_sv` `up_cx` `up_nt` `up_pl` `upl_nt` `up²` `use_sv` `usort_gr` `uvec_gr` `u′_gr` `v2_nt` `v2′_nt` `valid` `varof_sv` `vat_pl` `vmi_pl` `vn_rg` `vpi_pl` `vr_pl` `vuse_sv` `wil_nt` `wix_gr` `wix′_gr` `xeg_pl` `xm_pl` `xs_pl` `yl_pl` `yun_pl` `z_pl` `zemS_cx` `zem_cx` `zer_sv` `zetaS_cx` `zf_pl` `zfe_cx` `zis_cx` `zl_cx` `zl_fd` `zm_pl` `zm_sv` `zneg_cx` `zpl_cx` `zq_pl` `zs_pl` `zset_sv` `zw_gr` `¬³` `·ᴾ` `·ᵖ` `½ᶻ` `×⁴ᵈ` `÷ᴴ` `Σᴾ` `Ω` `βs` `βᶜ` `λᶜ` `ᶜ^` `ᶜ^ᴿ` `ᶜatan` `ᶜcos` `ᶜcosh` `ᶜexp` `ᶜlog` `ᶜroot` `ᶜsin` `ᶜsinh` `ᶜ¬` `ᶜ÷` `ᶜ÷ᴿ` `ᶜΣ` `ᶜℑ` `ᶜℑᴿ` `ᶜℜ` `ᶜℜᴿ` `ᶜ⇒` `ᶜ⇔` `ᶜ⇡` `ᶜ∗` `ᶜ∗ᴿ` `ᶜ√` `ᶜ∧` `ᶜ∨` `ᶜ∷` `ᶜ≐` `ᶜ≐ᴿ` `ᶜ≠` `ᶜ≠ᴿ` `ᶜ≺` `ᶜ≺ᴿ` `ᶜ≻` `ᶜ≻ᴿ` `ᶜ⊕` `ᶜ⊖` `ᶜ⊖ᴿ` `ᶜ⊘` `ᶜ⊛` `ᶜ⊞` `ᶜ⊟` `ᶜ⊟ᴿ` `ᶜ⊠` `ᶜ⊤` `ᶜ⊥` `ᶜ⩽` `ᶜ⩽ᴿ` `ᶜ⩾` `ᶜ⩾ᴿ` `ᶜ𝔲` `‖` `⁴ᴸ` `⁴ᶻ` `ℑᶻ′` `ℚ[i][x]` `ℚ[i][𝐱]` `ℜᶻ′` `ℤ²` `⇑ᶜ` `⇓ᶜ` `∂′` `∅ᵖ` `∗ᴾ` `∗ᵃ` `∗ᵖ` `√?ᶜ` `√merge` `√ᑫ` `√ᶜ′` `√ᶻ` `√ᶻ′` `√ᶻⁱ` `√⁺?ᵃ` `√⁺′` `∧³` `∧ᵈ` `∨³` `∨ᵈ` `≡ᵃ` `≡ᵐ` `≡ᶜ` `⊖ᴾ` `⊖ᵖ` `⊞ᴾ` `⊞ᵖ` `⊞ᶜ′` `⊟ᶜ` `⊟ᶜ′` `⊠ᴾ` `⊠ᵐ` `⊠ᵖ` `⊡′` `⊻ᵈ` `⋚ʳ′` `⋚ⁱ′` `⌄⁴` `⌊½⌋ᶻ` `⌊ᶻ` `⌜ᶻ` `①` `②` `③` `④` `⑤` `⑥` `⑦` `⑧` `⑨` `⓪` `⟐′` `⩾⁰` `⫽ᶻ′` `𝒦` `𝒮` `𝔡` `𝔲` `𝕊²` `𝕓⁴`
+**Further helpers** (named in doc 1, described in the source files): `+ˡ` `+ᵈ` `=ᶻ` `BDD` `Bag` `Chclass` `Dict` `Env` `FSet` `Heap` `Poly` `Queue` `Sig` `Term` `Theory` `abel_gr` `abinv_gr` `absᶻ` `acm` `acnorm′` `acosF_cx` `acoshF_cx` `acoshX_cx` `acoshq_cx` `ad_fd` `ad_pl` `add_pl` `add_rg` `add_sv` `addb_sv` `addf_sv` `addrule` `adds_sv` `adm_pl` `adr_pl` `adv_nt` `adz_pl` `aff_sv` `agl_cx` `agmq_cx` `allreal_sv` `am` `andl_sv` `ap_gr` `applya` `applyac` `applyc` `applyexact` `applyn′` `applyrule′` `applyrule″` `apps` `apr_sv` `ap′_gr` `ar_rg` `args²` `args¹` `arl_rg` `asinhC_cx` `asinhF_cx` `asinhR_cx` `asinhX_cx` `asinhq_cx` `asl_cx` `asm_sv` `assoc_gr` `at2S_cx` `atF_sv` `atS_cx` `at_cx` `atan2R_cx` `atan2q_cx` `atanR_cx` `atanq_cx` `atom_sv` `atomindex` `atomᴾ` `atp_cx` `atpos_cx` `ats_sv` `atser_cx` `b32_nt` `back′` `bat_nt` `batoms` `bby_nt` `bdand` `bdiff` `bdimp` `bdnot` `bdor` `bdxor` `beq` `bern_cx` `berns_cx` `bevalc` `bevalt` `bfrompaths` `bfsn_gr` `bfsn′_gr` `bgen′_gr` `biS_cx` `bi_sv` `bits_nt` `bjS_cx` `bk_nt` `blc_sv` `blen_cx` `blf_sv` `blk_sv` `blz_cx` `bmk` `bo_fd` `boolatomsT` `boolpassT` `boolsyms` `bpaths` `bpv_gr` `bq_sv` `bre_sv` `brw_nt` `bsatisfiable` `bsc_nt` `bsetverdict` `bsgs_nt` `btq_cx` `buch_rg` `burn_gr` `bz_cx` `caesar′` `cands_gr` `canonT` `cat_sv` `cauchyᵖ` `cb_pl` `ccl_gr` `ccl′_gr` `cd_pl` `cells_sv` `cent_gr` `cf_fd` `cf_nt` `cfq_nt` `cfs_nt` `chadd` `chcd` `chci` `chcl` `chcn` `chco` `chcp` `chcs` `chcu` `chcx` `chdigits` `chiS_cx` `chkey` `choose′` `chtable` `chunks′` `chz_pl` `ciS_cx` `cj_fd` `cj_sv` `ckey` `cl_fd` `cl_gl` `clen_gr` `clen′_gr` `clo_sv` `clos_gr` `cm_fd` `cmb_pl` `cmd_pl` `cmp_nt` `cmp_pl` `cmp_sv` `cmpl_sv` `cmpo_gr` `cmpp_gr` `cmps_gr` `cmpu_gr` `cn_pl` `cn_sv` `cnd_fd` `cnt_sv` `cof_sv` `colr_gr` `combinations′` `comm_gr` `comp_gr` `compile` `compiledof` `compiledtable` `conjR_cx` `conj_gr` `conjevents` `constᴾ` `cop_rg` `corehook` `cosR_cx` `cosS_cx` `coshS_cx` `coshᴾ` `cos′_gr` `cp_la` `cp_pl` `cplx_sv` `cpr_pl` `cpxR_cx` `crf_pl` `crow_gr` `crs_nt` `cst_sv` `ctg_pl` `ctl_pl` `ctx_nt` `ctz_pl` `cvp_nt` `cyc_gr` `cyc_nt` `cycap_gr` `cycl_gr` `cycs_gr` `cycz_gr` `cyc′_gr` `cysub_gr` `cz_sv` `czr_sv` `czz_sv` `d^` `daS_cx` `dd_fd` `dd_la` `ddf_pl` `ddh_pl` `ddp_nt` `ddp_pl` `dd′_gr` `decᵈ` `dec⁸` `defaultnames` `degs_gr` `dep_sv` `der_pl` `dfb_sv` `dg_pl` `dgq_cx` `dgs_pl` `diag2_cx` `difR_cx` `diff_gr` `dih_gr` `disc` `divR_cx` `divu_gr` `dk_pl` `dkget` `dkgetd` `dks_pl` `dl_fd` `dlt` `dlz_nt` `dlz_pl` `dlz′_nt` `dmm_pl` `dn_cx` `dnr_cx` `domU_sv` `domaincons` `dpp_nt` `dprod_gr` `dq_pl` `dr_fd` `dr_nt` `dr_pl` `dred_nt` `dropj4_cx` `dropj_cx` `dropl_cx` `dropl_pl` `dropn4_cx` `dropn_cx` `dropu_gr` `dropz′` `drop′` `drw_nt` `drz_pl` `dsm_nt` `dstu_gr` `dv_fd` `dv_nt` `dv_pl` `dvd_rg` `dvdu_gr` `dvg_nt` `dvm_pl` `dvn_pl` `dvo_nt` `dvq_pl` `dvr_pl` `dvs_pl` `dvs′_pl` `dz⁰` `d²ˡ` `d×` `d⁺` `ech_sv` `ed_fd` `edf_pl` `edg_gr` `eds_pl` `edv_pl` `edz_pl` `eeq_cx` `efuel` `eg_fd` `eg_nt` `egg_nt` `egi_nt` `egm_pl` `egz_nt` `egz_pl` `ehooks` `eiS_cx` `einR_cx` `einS_cx` `ekind` `ekl_cx` `ekq_cx` `el2u_cx` `elemT` `elem′` `elim′` `elm_sv` `emq_cx` `enames` `encᴾ` `encᵃ` `encᵐ` `eord_gr` `epos_sv` `eprec` `eprops` `eqe_rg` `eql_gr` `eqo_gr` `eqs_gr` `eqterm_rg` `equ_gr` `equp_gr` `eqz_nt` `erfS_cx` `erules` `es_pl` `esig` `esym` `etok` `eul_cx` `eur_cx` `evQ′` `ev_pl` `evl_gr` `evs_sv` `evz_sv` `ev²` `ev¹` `evᵖ` `excess_cx` `expR_cx` `expS_cx` `exp_sv` `expd_sv` `expq_cx` `expqz_cx` `expᴾ` `fA_sv` `fAnd_sv` `fC_sv` `fO_sv` `fOr_sv` `fa_fd` `fa_sv` `fact′` `fb_sv` `fbp_nt` `fc_fd` `fc_sv` `fcl_sv` `fcq_nt` `fcr_nt` `fct_nt` `fdb_nt` `fi_la` `fi_nt` `fi_sv` `fin_sv` `findindex′` `first_sv` `firstjust` `fixΦ_sv` `fix′_gr` `fl_cx` `fl_sv` `flip_sv` `flo_sv` `fls_nt` `fmabs` `fmadd` `fmisbad` `fmloopb` `fmloopb′` `fmnormb` `fmpathok` `fmscale` `fmscaleb` `fmtight` `fmtight′` `fmvarsonly` `fnde_gr` `fnz_gr` `fo′` `fr_pl` `frc_nt` `frombdd` `fromfactor` `frommono` `frompoly` `fromroman′` `fromterm` `fs_pl` `fsf_pl` `fsm_pl` `fst_rg` `fuel` `fwd′` `fxc_pl` `fxm_pl` `fxq_pl` `fy_nt` `gamS_cx` `gb_rg` `gc_fd` `gcd_pl` `gcdᶻ′` `gcmp_nt` `gcp_pl` `gdv_pl` `gen_gr` `gent_nt` `gen′_gr` `geu_gr` `gf_sv` `gfa_nt` `gfdeg_fd` `ggcdᶻ` `ggen_gr` `ggen′_gr` `gi_pl` `gl_sv` `gminv_nt` `gmq_cx` `gp3_nt` `gpe_nt` `gpi_nt` `gpm_nt` `gpq_pl` `gpr_pl` `gps_nt` `gpw_pl` `grp_gr` `grp_sv` `grp′_gr` `gz_pl` `gzi_pl` `hasO_sv` `hasop_sv` `hasprop` `hb_cx` `heads′` `hfx_pl` `hl_pl` `hla_pl` `hlf_nt` `hlp_cx` `hm_gr` `hmerge` `hmk` `hp_fd` `hpr_nt` `hrank` `hs_pl` `hsum_cx` `hsum_nt` `hv_pl` `iand` `iapply` `iapplyimp` `idchar` `idecide` `idstart` `idx_la` `idx_sv` `idx′_gr` `idz_sv` `ieccoef` `ieg_pl` `ig_pl` `igp_nt` `iimp` `iinvl` `ileft` `imR_cx` `in_fd` `ing2_gr` `ing_gr` `inl_gr` `inon` `inorm` `inp_gr` `ins_gr` `ins_rg` `ins_sv` `insk_sv` `insl_rg` `insp_sv` `insr_sv` `insᴾ` `insᵐ` `ins′` `intatoms` `intpass` `invR_cx` `inv_gr` `inv_pl` `invs_gr` `ior` `iotau_gr` `iotau′_gr` `ip_pl` `ipr_pl` `iprove` `iprove′` `ipw_nt` `irc_sv` `irt_nt` `irt′_nt` `irun_sv` `isC_sv` `isU_sv` `isaff_sv` `isc_sv` `isd_pl` `isg_gl` `isg_nt` `isimp` `isint_cx` `islat` `islower′` `isneg_cx` `isneg_sv` `iso_gr` `iso_pl` `isol_pl` `isopchar` `ispr_nt` `ispunc` `isreal_cx` `issq_nt` `it_pl` `ivl_cx` `jac_nt` `jn_cx` `jn_nt` `kdec_nt` `kenc_nt` `kindnum` `kle_sv` `kmerge_gr` `kmul_nt` `knrm_nt` `ko_sv` `kone_nt` `kpw_nt` `kpw′_nt` `ksort_gr` `lAdd_sv` `lCnj_sv` `lDiv_sv` `lEmb_sv` `lEq_sv` `lGe_sv` `lGt_sv` `lIm_sv` `lLe_sv` `lLt_sv` `lMul_sv` `lNe_sv` `lNeg_sv` `lNoUnf_sv` `lPow_sv` `lRe_sv` `lSplit_sv` `lSqrt_sv` `lSub_sv` `lastrun_sv` `lb_cx` `lbk_cx` `lbq_cx` `lcl_nt` `lcmu_gr` `lcmu′_gr` `lcn_nt` `lco_sv` `lcode_sv` `ldv_sv` `le_cx` `lens_gr` `lenu_gr` `leq_cx` `levfold′` `lev′` `lex_rg` `lex_sv` `lfa_sv` `lfb_sv` `lg2_cx` `lg2d_cx` `lg2u_cx` `lg_fd` `lgl_cx` `lgq_cx` `lgs_cx` `lgw_cx` `lgz_cx` `lhs_sv` `liS_cx` `lin_pl` `lku_sv` `ll_sv` `lmul_cx` `ln2_cx` `ln2a_cx` `logR_cx` `logS_cx` `logcR_cx` `logpos_cx` `logq_cx` `look` `lpS_cx` `lpe_nt` `lsp_nt` `lst_nt` `lt_cx` `lt_nt` `ltc_pl` `lub_la` `lud_la` `luf_la` `lug_la` `lun_la` `lup_la` `lv_pl` `lwS_cx` `lwdom_cx` `lwl_cx` `lwn_cx` `lwq_cx` `m35_nt` `m3_nt` `mag_cx` `magp_cx` `maxu_gr` `mb_pl` `mcmp_rg` `mctx_nt` `md_fd` `mdeg` `mdp_pl` `mdv_rg` `mem_gr` `mem_sv` `meq` `meq_la` `mexp_la` `mfac_pl` `mflat_la` `mid′` `minim_rg` `minv_nt` `mir_sv` `mk_cx` `mkhooks` `mkq_cx` `mktheory` `ml_fd` `mlex` `mlm_pl` `mlr_pl` `mlt_nt` `mlz_pl` `mm_pl` `mn_nt` `mnc_fd` `mnm_pl` `mo_fd` `mod_nt` `mon_pl` `mon_rg` `mono_rg` `mono_sv` `mp_fd` `mp_la` `mpadd_sv` `mpc_sv` `mpconst_sv` `mpl_pl` `mpmap_sv` `mpmul_sv` `mpneg_sv` `mpow_la` `mppow_sv` `mpscale_sv` `mpv_sv` `mpw_nt` `mr_nt` `mrb_nt` `mrg_nt` `mrg_rg` `mrg_sv` `mrgc_nt` `mrgl_nt` `mrl_nt` `msim_sv` `msort_nt` `mtm_rg` `mu_fd` `mu_sv` `mulR_cx` `mul_pl` `mul_rg` `mult_la` `mulu_gr` `mv_sv` `mz_cx` `n2_rg` `n_gr` `natmode` `nats_cx` `nc_pl` `ndv_pl` `negR_cx` `neg_cx` `neg_pl` `negΦ_sv` `nf_rg` `nfc_pl` `ng_fd` `ng_pl` `ngp_nt` `nl_rg` `nm_gl` `nn_rg` `nocst_sv` `normR_cx` `normR′` `norm_gr` `norm_sv` `npi_cx` `nr_sv` `nrm_nt` `nrm_rg` `nsr_pl` `nt_sv` `nthu_gr` `nums_gr` `numtok` `nw_cx` `nwt_cx` `nxo_nt` `nxp_nt` `nz_nt` `nz_pl` `nzr_gr` `nzr_la` `n′_gr` `odd_gr` `odd_nt` `odl_nt` `okb_sv` `ol_pl` `olp_pl` `one_rg` `opr_pl` `or_gl` `orb_gr` `orbs_gr` `orbs′_gr` `orb′_gr` `ord_nt` `ordu_gr` `orl_sv` `orq_nt` `orth_pl` `ot_pl` `outA_sv` `outI_sv` `outR_sv` `out_sv` `outg_gr` `outp_gr` `p2_pl` `p4_nt` `pa_sv` `pad_gr` `pad_rg` `padd` `pad′_gr` `pairs_rg` `pargs` `pargsend` `pargs′` `pat_nt` `pathalts` `pathconsistent` `patom` `patorder` `pb_sv` `pbinder` `pcall` `pcallorvar` `pch_cx` `pchain_pl` `pcst` `pctx_nt` `pdq_pl` `perm_gl` `permi_gr` `permm_la` `perms_gr` `pexpr` `pf_sv` `pfa_sv` `pfb_sv` `pfmmul` `pfpow` `pf′_pl` `pi_cx` `pia_cx` `picks′` `pick′` `pident` `pih_cx` `pin_gl` `plS_cx` `pld_cx` `plneg_cx` `ploop` `plq_cx` `pm_sv` `pmd_nt` `pmul` `pneg` `pol_sv` `polyhook` `polysqfree_pl` `pop` `pos_cx` `posr_gr` `pos′_gr` `pow_rg` `powu_gr` `powᶻ′` `pp_pl` `ppl_nt` `ppos_pl` `pprefix` `pprefixop` `pps_nt` `ppunct` `ppw_cx` `ppw_gr` `pr_fd` `prep` `primeu_gr` `prl_nt` `prm_nt` `probatoms` `probevents` `probhook` `probrows` `prs_nt` `prt_nt` `prz_pl` `ps_pl` `ps_rg` `pscale` `psr_pl` `pst_pl` `psum` `psw_cx` `pts_sv` `pvo_nt` `pvp_nt` `pvt_la` `pw2_cx` `pw_fd` `pw_gr` `pw_nt` `pw_pl` `pw_rg` `pwl_pl` `pwm_pl` `pwq_pl` `pwr_sv` `pwz_nt` `q4_gl` `qa_pl` `qadd_cx` `qd_sv` `qdiv_cx` `qk_sv` `qmul_cx` `qnorm` `qnr_nt` `qo_fd` `qr_sv` `qrc_sv` `qrl_nt` `qs_pl` `qsub_cx` `quo_pl` `quoᶻ` `qz_pl` `qzi_pl` `ratQ′` `rb_pl` `rb_sv` `rc_pl` `rcd_pl` `rcf_sv` `rcn_sv` `rd_pl` `rdc_nt` `reR_cx` `realᶻ` `red_la` `red_rg` `redr_gr` `refls_gr` `reg_gr` `regs_sv` `reg′_gr` `rel_cx` `rel_sv` `relcanon` `relhook` `relhook′` `relsym_sv` `relt_sv` `rem_pl` `remᶻ` `replace′` `reqs′_gr` `res_pl` `rf_pl` `rfc_pl` `rg_pl` `rgc_pl` `rgp_pl` `rgq_cx` `rgt_pl` `rhc_nt` `rhi_sv` `rhl_sv` `rho_nt` `rhu_sv` `rkl_sv` `rl_pl` `rl_sv` `rle_gr` `rle′_gr` `rlo_sv` `rm` `rm_fd` `rm_pl` `rmac` `rmc` `rml` `rmm_pl` `rmv_la` `rmv_pl` `rnd_nt` `rnd²` `rndᶻ` `ro_fd` `roman′` `rootS_cx` `rootu_cx` `rots_gr` `rq_pl` `rq_sv` `rqf_sv` `rqg_sv` `rr_gl` `rr_pl` `rrefp_la` `rr²` `rr¹` `rs_pl` `rsc_pl` `rsf_pl` `rsix_cx` `rst_nt` `rsz_pl` `rt_fd` `rt_pl` `rts_sv` `ru_sv` `rul2_cx` `ruler_cx` `runc_sv` `runs_sv` `r×` `r÷` `r⁺` `r⁻` `r∗` `s2c_nt` `s2p_nt` `s2s_nt` `sEs_cx` `sa_pl` `sadd` `sb_fd` `sbig` `sbm_pl` `sbq_fd` `sbz_pl` `sc4_cx` `sc_fd` `sca_rg` `scard` `sched` `sclR_cx` `scl_cx` `scl_pl` `scm_pl` `scz_pl` `sdiff` `serE_cx` `serEl_cx` `serN_cx` `serNl_cx` `ser_cx` `serl_cx` `setrel` `setrelneg` `setscheck` `setsok` `sf_fd` `sfd_nt` `sfl_nt` `sfr_nt` `sg_nt` `sg_pl` `sg_sv` `sgn_pl` `sgn_sv` `sgp_gr` `sgrs_gr` `sgr′_gr` `shiS_cx` `shn_cx` `showbase′` `showⁱ` `siS_cx` `sigadd` `sim_sv` `simplifyl` `simp′` `sinR_cx` `sinS_cx` `single_sv` `sinhS_cx` `sinhᴾ` `sinter` `sinv_gr` `sjoin` `sl_pl` `slm_pl` `slq_nt` `slr_nt` `smeet` `smem` `sminterm` `smul` `sneg` `snf_gr` `snp_gr` `solv_gr` `sord` `sorted_rg` `sosD_sv` `sosF_sv` `sosG_sv` `spS_cx` `sp_fd` `spf_cx` `spine` `spine′` `spl_gl` `spl_nt` `split_gr` `splitat′` `splitneg` `splitpos` `spl′` `spoly_rg` `spow` `spower` `spr_nt` `spr_pl` `sprob` `sprod` `spsp_nt` `spt_gl` `sq2_cx` `sq_fd` `sqchain_pl` `sqfp_sv` `sqj_cx` `sqm_nt` `sqn_nt` `sqp_pl` `sqq_gl` `sqr_nt` `sqrtR_cx` `sqrtS_cx` `sqrtpos_cx` `sqrtq_cx` `sqs_nt` `sqz_nt` `sq⁺` `sr2_sv` `sr3_sv` `sr_sv` `srdiv` `srs_pl` `srt_gl` `srt_sv` `sset` `ssl_nt` `ssr_nt` `ssub` `ssubset` `ssubsetz` `st_pl` `step` `stp_nt` `sub_pl` `sub_rg` `sub_sv` `subs_gr` `subs_la` `subsequences′` `subsetl` `subu_gr` `subΦ_sv` `sumR_cx` `sum_gl` `sunion` `sv_nt` `sv_sv` `swap_gr` `swp_gr` `sy_pl` `syeq` `syl_gr` `syle` `sylt` `syl′_gr` `symᶜ` `sz_pl` `s¬` `sⁱᶠ` `s⇒` `s⇔` `s∧` `s∨` `s⊤` `s⊥` `s⊻` `ta_sv` `tab_gl` `tails′` `takeu_gr` `take′` `tan_nt` `tand` `tang_cx` `tapp₁` `tapp₂` `tb_sv` `tcj_sv` `td_nt` `tdp_nt` `tds_nt` `tdv_sv` `teql` `tfalse` `tg_nt` `thabelian` `thabelianaxioms` `thabeliandoc` `thabeliansig` `thabeliantheorems` `tharith` `tharithaxioms` `tharithdoc` `tharithrules` `tharithsig` `thariththeorems` `thaxioms` `thclassical` `thclassicalaxioms` `thclassicaldoc` `thclassicaltheorems` `thclosure` `thclosure′` `thconflicts` `thcore` `thcoreaxioms` `thcoredoc` `thcorerules` `thcoresig` `thcoretheorems` `thdefault` `thdoc` `thetcs` `thetcsaxioms` `thetcsdoc` `thetcsrules` `thetcssig` `thetcstheorems` `thgroup` `thgroupaxioms` `thgroupdoc` `thgrouprules` `thgroupsig` `thgrouptheorems` `thhooks` `thintegers` `thintegersaxioms` `thintegersdoc` `thintegersrules` `thintegerstheorems` `thintuitionistic` `thintuitionisticaxioms` `thintuitionisticdoc` `thintuitionistictheorems` `thlattice` `thlatticeaxioms` `thlatticedoc` `thlatticerules` `thlatticesig` `thlatticetheorems` `thlookup` `thname` `thpeano` `thpeanoaxioms` `thpeanodoc` `thpeanorules` `thpeanosig` `thpeanotheorems` `thprob` `thprobaxioms` `thprobdoc` `thprobrules` `thprobsig` `thprobtheorems` `thprune` `threals` `threalsaxioms` `threalsdoc` `threalstheorems` `threquires` `thrules` `thsets` `thsetsaxioms` `thsetsdoc` `thsetsrules` `thsetssig` `thsetstheorems` `thsig` `ththeorems` `thzfc` `thzfcaxioms` `thzfcdoc` `thzfcrules` `thzfcsig` `thzfctheorems` `tisapp` `tisnum` `tisvar` `tk_nt` `tle` `tltl` `tm_pl` `tm_rg` `tm_sv` `tmapargs` `tmatchl` `tmp_sv` `tmpa_sv` `tmpb_sv` `tnot` `tnub` `tnumval` `tobdd` `tobdd′` `topoly` `topolyapp` `tor` `tpo_sv` `tprintapp` `tprintapp′` `tprintarg` `tprintcall` `tpw_sv` `tr2_fd` `tr3_fd` `tr_cx` `tr_fd` `tr_sv` `trc₀` `trc₁` `trdel` `trdiff` `tre_gr` `treq` `trfilter` `trfoldr` `trget` `trim_pl` `trimᵖ` `trint` `trinter` `tritems` `trj_cx` `trkey` `trmap` `trmk` `trows_cx` `trp_cx` `trput` `trsize` `trunion` `trv` `trz_pl` `ts_nt` `tsc_cx` `tsc_nt` `tsp_cx` `tsq_pl` `tsq_sv` `tsr_nt` `ttrue` `tups_gr` `tval_gr` `tvars′` `tz_nt` `u_gr` `ub_cx` `ube_cx` `ubs_cx` `uc_gr` `uc′_gr` `ud_nt` `ukh_cx` `ul_nt` `um_nt` `umerge_gr` `un_sv` `unary_cx` `unk_sv` `up_cx` `up_nt` `up_pl` `upl_nt` `up²` `use_sv` `usort_gr` `uvec_gr` `u′_gr` `v2_nt` `v2′_nt` `valid` `varof_sv` `vat_pl` `vmi_pl` `vn` `vn_rg` `vpi_pl` `vr_pl` `vuse_sv` `whit` `wil_nt` `wix_gr` `wix′_gr` `xeg_pl` `xm_pl` `xs_pl` `yl_pl` `yun_pl` `z_pl` `zelems` `zemS_cx` `zem_cx` `zer_sv` `zetaS_cx` `zf_pl` `zfchook` `zfe_cx` `zis_cx` `zl_cx` `zl_fd` `zm_pl` `zm_sv` `zmk` `zneg_cx` `zpl_cx` `zq_pl` `zs_pl` `zset` `zset_sv` `zw_gr` `¬³` `·ᴾ` `·ᵖ` `½ᶻ` `×⁴ᵈ` `÷ᴴ` `Σᴾ` `Ω` `βs` `βᶜ` `λᶜ` `ᶜ^` `ᶜ^ᴿ` `ᶜatan` `ᶜcos` `ᶜcosh` `ᶜexp` `ᶜlog` `ᶜroot` `ᶜsin` `ᶜsinh` `ᶜ¬` `ᶜ÷` `ᶜ÷ᴿ` `ᶜΣ` `ᶜℑ` `ᶜℑᴿ` `ᶜℜ` `ᶜℜᴿ` `ᶜ⇒` `ᶜ⇔` `ᶜ⇡` `ᶜ∗` `ᶜ∗ᴿ` `ᶜ√` `ᶜ∧` `ᶜ∨` `ᶜ∷` `ᶜ≐` `ᶜ≐ᴿ` `ᶜ≠` `ᶜ≠ᴿ` `ᶜ≺` `ᶜ≺ᴿ` `ᶜ≻` `ᶜ≻ᴿ` `ᶜ⊕` `ᶜ⊖` `ᶜ⊖ᴿ` `ᶜ⊘` `ᶜ⊛` `ᶜ⊞` `ᶜ⊟` `ᶜ⊟ᴿ` `ᶜ⊠` `ᶜ⊤` `ᶜ⊥` `ᶜ⩽` `ᶜ⩽ᴿ` `ᶜ⩾` `ᶜ⩾ᴿ` `ᶜ𝔲` `‖` `⁴ᴸ` `⁴ᶻ` `ℑᶻ′` `ℚ[i][x]` `ℚ[i][𝐱]` `ℜᶻ′` `ℤ²` `⇑ᶜ` `⇓ᶜ` `∂′` `∅ᵖ` `∗ᴾ` `∗ᵃ` `∗ᵖ` `√?ᶜ` `√merge` `√ᑫ` `√ᶜ′` `√ᶻ` `√ᶻ′` `√ᶻⁱ` `√⁺?ᵃ` `√⁺′` `∧³` `∧ᵈ` `∨³` `∨ᵈ` `≡ᵃ` `≡ᵐ` `≡ᶜ` `⊖ᴾ` `⊖ᵖ` `⊞ᴾ` `⊞ᵖ` `⊞ᶜ′` `⊟ᶜ` `⊟ᶜ′` `⊠ᴾ` `⊠ᵐ` `⊠ᵖ` `⊡′` `⊻ᵈ` `⋚ʳ′` `⋚ⁱ′` `⌄⁴` `⌊½⌋ᶻ` `⌊ᶻ` `⌜ᶻ` `①` `②` `③` `④` `⑤` `⑥` `⑦` `⑧` `⑨` `⓪` `⟐′` `⩾⁰` `⫽ᶻ′` `𝒦` `𝒮` `𝔡` `𝔲` `𝕊²` `𝕓⁴`
 
 **Notions without a symbol yet.**  General roots beyond what `lib/poly.imo` isolates, relations and functions as sets of pairs, Galois groups of
 polynomials of degree ≥ 5, limits as values, and unbounded quantifiers (they are not decidable; bounded ones over lists are provided, and a statement treats a
@@ -2877,25 +3730,25 @@ The diagram names the modules of Pymo; Haskimo and Rustimo have the same stages 
 
 | file | lines | role |
 |:--|--:|:--|
-| `pymo/imo_core.py` | 333 | lazy call-by-need evaluator (terms compiled to Python), numeral reader, value decoders |
+| `pymo/imo_core.py` | 359 | lazy call-by-need evaluator (terms compiled to Python), numeral reader, value decoders |
 | `pymo/base_b.py` | 100 | Python twin of the base-(i−1) arithmetic (reference for the tests) |
 | `pymo/syntax.py` | 269 | spec lexer and parser, class terms, pretty-printers, erasure to lambda terms |
-| `pymo/imotypes.py` | 474 | the class checker (classes, facts, overloads, coercions, ascription) |
+| `pymo/imotypes.py` | 488 | the class checker (classes, facts, overloads, coercions, ascription) |
 | `pymo/quote.py` | 169 | quotation of statements as numeric codes, and the definitions table, for the simplifier |
 | `pymo/numeral.py` | 62 | writes and reads base-(i−1) numerals (a helper for authoring) |
 | `pymo/layers.py` | 152 | binary lexer, doc 1, spec ↔ bin translation, file sections |
 | `pymo/hum.py` | 249 | human reader (doc 2, Pratt parser) |
-| `pymo/imo.py` | 186 | loader / driver: notations → statements → checker → evaluator |
+| `pymo/imo.py` | 190 | loader / driver: notations → statements → checker → evaluator |
 | `pymo/output.py` | 365 | the printer: main, normal-form terms in bin / spec / hum, the output notation |
 | `pymo/i1.py` | 130 | command line of Pymo: run, check, translate, eval, text |
 | `pymo/mkdoc1.py` | 27 | regenerates docs/doc1.sbl (append-only) |
 | `pymo/mkcarry.py` | 81 | generates the carry decision trees of the adder and subtractor (lib/number.imo) |
 | `pymo/mkdec.py` | 100 | generates the tables of the division-free decimal conversion (lib/text.imo) |
 | `pymo/mkprove.py` | 34 | writes the doc 1 codes the prover of lib/prove.imo dispatches on into that file |
-| `pymo/mkbin.py` | 32 | regenerates the all-binary prelude and example .bin.imo / .sbl files |
+| `pymo/mkbin.py` | 38 | regenerates the all-binary prelude and example .bin.imo / .sbl files |
 | `pymo/mkref.py` | 136 | regenerates the reference tables |
-| `pymo/mkreadme.py` | 459 | assembles this README |
-| `lib/logic.imo` | 73 | prelude 1: classes, facts, Booleans, pairs, lists, text |
+| `pymo/mkreadme.py` | 472 | assembles this README |
+| `lib/logic.imo` | 74 | prelude 1: classes, facts, Booleans, pairs, lists, text |
 | `lib/number.imo` | 128 | prelude 2: ℤ[i] digit arithmetic, ℚ[i] with total division, sign automaton, order |
 | `lib/algebra.imo` | 93 | prelude 3: algebras, lazy ℝ[i], series, Cayley–Dickson tower, function spaces |
 | `lib/bounded.imo` | 9 | prelude 4: bounded quantifiers and ranges |
@@ -2916,13 +3769,19 @@ The diagram names the modules of Pymo; Haskimo and Rustimo have the same stages 
 | `lib/prove.imo` | 420 | prelude 20: Prop, the relations on ℝ[i], the three-valued prover, predicates |
 | `lib/solve.imo` | 515 | prelude 21: simplify′ — the engine that finds the simplest form |
 | `lib/codec.imo` | 61 | prelude 22: types as decoding keys — pairs of integers as a + b·i, strings as numbers, pairs of strings |
-| `lib/prelude.bin.imo` | 4102 | the whole prelude in binary notation (generated) |
+| `lib/prelude.bin.imo` | 5463 | the whole prelude in binary notation (generated) |
 | `tests/harness.py` | 121 | shared helpers of the suites; --core pymo|haskimo|rustimo chooses the core under test |
 | `tests/core_serve.py` | 243 | Haskimo and Rustimo as cores of the shared suites: haskimo serve / rustimo serve behind the API of the harness |
 | `tests/run_suites.py` | 74 | runs every suite on every core it supports |
 | `tests/test_layers.py` | 229 | notations, docs, checker, Char/String, order, quantifiers, analysis |
 | `tests/test_algebra.py` | 174 | ℤ[i], ℚ[i], Cayley–Dickson tower, lazy ℝ[i], function spaces |
 | `tests/test_axioms.py` | 129 | the axiom audit of ℚ[i], evaluated in the language |
+| `tests/test_lists.py` | 144 | lib/lists.imo against Python oracles |
+| `tests/test_strings.py` | 120 | lib/strings.imo against Python oracles |
+| `tests/test_dict.py` | 144 | lib/dict.imo (tries) against Python containers |
+| `tests/langtest.py` | 138 | library tests as human-notation programs, with Python oracles |
+| `tests/test_classes.py` | 270 | the class system: lattice against a model, overload sets, human operators, on every core |
+| `tests/classes.golden.json` | 7 | digests of the checker messages on which all the cores agree (written by test_classes.py --bless) |
 | `tests/test_library.py` | 120 | the library, from the human notation, against Python references |
 | `tests/test_output.py` | 123 | main, the printer, output notations and round trips |
 | `tests/test_prove.py` | 117 | predicates: true / false / undetermined answers, the all-binary program, the one-system laws |
@@ -2939,53 +3798,72 @@ The diagram names the modules of Pymo; Haskimo and Rustimo have the same stages 
 | `tests/test_codec.py` | 182 | types as decoding keys: Z[i], Z^2, fractions, String^2 |
 | `tests/test_readme.py` | 130 | checks the numbers and messages written by hand in the README |
 | `tests/refmath.py` | 52 | independent Python reference for ℚ[i] and the Cayley–Dickson tower |
-| `tests/conformance/run.py` | 177 | the interpreter-neutral test: the same command lines on Pymo, Haskimo and Rustimo, compared byte for byte |
-| `pymo/mkconformance.py` | 182 | writes the library sweep of the conformance suite and its list of cases |
-| `i1` | 147 | dispatcher: runs Pymo, Haskimo or Rustimo (--impl pymo|haskimo|rustimo|all) |
+| `tests/conformance/run.py` | 210 | the interpreter-neutral test: the same command lines on Pymo, Haskimo and Rustimo, compared byte for byte |
+| `pymo/mkconformance.py` | 184 | writes the library sweep of the conformance suite and its list of cases |
+| `i1` | 228 | dispatcher: runs Pymo, Haskimo or Rustimo (--impl pymo|haskimo|rustimo|all) |
 | `install.sh` | 166 | installer: any of Pymo, Haskimo and Rustimo (i1, pymo, haskimo, rustimo) |
 | `haskimo/build.sh` | 3 | builds Haskimo, build/haskimo, with plain ghc |
 | `rustimo/build.sh` | 4 | builds Rustimo, build/rustimo, with plain cargo (no crates) |
-| `Makefile` | 44 | make (build Haskell and Rust), install, test, conformance |
+| `Makefile` | 74 | make (build Haskell and Rust), install, test, conformance |
 | `haskimo.cabal` | 45 | cabal package of Haskimo |
-| `haskimo/app/Main.hs` | 242 | Haskell: the command line (run, check, translate, eval, text) |
+| `haskimo/app/Main.hs` | 246 | Haskell: the command line (run, check, translate, eval, text) |
 | `haskimo/src/I1/Base.hs` | 186 | Haskell: digit arithmetic of base i−1, Python-compatible repr and %g |
 | `haskimo/src/I1/Syntax.hs` | 333 | Haskell: spec lexer and parser, class terms, pretty-printers, erasure |
 | `haskimo/src/I1/Layers.hs` | 212 | Haskell: binary lexer, doc 1, spec ↔ bin translation, file sections |
 | `haskimo/src/I1/Hum.hs` | 367 | Haskell: doc 2, human lexer and Pratt parser |
-| `haskimo/src/I1/Types.hs` | 556 | Haskell: the class checker |
+| `haskimo/src/I1/Types.hs` | 570 | Haskell: the class checker |
 | `haskimo/src/I1/Quote.hs` | 203 | Haskell: quotation of statements as numeric codes |
 | `haskimo/src/I1/Core.hs` | 182 | Haskell: the lazy evaluator and the value decoders |
 | `haskimo/src/I1/Program.hs` | 254 | Haskell: loader / driver |
 | `haskimo/src/I1/Output.hs` | 450 | Haskell: the printer, the Speller, main and the output notations |
 | `haskimo/src/I1/Serve.hs` | 139 | Haskell: haskimo serve, a loaded program as a service for the shared test suite |
-| `haskimo/src/I1/EmbedTH.hs` | 41 | Haskell: compile-time embedding of lib/*.imo and the two docs |
+| `haskimo/src/I1/EmbedTH.hs` | 44 | Haskell: compile-time embedding of lib/*.imo and the two docs |
 | `haskimo/src/I1/Data.hs` | 15 | Haskell: the embedded system files |
 | `rustimo/Cargo.toml` | 26 | cargo package of Rustimo (no dependencies) |
-| `rustimo/src/main.rs` | 407 | Rust: the command line (run, check, translate, eval, text, serve) |
-| `rustimo/src/base.rs` | 262 | Rust: digit arithmetic of base i−1, Python-compatible repr and %g |
+| `rustimo/src/main.rs` | 410 | Rust: the command line (run, check, translate, eval, text, serve) |
+| `rustimo/src/base.rs` | 270 | Rust: digit arithmetic of base i−1, Python-compatible repr and %g |
 | `rustimo/src/bigint.rs` | 501 | Rust: big integers and rationals for the host side (no crates) |
 | `rustimo/src/syntax.rs` | 688 | Rust: spec lexer and parser, class terms, pretty-printers, erasure |
 | `rustimo/src/layers.rs` | 341 | Rust: binary lexer, doc 1, spec ↔ bin translation, file sections |
 | `rustimo/src/hum.rs` | 630 | Rust: doc 2, human lexer and Pratt parser |
-| `rustimo/src/types.rs` | 1004 | Rust: the class checker |
+| `rustimo/src/types.rs` | 1033 | Rust: the class checker |
 | `rustimo/src/quote.rs` | 308 | Rust: quotation of statements as numeric codes |
 | `rustimo/src/core.rs` | 1083 | Rust: the lazy evaluator (flat closures, explicit stack, update frames) and the value decoders |
-| `rustimo/src/program.rs` | 473 | Rust: loader / driver |
+| `rustimo/src/program.rs` | 478 | Rust: loader / driver |
 | `rustimo/src/output.rs` | 631 | Rust: the printer, the Speller, main and the output notations |
 | `rustimo/src/serve.rs` | 190 | Rust: rustimo serve, a loaded program as a service for the shared test suite |
-| `rustimo/src/data.rs` | 32 | Rust: the embedded system files |
+| `rustimo/src/data.rs` | 10 | Rust: the embedded system files |
 | `rustimo/src/alloc.rs` | 88 | Rust: a small-block allocator for the evaluator |
-| **total** | **29059** | |
+| `compimo/src/main.rs` | 403 | Compimo: the command line (the commands of the other cores, prelude, selftest) |
+| `compimo/src/core.rs` | 529 | Compimo: the machine: translation, the C compiler, loading, the interface of the printer |
+| `compimo/src/gen.rs` | 1061 | Compimo: de Bruijn terms to C: constructors, pattern matches, inlining, natives |
+| `compimo/src/selftest.rs` | 145 | Compimo: the native arithmetic against the definitions |
+| `compimo/rt/imo_rt.c` | 525 | Compimo (C): the run-time system: objects, laziness, application, packed digit strings, natives |
+| `compimo/rt/imo_rt.h` | 79 | Compimo (C): the header of the run-time system |
+| **total** | **34239** | |
 
 ### 16.3 Test-suites
 
-Eighteen suites, each a plain script, and **shared by the three cores** ([§2.1](#21-three-interpreters-pymo-haskimo-and-rustimo)).  Fourteen use only the program-and-value API of `tests/harness.py` and run on Pymo, on Haskimo and on Rustimo alike: `python3 tests/test_poly.py` runs on Pymo, `python3 tests/test_poly.py --core haskimo` on Haskimo, `--core rustimo` on Rustimo (`tests/core_serve.py` starts `haskimo serve` or `rustimo serve`, and the suite decodes the digit strings, truth values and list and pair shapes that come back; every decision about a value is made by the evaluator of the core under test).  Four test the Python API of Pymo itself — its readers, its printer, its quoting — and run on Pymo only; what they check has command-line counterparts among the cases of `tests/conformance`, which run on all the cores ([§16.5](#165-the-three-cores-and-the-shared-test-suite)).  `python3 tests/run_suites.py` runs every suite on every core it supports.  On Pymo the test of the complex functions takes about 25 minutes on three cores (`python3 tests/test_complex.py --first` runs one case per function in 40 seconds); on Haskimo and on Rustimo about a minute.
+Twenty-three suites, each a plain script, and **shared by the three cores** ([§2.1](#21-three-interpreters-pymo-haskimo-and-rustimo)).  Nineteen use only the program-and-value API of `tests/harness.py` and run on Pymo, on Haskimo and on Rustimo alike: `python3 tests/test_poly.py` runs on Pymo, `python3 tests/test_poly.py --core haskimo` on Haskimo, `--core rustimo` on Rustimo (`tests/core_serve.py` starts `haskimo serve` or `rustimo serve`, and the suite decodes the digit strings, truth values and list and pair shapes that come back; every decision about a value is made by the evaluator of the core under test).  Four test the Python API of Pymo itself — its readers, its printer, its quoting — and run on Pymo only; what they check has command-line counterparts among the cases of `tests/conformance`, which run on all the cores ([§16.5](#165-the-three-cores-and-the-shared-test-suite)).  `python3 tests/run_suites.py` runs every suite on every core it supports.  On Pymo the test of the complex functions takes about 25 minutes on three cores (`python3 tests/test_complex.py --first` runs one case per function in 40 seconds); on Haskimo and on Rustimo about a minute.
 
 | suite | cores | what it checks |
 |:--|:--|:--|
 | `tests/test_layers.py` | Pymo | notations, doc 1 / doc 2, translations and round trips, the class checker, Char/String, order, quantifiers, analysis |
 | `tests/test_algebra.py` | Pymo, Haskimo, Rustimo | ℤ[i] and ℚ[i] arithmetic, the Cayley–Dickson tower, lazy ℝ[i], function spaces |
 | `tests/test_axioms.py` | Pymo, Haskimo, Rustimo | the laws of [§11](#11-the-axioms-of-qi-complete-in-every-sense-a-computable-system-can-be): adder, subtractor, sign automaton, Re/Im, division, gcd, canonical form, field and meadow laws — evaluated in the language |
+| `tests/test_classes.py` | Pymo, Haskimo, Rustimo | the class system of [§7](#7-classes-every-symbol-is-declared-first): the lattice of 137 classes against a model written from §7 (all 18 769 pairs), 119 160 probes of every overload set and generic declaration and 5 868 of the human operators, whose messages must be those all the cores printed (`tests/classes.golden.json`, written by `--bless` only if they agree) |
+| `tests/test_lists.py` | Pymo, Haskimo, Rustimo | `lib/lists.imo` against Python oracles: folds, scans, searching, stable sorting, subsequences, permutations, combinations (350 checks; written as human-notation programs by `tests/langtest.py`) |
+| `tests/test_strings.py` | Pymo, Haskimo, Rustimo | `lib/strings.imo`: character classes and case against Python's tables, splitting, searching, padding, bases, Roman numerals, edit distance (767 checks) |
+| `tests/test_dict.py` | Pymo, Haskimo, Rustimo | `lib/dict.imo` against Python's dict, set, Counter, heapq and deque on random sequences of operations (1357 checks) |
+| `tests/test_calendar.py` | Pymo (a sample), Haskimo, Rustimo | `lib/calendar.imo` against Python's `datetime` and `calendar`: day numbers, weekdays, the ISO calendar, Easter, date strings (900 checks) |
+| `tests/test_graph.py` | Pymo (a sample), Haskimo, Rustimo | `lib/graph.imo` against Python implementations of the same algorithms on random graphs (444 checks) |
+| `tests/test_stats.py` | Pymo (a sample), Haskimo, Rustimo | `lib/stats.imo` against Python's `fractions` and `statistics` on random lists (640 checks) |
+| `tests/test_geom.py` | Pymo (a sample), Haskimo, Rustimo | `lib/geom.imo` against Python implementations with fractions, degenerate cases included (977 checks) |
+| `tests/test_regex.py` | Pymo (a sample), Haskimo, Rustimo | `lib/regex.imo` against Python's `re` (full matches) and brute-force definitions (longest matches) on random patterns (496 checks) |
+| `tests/test_encode.py` | Pymo (a sample), Haskimo, Rustimo | `lib/encode.imo` against Python's `base64`, `binascii`, `urllib.parse` and `zlib` and the textbook algorithms, invalid inputs included (1457 checks) |
+| `tests/test_prng.py` | Pymo (a sample), Haskimo, Rustimo | `lib/prng.imo` against models in Python and known answers (195 checks) |
+| `tests/test_combin.py` | Pymo (a sample), Haskimo, Rustimo | `lib/combin.imo` against `math.comb`, inclusion–exclusion, brute force over permutations and words, and restricted growth strings (575 checks) |
+| `tests/test_theory.py` | Pymo (a sample), Haskimo, Rustimo | the theories of [`docs/lib-theory.md`](docs/lib-theory.md): the embedded theorems of the 23 packages, the mechanism of packages and their conflicts, curated statements with their exact verdicts, and random statements against exact Python oracles (truth tables, dictionary polynomials, Fractions, Fourier–Motzkin, principal minors, case-by-case expansion of abs/min/max, free reduction, vertices of the simplex, frozensets, finite topological spaces, linear forms) (1945 checks) |
 | `tests/test_library.py` | Pymo, Haskimo, Rustimo | the library of [§14](#14-standard-library-reference) against exact Python references |
 | `tests/test_output.py` | Pymo | `main`, the printer, the three output notations and their round trips |
 | `tests/test_prove.py` | Pymo, Haskimo, Rustimo | predicates on ℝ[i]: every answer against the mathematical truth, undetermined instead of a guess, the all-binary program, the one-system laws |
@@ -3169,13 +4047,13 @@ Measured while building this README (Python 3.13.16, 4 cores; the suites ran fou
 
 | command | wall-clock |
 |:--|--:|
-| `python3 pymo/i1.py check examples/target.hum.imo` | 1.0 s |
-| `python3 pymo/i1.py run examples/main.hum.imo` | 10.3 s |
-| `python3 pymo/i1.py run examples/prove.hum.imo` | 9.2 s |
-| `python3 pymo/i1.py run examples/predicates.hum.imo` | 4.2 s |
-| `python3 pymo/i1.py eval examples/target.hum.imo z 8` | 0.9 s |
-| `python3 pymo/i1.py eval examples/target.hum.imo z 14` | 1.1 s |
-| `python3 pymo/i1.py eval examples/target.hum.imo z 30` | 2.4 s |
+| `python3 pymo/i1.py check examples/target.hum.imo` | 7.1 s |
+| `python3 pymo/i1.py run examples/main.hum.imo` | 16.0 s |
+| `python3 pymo/i1.py run examples/prove.hum.imo` | 14.8 s |
+| `python3 pymo/i1.py run examples/predicates.hum.imo` | 10.2 s |
+| `python3 pymo/i1.py eval examples/target.hum.imo z 8` | 7.2 s |
+| `python3 pymo/i1.py eval examples/target.hum.imo z 14` | 7.1 s |
+| `python3 pymo/i1.py eval examples/target.hum.imo z 30` | 8.2 s |
 
 The test-suites, on the three cores (`python3 tests/run_suites.py`; the same checks, the same counts):
 
@@ -3219,7 +4097,13 @@ The repository has three kinds of content ([§2.1](#21-three-interpreters-pymo-h
 | — | `EmbedTH.hs`, `Data.hs` | `data.rs`, `alloc.rs` | embed the system files into the executable (Rustimo also has a small-block allocator for the evaluator) |
 | — | `Serve.hs` | `serve.rs` | `haskimo serve`, `rustimo serve`: a loaded program as a service, so that the library suites can run on them (`tests/core_serve.py` is the client of both) |
 
-**Conformance.**  `python3 tests/conformance/run.py` runs the same command lines on any of the cores (`--impl pymo|haskimo|rustimo|all`) and compares standard output and exit status, byte for byte, with `tests/conformance/expected.json`.  The expected outputs are the bytes **on which all the cores agree**: `--bless` runs them all and records a case only if they print the same; a case on which they differ is listed and not recorded.  The suite has 2066 cases: 114 on the shipped examples (every command of [§2](#2-quick-start), the three output notations, the all-binary prelude); 428 on 107 programs recorded from the Python test-suites (each with `check`, `translate --to spec`, `translate --to bin` and `run`); 8 on the programs of the error-message table of [§7.6](#76-error-messages-as-the-checker-prints-them), 21 on hand-written edge cases (literals and escapes, comments, mixed sections, errors, unknowns, big numbers) and 2 on the command line itself; and 1493 in the library sweep (`pymo/mkconformance.py` writes one-line programs `main in <class> := name(arguments)` for every function of the standard library that has a human name and a signature it can write literals for; a few are also printed in `--out spec` and `--out bin`).  `python3 tests/conformance/run.py --fast` skips the slow cases.
+**Conformance.**  `python3 tests/conformance/run.py` runs the same command lines on any of the cores (`--impl pymo|haskimo|rustimo|all`) and compares standard output and exit status, byte for byte, with `tests/conformance/expected.json`.  The expected outputs are the bytes **on which all the cores agree**: `--bless` runs them all and records a case only if they print the same; a case on which they differ is listed and not recorded.  The suite has 2227 cases: 123 on the shipped examples (every command of [§2](#2-quick-start), the three output notations, the all-binary prelude); 428 on 107 programs recorded from the Python test-suites (each with `check`, `translate --to spec`, `translate --to bin` and `run`); 8 on the programs of the error-message table of [§7.6](#76-error-messages-as-the-checker-prints-them), 32 on hand-written edge cases (literals and escapes, comments, mixed sections, errors, unknowns, big numbers), 2 on the command line itself and 9 on the theories of [`docs/lib-theory.md`](docs/lib-theory.md) (simplest forms, verdicts, packages); and 1625 in the library sweep (`pymo/mkconformance.py` writes one-line programs `main in <class> := name(arguments)` for every function of the standard library that has a human name and a signature it can write literals for; a few are also printed in `--out spec` and `--out bin`).  `python3 tests/conformance/run.py --fast` skips the slow cases.
+
+**Native `.imo` tests, with no Python.**  The checks also exist as `.imo` programs that every core runs directly, the interpreters and the compiler alike.  `tests/imo/full/` (72 files, 9831 checks) and `tests/imo/small/` (33 files, 4057 checks: the sample that Pymo can afford) are
+programs in the human notation that **check themselves**: `./i1 --impl compimo run tests/imo/full/encode-01.hum.imo` prints `PASS 150`, or `FAIL` and the labels of the checks that failed.  The expected values in them were computed once, by the independent Python oracles of the suites
+(`LANGTEST_EMIT=tests/imo/full python3 tests/test_encode.py --core rustimo` writes the files of one suite), so that running the files needs nothing but a core.  `tests/run_imo.sh [--impl NAME,NAME] [--set full|small]` runs them, and
+`tests/conformance/run.sh [--impl NAME,NAME] [--fast|--slow]` runs the conformance cases against the plain files of `tests/conformance/expected/` (`run.py --bless` and `run.py --export` write them from `expected.json`).  Both are POSIX shell scripts and run on
+Pymo, Haskimo, Rustimo, Compimo, OCamimo, Schimo, Cimo and Rimo (`--impl rimo`, slow: `tests/conformance/run.sh --sample-lib 12`).
 
 **What is not parallel.**  Three things.  The scripts that write the generated shared files (`pymo/mk*.py`, `pymo/numeral.py`, `pymo/setauthor.py`) exist once, in Python, because they import the modules of Pymo; Haskimo and Rustimo only read what they write.  Four of the eighteen suites of [§16.3](#163-test-suites) (`layers`, `output`, `predicates`, `readme`) test the Python API of Pymo and run on Pymo only: the readers, checker, quoting and printer of Haskimo and Rustimo are tested by the cases of `tests/conformance` (which include the programs that those four suites load) and, through the programs they load, by the other fourteen suites.  And the cores differ in speed, in memory and in the text of a crash of the host (a Python traceback, a `haskimo: ...` or `rustimo: ...` line); all exit with status 1.
 
@@ -3227,12 +4111,12 @@ The same commands on the three interpreters, measured while building this README
 
 | command | Pymo | Haskimo | Rustimo |
 |:--|--:|--:|--:|
-| `i1 run examples/hello.hum.imo` | 0.93 s, 159 MB | 0.15 s, 158 MB | 0.03 s, 17 MB |
-| `i1 check examples/target.hum.imo` | 0.89 s, 159 MB | 0.16 s, 158 MB | 0.03 s, 16 MB |
-| `i1 run examples/main.hum.imo` | 9.63 s, 163 MB | 0.81 s, 168 MB | 0.98 s, 22 MB |
-| `i1 run examples/prove.hum.imo` | 9.49 s, 178 MB | 0.89 s, 185 MB | 0.98 s, 28 MB |
-| `i1 run examples/predicates.hum.imo` | 4.66 s, 162 MB | 0.54 s, 169 MB | 0.49 s, 19 MB |
-| `i1 eval examples/target.hum.imo z 30` | 2.46 s, 159 MB | 0.32 s, 164 MB | 0.19 s, 20 MB |
+| `i1 run examples/hello.hum.imo` | 7.28 s, 1088 MB | 0.52 s, 181 MB | 0.05 s, 22 MB |
+| `i1 check examples/target.hum.imo` | 7.46 s, 1088 MB | 0.42 s, 181 MB | 0.04 s, 21 MB |
+| `i1 run examples/main.hum.imo` | 17.02 s, 1091 MB | 1.38 s, 184 MB | 0.95 s, 27 MB |
+| `i1 run examples/prove.hum.imo` | 15.41 s, 1096 MB | 1.30 s, 194 MB | 0.92 s, 33 MB |
+| `i1 run examples/predicates.hum.imo` | 10.66 s, 1090 MB | 0.85 s, 186 MB | 0.48 s, 25 MB |
+| `i1 eval examples/target.hum.imo z 30` | 8.58 s, 1088 MB | 0.60 s, 181 MB | 0.20 s, 25 MB |
 
 ---
 
@@ -3380,144 +4264,257 @@ $ python3 pymo/i1.py eval examples/norm.hum.imo v
 
 ```text
 i-1/
-├── docs/                       # the two system documents and generated reference tables
+├── cimo/
+│   ├── src/
+│   │   ├── cimo.h
+│   │   ├── core.c
+│   │   ├── data_gen.c
+│   │   ├── hum.c
+│   │   ├── layers.c
+│   │   ├── main.c
+│   │   ├── output.c
+│   │   ├── program.c
+│   │   ├── quote.c
+│   │   ├── syntax.c
+│   │   ├── types.c
+│   │   └── util.c
+│   ├── build.sh
+│   └── gen_data.sh
+├── compimo/
+│   ├── rt/
+│   │   ├── imo_rt.c              # Compimo (C): the run-time system: objects, laziness, application, packed digit strings, natives
+│   │   └── imo_rt.h              # Compimo (C): the header of the run-time system
+│   ├── src/
+│   │   ├── core.rs               # Compimo: the machine: translation, the C compiler, loading, the interface of the printer
+│   │   ├── gen.rs                # Compimo: de Bruijn terms to C: constructors, pattern matches, inlining, natives
+│   │   ├── main.rs               # Compimo: the command line (the commands of the other cores, prelude, selftest)
+│   │   ├── program.rs
+│   │   └── selftest.rs           # Compimo: the native arithmetic against the definitions
+│   ├── build.rs
+│   ├── build.sh
+│   ├── Cargo.lock
+│   └── Cargo.toml
+├── docs/                         # the two system documents and generated reference tables
 │   ├── authoring.md
-│   ├── axioms.md               # the axiom audit of ℚ[i]: statements and proofs
-│   ├── doc1.sbl                # doc 1:  spec symbol := bin symbol
-│   ├── doc2.generated.md       # doc 2 as a table (generated)
-│   ├── doc2.sbl                # doc 2:  human symbol := spec / bin symbol(s) ; role
+│   ├── axioms.md                 # the axiom audit of ℚ[i]: statements and proofs
+│   ├── cimo.md
+│   ├── compimo.md
+│   ├── doc1.sbl                  # doc 1:  spec symbol := bin symbol
+│   ├── doc2.generated.md         # doc 2 as a table (generated)
+│   ├── doc2.sbl                  # doc 2:  human symbol := spec / bin symbol(s) ; role
+│   ├── lib-calendar.md
 │   ├── lib-codec.md
+│   ├── lib-combin.md
 │   ├── lib-complex.md
+│   ├── lib-dict.md
+│   ├── lib-encode.md
 │   ├── lib-field.md
 │   ├── lib-galois.md
+│   ├── lib-geom.md
+│   ├── lib-graph.md
 │   ├── lib-group.md
 │   ├── lib-linalg.md
+│   ├── lib-lists.md
 │   ├── lib-numtheory.md
 │   ├── lib-poly.md
 │   ├── lib-predicates.md
+│   ├── lib-prng.md
+│   ├── lib-regex.md
 │   ├── lib-ring.md
 │   ├── lib-solve.md
+│   ├── lib-stats.md
+│   ├── lib-strings.md
+│   ├── lib-theory.md
+│   ├── ocamimo.md
 │   ├── predicates.md
-│   ├── prove.md                # predicates on ℝ[i]: rules, soundness, limits
-│   └── reference.generated.md  # reference tables (generated)
-├── examples/                   # example programs, one notation per file
-│   ├── analysis.hum.imo        # exp, sin, cos, Euler
-│   ├── bad.hum.imo             # a program the checker rejects
+│   ├── prove.md                  # predicates on ℝ[i]: rules, soundness, limits
+│   ├── reference.generated.md    # reference tables (generated)
+│   ├── rimo.md
+│   └── schimo.md
+├── examples/                     # example programs, one notation per file
+│   ├── analysis.hum.imo          # exp, sin, cos, Euler
+│   ├── bad.hum.imo               # a program the checker rejects
 │   ├── decode.hum.imo
-│   ├── hello.bin.imo           # … in binary notation
-│   ├── hello.hum.imo           # text, with a main
+│   ├── hello.bin.imo             # … in binary notation
+│   ├── hello.hum.imo             # text, with a main
 │   ├── hello.sbl
-│   ├── main.hum.imo            # a program: main ∶ String
-│   ├── norm.hum.imo            # a user-defined function
-│   ├── point.hum.imo           # one value in the three output notations
+│   ├── main.hum.imo              # a program: main ∶ String
+│   ├── norm.hum.imo              # a user-defined function
+│   ├── point.hum.imo             # one value in the three output notations
 │   ├── predicates.hum.imo
-│   ├── prove.bin.imo           # … the same program in binary notation
-│   ├── prove.hum.imo           # predicates: relations on ℝ[i] simplified by logic
+│   ├── prove.bin.imo             # … the same program in binary notation
+│   ├── prove.hum.imo             # predicates: relations on ℝ[i] simplified by logic
 │   ├── prove.sbl
-│   ├── quaternion.hum.imo      # quaternions
+│   ├── quaternion.hum.imo        # quaternions
+│   ├── sedenion.hum.imo          # sedenions: zero divisors, in human notation
 │   ├── spaces.bin.imo
-│   ├── spaces.hum.imo          # sequence space
+│   ├── spaces.hum.imo            # sequence space
 │   ├── spaces.sbl
 │   ├── spaces.spec.imo
-│   ├── target.bin.imo          # … in binary notation
-│   ├── target.hum.imo          # π + e·i in human notation
-│   ├── target.sbl              # local symbols of target.bin.imo
-│   ├── target.spec.imo         # … in spec notation
-│   └── tower.spec.imo          # Cayley–Dickson over lazy ℝ[i]
-├── haskimo/                    # Haskimo, the Haskell interpreter of the same specification
+│   ├── target.bin.imo            # … in binary notation
+│   ├── target.hum.imo            # π + e·i in human notation
+│   ├── target.sbl                # local symbols of target.bin.imo
+│   ├── target.spec.imo           # … in spec notation
+│   └── tower.spec.imo            # Cayley–Dickson over lazy ℝ[i]
+├── haskimo/                      # Haskimo, the Haskell interpreter of the same specification
 │   ├── app/
-│   │   └── Main.hs             # Haskell: the command line (run, check, translate, eval, text)
+│   │   └── Main.hs               # Haskell: the command line (run, check, translate, eval, text)
 │   ├── src/
 │   │   └── I1/
-│   │       ├── Base.hs         # Haskell: digit arithmetic of base i−1, Python-compatible repr and %g
-│   │       ├── Core.hs         # Haskell: the lazy evaluator and the value decoders
-│   │       ├── Data.hs         # Haskell: the embedded system files
-│   │       ├── EmbedTH.hs      # Haskell: compile-time embedding of lib/*.imo and the two docs
-│   │       ├── Hum.hs          # Haskell: doc 2, human lexer and Pratt parser
-│   │       ├── Layers.hs       # Haskell: binary lexer, doc 1, spec ↔ bin translation, file sections
-│   │       ├── Output.hs       # Haskell: the printer, the Speller, main and the output notations
-│   │       ├── Program.hs      # Haskell: loader / driver
-│   │       ├── Quote.hs        # Haskell: quotation of statements as numeric codes
-│   │       ├── Serve.hs        # Haskell: haskimo serve, a loaded program as a service for the shared test suite
-│   │       ├── Syntax.hs       # Haskell: spec lexer and parser, class terms, pretty-printers, erasure
-│   │       └── Types.hs        # Haskell: the class checker
-│   ├── build.sh                # builds Haskimo, build/haskimo, with plain ghc
-│   └── README.md               # build, modules and differences of Haskimo
-├── lib/                        # the standard library (trusted prelude)
-│   ├── algebra.imo             # prelude 3: algebras, lazy ℝ[i], series, Cayley–Dickson tower, function spaces
-│   ├── analysis.imo            # prelude 5: exp, sin, cos
-│   ├── arith.imo               # prelude 6: exact division, gcd, canonical form, floor, div/mod, powers, factorial, isqrt
-│   ├── bounded.imo             # prelude 4: bounded quantifiers and ranges
-│   ├── codec.imo               # prelude 22: types as decoding keys — pairs of integers as a + b·i, strings as numbers, pairs of strings
-│   ├── complex.imo             # prelude 14: functions of a complex variable: logs, powers, inverse trigonometric and hyperbolic functions, Γ, ζ, erf, Bessel, elliptic integrals
-│   ├── field.imo               # prelude 17: GF(p), GF(p^n), number fields, algebraic numbers
-│   ├── galois.imo              # prelude 19: Galois groups of low-degree polynomials, cyclotomy, Frobenius
-│   ├── group.imo               # prelude 18: permutation groups
-│   ├── linalg.imo              # prelude 9: vectors, matrices, determinant, solve, inverse
-│   ├── list.imo                # prelude 7: lists, sorting, digit-wise operations, characters
-│   ├── logic.imo               # prelude 1: classes, facts, Booleans, pairs, lists, text
-│   ├── number.imo              # prelude 2: ℤ[i] digit arithmetic, ℚ[i] with total division, sign automaton, order
-│   ├── numtheory.imo           # prelude 15: number theory
-│   ├── poly.imo                # prelude 13: polynomials over ℚ[i]: gcd, resultants, Sturm, real roots, factorisation over ℚ
-│   ├── prelude.bin.imo         # the whole prelude in binary notation (generated)
-│   ├── prove.imo               # prelude 20: Prop, the relations on ℝ[i], the three-valued prover, predicates
-│   ├── real.imo                # prelude 8: √, log, atan, hyperbolic functions, tan, derivative, integral
-│   ├── ring.imo                # prelude 16: Z/n, ideals, quotient rings, multivariate polynomials, Gröbner bases
-│   ├── set.imo                 # prelude 10: sets as membership tests
-│   ├── solve.imo               # prelude 21: simplify′ — the engine that finds the simplest form
-│   └── text.imo                # prelude 11: decimal output without division, show functions
-├── pymo/                       # Pymo, the Python interpreter (Python 3, standard library only), and the scripts that write the generated files
-│   ├── base_b.py               # Python twin of the base-(i−1) arithmetic (reference for the tests)
-│   ├── hum.py                  # human reader (doc 2, Pratt parser)
-│   ├── i1.py                   # command line of Pymo: run, check, translate, eval, text
-│   ├── imo.py                  # loader / driver: notations → statements → checker → evaluator
-│   ├── imo_core.py             # lazy call-by-need evaluator (terms compiled to Python), numeral reader, value decoders
-│   ├── imotypes.py             # the class checker (classes, facts, overloads, coercions, ascription)
-│   ├── layers.py               # binary lexer, doc 1, spec ↔ bin translation, file sections
-│   ├── mkbin.py                # regenerates the all-binary prelude and example .bin.imo / .sbl files
-│   ├── mkcarry.py              # generates the carry decision trees of the adder and subtractor (lib/number.imo)
-│   ├── mkconformance.py        # writes the library sweep of the conformance suite and its list of cases
-│   ├── mkdec.py                # generates the tables of the division-free decimal conversion (lib/text.imo)
-│   ├── mkdoc1.py               # regenerates docs/doc1.sbl (append-only)
-│   ├── mkprove.py              # writes the doc 1 codes the prover of lib/prove.imo dispatches on into that file
-│   ├── mkreadme.py             # assembles this README
-│   ├── mkref.py                # regenerates the reference tables
-│   ├── numeral.py              # writes and reads base-(i−1) numerals (a helper for authoring)
-│   ├── output.py               # the printer: main, normal-form terms in bin / spec / hum, the output notation
-│   ├── quote.py                # quotation of statements as numeric codes, and the definitions table, for the simplifier
-│   ├── setauthor.py
-│   └── syntax.py               # spec lexer and parser, class terms, pretty-printers, erasure to lambda terms
-├── readme/                     # sources of this README
-│   └── part1.md … part8.md     # hand-written sections, with {{placeholders}}
-├── rustimo/                    # Rustimo, the Rust interpreter of the same specification (no crates)
+│   │       ├── Base.hs           # Haskell: digit arithmetic of base i−1, Python-compatible repr and %g
+│   │       ├── Core.hs           # Haskell: the lazy evaluator and the value decoders
+│   │       ├── Data.hs           # Haskell: the embedded system files
+│   │       ├── EmbedTH.hs        # Haskell: compile-time embedding of lib/*.imo and the two docs
+│   │       ├── Hum.hs            # Haskell: doc 2, human lexer and Pratt parser
+│   │       ├── Layers.hs         # Haskell: binary lexer, doc 1, spec ↔ bin translation, file sections
+│   │       ├── Output.hs         # Haskell: the printer, the Speller, main and the output notations
+│   │       ├── Program.hs        # Haskell: loader / driver
+│   │       ├── Quote.hs          # Haskell: quotation of statements as numeric codes
+│   │       ├── Serve.hs          # Haskell: haskimo serve, a loaded program as a service for the shared test suite
+│   │       ├── Syntax.hs         # Haskell: spec lexer and parser, class terms, pretty-printers, erasure
+│   │       └── Types.hs          # Haskell: the class checker
+│   ├── build.sh                  # builds Haskimo, build/haskimo, with plain ghc
+│   └── README.md                 # build, modules and differences of Haskimo
+├── lib/                          # the standard library (trusted prelude) (50 files)
+├── libsrc/
+│   ├── gen/
+│   │   ├── th_geom.py
+│   │   ├── th_topo.py
+│   │   └── topo_theorems.json
+│   ├── build.sh
+│   ├── calendar.hum.imo
+│   ├── combin.hum.imo
+│   ├── encode.hum.imo
+│   ├── geom.hum.imo
+│   ├── graph.hum.imo
+│   ├── prng.hum.imo
+│   ├── psd.hum.imo
+│   ├── regex.hum.imo
+│   ├── stats.hum.imo
+│   ├── th_geom.hum.imo
+│   ├── th_piece.hum.imo
+│   └── th_topo.hum.imo
+├── ocamimo/
 │   ├── src/
-│   │   ├── alloc.rs            # Rust: a small-block allocator for the evaluator
-│   │   ├── base.rs             # Rust: digit arithmetic of base i−1, Python-compatible repr and %g
-│   │   ├── bigint.rs           # Rust: big integers and rationals for the host side (no crates)
-│   │   ├── core.rs             # Rust: the lazy evaluator (flat closures, explicit stack, update frames) and the value decoders
-│   │   ├── data.rs             # Rust: the embedded system files
-│   │   ├── hum.rs              # Rust: doc 2, human lexer and Pratt parser
-│   │   ├── layers.rs           # Rust: binary lexer, doc 1, spec ↔ bin translation, file sections
-│   │   ├── main.rs             # Rust: the command line (run, check, translate, eval, text, serve)
-│   │   ├── output.rs           # Rust: the printer, the Speller, main and the output notations
-│   │   ├── program.rs          # Rust: loader / driver
-│   │   ├── quote.rs            # Rust: quotation of statements as numeric codes
-│   │   ├── serve.rs            # Rust: rustimo serve, a loaded program as a service for the shared test suite
-│   │   ├── syntax.rs           # Rust: spec lexer and parser, class terms, pretty-printers, erasure
-│   │   └── types.rs            # Rust: the class checker
-│   ├── build.sh                # builds Rustimo, build/rustimo, with plain cargo (no crates)
+│   │   ├── base.ml
+│   │   ├── bigint.ml
+│   │   ├── core.ml
+│   │   ├── data_gen.ml
+│   │   ├── hum.ml
+│   │   ├── layers.ml
+│   │   ├── main.ml
+│   │   ├── output.ml
+│   │   ├── program.ml
+│   │   ├── quote.ml
+│   │   ├── syntax.ml
+│   │   └── types.ml
+│   ├── build.sh
+│   └── gen_data.sh
+├── pymo/                         # Pymo, the Python interpreter (Python 3, standard library only), and the scripts that write the generated files
+│   ├── base_b.py                 # Python twin of the base-(i−1) arithmetic (reference for the tests)
+│   ├── hum.py                    # human reader (doc 2, Pratt parser)
+│   ├── i1.py                     # command line of Pymo: run, check, translate, eval, text
+│   ├── imo.py                    # loader / driver: notations → statements → checker → evaluator
+│   ├── imo_core.py               # lazy call-by-need evaluator (terms compiled to Python), numeral reader, value decoders
+│   ├── imotypes.py               # the class checker (classes, facts, overloads, coercions, ascription)
+│   ├── layers.py                 # binary lexer, doc 1, spec ↔ bin translation, file sections
+│   ├── mkbin.py                  # regenerates the all-binary prelude and example .bin.imo / .sbl files
+│   ├── mkcarry.py                # generates the carry decision trees of the adder and subtractor (lib/number.imo)
+│   ├── mkconformance.py          # writes the library sweep of the conformance suite and its list of cases
+│   ├── mkdec.py                  # generates the tables of the division-free decimal conversion (lib/text.imo)
+│   ├── mkdoc1.py                 # regenerates docs/doc1.sbl (append-only)
+│   ├── mkprove.py                # writes the doc 1 codes the prover of lib/prove.imo dispatches on into that file
+│   ├── mkreadme.py               # assembles this README
+│   ├── mkref.py                  # regenerates the reference tables
+│   ├── numeral.py                # writes and reads base-(i−1) numerals (a helper for authoring)
+│   ├── output.py                 # the printer: main, normal-form terms in bin / spec / hum, the output notation
+│   ├── quote.py                  # quotation of statements as numeric codes, and the definitions table, for the simplifier
+│   ├── setauthor.py
+│   └── syntax.py                 # spec lexer and parser, class terms, pretty-printers, erasure to lambda terms
+├── readme/                       # sources of this README
+│   └── part1.md … part8.md       # hand-written sections, with {{placeholders}}
+├── rimo/
+│   ├── R/
+│   │   ├── base.R
+│   │   ├── core.R
+│   │   ├── hum.R
+│   │   ├── layers.R
+│   │   ├── main.R
+│   │   ├── output.R
+│   │   ├── program.R
+│   │   ├── quote.R
+│   │   ├── syntax.R
+│   │   └── types.R
+│   └── build.sh
+├── rustimo/                      # Rustimo, the Rust interpreter of the same specification (no crates)
+│   ├── src/
+│   │   ├── alloc.rs              # Rust: a small-block allocator for the evaluator
+│   │   ├── base.rs               # Rust: digit arithmetic of base i−1, Python-compatible repr and %g
+│   │   ├── bigint.rs             # Rust: big integers and rationals for the host side (no crates)
+│   │   ├── core.rs               # Rust: the lazy evaluator (flat closures, explicit stack, update frames) and the value decoders
+│   │   ├── data.rs               # Rust: the embedded system files
+│   │   ├── hum.rs                # Rust: doc 2, human lexer and Pratt parser
+│   │   ├── layers.rs             # Rust: binary lexer, doc 1, spec ↔ bin translation, file sections
+│   │   ├── main.rs               # Rust: the command line (run, check, translate, eval, text, serve)
+│   │   ├── output.rs             # Rust: the printer, the Speller, main and the output notations
+│   │   ├── program.rs            # Rust: loader / driver
+│   │   ├── quote.rs              # Rust: quotation of statements as numeric codes
+│   │   ├── serve.rs              # Rust: rustimo serve, a loaded program as a service for the shared test suite
+│   │   ├── syntax.rs             # Rust: spec lexer and parser, class terms, pretty-printers, erasure
+│   │   └── types.rs              # Rust: the class checker
+│   ├── build.rs
+│   ├── build.sh                  # builds Rustimo, build/rustimo, with plain cargo (no crates)
 │   ├── Cargo.lock
-│   ├── Cargo.toml              # cargo package of Rustimo (no dependencies)
-│   └── README.md               # build, modules, the evaluator and differences of Rustimo
-├── tests/                      # test-suites (1445 files)
+│   ├── Cargo.toml                # cargo package of Rustimo (no dependencies)
+│   └── README.md                 # build, modules, the evaluator and differences of Rustimo
+├── schimo/
+│   ├── src/
+│   │   ├── compiled/
+│   │   │   ├── base_rkt.dep
+│   │   │   ├── base_rkt.zo
+│   │   │   ├── core_rkt.dep
+│   │   │   ├── core_rkt.zo
+│   │   │   ├── data-gen_rkt.dep
+│   │   │   ├── data-gen_rkt.zo
+│   │   │   ├── hum_rkt.dep
+│   │   │   ├── hum_rkt.zo
+│   │   │   ├── layers_rkt.dep
+│   │   │   ├── layers_rkt.zo
+│   │   │   ├── main_rkt.dep
+│   │   │   ├── main_rkt.zo
+│   │   │   ├── output_rkt.dep
+│   │   │   ├── output_rkt.zo
+│   │   │   ├── program_rkt.dep
+│   │   │   ├── program_rkt.zo
+│   │   │   ├── quote_rkt.dep
+│   │   │   ├── quote_rkt.zo
+│   │   │   ├── syntax_rkt.dep
+│   │   │   ├── syntax_rkt.zo
+│   │   │   ├── types_rkt.dep
+│   │   │   └── types_rkt.zo
+│   │   ├── base.rkt
+│   │   ├── core.rkt
+│   │   ├── data-gen.rkt
+│   │   ├── hum.rkt
+│   │   ├── layers.rkt
+│   │   ├── main.rkt
+│   │   ├── output.rkt
+│   │   ├── program.rkt
+│   │   ├── quote.rkt
+│   │   ├── syntax.rkt
+│   │   └── types.rkt
+│   ├── build.sh
+│   └── gen_data.sh
+├── tests/                        # test-suites (4123 files)
+├── .gitattributes
 ├── .gitignore
-├── COMMERCIAL.md               # how to request a commercial license
-├── haskimo.cabal               # cabal package of Haskimo
-├── i1                          # dispatcher: --impl pymo|haskimo|rustimo|all
-├── install.sh                  # installs any of Pymo, Haskimo and Rustimo
-├── LICENSE                     # the i-1 License: non-commercial, attribution, strong copyleft; commercial use by paid license
-├── Makefile                    # make (build Haskell and Rust), install, test, conformance
-└── README.md                   # this file (generated by pymo/mkreadme.py)
+├── COMMERCIAL.md                 # how to request a commercial license
+├── haskimo.cabal                 # cabal package of Haskimo
+├── i1                            # dispatcher: --impl pymo|haskimo|rustimo|all
+├── install.sh                    # installs any of Pymo, Haskimo and Rustimo
+├── LICENSE                       # the i-1 License: non-commercial, attribution, strong copyleft; commercial use by paid license
+├── Makefile                      # make (build Haskell and Rust), install, test, conformance
+└── README.md                     # this file (generated by pymo/mkreadme.py)
 ```
 
 ---

@@ -1,0 +1,1 @@
+main in List(String) := [hexencode([222, 173, 190, 239]), base64encode(utf8bytes("foobar")), base64encode([1, 2]), percentencode("a b/é€"), numwords(1234567), numwords(90000000000), vigenere("LEMON", "ATTACKATDAWN"), unvigenere("lemon", "Lxfopv, ef!"), head(utf8string([104, 195, 169]))] ++ dyckpaths(3)

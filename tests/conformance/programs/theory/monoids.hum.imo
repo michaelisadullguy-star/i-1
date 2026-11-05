@@ -1,0 +1,1 @@
+main in List(\NN) := [holdsv(envwith(["monoid"]), "x ⋆ y = y ⋆ x"), holdsv(envwith(["cmonoid"]), "x ⋆ y = y ⋆ x"), holdsv(envwith(["monoid"]), "x ⋆ ε ⋆ y = x ⋆ y"), holdsv(envwith(["cmonoid"]), "x ⋆ y ⋆ x = x ⋆ x ⋆ y"), holdsv(envwith(["monoid"]), "x ⋆ y ⋆ x = x ⋆ x ⋆ y"), holdsv(envwith(["monoid"]), "x ⋆ y = x ⋆ z => y = z")]

@@ -1,0 +1,1 @@
+main in Bool := ispalindrome(['z', 'Q', '7'])

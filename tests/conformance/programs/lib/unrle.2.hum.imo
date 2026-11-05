@@ -1,0 +1,1 @@
+main in List(Char) := unrle(['z', 'Q', '7'])

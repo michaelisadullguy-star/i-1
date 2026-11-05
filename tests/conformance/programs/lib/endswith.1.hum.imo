@@ -1,0 +1,1 @@
+main in Bool := endswith(['a', 'z', 'Q'], ['Q', '7', 'a'])

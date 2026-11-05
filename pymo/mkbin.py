@@ -30,3 +30,9 @@ for name, src in EXAMPLES:
     open(os.path.join(ROOT, 'examples', f'{name}.sbl'), 'w', encoding='utf-8').write(
         shared.render(names=mine, header=[f"program-local symbols of examples/{name} (same line format as doc 1)"]))
     print(f"{name}.bin.imo:", len(text), "characters; local symbols:", {k: shared.local[k] for k in mine})
+
+# the CRLF twins of examples/hello.bin.imo and hello.sbl that the conformance suite keeps (tests/conformance/programs/misc/crlf_bin.*):
+# derived here because their local codes move whenever doc 1 grows
+for _src, _dst in (('hello.bin.imo', 'crlf_bin.bin.imo'), ('hello.sbl', 'crlf_bin.sbl')):
+    _b = open(os.path.join(ROOT, 'examples', _src), 'rb').read().replace(b'\r\n', b'\n').replace(b'\n', b'\r\n')
+    open(os.path.join(ROOT, 'tests', 'conformance', 'programs', 'misc', _dst), 'wb').write(_b)

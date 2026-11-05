@@ -1,0 +1,2 @@
+⍝ program-local symbols of examples/hello (same line format as doc 1)
+greeting := .101101100100.

@@ -219,11 +219,19 @@ pub fn basename(p: &str) -> &str {
     p.rsplit('/').next().unwrap_or(p)
 }
 
-/// read a whole file as UTF-8 (the language's source files are UTF-8, whatever the locale)
+/// read a whole file as UTF-8 (the language's source files are UTF-8, whatever the locale).  A file that is not valid UTF-8 is an
+/// error (`InvalidData`), as in Pymo and Haskimo: the bytes are never replaced by U+FFFD behind the author's back.
 pub fn read_utf8(path: &str) -> std::io::Result<String> {
     let mut bytes = vec![];
     std::fs::File::open(path)?.read_to_end(&mut bytes)?;
-    Ok(String::from_utf8_lossy(&bytes).into_owned())
+    String::from_utf8(bytes).map_err(|e| {
+        let at = e.utf8_error().valid_up_to();
+        let b = e.as_bytes()[at];
+        std::io::Error::new(
+            std::io::ErrorKind::InvalidData,
+            format!("cannot decode byte sequence starting from {} (position {})", b, at),
+        )
+    })
 }
 
 

@@ -16,13 +16,17 @@ import syntax, layers, hum, quote
 from imotypes import ImoTypeError, Checker, UnknownError
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-PRELUDE = [os.path.join(ROOT, 'lib', f) for f in ('logic.imo', 'number.imo', 'algebra.imo', 'bounded.imo', 'analysis.imo', 'arith.imo', 'list.imo', 'real.imo', 'linalg.imo', 'set.imo', 'text.imo',
-           'poly.imo', 'complex.imo', 'numtheory.imo', 'ring.imo', 'field.imo', 'group.imo', 'galois.imo', 'prove.imo', 'solve.imo', 'codec.imo')]
+def _manifest():
+    """the prelude files, in loading order: lib/MANIFEST (one file name per line, ⍝ starts a comment) — the list every core shares"""
+    with open(os.path.join(ROOT, 'lib', 'MANIFEST'), encoding='utf-8', newline='') as f:
+        names = [ln.strip() for ln in f.read().split('\n')]
+    return [os.path.join(ROOT, 'lib', n) for n in names if n and not n.startswith('⍝')]
+PRELUDE = _manifest()
 
 class Program:
     def __init__(self, doc1=None, doc2=None):
-        self.doc1 = layers.Doc1.parse(open(doc1 or os.path.join(ROOT, 'docs', 'doc1.sbl'), encoding='utf-8').read())
-        self.doc2 = hum.Doc2.parse(open(doc2 or os.path.join(ROOT, 'docs', 'doc2.sbl'), encoding='utf-8').read())
+        self.doc1 = layers.Doc1.parse(open(doc1 or os.path.join(ROOT, 'docs', 'doc1.sbl'), encoding='utf-8', newline='').read())
+        self.doc2 = hum.Doc2.parse(open(doc2 or os.path.join(ROOT, 'docs', 'doc2.sbl'), encoding='utf-8', newline='').read())
         import re as _re
         for e in self.doc2.entries:                      # a bin symbol on the right of doc 2 means the spec symbol that doc 1 gives that code to
             e['rhs'] = [self.doc1.b2s.get(x, x) if _re.fullmatch(r'\.[01]+\.', x) else x for x in e['rhs']]
@@ -55,10 +59,10 @@ class Program:
 
     def add_file(self, path, trusted=False):
         local = path.rsplit('.imo', 1)[0].replace('.bin', '').replace('.hum', '').replace('.spec', '') + '.sbl'
-        text = open(path, encoding='utf-8').read()
+        text = open(path, encoding='utf-8', newline='').read()          # verbatim: a carriage return is whitespace, or a character inside a literal
         uses_bin = layers.default_notation(path) == 'bin' or '\n@bin' in '\n' + text
         if uses_bin and os.path.exists(local):          # program-local symbol table of a bin program (same line format as doc 1)
-            for line in open(local, encoding='utf-8').read().split('\n'):
+            for line in open(local, encoding='utf-8', newline='').read().split('\n'):
                 if ' := ' in line and not line.startswith('⍝'):
                     a, b = [x.strip() for x in line.split(' := ')]
                     if a in self.doc1.s2b: continue

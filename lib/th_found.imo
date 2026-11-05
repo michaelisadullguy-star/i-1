@@ -1,0 +1,71 @@
+⍝ lib/th_found.imo — spec notation — trusted prelude, part 36: foundations: ZFC (hereditarily finite sets, evaluated) and ETCS, Lawvere's elementary theory of the category of sets (morphisms, normalised)
+⍝ The two are alternative foundations and conflict: use "zfc" env switches ETCS off and use "etcs" env switches ZFC off.  Both conflict with the algebra of sets of lib/th_algebra.imo (they share its tokens).
+⍝ ZFC.  A set is {a, b, …}; the order and the repetitions of the elements do not matter (extensionality is the normal form: the elements are sorted and merged); the elements of a set
+⍝ are sets, or numbers taken as urelements.  The operations  ∪ ∩ \ 𝒫 ⋃ × card ord  are computed on sets whose elements are known, ∈ ⊆ = are decided, and the axioms of foundation
+⍝ (A ∉ A, no 2-cycle of membership) are rules.  ETCS.  Morphisms are composed with ∘ (associative); the rules are the equations of a cartesian closed category with a terminal object.
+sset ∶ ℕ
+sset ≔ (symid "set")
+zset ∶ Term → 𝔹
+zset ξ ≔ (tishead sset ξ)
+zmk ∶ 𝔏 Term → Term
+zmk ξ ≔ (tapp sset ξ)
+zelems ∶ Term → 𝔏 Term
+zelems ξ ≔ (targs ξ)
+zknown ∶ Term → 𝔹      ⍝ a set whose elements are all ground
+zknown ξ ≔ (∧ (zset ξ) (tground ξ))
+sunion ∶ ℕ
+sunion ≔ (symid "union")
+sinter ∶ ℕ
+sinter ≔ (symid "inter")
+sdiff ∶ ℕ
+sdiff ≔ (symid "diff")
+spower ∶ ℕ
+spower ≔ (symid "powerset")
+sbig ∶ ℕ
+sbig ≔ (symid "bigunion")
+scard ∶ ℕ
+scard ≔ (symid "card")
+sprod ∶ ℕ
+sprod ≔ (symid "prod")
+sord ∶ ℕ
+sord ≔ (symid "ord")
+⍝ the von Neumann ordinal n: {0, 1, …, n−1} with 0 = {}
+vn ∶ ℕ → Term
+vn ξ ≔ (zmk (⫶ vn (⍳ ξ)))
+zfchook ∶ Env → Term → 𝔏 Term
+zfchook ξ η ≔ ((f ↦ ((as ↦ ((≐ f sunion) ((∧ (zset (hd as)) (zset (hd (⌄ as)))) (∷ (zmk (⧺ (zelems (hd as)) (zelems (hd (⌄ as))))) ⊘) ⊘) ((≐ f sinter) ((∧ (zknown (hd as)) (zknown (hd (⌄ as)))) (∷ (zmk (filter (e ↦ (elemT e (zelems (hd (⌄ as))))) (zelems (hd as)))) ⊘) ⊘) ((≐ f sdiff) ((∧ (zknown (hd as)) (zknown (hd (⌄ as)))) (∷ (zmk (filter (e ↦ (¬ (elemT e (zelems (hd (⌄ as)))))) (zelems (hd as)))) ⊘) ⊘) ((≐ f spower) ((∧ (zset (hd as)) (⩽ (ℓ (zelems (hd as))) 111001100)) (∷ (zmk (⫶ zmk (subsequences (zelems (hd as))))) ⊘) ⊘) ((≐ f sbig) ((∧ (zset (hd as)) (∀ₗ zset (zelems (hd as)))) (∷ (zmk (concatmap zelems (zelems (hd as)))) ⊘) ⊘) ((≐ f scard) ((zknown (hd as)) (∷ (tnum (ℓ (zelems (hd as)))) ⊘) ⊘) ((≐ f sprod) ((∧ (zset (hd as)) (zset (hd (⌄ as)))) (∷ (zmk (concatmap (a ↦ (⫶ (b ↦ (zopair a b)) (zelems (hd (⌄ as))))) (zelems (hd as)))) ⊘) ⊘) ((≐ f sord) ((∧ (tisnum (hd as)) (∧ (≐ (denom (tnumval (hd as))) 1) (∧ (≐ (ℑ (tnumval (hd as))) 0) (∧ (⩾ (tnumval (hd as)) 0) (⩽ (tnumval (hd as)) 111001100))))) (∷ (vn (tnumval (hd as))) ⊘) ⊘) ⊘))))))))) (targs η))) (thead η))
+zopair ∶ Term → Term → Term      ⍝ Kuratowski: (a, b) = {{a}, {a, b}}
+zopair ξ η ≔ (zmk (∷ (zmk (∷ ξ ⊘)) (∷ (zmk (∷ ξ (∷ η ⊘))) ⊘)))
+zeqhook ∶ Env → Term → 𝔏 Term      ⍝ two different sets (or numbers) with known elements are different
+zeqhook ξ η ≔ ((a ↦ ((b ↦ ((∧ (∨ (zknown a) (∧ (tisnum a) (tground a))) (∧ (∨ (zknown b) (∧ (tisnum b) (tground b))) (¬ (teq a b)))) (∷ tfalse ⊘) ⊘)) (hd (⌄ (targs η))))) (hd (targs η)))
+ssubsetz ∶ ℕ
+ssubsetz ≔ (symid "subset")
+zmemhook ∶ Env → Term → 𝔏 Term      ⍝ x ∈ {a, b, …} is x = a ∨ x = b ∨ …
+zmemhook ξ η ≔ ((s ↦ ((∧ (zset s) (¬ (∅ (zelems s)))) (∷ (tapp s∨ (⫶ (e ↦ (tapp₂ syeq (hd (targs η)) e)) (zelems s))) ⊘) ⊘)) (hd (⌄ (targs η))))
+zsubhook ∶ Env → Term → 𝔏 Term      ⍝ {a, b, …} ⊆ B is a ∈ B ∧ b ∈ B ∧ …
+zsubhook ξ η ≔ ((s ↦ ((∧ (zset s) (¬ (∅ (zelems s)))) (∷ (tapp s∧ (⫶ (e ↦ (tapp₂ smem e (hd (⌄ (targs η))))) (zelems s))) ⊘) ⊘)) (hd (targs η)))
+thzfc ∶ Theory
+thzfcsig ∶ 𝔏 𝕊
+thzfcsig ≔ (lines "fn 0 set set CI\nconst 0 ∅ set\nconst 0 emptyset set\ninfixl 6 ∪ union ACI\ninfixl 6 union union ACI\ninfixl 7 ∩ inter ACI\ninfixl 7 inter inter ACI\ninfixl 6 \\ diff\ninfix 5 ⊆ subset\ninfix 5 subseteq subset\ninfix 5 ∈ mem\ninfix 5 in mem\nfn 0 powerset powerset\nfn 0 𝒫 powerset\nfn 0 bigunion bigunion\nfn 0 ⋃ bigunion\nfn 0 card card\ninfixl 7 × prod\nfn 0 prod prod\nfn 0 opair opair\nfn 0 ord ord\nfn 0 succ zsucc")
+thzfcrules ∶ 𝔏 𝕊
+thzfcrules ≔ (lines "union(x, set()) ==> x\ninter(x, set()) ==> set()\ndiff(x, set()) ==> x\ndiff(set(), x) ==> set()\ndiff(x, x) ==> set()\nsubset(set(), x) ==> true\nsubset(x, x) ==> true\nmem(x, set()) ==> false\nmem(x, x) ==> false\nmem(y, powerset(x)) ==> subset(y, x)\nmem(x, y) ∧ mem(y, x) ==> false\npowerset(set()) ==> set(set())\nbigunion(set()) ==> set()\nopair(x, y) ==> set(set(x), set(x, y))\nzsucc(x) ==> union(x, set(x))")
+thzfcaxioms ∶ 𝔏 𝕊
+thzfcaxioms ≔ (lines "extensionality: sets with the same elements are equal\nempty set: ∅ has no element\npairing: {a, b} is a set\nunion: ⋃A is a set\npower set: 𝒫A is a set\ninfinity: there is an inductive set (ω)\nseparation (a schema): {x ∈ A | φ(x)}\nreplacement (a schema)\nfoundation: A ∉ A, and no cycle of membership\nchoice (not used by the simplifier)")
+thzfctheorems ∶ 𝔏 𝕊
+thzfctheorems ≔ (lines "{a, b} = {b, a}\n{a, a} = {a}\n{1, 2} ∪ {2, 3} = {1, 2, 3}\n{1, 2} ∩ {2, 3} = {2}\n{1, 2, 3} \\ {2} = {1, 3}\n2 ∈ {1, 2}\n¬(3 ∈ {1, 2})\n{1} ⊆ {1, 2}\n∅ ⊆ A\nA ⊆ A\ncard(powerset({1, 2, 3})) = 8\npowerset(∅) = {∅}\nbigunion({{1}, {2, 3}}) = {1, 2, 3}\n¬(A ∈ A)\n¬(A ∈ B ∧ B ∈ A)\nopair(1, 2) != opair(2, 1)\nord(2) = {∅, {∅}}\ncard(ord(5)) = 5\nsucc(ord(3)) = ord(4)\n{1, 2} × {3} = {opair(1, 3), opair(2, 3)}\ncard({1, 2} × {1, 2, 3}) = 6\nA ∪ A = A\nA ∪ ∅ = A\nA ∩ ∅ = ∅\n∅ ∈ powerset(A)\n{1, 2} ≠ {1, 3}\n{∅} ∈ ord(2)")
+thzfcdoc ∶ 𝕊
+thzfcdoc ≔ "ZFC on hereditarily finite sets: extensionality is the normal form, the operations are computed, foundation is a rule; a foundation, so it conflicts with ETCS"
+thzfc ≔ (mktheory "zfc" (∷ "core" ⊘) (∷ "etcs" (∷ "sets" ⊘)) ⊥ thzfcsig thzfcrules (∷ (⊗ "mem" zmemhook) (∷ (⊗ "subset" zsubhook) (∷ (⊗ "union" zfchook) (∷ (⊗ "inter" zfchook) (∷ (⊗ "diff" zfchook) (∷ (⊗ "powerset" zfchook) (∷ (⊗ "bigunion" zfchook) (∷ (⊗ "card" zfchook) (∷ (⊗ "prod" zfchook) (∷ (⊗ "ord" zfchook) (∷ (⊗ "eq" zeqhook) ⊘))))))))))) thzfcaxioms thzfctheorems thzfcdoc)
+⍝ ---- ETCS
+thetcs ∶ Theory
+thetcssig ∶ 𝔏 𝕊
+thetcssig ≔ (lines "infixl 7 ∘ comp A\ninfixl 7 comp comp A\nfn 0 pr pair2\nfn 0 lam curry\nconst 0 id idm\nconst 0 p1 proj1\nconst 0 p2 proj2\nconst 0 ev evl\nconst 0 bang bang")
+thetcsrules ∶ 𝔏 𝕊
+thetcsrules ≔ (lines "id ∘ f ==> f\nf ∘ id ==> f\np1 ∘ pr(f, g) ==> f\np2 ∘ pr(f, g) ==> g\npr(p1, p2) ==> id\npr(f, g) ∘ h ==> pr(f ∘ h, g ∘ h)\npr(p1 ∘ h, p2 ∘ h) ==> h\nbang ∘ f ==> bang\nev ∘ pr(lam(f) ∘ p1, p2) ==> f\nlam(ev) ==> id")
+thetcsaxioms ∶ 𝔏 𝕊
+thetcsaxioms ≔ (lines "S1  category: composition is associative and has identities\nS2  a terminal object 1: every object has exactly one morphism to it (bang)\nS3  products: for f : X → A and g : X → B there is exactly one pr(f, g) : X → A × B with p1 ∘ pr(f, g) = f and p2 ∘ pr(f, g) = g\nS4  exponentials: lam is a bijection between X × A → B and X → B^A, with ev ∘ pr(lam(f) ∘ p1, p2) = f\nS5  a subobject classifier Ω (not used by the simplifier)\nS6  a natural numbers object (not used by the simplifier)\nS7  well-pointedness: morphisms are equal if they are equal on all elements 1 → X (not used)\nS8  choice: every epimorphism has a section (not used)")
+thetcstheorems ∶ 𝔏 𝕊
+thetcstheorems ≔ (lines "id ∘ f = f\nf ∘ id = f\n(f ∘ g) ∘ h = f ∘ (g ∘ h)\np1 ∘ pr(f, g) = f\np2 ∘ pr(f, g) = g\npr(p1, p2) = id\npr(f, g) ∘ h = pr(f ∘ h, g ∘ h)\nbang ∘ f = bang\npr(p2, p1) ∘ pr(p2, p1) = id\nev ∘ pr(lam(f) ∘ p1, p2) = f\nlam(ev) = id\nbang ∘ g ∘ f = bang\npr(p1 ∘ f, p2 ∘ f) = f\np1 ∘ pr(p2, p1) = p2\nid ∘ id = id\nf ∘ g ∘ id ∘ h = f ∘ g ∘ h")
+thetcsdoc ∶ 𝕊
+thetcsdoc ≔ "Lawvere's elementary theory of the category of sets: the equations of morphisms in a cartesian closed category with a terminal object, as rewrite rules; a foundation, so it conflicts with ZFC"
+thetcs ≔ (mktheory "etcs" (∷ "core" ⊘) (∷ "zfc" (∷ "sets" ⊘)) ⊥ thetcssig thetcsrules ⊘ thetcsaxioms thetcstheorems thetcsdoc)

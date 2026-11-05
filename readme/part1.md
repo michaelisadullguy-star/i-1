@@ -56,7 +56,7 @@ pi lt 22/7                               true      (certified error bounds)
 | **Types are decoding keys** | A type tells how to read a binary string and never changes the string: `110101` is 1 − 6i in ℤ[i], the pair (1, −6) in ℤ², the fraction −1/6; a pair of strings, `("Hello, world!", "Welcome to i - 1!")`, is one binary string read as `String²` ([§6.6](#66-types-are-decoding-keys)). |
 | **Number system** | Base **i − 1**, digits `0` and `1`.  Every Gaussian integer has a unique finite expansion, so ℤ[i] needs no sign and no separate real/imaginary parts.  `11` is *i*, `1100` is 2, `11101` is −1. |
 | **ℝ[i] is lazy** | A real or complex number is an infinite stream of ℚ[i] elements (its approximants).  Nothing is computed until an element is demanded. |
-| **Dimension only goes up** | Cayley–Dickson trees ℂ → ℍ → 𝕆 → 𝕊 → … of unbounded depth.  Lower-depth values are lifted by *a ↦ (a, 0)*; no operation ever trims a tree, so a zero of depth 3 stays a zero of depth 3. |
+| **Dimension only goes up** | Cayley–Dickson trees: complex numbers → quaternions → octonions → sedenions → … of unbounded depth.  Lower-depth values are lifted by *a ↦ (a, 0)*; no operation ever trims a tree, so a zero of depth 3 stays a zero of depth 3. |
 | **Infinite dimensions** | `𝔉 A` is the algebra of all functions ℚ[i] → A, with pointwise operations; inner products are streams of partial sums. |
 | **Classes first** | Every value, variant and function must be declared with its class (domain → codomain) before it is defined.  Classes form a lattice (ℕ ⊆ ℤ ⊆ ℚ ⊆ ℚ[i] …) with a few explicit widening coercions. |
 | **Everything from ℚ[i]** | Booleans are digits, `Char` is a natural number (a code point), `String` is a list of `Char`, lists and pairs are lambda terms over numerals. |
@@ -114,11 +114,16 @@ python3 pymo/i1.py eval      examples/target.hum.imo z 14
 python3 pymo/i1.py translate examples/target.hum.imo --to spec
 python3 pymo/i1.py translate examples/target.hum.imo --to bin
 
-# run the test-suites (each prints PASS/FAIL lines; together a few minutes).  Fourteen of them also run on Haskimo and Rustimo: add  --core haskimo  or  --core rustimo
+# run the test-suites (each prints PASS/FAIL lines; together a few minutes).  Nineteen of them also run on Haskimo and Rustimo: add  --core haskimo  or  --core rustimo
 # (all of them on every core they support:  python3 tests/run_suites.py)
 python3 tests/test_layers.py       # notations, docs, class checker, Char/String, order, quantifiers, analysis
 python3 tests/test_algebra.py      # ℤ[i], ℚ[i], Cayley–Dickson tower, lazy ℝ[i], function spaces
 python3 tests/test_axioms.py       # the axiom audit of ℚ[i]: field, meadow, order, conjugation, canonical forms
+python3 tests/test_classes.py      # the class system: lattice, overload sets, human operators (all three cores agree)
+python3 tests/test_lists.py        # lists: folds, scans, sorting, searching, combinatorics (against Python)
+python3 tests/test_strings.py      # characters and strings: case, splitting, bases, Roman numerals, edit distance
+python3 tests/test_dict.py         # dictionaries, sets, multisets, heaps, queues (tries over the digits)
+python3 tests/test_theory.py       # theories: packages of axioms, and the decision of statements (true / false / undetermined)
 python3 tests/test_library.py      # the library: arithmetic, lists, analysis, linear algebra, sets (from the human notation)
 python3 tests/test_output.py       # main, the three output notations, round trips
 python3 tests/test_prove.py       # predicates: relations on ℝ[i] decided by logic
@@ -142,12 +147,12 @@ Files choose their notation by extension — `x.hum.imo` human, `x.bin.imo` bina
 
 ### 2.1 Three interpreters: Pymo, Haskimo and Rustimo
 
-i-1 is an **interpreted** language: a program is read, class-checked and evaluated every time it runs, and nothing compiles it into a file ([§9](#9-evaluation-model) says what the evaluator does inside).  The language is defined by what the repository **shares**: the `.imo` files (the standard library `lib/`, the examples, and the two system documents `docs/doc1.sbl` and `docs/doc2.sbl`), the `.md` files (this README and `docs/`) and the test suite (`tests/`).  Everything else is one of three **parallel cores**, three interpreters of that one specification, which read the same files and print the same bytes.  They are peers: none is the reference, and a core is right when the shared test suite passes on it.
+i-1 has three **interpreters**: a program is read, class-checked and evaluated every time it runs ([§9](#9-evaluation-model) says what the evaluator does inside); a fourth program, **Compimo** ([§2.2](#22-compimo-the-compiler)), translates a program to C and compiles it.  The language is defined by what the repository **shares**: the `.imo` files (the standard library `lib/`, the examples, and the two system documents `docs/doc1.sbl` and `docs/doc2.sbl`), the `.md` files (this README and `docs/`) and the test suite (`tests/`).  Everything else is one of three **parallel cores**, three interpreters of that one specification, which read the same files and print the same bytes.  They are peers: none is the reference, and a core is right when the shared test suite passes on it.
 
 ```text
 lib/  examples/  docs/*.sbl               the language: the .imo files and the system documents                          shared
 README.md  readme/  docs/*.md             the documentation                                                              shared
-tests/                                    the test suite (tests/conformance and 14 of the 18 suites run on all cores)    shared
+tests/                                    the test suite (tests/conformance and 19 of the 23 suites run on all cores)    shared
 pymo/                                     Pymo, the Python core, with the scripts that write the generated files         parallel
 haskimo/                                  Haskimo, the Haskell core                                                      parallel
 rustimo/                                  Rustimo, the Rust core                                                         parallel
@@ -181,6 +186,21 @@ i1 --impl all     run examples/main.hum.imo    # all of them at the same time: t
 
 `py`, `hs` and `rs` are accepted for `pymo`, `haskimo` and `rustimo` (`--impl rs`, `--default py`).  From a checkout, without installing: `make` builds `build/haskimo` and `build/rustimo` (`make rustimo`, or `./rustimo/build.sh`, for the Rust one alone), and `./i1 --impl rustimo run examples/main.hum.imo` works in place.  `cabal install exe:haskimo` installs Haskimo alone.  `i1` takes the commands and options of `pymo/i1.py` unchanged.  How the three interpreters are kept identical — one interpreter-neutral test that all of them must pass, `tests/conformance/run.py` — is described in [§16.5](#165-the-three-cores-and-the-shared-test-suite).
 
+
+### 2.2 Compimo, the compiler
+
+**Compimo** is the compiled version of i-1 (`compimo/`, Rust and C, no Python; [`docs/compimo.md`](docs/compimo.md)).  It uses the front end of Rustimo (readers, class checker, printer), translates the
+program to C, compiles it together with the prelude (compiled once and cached) and a small run-time system, and runs it; it prints the same bytes as the interpreters (all the cases of
+`tests/conformance`).  Its speed comes from three things: constructors and pattern matches become data objects and switches, small functions are inlined, and the arithmetic on digit strings —
+almost all that i-1 does — is done on arrays of digits by native versions that return *the same lists* as the definitions (`compimo selftest` checks it on random strings).
+
+```bash
+make compimo                       # needs cargo, a C compiler and libgc-dev; build/compimo
+build/compimo prelude              # once: compile the prelude (about 3 minutes)
+build/compimo run examples/prove.hum.imo
+i1 --impl compimo run examples/prove.hum.imo       # it is chosen by name only (not part of auto, both or all)
+```
+
 ---
 
 ## 3. Design principles
@@ -195,3 +215,15 @@ i1 --impl all     run examples/main.hum.imo    # all of them at the same time: t
 8. **Honest scope.**  The prelude's class signatures are *trusted declarations* (they are tested, not proved).  User programs are fully checked against them.  Limits are listed in [§17](#17-status-limits-and-roadmap), not hidden.
 9. **Purity at level i − 1.**  Everything is a function and every computation goes through the base-(i−1) digits: arithmetic, gcd, decimal text, the canonical forms printed as output, and the proofs of the predicates all run *in the language* — the all-binary programs give the same answers.  The host only reads digits back (the isomorphism digit string ↔ Gaussian integer) and spells them.
 10. **One system.**  The digits are the truth values, so a relation's answer is a number, and the joins of the different structures — `+` on truth values, `or`, `max`, `union` — are one operation in different places ([§13.5](#135-one-system)).
+
+### 2.3 More interpreters: OCamimo, Schimo, Cimo and Rimo
+
+**OCamimo** (`ocamimo/`, OCaml, standard library only; [`docs/ocamimo.md`](docs/ocamimo.md)) is a fourth interpreter, a peer of Pymo, Haskimo and Rustimo: it reads the same files and prints the same
+bytes for every command (`python3 tests/conformance/run.py --impl ocamimo`: all the cases conform).  Build it with `make ocamimo` and choose it by name, `./i1 --impl ocamimo run program.hum.imo`; it is not part of `auto`, `both` or `all`.
+
+**Schimo** (`schimo/`, Racket, a Scheme; [`docs/schimo.md`](docs/schimo.md)) is a fifth one: `make schimo`, `./i1 --impl schimo run program.hum.imo`, and all the cases conform too.
+
+**Cimo** (`cimo/`, C with the Boehm collector; [`docs/cimo.md`](docs/cimo.md)) is a sixth one: `make cimo`, `./i1 --impl cimo run program.hum.imo`, and all the cases conform too.  (It interprets; the compiler of i-1 to C is Compimo, §2.2.)
+
+**Rimo** (`rimo/`, R with the package gmp; [`docs/rimo.md`](docs/rimo.md)) is a seventh one: `make rimo`, `./i1 --impl rimo run program.hum.imo`.  It is two to three orders of magnitude slower than Rustimo (R is not made for this), so it
+was run on the conformance cases that are not slow, with one in twelve of the library sweep (726 cases, all conform), and on the self-checking `.imo` tests of `tests/imo/small` (33 files, 4057 checks, all pass; [`docs/rimo.md`](docs/rimo.md) says what was run and how long it takes).

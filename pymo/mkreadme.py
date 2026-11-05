@@ -192,6 +192,12 @@ ROLE = {
  'tests/test_layers.py': 'notations, docs, checker, Char/String, order, quantifiers, analysis',
  'tests/test_algebra.py': 'ℤ[i], ℚ[i], Cayley–Dickson tower, lazy ℝ[i], function spaces',
  'tests/test_axioms.py': 'the axiom audit of ℚ[i], evaluated in the language',
+ 'tests/test_lists.py': 'lib/lists.imo against Python oracles',
+ 'tests/test_strings.py': 'lib/strings.imo against Python oracles',
+ 'tests/test_dict.py': 'lib/dict.imo (tries) against Python containers',
+ 'tests/langtest.py': 'library tests as human-notation programs, with Python oracles',
+ 'tests/test_classes.py': 'the class system: lattice against a model, overload sets, human operators, on every core',
+ 'tests/classes.golden.json': 'digests of the checker messages on which all the cores agree (written by test_classes.py --bless)',
  'tests/test_library.py': 'the library, from the human notation, against Python references',
  'tests/test_output.py': 'main, the printer, output notations and round trips',
  'tests/test_prove.py': 'predicates: true / false / undetermined answers, the all-binary program, the one-system laws',
@@ -244,6 +250,12 @@ ROLE = {
  'rustimo/src/serve.rs': 'Rust: rustimo serve, a loaded program as a service for the shared test suite',
  'rustimo/src/data.rs': 'Rust: the embedded system files',
  'rustimo/src/alloc.rs': 'Rust: a small-block allocator for the evaluator',
+ 'compimo/src/main.rs': 'Compimo: the command line (the commands of the other cores, prelude, selftest)',
+ 'compimo/src/core.rs': 'Compimo: the machine: translation, the C compiler, loading, the interface of the printer',
+ 'compimo/src/gen.rs': 'Compimo: de Bruijn terms to C: constructors, pattern matches, inlining, natives',
+ 'compimo/src/selftest.rs': 'Compimo: the native arithmetic against the definitions',
+ 'compimo/rt/imo_rt.c': 'Compimo (C): the run-time system: objects, laziness, application, packed digit strings, natives',
+ 'compimo/rt/imo_rt.h': 'Compimo (C): the header of the run-time system',
 }
 SUITES = ('layers', 'algebra', 'axioms', 'library', 'output', 'prove', 'readme')        # their output is quoted in the README
 MORE = ('predicates', 'solve', 'poly', 'numtheory', 'group', 'linalg', 'complex', 'ring', 'field', 'galois', 'codec')      # timed only
@@ -314,12 +326,13 @@ def p_conformance():
     misc = [i for i in ids if i.startswith('misc.')]
     err = [i for i in ids if i.startswith('err.')]
     cli = [i for i in ids if i.startswith('cli.')]
+    theory = [i for i in ids if i.startswith('theory.')]
     n_sess = len({i.split('.')[0] for i in sess})
-    assert len(ex) + len(sess) + len(lib) + len(misc) + len(err) + len(cli) == len(ids), "p_conformance: cases of an unknown kind"
+    assert len(ex) + len(sess) + len(lib) + len(misc) + len(err) + len(cli) + len(theory) == len(ids), "p_conformance: cases of an unknown kind"
     return (f"The suite has {len(ids)} cases: {len(ex)} on the shipped examples (every command of [§2](#2-quick-start), the three output notations, the all-binary prelude); "
             f"{len(sess)} on {n_sess} programs recorded from the Python test-suites (each with `check`, `translate --to spec`, `translate --to bin` and `run`); "
             f"{len(err)} on the programs of the error-message table of [§7.6](#76-error-messages-as-the-checker-prints-them), {len(misc)} on hand-written edge cases "
-            f"(literals and escapes, comments, mixed sections, errors, unknowns, big numbers) and {len(cli)} on the command line itself; "
+            f"(literals and escapes, comments, mixed sections, errors, unknowns, big numbers), {len(cli)} on the command line itself and {len(theory)} on the theories of [`docs/lib-theory.md`](docs/lib-theory.md) (simplest forms, verdicts, packages); "
             f"and {len(lib)} in the library sweep (`pymo/mkconformance.py` writes one-line programs `main in <class> := name(arguments)` for every function of the standard library "
             f"that has a human name and a signature it can write literals for; a few are also printed in `--out spec` and `--out bin`).  "
             f"`python3 tests/conformance/run.py --fast` skips the slow cases.")
@@ -362,7 +375,7 @@ TREE_NOTES = {
  'reference.generated.md': 'reference tables (generated)', 'lib': 'the standard library (trusted prelude)', 'examples': 'example programs, one notation per file',
  'pymo': 'Pymo, the Python interpreter (Python 3, standard library only), and the scripts that write the generated files', 'rustimo': 'Rustimo, the Rust interpreter of the same specification (no crates)', 'tests': 'test-suites', 'logs': 'output of the last test run', 'readme': 'sources of this README',
  'target.hum.imo': 'π + e·i in human notation', 'target.spec.imo': '… in spec notation', 'target.bin.imo': '… in binary notation', 'target.sbl': 'local symbols of target.bin.imo',
- 'spaces.hum.imo': 'sequence space', 'spaces.spec.imo': '', 'spaces.bin.imo': '', 'spaces.sbl': '', 'analysis.hum.imo': 'exp, sin, cos, Euler', 'quaternion.hum.imo': 'quaternions',
+ 'spaces.hum.imo': 'sequence space', 'spaces.spec.imo': '', 'spaces.bin.imo': '', 'spaces.sbl': '', 'analysis.hum.imo': 'exp, sin, cos, Euler', 'quaternion.hum.imo': 'quaternions', 'sedenion.hum.imo': 'sedenions: zero divisors, in human notation',
  'hello.hum.imo': 'text, with a main', 'hello.bin.imo': '… in binary notation', 'hello.sbl': '', 'main.hum.imo': 'a program: main ∶ String', 'point.hum.imo': 'one value in the three output notations', 'prove.hum.imo': 'predicates: relations on ℝ[i] simplified by logic', 'prove.bin.imo': '… the same program in binary notation', 'prove.sbl': '', 'axioms.md': 'the axiom audit of ℚ[i]: statements and proofs', 'prove.md': 'predicates on ℝ[i]: rules, soundness, limits', 'tower.spec.imo': 'Cayley–Dickson over lazy ℝ[i]', 'bad.hum.imo': 'a program the checker rejects', 'norm.hum.imo': 'a user-defined function',
  'haskimo': 'Haskimo, the Haskell interpreter of the same specification', 'app': '', 'src': '', 'I1': '', 'build.sh': '', 'Makefile': '', 'haskimo.cabal': '',
  'haskimo/README.md': 'build, modules and differences of Haskimo', 'rustimo/README.md': 'build, modules, the evaluator and differences of Rustimo', 'Cargo.toml': '', 'Cargo.lock': '', 'tests/conformance/programs/README.md': 'where each recorded program comes from',

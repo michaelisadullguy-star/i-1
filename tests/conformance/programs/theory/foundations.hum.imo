@@ -1,0 +1,2 @@
+-- ZFC on hereditarily finite sets, ETCS, Kolmogorov
+main in List(\NN) := [holdsv(envwith(["zfc"]), "{1, 2} ∪ {2, 3} = {1, 2, 3}"), holdsv(envwith(["zfc"]), "card(powerset({1, 2, 3})) = 8"), holdsv(envwith(["zfc"]), "3 ∈ {1, 2}"), holdsv(envwith(["etcs"]), "p1 ∘ pr(f, g) = f"), holdsv(envwith(["etcs"]), "f ∘ g = g ∘ f"), holdsv(envwith(["kolmogorov"]), "P(A ∪ B) <= P(A) + P(B)"), holdsv(envwith(["kolmogorov"]), "P(A) > 1"), holdsv(envwith(["kolmogorov"]), "P(A ∪ B ∪ C) <= P(A) + P(B) + P(C)")]

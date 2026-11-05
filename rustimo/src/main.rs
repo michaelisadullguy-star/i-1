@@ -81,7 +81,10 @@ impl Out {
 fn load_files(files: &[String], build: bool) -> R<Program> {
     let mut srcs = vec![];
     for f in files {
-        let text = read_utf8(f).map_err(|e| Err::Parse(format!("{}: openFile: {}", f, io_reason(&e))))?;
+        let text = read_utf8(f).map_err(|e| match e.kind() {
+            std::io::ErrorKind::InvalidData => Err::Parse(format!("{}: hGetContents: invalid argument ({})", f, e)),
+            _ => Err::Parse(format!("{}: openFile: {}", f, io_reason(&e))),
+        })?;
         srcs.push(SourceFile { path: f.clone(), text });
     }
     let prelude: Vec<String> = files.iter().filter(|f| f.ends_with("prelude.bin.imo")).cloned().collect();

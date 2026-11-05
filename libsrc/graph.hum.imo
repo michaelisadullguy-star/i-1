@@ -1,0 +1,57 @@
+-- graph.hum.imo -- graphs (human notation; lib/graph.imo is its translation, made by libsrc/build.sh).
+-- A graph is a dictionary from vertices (integers) to the lists of their neighbours, Dict(List(\Z)), in the order in which the edges were given; an edge list is a
+-- list of pairs.  A weighted graph maps a vertex to the list of (neighbour, weight) pairs, Dict(List(Pair(\Z, \QQ))); a weighted edge is pair(u, pair(v, w)).
+_ensure(v, g) in \Z -> Dict(List(\Z)) -> Dict(List(\Z)) := if(dhas(v, g), g, dput(v, [], g))
+_addedge(u, v, g) in \Z -> \Z -> Dict(List(\Z)) -> Dict(List(\Z)) := dwith((new in List(\Z) |-> (old in List(\Z) |-> old ++ new)), u, [v], _ensure(v, g))
+digraph(vs, es) in List(\Z) -> List(Pair(\Z, \Z)) -> Dict(List(\Z)) := foldl((g in Dict(List(\Z)) |-> (e in Pair(\Z, \Z) |-> _addedge(fst(e), snd(e), g))), foldl((g in Dict(List(\Z)) |-> (v in \Z |-> _ensure(v, g))), emptydict, vs), es)
+ugraph(vs, es) in List(\Z) -> List(Pair(\Z, \Z)) -> Dict(List(\Z)) := foldl((g in Dict(List(\Z)) |-> (e in Pair(\Z, \Z) |-> if(fst(e) == snd(e), _addedge(fst(e), snd(e), g), _addedge(snd(e), fst(e), _addedge(fst(e), snd(e), g))))), foldl((g in Dict(List(\Z)) |-> (v in \Z |-> _ensure(v, g))), emptydict, vs), es)
+neighbors(g, v) in Dict(List(\Z)) -> \Z -> List(\Z) := dgetd(v, [], g)
+vertices(g) in Dict(List(\Z)) -> List(\Z) := dkeys(g)
+degree(g, v) in Dict(List(\Z)) -> \Z -> \NN := length(neighbors(g, v))
+edges(g) in Dict(List(\Z)) -> List(Pair(\Z, \Z)) := concat(map((p in Pair(\Z, List(\Z)) |-> map((w in \Z |-> pair(fst(p), w)), snd(p))), ditems(g)))
+reversed(g) in Dict(List(\Z)) -> Dict(List(\Z)) := digraph(vertices(g), map((e in Pair(\Z, \Z) |-> pair(snd(e), fst(e))), edges(g)))
+_glet(x, f) in alpha -> (alpha -> beta) -> beta := f(x)
+-- breadth-first search: the vertices reachable from s, in the order in which they are first reached
+_bfsexpand(g, v, q, seen) in Dict(List(\Z)) -> \Z -> Queue(\Z) -> FSet -> Pair(Queue(\Z), FSet) := foldl((st in Pair(Queue(\Z), FSet) |-> (w in \Z |-> if(fshas(w, snd(st)), st, pair(qpush(w, fst(st)), fsadd(w, snd(st)))))), pair(q, seen), neighbors(g, v))
+_bfsgo(g, q, seen, acc) in Dict(List(\Z)) -> Queue(\Z) -> FSet -> List(\Z) -> List(\Z) := if(qempty(q), reverse(acc), _glet(_bfsexpand(g, head(qpeek(q)), qpop(q), seen), (r in Pair(Queue(\Z), FSet) |-> _bfsgo(g, fst(r), snd(r), cons(head(qpeek(q)), acc)))))
+bfs(g, s) in Dict(List(\Z)) -> \Z -> List(\Z) := _bfsgo(g, qpush(s, emptyqueue), fsadd(s, emptyfset), [])
+-- depth-first search: preorder, the neighbours in the order of their lists
+_dfsgo(g, stack, seen, acc) in Dict(List(\Z)) -> List(\Z) -> FSet -> List(\Z) -> List(\Z) := if(isnil(stack), reverse(acc), if(fshas(head(stack), seen), _dfsgo(g, tail(stack), seen, acc), _dfsgo(g, neighbors(g, head(stack)) ++ tail(stack), fsadd(head(stack), seen), cons(head(stack), acc))))
+dfs(g, s) in Dict(List(\Z)) -> \Z -> List(\Z) := _dfsgo(g, [s], emptyfset, [])
+reachable(g, s, t) in Dict(List(\Z)) -> \Z -> \Z -> Bool := elem(t, bfs(g, s))
+-- connected components of an undirected graph: lists of vertices in the order of BFS from the least unvisited vertex
+_compsgo(g, vs, seen, acc) in Dict(List(\Z)) -> List(\Z) -> FSet -> List(List(\Z)) -> List(List(\Z)) := if(isnil(vs), reverse(acc), if(fshas(head(vs), seen), _compsgo(g, tail(vs), seen, acc), _glet(bfs(g, head(vs)), (c in List(\Z) |-> _compsgo(g, tail(vs), foldl((s in FSet |-> (w in \Z |-> fsadd(w, s))), seen, c), cons(c, acc))))))
+components(g) in Dict(List(\Z)) -> List(List(\Z)) := _compsgo(g, vertices(g), emptyfset, [])
+-- distances (numbers of edges) from s to the vertices reachable from it
+_distgo(g, q, d) in Dict(List(\Z)) -> Queue(\Z) -> Dict(\ZZ) -> Dict(\ZZ) := if(qempty(q), d, _glet(head(qpeek(q)), (v in \Z |-> _distgo(g, foldl((qq in Queue(\Z) |-> (w in \Z |-> if(dhas(w, d), qq, qpush(w, qq)))), qpop(q), neighbors(g, v)), foldl((dd in Dict(\ZZ) |-> (w in \Z |-> if(dhas(w, dd), dd, dput(w, dgetd(v, 0, d) + 1, dd)))), d, neighbors(g, v))))))
+distances(g, s) in Dict(List(\Z)) -> \Z -> Dict(\ZZ) := _distgo(g, qpush(s, emptyqueue), dput(s, 0, emptydict))
+-- a shortest path (fewest edges) from s to t, found by breadth-first search: the list of vertices from s to t, or the empty list (a maybe: a list of at most one path)
+_pargo(g, q, par) in Dict(List(\Z)) -> Queue(\Z) -> Dict(\Z) -> Dict(\Z) := if(qempty(q), par, _glet(head(qpeek(q)), (v in \Z |-> _pargo(g, foldl((qq in Queue(\Z) |-> (w in \Z |-> if(dhas(w, par), qq, qpush(w, qq)))), qpop(q), neighbors(g, v)), foldl((pp in Dict(\Z) |-> (w in \Z |-> if(dhas(w, pp), pp, dput(w, v, pp)))), par, neighbors(g, v))))))
+_unwind(par, s, v, acc) in Dict(\Z) -> \Z -> \Z -> List(\Z) -> List(\Z) := if(v == s, cons(s, acc), _unwind(par, s, dgetd(v, s, par), cons(v, acc)))
+shortestpath(g, s, t) in Dict(List(\Z)) -> \Z -> \Z -> List(List(\Z)) := _glet(_pargo(g, qpush(s, emptyqueue), dput(s, s, emptydict)), (par in Dict(\Z) |-> if(dhas(t, par), [_unwind(par, s, t, [])], [])))
+-- topological order by Kahn's algorithm (the vertices without incoming edges first, in the order of the keys of the dictionary); a cycle leaves its vertices, and everything after
+-- them, out of the result
+_indeg(g) in Dict(List(\Z)) -> Dict(\ZZ) := foldl((d in Dict(\ZZ) |-> (e in Pair(\Z, \Z) |-> dput(snd(e), dgetd(snd(e), 0, d) + 1, d))), foldl((d in Dict(\ZZ) |-> (v in \Z |-> dput(v, 0, d))), emptydict, vertices(g)), edges(g))
+_topogo(g, q, d, acc) in Dict(List(\Z)) -> Queue(\Z) -> Dict(\ZZ) -> List(\Z) -> List(\Z) := if(qempty(q), reverse(acc), _glet(head(qpeek(q)), (v in \Z |-> _glet(foldl((st in Pair(Queue(\Z), Dict(\ZZ)) |-> (w in \Z |-> if(dgetd(w, 0, snd(st)) == 1, pair(qpush(w, fst(st)), dput(w, 0, snd(st))), pair(fst(st), dput(w, dgetd(w, 0, snd(st)) - 1, snd(st)))))), pair(qpop(q), d), neighbors(g, v)), (r in Pair(Queue(\Z), Dict(\ZZ)) |-> _topogo(g, fst(r), snd(r), cons(v, acc)))))))
+toposort(g) in Dict(List(\Z)) -> List(\Z) := _topogo(g, foldl((q in Queue(\Z) |-> (v in \Z |-> qpush(v, q))), emptyqueue, filter((v in \Z |-> dgetd(v, 0, _indeg(g)) == 0), vertices(g))), _indeg(g), [])
+isacyclic(g) in Dict(List(\Z)) -> Bool := length(toposort(g)) == dsize(g)
+-- an undirected graph is bipartite when every edge joins vertices whose distances from the root of their component have different parities
+_parity(d, v) in Dict(\ZZ) -> \Z -> \Z := dgetd(v, 0, d) mod 2
+_bipcomp(g, c) in Dict(List(\Z)) -> List(\Z) -> Bool := _glet(distances(g, head(c)), (d in Dict(\ZZ) |-> forall((v in \Z |-> forall((w in \Z |-> not (_parity(d, v) == _parity(d, w))), neighbors(g, v))), c)))
+isbipartite(g) in Dict(List(\Z)) -> Bool := forall((c in List(\Z) |-> _bipcomp(g, c)), components(g))
+isconnected(g) in Dict(List(\Z)) -> Bool := length(components(g)) leq 1
+-- weighted graphs
+_wensure(v, g) in \Z -> Dict(List(Pair(\Z, \QQ))) -> Dict(List(Pair(\Z, \QQ))) := if(dhas(v, g), g, dput(v, [], g))
+_waddedge(u, v, w, g) in \Z -> \Z -> \QQ -> Dict(List(Pair(\Z, \QQ))) -> Dict(List(Pair(\Z, \QQ))) := dwith((new in List(Pair(\Z, \QQ)) |-> (old in List(Pair(\Z, \QQ)) |-> old ++ new)), u, [pair(v, w)], _wensure(v, g))
+wdigraph(vs, es) in List(\Z) -> List(Pair(\Z, Pair(\Z, \QQ))) -> Dict(List(Pair(\Z, \QQ))) := foldl((g in Dict(List(Pair(\Z, \QQ))) |-> (e in Pair(\Z, Pair(\Z, \QQ)) |-> _waddedge(fst(e), fst(snd(e)), snd(snd(e)), g))), foldl((g in Dict(List(Pair(\Z, \QQ))) |-> (v in \Z |-> _wensure(v, g))), emptydict, vs), es)
+wugraph(vs, es) in List(\Z) -> List(Pair(\Z, Pair(\Z, \QQ))) -> Dict(List(Pair(\Z, \QQ))) := foldl((g in Dict(List(Pair(\Z, \QQ))) |-> (e in Pair(\Z, Pair(\Z, \QQ)) |-> if(fst(e) == fst(snd(e)), _waddedge(fst(e), fst(snd(e)), snd(snd(e)), g), _waddedge(fst(snd(e)), fst(e), snd(snd(e)), _waddedge(fst(e), fst(snd(e)), snd(snd(e)), g))))), foldl((g in Dict(List(Pair(\Z, \QQ))) |-> (v in \Z |-> _wensure(v, g))), emptydict, vs), es)
+-- Dijkstra's algorithm (non-negative weights): the distances from s to the vertices reachable from it
+_relax(h, d, v, ws) in Heap(\Z) -> \QQ -> \Z -> List(Pair(\Z, \QQ)) -> Heap(\Z) := foldl((hh in Heap(\Z) |-> (p in Pair(\Z, \QQ) |-> hpush(d + snd(p), fst(p), hh))), h, ws)
+_dijgo(g, h, dist) in Dict(List(Pair(\Z, \QQ))) -> Heap(\Z) -> Dict(\QQ) -> Dict(\QQ) := if(hempty(h), dist, _glet(head(hpeek(h)), (top in Pair(\QQ, \Z) |-> if(dhas(snd(top), dist), _dijgo(g, hpop(h), dist), _dijgo(g, _relax(hpop(h), fst(top), snd(top), dgetd(snd(top), [], g)), dput(snd(top), fst(top), dist))))))
+dijkstra(g, s) in Dict(List(Pair(\Z, \QQ))) -> \Z -> Dict(\QQ) := _dijgo(g, hpush(0, s, emptyheap), emptydict)
+-- Kruskal's algorithm: a minimum spanning forest of an undirected weighted graph given by its edge list pair(u, pair(v, w)); the edges are taken in the order of their weights
+-- (a stable sort), and the forest is returned as a list of edges
+_find(par, x) in Dict(\Z) -> \Z -> \Z := if(dgetd(x, x, par) == x, x, _find(par, dgetd(x, x, par)))
+_kruskalgo(par, es, acc) in Dict(\Z) -> List(Pair(\Z, Pair(\Z, \QQ))) -> List(Pair(\Z, Pair(\Z, \QQ))) -> List(Pair(\Z, Pair(\Z, \QQ))) := if(isnil(es), reverse(acc), if(_find(par, fst(head(es))) == _find(par, fst(snd(head(es)))), _kruskalgo(par, tail(es), acc), _kruskalgo(dput(_find(par, fst(head(es))), _find(par, fst(snd(head(es)))), par), tail(es), cons(head(es), acc))))
+kruskal(es) in List(Pair(\Z, Pair(\Z, \QQ))) -> List(Pair(\Z, Pair(\Z, \QQ))) := _kruskalgo(emptydict, sortby((a in Pair(\Z, Pair(\Z, \QQ)) |-> (b in Pair(\Z, Pair(\Z, \QQ)) |-> snd(snd(a)) leq snd(snd(b)))), es), [])
+mstweight(es) in List(Pair(\Z, Pair(\Z, \QQ))) -> \QQ := sumof(map((e in Pair(\Z, Pair(\Z, \QQ)) |-> snd(snd(e))), kruskal(es)))

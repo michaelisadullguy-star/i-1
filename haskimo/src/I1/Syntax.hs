@@ -63,7 +63,7 @@ locNames :: Loc -> [String]
 locNames = map fst
 
 classVars :: [String]
-classVars = ["α", "β", "γ"]
+classVars = ["α", "β", "γ", "δ", "ε"]
 
 -- ---------------------------------------------------------------- lexer
 data Tok = TNL | TOpen | TClose | TkNum String | TkChr Int | TkStr String | TkName String

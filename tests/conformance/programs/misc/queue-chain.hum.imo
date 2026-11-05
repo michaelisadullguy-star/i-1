@@ -1,0 +1,1 @@
+main in List(Bool) := [((qsize(qpop(qpush(11, qpush(11, qpop(qpush(10, qpush(10, qpop(qpush(9, qpush(9, qpop(qpush(8, qpush(8, qpop(qpush(7, qpush(7, qpop(qpush(6, qpush(6, qpop(qpush(5, qpush(5, qpop(qpush(4, qpush(4, qpop(qpush(3, qpush(3, qpop(qpush(2, qpush(2, qpop(qpush(1, qpush(1, qpop(qpush(0, qpush(0, qpush(0, emptyqueue))))))))))))))))))))))))))))))))))))))) == (13))]

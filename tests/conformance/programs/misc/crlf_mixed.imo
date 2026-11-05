@@ -1,0 +1,8 @@
+⍝ spec with a human section in the middle
+a ∶ ℕ
+a ≔ 1101
+@hum
+b in \NN := a + 1
+@spec
+main ∶ ℕ
+main ≔ (⊞ a b)

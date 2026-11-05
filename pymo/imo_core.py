@@ -141,6 +141,7 @@ class Machine:
     DEEP = 40
 
     def __init__(self, defs):
+        self._fv, self._key, self._intern = {}, {}, {}
         self.G = {}
         for name, ast in defs:
             assert name not in self.G, name
@@ -214,11 +215,36 @@ class Machine:
         elif t[0] == 'A': Machine.free(t[1], d, acc, d0); Machine.free(t[2], d, acc, d0)
         return acc
 
+    def fv(self, t):
+        """the greatest (index - number of binders inside t above the variable) over the variables of t, memoised per node: t is closed iff it is <= 0
+        (a term is a tree of tuples, and a long list is a deep spine: asking each sub-term again would take quadratic time)"""
+        m = self._fv.get(id(t))
+        if m is None:
+            tag = t[0]
+            if tag == 'V': r = t[1]
+            elif tag == 'G': r = 0
+            elif tag == 'L': r = self.fv(t[1]) - 1
+            else: r = max(self.fv(t[1]), self.fv(t[2]))
+            m = self._fv[id(t)] = (r, t)                 # t is kept, so that its id stays its own
+        return m[0]
+
     def closed(self, t, d):
-        return not Machine.free(t, d, set())
+        return self.fv(t) <= 0
+
+    def key(self, t):
+        """a small integer for the structure of t (equal terms get the same one), memoised per node"""
+        m = self._key.get(id(t))
+        if m is None:
+            tag = t[0]
+            if tag == 'A': s = ('A', self.key(t[1]), self.key(t[2]))
+            elif tag == 'L': s = ('L', self.key(t[1]))
+            else: s = tuple(t)
+            r = self._intern.setdefault(s, len(self._intern))
+            m = self._key[id(t)] = (r, t)
+        return m[0]
 
     def const(self, t):
-        key = repr(t)
+        key = self.key(t)
         if key not in self.consts:
             e, _ = self.value(t, 0)
             k = self.fresh('c'); self.consts[key] = k

@@ -1,0 +1,21 @@
+[package]
+name = "compimo"
+version = "0.1.0"
+edition = "2021"
+authors = ["Yinhao Wang <yinhao.wang@outlook.com>"]
+description = "Compimo, the compiler of the i-1 language: a program is translated to C, compiled with a small run-time system and run"
+license-file = "../LICENSE"
+publish = false
+
+# Nothing from crates.io: the standard library only.  The front end (readers, class checker, printer) is the one of Rustimo.
+[dependencies]
+
+[[bin]]
+name = "compimo"
+path = "src/main.rs"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+debug = false

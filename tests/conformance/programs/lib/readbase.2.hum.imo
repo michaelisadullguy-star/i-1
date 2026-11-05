@@ -1,0 +1,1 @@
+main in List(\NN) := readbase(5, ['7', 'a', 'z'])

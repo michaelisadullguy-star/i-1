@@ -1,0 +1,1 @@
+pair("table", [pair(1, 1/2), pair(2, 2/3), pair(3, -3/4)])

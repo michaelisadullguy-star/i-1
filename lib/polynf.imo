@@ -1,0 +1,93 @@
+⍝ lib/polynf.imo — spec notation — trusted prelude, part 31: polynomials as normal forms of arithmetic terms, with the sign analysis that decides equations and inequalities
+⍝ A polynomial is a list of terms (⊗ c m) in decreasing order, c ≠ 0 in ℚ[i] and m a monomial: a list of (⊗ atom exponent) sorted by the order on terms.  The ATOMS are the subterms that
+⍝ are not sums, products, powers (with a natural exponent), negations, differences or quotients by a number: variables and anything else (f(x), x/y, …).  Two arithmetic terms are
+⍝ equal as polynomials exactly when their normal forms are equal, so this is a decision procedure for the identities of commutative rings (and of fields, for divisions by numbers).
+⍝ The symbols are add, sub, neg, mul, pow, rdiv (division) and the relations eq, lt, le (gt and ge are rewritten into lt and le by the rules of the theory).
+Poly ∶ 𝒦
+sadd ∶ ℕ
+sadd ≔ (symid "add")
+ssub ∶ ℕ
+ssub ≔ (symid "sub")
+sneg ∶ ℕ
+sneg ≔ (symid "neg")
+smul ∶ ℕ
+smul ≔ (symid "mul")
+spow ∶ ℕ
+spow ≔ (symid "pow")
+srdiv ∶ ℕ
+srdiv ≔ (symid "rdiv")
+syeq ∶ ℕ
+syeq ≔ (symid "eq")
+sylt ∶ ℕ
+sylt ≔ (symid "lt")
+syle ∶ ℕ
+syle ≔ (symid "le")
+⍝ ---- monomials
+mdeg ∶ 𝔏 α → ℕ
+mdeg ξ ≔ (sumof (⫶ ▶ ξ))
+meq ∶ 𝔏 α → 𝔏 α → 𝔹
+meq ξ η ≔ (ξ (θ ι ↦ (η (κ′ μ ↦ (∧ (teq (◀ θ) (◀ κ′)) (∧ (≐ (▶ θ) (▶ κ′)) (meq ι μ)))) ⊥)) (∅ η))
+mlex ∶ 𝔏 α → 𝔏 α → 𝔹
+mlex ξ η ≔ (ξ (θ ι ↦ (η (κ′ μ ↦ ((teq (◀ θ) (◀ κ′)) ((≐ (▶ θ) (▶ κ′)) (mlex ι μ) (≻ (▶ θ) (▶ κ′))) (tlt (◀ θ) (◀ κ′)))) ⊥)) ⊥)
+mbefore ∶ 𝔏 α → 𝔏 α → 𝔹      ⍝ a monomial comes before another: higher degree first, then by atoms
+mbefore ξ η ≔ ((≺ (mdeg η) (mdeg ξ)) ⊤ ((≺ (mdeg ξ) (mdeg η)) ⊥ (mlex ξ η)))
+pfmmul ∶ 𝔏 α → 𝔏 α → 𝔏 α
+pfmmul ξ η ≔ (ξ (θ ι ↦ (η (κ′ μ ↦ ((teq (◀ θ) (◀ κ′)) (∷ (⊗ (◀ θ) (⊞ (▶ θ) (▶ κ′))) (pfmmul ι μ)) ((tlt (◀ θ) (◀ κ′)) (∷ θ (pfmmul ι η)) (∷ κ′ (pfmmul ξ μ))))) ξ)) η)
+⍝ ---- polynomials
+pcst ∶ ℚ[i] → Poly
+pcst ξ ≔ ((≐ ξ 0) ⊘ (∷ (⊗ ξ ⊘) ⊘))
+patom ∶ Term → Poly
+patom ξ ≔ (∷ (⊗ 1 (∷ (⊗ ξ 1) ⊘)) ⊘)
+padd ∶ Poly → Poly → Poly
+padd ξ η ≔ (ξ (θ ι ↦ (η (κ′ μ ↦ ((meq (▶ θ) (▶ κ′)) ((ν ↦ ((≐ ν 0) (padd ι μ) (∷ (⊗ ν (▶ θ)) (padd ι μ)))) (⊞ (◀ θ) (◀ κ′))) ((mbefore (▶ θ) (▶ κ′)) (∷ θ (padd ι η)) (∷ κ′ (padd ξ μ))))) ξ)) η)
+pscale ∶ ℚ[i] → Poly → Poly
+pscale ξ η ≔ ((≐ ξ 0) ⊘ (⫶ (θ ↦ (⊗ (⊠ ξ (◀ θ)) (▶ θ))) η))
+pneg ∶ Poly → Poly
+pneg ξ ≔ (pscale (⊖ 1) ξ)
+pmul ∶ Poly → Poly → Poly
+pmul ξ η ≔ (foldl (θ ι ↦ (padd θ (⫶ (κ′ ↦ (⊗ (⊠ (◀ ι) (◀ κ′)) (pfmmul (▶ ι) (▶ κ′)))) η))) ⊘ ξ)
+pfpow ∶ Poly → ℕ → Poly
+pfpow ξ η ≔ ((≐ η 0) (pcst 1) (pmul ξ (pfpow ξ (⊟ η 1))))
+psubst ∶ (Term → Poly) → Poly → Poly      ⍝ replace every atom by a polynomial
+psubst ξ η ≔ (foldl padd ⊘ (⫶ (t ↦ (pscale (◀ t) (foldl pmul (pcst 1) (⫶ (f ↦ (pfpow (ξ (◀ f)) (▶ f))) (▶ t))))) η))
+⍝ the polynomial of a term
+topoly ∶ Term → Poly
+topoly ξ ≔ (ξ (η ↦ (patom ξ)) (η ζ ↦ (topolyapp ξ η ζ)) (η ↦ (pcst η)))
+topolyapp ∶ Term → ℕ → 𝔏 Term → Poly
+topolyapp ξ η ζ ≔ ((≐ η sadd) (foldl padd ⊘ (⫶ topoly ζ)) ((≐ η ssub) (padd (topoly (hd ζ)) (pneg (topoly (hd (⌄ ζ))))) ((≐ η sneg) (pneg (topoly (hd ζ))) ((≐ η smul) (foldl pmul (pcst 1) (⫶ topoly ζ)) ((≐ η spow) ((∧ (tisnum (hd (⌄ ζ))) (∧ (≐ (ℑ (tnumval (hd (⌄ ζ)))) 0) (∧ (≐ (denom (tnumval (hd (⌄ ζ)))) 1) (∧ (⩾ (tnumval (hd (⌄ ζ))) 0) (⩽ (tnumval (hd (⌄ ζ))) 11101000000000000))))) (pfpow (topoly (hd ζ)) (tnumval (hd (⌄ ζ)))) (patom ξ)) ((≐ η srdiv) ((∧ (tisnum (hd (⌄ ζ))) (¬ (≐ (tnumval (hd (⌄ ζ))) 0))) (pscale (÷ 1 (tnumval (hd (⌄ ζ)))) (topoly (hd ζ))) (patom ξ)) (patom ξ)))))))
+⍝ the term of a polynomial (not yet in the order of the operators: use acdeep)
+frompoly ∶ Poly → Term
+frompoly ξ ≔ (ξ (θ ι ↦ ((∅ ι) (fromterm θ) (tapp sadd (⫶ fromterm ξ)))) (tnum 0))
+fromterm ∶ α → Term
+fromterm ξ ≔ ((∅ (▶ ξ)) (tnum (◀ ξ)) ((≐ (◀ ξ) 1) (frommono (▶ ξ)) (tapp smul (∷ (tnum (◀ ξ)) (⫶ fromfactor (▶ ξ))))))
+frommono ∶ 𝔏 α → Term
+frommono ξ ≔ ((≐ (ℓ ξ) 1) (fromfactor (hd ξ)) (tapp smul (⫶ fromfactor ξ)))
+fromfactor ∶ α → Term
+fromfactor ξ ≔ ((≐ (▶ ξ) 1) (◀ ξ) (tapp₂ spow (◀ ξ) (tnum (▶ ξ))))
+acdeep ∶ Env → Term → Term      ⍝ the laws of the operators applied everywhere, bottom-up
+acdeep ξ η ≔ (acnorm ξ (tmapargs (acdeep ξ) η))
+⍝ the normal form of an arithmetic term, or [] if it is already the normal form (so that a hook does not rewrite for ever)
+polyhook ∶ Env → Term → 𝔏 Term
+polyhook ξ η ≔ ((o ↦ ((teq o η) ⊘ (∷ o ⊘))) (acdeep ξ (frompoly (topoly η))))
+⍝ ---- signs.  The sign of a polynomial: 3 positive, 2 non-negative, 1 non-positive, 0 negative, 4 unknown; over the naturals every atom is ≥ 0, over the reals only even powers are
+natmode ∶ Env → 𝔹
+natmode ξ ≔ (elemby ≐ˢ "peano" (enames ξ))
+monosign ∶ 𝔹 → α → ℕ      ⍝ the sign of one term c·m: 2 non-negative, 1 non-positive, 4 unknown (a zero-degree term is a number)
+monosign ξ η ≔ ((∅ (▶ η)) ((≐ (ℑ (◀ η)) 0) ((⩾ (◀ η) 0) 1100 1) 111010000) ((∧ (≐ (ℑ (◀ η)) 0) (∨ ξ (∀ₗ (θ ↦ (≐ (mod (▶ θ) 1100) 0)) (▶ η)))) ((⩾ (◀ η) 0) 1100 1) 111010000))
+pfsign′ ∶ Env → Poly → ℕ      ⍝ the sign by the signs of the monomials: 3 positive, 2 non-negative, 1 non-positive, 0 negative, 4 unknown (a polynomial that is not zero)
+pfsign′ ξ η ≔ ((ss ↦ ((∀ₗ (θ ↦ (≐ θ 1100)) ss) ((∧ (hasconst η) (≻ (◀ (last η)) 0)) 1101 1100) ((∀ₗ (θ ↦ (≐ θ 1)) ss) ((∧ (hasconst η) (≺ (◀ (last η)) 0)) 0 1) 111010000))) (⫶ (monosign (natmode ξ)) η))
+pfsign ∶ Env → Poly → ℕ      ⍝ the sign of a polynomial that is not zero: by its monomials, and for polynomials of degree 2 by an exact positive semidefiniteness test (lib/psd.imo)
+pfsign ξ η ≔ ((r ↦ ((≐ r 111010000) (quadsign η) r)) (pfsign′ ξ η))
+hasconst ∶ Poly → 𝔹      ⍝ is there a term of degree 0 (it comes last)
+hasconst ξ ≔ (∧ (¬ (∅ ξ)) (∅ (▶ (last ξ))))
+⍝ ---- the relations.  d = b − a:  eq(a, b), lt(a, b), le(a, b) are decided by the sign of d, or put in the canonical form  P ∘ N  (P the terms of d with positive coefficient, N those with negative ones, negated)
+splitpos ∶ Poly → Poly
+splitpos ξ ≔ (filter (θ ↦ (≻ (ℜ (◀ θ)) 0)) ξ)
+splitneg ∶ Poly → Poly
+splitneg ξ ≔ (pneg (filter (θ ↦ (¬ (≻ (ℜ (◀ θ)) 0))) ξ))
+relhook ∶ Env → Term → 𝔏 Term
+relhook ξ η ≔ ((f ↦ ((d ↦ ((s ↦ (relhook′ ξ η f d s)) (pfsign ξ d))) (padd (topoly (hd (⌄ (targs η)))) (pneg (topoly (hd (targs η))))))) (thead η))
+relhook′ ∶ Env → Term → ℕ → Poly → ℕ → 𝔏 Term
+relhook′ ξ η ζ ω ν ≔ ((∅ ω) (∷ ((≐ ζ sylt) tfalse ttrue) ⊘) ((≐ ν 1101) (∷ ((≐ ζ syeq) tfalse ttrue) ⊘) ((≐ ν 0) (∷ tfalse ⊘) ((∧ (≐ ν 1100) (≐ ζ syle)) (∷ ttrue ⊘) ((∧ (≐ ν 1) (≐ ζ sylt)) (∷ tfalse ⊘) (relcanon ξ η ζ ω))))))
+relcanon ∶ Env → Term → ℕ → Poly → 𝔏 Term
+relcanon ξ η ζ ω ≔ ((o ↦ ((teq o η) ⊘ (∷ o ⊘))) (acdeep ξ (tapp₂ ζ (frompoly (splitneg ω)) (frompoly (splitpos ω)))))

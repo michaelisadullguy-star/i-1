@@ -23,6 +23,12 @@
 #   I1_PYMO     path of pymo/i1.py              (default: ../share/i1/pymo/i1.py or ./pymo/i1.py, relative to this script)
 #   I1_HASKIMO  path of the haskimo executable   (default: next to this script, ./build/haskimo, or haskimo on PATH)
 #   I1_RUSTIMO  path of the rustimo executable   (default: next to this script, ./build/rustimo, or rustimo on PATH)
+#   I1_COMPIMO  path of the compimo executable  (default: ./build/compimo, or compimo on PATH); Compimo compiles the program to C and is chosen only by name:
+#               --impl compimo  (it is not part of auto, both or all)
+#   I1_OCAMIMO  path of the ocamimo executable (default: ./build/ocamimo, or ocamimo on PATH); OCamimo is chosen only by name:  --impl ocamimo
+#   I1_SCHIMO   path of the schimo launcher (default: ./build/schimo, or schimo on PATH); Schimo needs Racket and is chosen only by name:  --impl schimo
+#   I1_CIMO     path of the cimo executable    (default: ./build/cimo, or cimo on PATH); Cimo needs a C compiler and libgc-dev to be built and is chosen only by name:  --impl cimo
+#   I1_RIMO     path of the rimo launcher (default: ./build/rimo, or rimo on PATH); Rimo needs R and the package gmp and is chosen only by name:  --impl rimo
 #   I1_PYTHON   the Python that runs Pymo        (default: python3)
 
 # --- where am I (follow symbolic links)
@@ -68,6 +74,41 @@ if [ -z "$rustimo" ]; then
   done
   [ -n "$rustimo" ] || rustimo=$(command -v rustimo 2>/dev/null || true)
 fi
+compimo=${I1_COMPIMO-}
+if [ -z "$compimo" ]; then
+  for c in "$here/build/compimo" "$here/dist/compimo"; do
+    if is_exe "$c"; then compimo=$c; break; fi
+  done
+  [ -n "$compimo" ] || compimo=$(command -v compimo 2>/dev/null || true)
+fi
+ocamimo=${I1_OCAMIMO-}
+if [ -z "$ocamimo" ]; then
+  for c in "$here/build/ocamimo" "$here/dist/ocamimo"; do
+    if is_exe "$c"; then ocamimo=$c; break; fi
+  done
+  [ -n "$ocamimo" ] || ocamimo=$(command -v ocamimo 2>/dev/null || true)
+fi
+schimo=${I1_SCHIMO-}
+if [ -z "$schimo" ]; then
+  for c in "$here/build/schimo" "$here/dist/schimo"; do
+    if is_exe "$c"; then schimo=$c; break; fi
+  done
+  [ -n "$schimo" ] || schimo=$(command -v schimo 2>/dev/null || true)
+fi
+cimo=${I1_CIMO-}
+if [ -z "$cimo" ]; then
+  for c in "$here/build/cimo" "$here/dist/cimo"; do
+    if is_exe "$c"; then cimo=$c; break; fi
+  done
+  [ -n "$cimo" ] || cimo=$(command -v cimo 2>/dev/null || true)
+fi
+rimo=${I1_RIMO-}
+if [ -z "$rimo" ]; then
+  for c in "$here/build/rimo" "$here/dist/rimo"; do
+    if is_exe "$c"; then rimo=$c; break; fi
+  done
+  [ -n "$rimo" ] || rimo=$(command -v rimo 2>/dev/null || true)
+fi
 python=${I1_PYTHON:-python3}
 
 # --- choose
@@ -95,6 +136,41 @@ run_rustimo() {
     exit 127
   fi
   exec "$rustimo" "$@"
+}
+run_compimo() {
+  if [ -z "$compimo" ] || ! is_exe "$compimo"; then
+    echo "i1: Compimo was not found (the executable compimo): build it with  make compimo  (it needs a C compiler and libgc-dev), or set I1_COMPIMO" >&2
+    exit 127
+  fi
+  exec "$compimo" "$@"
+}
+run_ocamimo() {
+  if [ -z "$ocamimo" ] || ! is_exe "$ocamimo"; then
+    echo "i1: OCamimo was not found (the executable ocamimo): build it with  make ocamimo  (it needs ocamlopt), or set I1_OCAMIMO" >&2
+    exit 127
+  fi
+  exec "$ocamimo" "$@"
+}
+run_schimo() {
+  if [ -z "$schimo" ] || ! is_exe "$schimo"; then
+    echo "i1: Schimo was not found (the launcher schimo): build it with  make schimo  (it needs racket), or set I1_SCHIMO" >&2
+    exit 127
+  fi
+  exec "$schimo" "$@"
+}
+run_cimo() {
+  if [ -z "$cimo" ] || ! is_exe "$cimo"; then
+    echo "i1: Cimo was not found (the executable cimo): build it with  make cimo  (it needs a C compiler and libgc-dev), or set I1_CIMO" >&2
+    exit 127
+  fi
+  exec "$cimo" "$@"
+}
+run_rimo() {
+  if [ -z "$rimo" ] || ! is_exe "$rimo"; then
+    echo "i1: Rimo was not found (the launcher rimo): build it with  make rimo  (it needs R and the CRAN package gmp), or set I1_RIMO" >&2
+    exit 127
+  fi
+  exec "$rimo" "$@"
 }
 run_haskimo() {
   if [ -z "$haskimo" ] || ! is_exe "$haskimo"; then
@@ -141,7 +217,12 @@ case $impl in
   pymo) run_pymo "$@" ;;
   haskimo) run_haskimo "$@" ;;
   rustimo) run_rustimo "$@" ;;
+  compimo) run_compimo "$@" ;;
+  ocamimo) run_ocamimo "$@" ;;
+  schimo) run_schimo "$@" ;;
+  cimo) run_cimo "$@" ;;
+  rimo) run_rimo "$@" ;;
   both) use_hs=yes; use_rs=no; run_together "$@" ;;
   all) use_hs=yes; use_rs=yes; run_together "$@" ;;
-  *) echo "i1: --impl takes pymo, haskimo, rustimo, auto, both or all (got '$impl')" >&2; exit 2 ;;
+  *) echo "i1: --impl takes pymo, haskimo, rustimo, compimo, ocamimo, schimo, cimo, rimo, auto, both or all (got '$impl')" >&2; exit 2 ;;
 esac

@@ -1,0 +1,4 @@
+greeting ∶ 𝕊
+greeting ≔ (⧺ "Hello, " (⧺ "i-1 — " "λ"))
+main ∶ 𝕊
+main ≔ (⧺ greeting "\n")

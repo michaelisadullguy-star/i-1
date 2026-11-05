@@ -1,0 +1,43 @@
+-- geom.hum.imo -- plane geometry with exact rational coordinates (human notation; lib/geom.imo is its translation, made by libsrc/build.sh).
+-- A point (or a vector) is a pair pair(x, y) of rationals, a polygon a list of points in order around it.  Nothing here needs a square root: distances are squared.
+_gmlet(x, f) in alpha -> (alpha -> beta) -> beta := f(x)
+ptx(p) in Pair(\QQ, \QQ) -> \QQ := fst(p)
+pty(p) in Pair(\QQ, \QQ) -> \QQ := snd(p)
+vsub2(a, b) in Pair(\QQ, \QQ) -> Pair(\QQ, \QQ) -> Pair(\QQ, \QQ) := pair(fst(a) - fst(b), snd(a) - snd(b))
+vadd2(a, b) in Pair(\QQ, \QQ) -> Pair(\QQ, \QQ) -> Pair(\QQ, \QQ) := pair(fst(a) + fst(b), snd(a) + snd(b))
+vscale2(k, a) in \QQ -> Pair(\QQ, \QQ) -> Pair(\QQ, \QQ) := pair(k * fst(a), k * snd(a))
+dotp(a, b) in Pair(\QQ, \QQ) -> Pair(\QQ, \QQ) -> \QQ := fst(a) * fst(b) + snd(a) * snd(b)
+crossp(a, b) in Pair(\QQ, \QQ) -> Pair(\QQ, \QQ) -> \QQ := fst(a) * snd(b) - snd(a) * fst(b)
+dist2(a, b) in Pair(\QQ, \QQ) -> Pair(\QQ, \QQ) -> \QQ := dotp(vsub2(a, b), vsub2(a, b))
+cross3(o, a, b) in Pair(\QQ, \QQ) -> Pair(\QQ, \QQ) -> Pair(\QQ, \QQ) -> \QQ := crossp(vsub2(a, o), vsub2(b, o))
+orient(a, b, c) in Pair(\QQ, \QQ) -> Pair(\QQ, \QQ) -> Pair(\QQ, \QQ) -> \ZZ := sgn(cross3(a, b, c))
+triarea2(a, b, c) in Pair(\QQ, \QQ) -> Pair(\QQ, \QQ) -> Pair(\QQ, \QQ) -> \QQ := abs(cross3(a, b, c))
+iscollinear(a, b, c) in Pair(\QQ, \QQ) -> Pair(\QQ, \QQ) -> Pair(\QQ, \QQ) -> Bool := cross3(a, b, c) == 0
+midpoint(a, b) in Pair(\QQ, \QQ) -> Pair(\QQ, \QQ) -> Pair(\QQ, \QQ) := vscale2(1 / 2, vadd2(a, b))
+centroid(pts) in List(Pair(\QQ, \QQ)) -> Pair(\QQ, \QQ) := if(isnil(pts), pair(0, 0), vscale2(1 / length(pts), foldl((s in Pair(\QQ, \QQ) |-> (p in Pair(\QQ, \QQ) |-> vadd2(s, p))), pair(0, 0), pts)))
+bbox(pts) in List(Pair(\QQ, \QQ)) -> Pair(Pair(\QQ, \QQ), Pair(\QQ, \QQ)) := pair(pair(minimum(map(ptx, pts)), minimum(map(pty, pts))), pair(maximum(map(ptx, pts)), maximum(map(pty, pts))))
+onsegment(p, a, b) in Pair(\QQ, \QQ) -> Pair(\QQ, \QQ) -> Pair(\QQ, \QQ) -> Bool := (cross3(a, b, p) == 0) and (min(fst(a), fst(b)) leq fst(p)) and (fst(p) leq max(fst(a), fst(b))) and (min(snd(a), snd(b)) leq snd(p)) and (snd(p) leq max(snd(a), snd(b)))
+segmentsintersect(a, b, c, d) in Pair(\QQ, \QQ) -> Pair(\QQ, \QQ) -> Pair(\QQ, \QQ) -> Pair(\QQ, \QQ) -> Bool := ((orient(a, b, c) * orient(a, b, d) lt 0) and (orient(c, d, a) * orient(c, d, b) lt 0)) or onsegment(c, a, b) or onsegment(d, a, b) or onsegment(a, c, d) or onsegment(b, c, d)
+-- the point where the lines ab and cd meet, as a list of at most one point (empty for parallel lines)
+lineintersection(a, b, c, d) in Pair(\QQ, \QQ) -> Pair(\QQ, \QQ) -> Pair(\QQ, \QQ) -> Pair(\QQ, \QQ) -> List(Pair(\QQ, \QQ)) := if(crossp(vsub2(b, a), vsub2(d, c)) == 0, [], [vadd2(a, vscale2(crossp(vsub2(c, a), vsub2(d, c)) / crossp(vsub2(b, a), vsub2(d, c)), vsub2(b, a)))])
+-- the centre of the circle through three points, as a list of at most one point (empty for collinear points)
+circumcenter(a, b, c) in Pair(\QQ, \QQ) -> Pair(\QQ, \QQ) -> Pair(\QQ, \QQ) -> List(Pair(\QQ, \QQ)) := if(cross3(a, b, c) == 0, [], [pair(((dotp(a, a)) * (snd(b) - snd(c)) + (dotp(b, b)) * (snd(c) - snd(a)) + (dotp(c, c)) * (snd(a) - snd(b))) / (2 * (fst(a) * (snd(b) - snd(c)) + fst(b) * (snd(c) - snd(a)) + fst(c) * (snd(a) - snd(b)))), ((dotp(a, a)) * (fst(c) - fst(b)) + (dotp(b, b)) * (fst(a) - fst(c)) + (dotp(c, c)) * (fst(b) - fst(a))) / (2 * (fst(a) * (snd(b) - snd(c)) + fst(b) * (snd(c) - snd(a)) + fst(c) * (snd(a) - snd(b)))))])
+-- polygons
+_shoelace(pts, k) in List(Pair(\QQ, \QQ)) -> \NN -> \QQ := if(k == length(pts), 0, crossp(nth(pts, k), nth(pts, (k + 1) mod length(pts))) + _shoelace(pts, k + 1))
+polyarea2(pts) in List(Pair(\QQ, \QQ)) -> \QQ := if(length(pts) lt 3, 0, abs(_shoelace(pts, 0)))
+polyarea(pts) in List(Pair(\QQ, \QQ)) -> \QQ := polyarea2(pts) / 2
+signedarea2(pts) in List(Pair(\QQ, \QQ)) -> \QQ := if(length(pts) lt 3, 0, _shoelace(pts, 0))
+polyperimeter2(pts) in List(Pair(\QQ, \QQ)) -> List(\QQ) := zipwith(dist2, pts, tail(pts) ++ take(1, pts))
+-- the position of a point with respect to a polygon: 1 inside, 0 on the boundary, minus 1 outside
+_edges(pts) in List(Pair(\QQ, \QQ)) -> List(Pair(Pair(\QQ, \QQ), Pair(\QQ, \QQ))) := zipwith((a in Pair(\QQ, \QQ) |-> (b in Pair(\QQ, \QQ) |-> pair(a, b))), pts, tail(pts) ++ take(1, pts))
+_crosses(p, e) in Pair(\QQ, \QQ) -> Pair(Pair(\QQ, \QQ), Pair(\QQ, \QQ)) -> Bool := ((snd(fst(e)) leq snd(p)) and (snd(p) lt snd(snd(e))) and (cross3(fst(e), snd(e), p) gt 0)) or ((snd(snd(e)) leq snd(p)) and (snd(p) lt snd(fst(e))) and (cross3(fst(e), snd(e), p) lt 0))
+inpolygon(p, pts) in Pair(\QQ, \QQ) -> List(Pair(\QQ, \QQ)) -> \ZZ := if(exists((e in Pair(Pair(\QQ, \QQ), Pair(\QQ, \QQ)) |-> onsegment(p, fst(e), snd(e))), _edges(pts)), 0, if(length(filter((e in Pair(Pair(\QQ, \QQ), Pair(\QQ, \QQ)) |-> _crosses(p, e)), _edges(pts))) mod 2 == 1, 1, -1))
+isconvex(pts) in List(Pair(\QQ, \QQ)) -> Bool := (length(pts) lt 3) or ((forall((k in \NN |-> cross3(nth(pts, k), nth(pts, (k + 1) mod length(pts)), nth(pts, (k + 2) mod length(pts))) geq 0), upto(0, abs(length(pts) - 1)))) or (forall((k in \NN |-> cross3(nth(pts, k), nth(pts, (k + 1) mod length(pts)), nth(pts, (k + 2) mod length(pts))) leq 0), upto(0, abs(length(pts) - 1)))))
+-- the convex hull by Andrew's monotone chain: the vertices in counter-clockwise order from the lowest-leftmost point, collinear points left out
+_ptle(a, b) in Pair(\QQ, \QQ) -> Pair(\QQ, \QQ) -> Bool := (fst(a) lt fst(b)) or ((fst(a) == fst(b)) and (snd(a) leq snd(b)))
+_pteq(a, b) in Pair(\QQ, \QQ) -> Pair(\QQ, \QQ) -> Bool := (fst(a) == fst(b)) and (snd(a) == snd(b))
+_hullpush(p, st) in Pair(\QQ, \QQ) -> List(Pair(\QQ, \QQ)) -> List(Pair(\QQ, \QQ)) := if((length(st) geq 2) and (cross3(head(tail(st)), head(st), p) leq 0), _hullpush(p, tail(st)), cons(p, st))
+_chain(pts) in List(Pair(\QQ, \QQ)) -> List(Pair(\QQ, \QQ)) := reverse(foldl((st in List(Pair(\QQ, \QQ)) |-> (p in Pair(\QQ, \QQ) |-> _hullpush(p, st))), [], pts))
+convexhull(pts) in List(Pair(\QQ, \QQ)) -> List(Pair(\QQ, \QQ)) := _gmlet(nubby(_pteq, sortby(_ptle, pts)), (s in List(Pair(\QQ, \QQ)) |-> if(length(s) leq 2, s, init(_chain(s)) ++ init(_chain(reverse(s))))))
+-- the least squared distance between two of the points (0 when there are fewer than two)
+closestpair2(pts) in List(Pair(\QQ, \QQ)) -> \QQ := if(length(pts) lt 2, 0, minimum(concat(map((i in \NN |-> map((j in \NN |-> dist2(nth(pts, i), nth(pts, j))), upto(i + 1, abs(length(pts) - 1)))), upto(0, abs(length(pts) - 2))))))

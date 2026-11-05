@@ -4,3 +4,10 @@ build/
 dist-newstyle/
 
 rustimo/target/
+compimo/target/
+ocamimo/src/data_gen.ml
+ocamimo/src/*.cm[ixo]
+ocamimo/src/*.o
+schimo/src/data-gen.rkt
+schimo/src/compiled/
+cimo/src/data_gen.c

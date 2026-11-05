@@ -1,0 +1,78 @@
+⍝ lib/rewrite.imo — spec notation — trusted prelude, part 28: rewriting: the normal form of a term under rules, associative-commutative-idempotent operators and hooks
+⍝ An Env is the state of a set of active theories:  (⊗ signature (⊗ rules (⊗ hooks (⊗ names fuel))))  with rules a Dict (head symbol → list of rules) of
+⍝ (⊗ lhs rhs), hooks a Dict (head symbol → list of functions  Env → Term → maybe Term)  that decide what a rule cannot (arithmetic on numbers, canonical forms),
+⍝ names the active theories and fuel the number of rewriting steps allowed at one node.
+⍝ Properties of a symbol come from its declaration (lib/parse.imo): A associative (nested applications are flattened), C commutative (the arguments are sorted),
+⍝ I idempotent (equal arguments are merged; only with C).  A rule  f(l₁…lₖ) ⟹ r  on an A or AC symbol applies to  f(l₁…lₖ, rest…)  and gives  f(r, rest…).
+Env ∶ 𝒦
+mkenv ∶ Sig → Dict (𝔏 α) → Dict (𝔏 β) → 𝔏 𝕊 → ℕ → Env
+mkenv ξ η ζ ω ν ≔ (⊗ ξ (⊗ η (⊗ ζ (⊗ ω ν))))
+esig ∶ Env → Sig
+esig ξ ≔ (◀ ξ)
+erules ∶ Env → Dict (𝔏 α)
+erules ξ ≔ (◀ (▶ ξ))
+ehooks ∶ Env → Dict (𝔏 α)
+ehooks ξ ≔ (◀ (▶ (▶ ξ)))
+enames ∶ Env → 𝔏 𝕊
+enames ξ ≔ (◀ (▶ (▶ (▶ ξ))))
+efuel ∶ Env → ℕ
+efuel ξ ≔ (▶ (▶ (▶ (▶ ξ))))
+symprops ∶ Env → ℕ → 𝕊      ⍝ the property letters of a symbol (A, C, I)
+symprops ξ η ≔ ((e ↦ ((∅ e) "" (eprops (hd e)))) (sigprint (esig ξ) η))
+hasprop ∶ Env → ℕ → 𝕮 → 𝔹
+hasprop ξ η ζ ≔ (elem ζ (symprops ξ η))
+⍝ ---- the laws of the operators
+acnorm ∶ Env → Term → Term      ⍝ flatten (A), sort (C), merge equal arguments (I); one argument left: that argument
+acnorm ξ η ≔ (η (ζ ↦ η) (ζ ω ↦ ((ν ↦ ((∅ ν) η (acnorm′ ξ ζ ν ω η))) (symprops ξ ζ))) (ζ ↦ η))
+acnorm′ ∶ Env → ℕ → 𝕊 → 𝔏 Term → Term → Term
+acnorm′ ξ η ζ ω ν ≔ ((ο ↦ ((ρ ↦ ((σ ↦ ((∧ (≐ (ℓ σ) 1) (elem 'A' ζ)) (hd σ) (tapp η σ))) ((∧ (elem 'I' ζ) (elem 'C' ζ)) (tnub ρ) ρ))) ((elem 'C' ζ) (tsort ο) ο))) ((elem 'A' ζ) (concatmap (π′ ↦ ((tishead η π′) (targs π′) (∷ π′ ⊘))) ω) ω))
+⍝ ---- matching up to the laws.  rm env pattern term σ: the list of all substitutions that extend σ and make the pattern equal to the term
+rm ∶ Env → Term → Term → Dict Term → 𝔏 (Dict Term)
+rm ξ η ζ ω ≔ (η (ν ↦ ((ο ↦ ((∅ ο) (∷ (dkput (◀ ν) ζ ω) ⊘) ((teq (hd ο) ζ) (∷ ω ⊘) ⊘))) (dkget (◀ ν) ω))) (ν ο ↦ (ζ (ρ ↦ ⊘) (ρ σ ↦ ((≐ ν ρ) ((τ ↦ ((∅ τ) ((≐ (ℓ ο) (ℓ σ)) (rml ξ ο σ ω) ⊘) ((∧ (elem 'A' τ) (elem 'C' τ)) (rmac ξ ο σ ω) ((elem 'C' τ) (rmc ξ ο σ ω) ((≐ (ℓ ο) (ℓ σ)) (rml ξ ο σ ω) ⊘))))) (symprops ξ ν)) ⊘)) (ρ ↦ ⊘))) (ν ↦ (ζ (ο ↦ ⊘) (ο ρ ↦ ⊘) (ο ↦ ((≐ ν ο) (∷ ω ⊘) ⊘)))))
+rml ∶ Env → 𝔏 Term → 𝔏 Term → Dict Term → 𝔏 (Dict Term)
+rml ξ η ζ ω ≔ (η (θ ι ↦ (ζ (κ′ μ ↦ (concatmap (ν ↦ (rml ξ ι μ ν)) (rm ξ θ κ′ ω))) ⊘)) ((∅ ζ) (∷ ω ⊘) ⊘))
+⍝ commutative operator, same number of arguments, any order (AC with nothing left over)
+rmac ∶ Env → 𝔏 Term → 𝔏 Term → Dict Term → 𝔏 (Dict Term)
+rmac ξ η ζ ω ≔ ((≐ (ℓ η) (ℓ ζ)) (⫶ ◀ (filter (ο ↦ (∅ (▶ ο))) (acm ξ (patorder η) ζ ω))) ⊘)
+rmc ∶ Env → 𝔏 Term → 𝔏 Term → Dict Term → 𝔏 (Dict Term)
+rmc ξ η ζ ω ≔ (rmac ξ η ζ ω)
+⍝ the pattern arguments that are not bare variables first (they bind variables for the others)
+patorder ∶ 𝔏 Term → 𝔏 Term
+patorder ξ ≔ (⧺ (filter (η ↦ (¬ (tisvar η))) ξ) (filter tisvar ξ))
+⍝ all the ways to match the pattern arguments to distinct arguments of the term: pairs (σ, the arguments left over)
+acm ∶ Env → 𝔏 Term → 𝔏 Term → Dict Term → 𝔏 (𝔓 (Dict Term) (𝔏 Term))
+acm ξ η ζ ω ≔ (η (θ ι ↦ (concatmap (κ′ ↦ (concatmap (μ ↦ (acm ξ ι (▶ κ′) μ)) (rm ξ θ (◀ κ′) ω))) (picks′ ζ))) (∷ (⊗ ω ζ) ⊘))
+⍝ associative only: the pattern arguments against a run of consecutive arguments: triples (σ, arguments before, arguments after)
+am ∶ Env → 𝔏 Term → 𝔏 Term → Dict Term → 𝔏 (𝔓 (Dict Term) (𝔓 (𝔏 Term) (𝔏 Term)))
+am ξ η ζ ω ≔ ((⩽ (ℓ η) (ℓ ζ)) (⧺ (⫶ (ν ↦ (⊗ ν (⊗ ⊘ (drop (ℓ η) ζ)))) (rml ξ η (take (ℓ η) ζ) ω)) (ζ (θ ι ↦ (⫶ (ν ↦ (⊗ (◀ ν) (⊗ (∷ θ (◀ (▶ ν))) (▶ (▶ ν))))) (am ξ η ι ω))) ⊘)) ⊘)
+⍝ ---- rules.  A rule is (⊗ lhs rhs).  step: one rewriting step at the root of a term, by a hook or by the first rule that applies: a maybe
+firstjust ∶ 𝔏 (𝔏 α) → 𝔏 α
+firstjust ξ ≔ (ξ (η ζ ↦ ((∅ η) (firstjust ζ) η)) ⊘)
+applyrule ∶ Env → α → Term → 𝔏 Term      ⍝ apply one rule (⊗ lhs rhs) at the root of a term: a maybe
+applyrule ξ η ζ ≔ (applyrule′ ξ (◀ η) (▶ η) ζ)
+applyrule′ ∶ Env → Term → Term → Term → 𝔏 Term
+applyrule′ ξ η ζ ω ≔ ((∨ (¬ (tisapp η)) (¬ (≐ (thead η) (thead ω)))) ⊘ (applyrule″ ξ η ζ (thead ω) (targs η) (targs ω) (symprops ξ (thead ω)) ω))
+applyrule″ ∶ Env → Term → Term → ℕ → 𝔏 Term → 𝔏 Term → 𝕊 → Term → 𝔏 Term
+applyrule″ ξ η ζ ω ν ο ρ σ ≔ ((∧ (elem 'A' ρ) (elem 'C' ρ)) (applyac ξ η ζ ω ν ο) ((elem 'A' ρ) (applya ξ η ζ ω ν ο) ((elem 'C' ρ) (applyc ξ η ζ ω ν ο) (applyexact ξ η ζ σ))))
+applyexact ∶ Env → Term → Term → Term → 𝔏 Term
+applyexact ξ η ζ ω ≔ ((m ↦ ((∅ m) ⊘ (∷ (tsubst (hd m) ζ) ⊘))) (tmatch η ω (⊘)))
+applyac ∶ Env → Term → Term → ℕ → 𝔏 Term → 𝔏 Term → 𝔏 Term
+applyac ξ η ζ ω ν ο ≔ ((m ↦ ((∅ m) ⊘ (∷ (acnorm ξ ((∅ (▶ (hd m))) (tsubst (◀ (hd m)) ζ) (tapp ω (∷ (tsubst (◀ (hd m)) ζ) (▶ (hd m)))))) ⊘))) (acm ξ (patorder ν) ο ⊘))
+applyc ∶ Env → Term → Term → ℕ → 𝔏 Term → 𝔏 Term → 𝔏 Term
+applyc ξ η ζ ω ν ο ≔ ((m ↦ ((∅ m) ⊘ (∷ (tsubst (◀ (hd m)) ζ) ⊘))) (filter (ρ ↦ (∅ (▶ ρ))) (acm ξ (patorder ν) ο ⊘)))
+applya ∶ Env → Term → Term → ℕ → 𝔏 Term → 𝔏 Term → 𝔏 Term
+applya ξ η ζ ω ν ο ≔ ((m ↦ ((∅ m) ⊘ (∷ (acnorm ξ (tapp ω (⧺ (◀ (▶ (hd m))) (∷ (tsubst (◀ (hd m)) ζ) (▶ (▶ (hd m))))))) ⊘))) (am ξ ν ο ⊘))
+step ∶ Env → Term → 𝔏 Term
+step ξ η ≔ (η (ζ ↦ ⊘) (ζ ω ↦ (firstjust (⧺ (⫶ (h ↦ (h ξ η)) (dkgetd (◀ ζ) ⊘ (ehooks ξ))) (⫶ (r ↦ (applyrule ξ r η)) (dkgetd (◀ ζ) ⊘ (erules ξ)))))) (ζ ↦ ⊘))
+⍝ ---- the normal form
+nf ∶ Env → ℕ → Term → Term      ⍝ bottom-up: children first, the laws of the operator, then hooks and rules at the root until none applies (at most k steps in a row)
+nf ξ η ζ ≔ (ζ (ω ↦ ζ) (ω ν ↦ ((ο ↦ ((≐ η 0) ο ((ρ ↦ ((∅ ρ) ο (nf ξ (⊟ η 1) (hd ρ)))) (step ξ ο)))) (acnorm ξ (tapp ω (⫶ (nf ξ η) ν))))) (ω ↦ ζ))
+normalize ∶ Env → Term → Term      ⍝ the normal form under the rules of the active theories
+normalize ξ η ≔ (nf ξ (efuel ξ) η)
+⍝ ---- reading rules and building an environment from lines of text
+mkrule ∶ Sig → 𝕊 → 𝔏 α      ⍝ "lhs ==> rhs" as a rule (a maybe)
+mkrule ξ η ≔ ((ps ↦ ((≠ (ℓ ps) 1100) ⊘ ((l ↦ ((r ↦ ((∨ (∅ l) (∅ r)) ⊘ (∷ (⊗ (hd l) (hd r)) ⊘))) (parseterm ξ (nth ps 1)))) (parseterm ξ (hd ps))))) (splitstr " ==> " η))
+addrule ∶ Dict (𝔏 α) → α → Dict (𝔏 α)
+addrule ξ η ≔ (dkwith (θ ι ↦ (⧺ ι θ)) (◀ (thead (◀ η))) (∷ η ⊘) ξ)
+mkrules ∶ Sig → 𝔏 𝕊 → Dict (𝔏 α)      ⍝ the rule index of a list of lines (in order)
+mkrules ξ η ≔ (foldl addrule ⊘ (concatmap (mkrule ξ) η))

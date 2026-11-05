@@ -1,0 +1,2 @@
+-- the byte 0xFF is not UTF-8: every core refuses the file (status 1), none replaces it by U+FFFD
+main in String := "abÿcd"

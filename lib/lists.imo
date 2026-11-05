@@ -1,0 +1,169 @@
+⍝ lib/lists.imo — spec notation — trusted prelude, part 23: lists, more: folds, scans, searching, sorting, combinatorics, combinators
+⍝ Lists are Scott lists: (∷ h t) and ⊘; a list can be consumed as (xs (h t ↦ if-cons) if-nil).  A "maybe" is a list of at most one
+⍝ element (⊘ = nothing, (∷ x ⊘) = just x).  A predicate p is α → 𝔹; an order "le" is α → α → 𝔹 (le a b = a may stay before b).
+⍝ ---- combinators
+ident ∶ α → α      ⍝ the identity function
+ident ξ ≔ ξ
+const ∶ α → β → α      ⍝ const x y = x
+const ξ η ≔ ξ
+flip ∶ (α → β → γ) → β → α → γ      ⍝ flip f x y = f y x
+flip ξ η ζ ≔ (ξ ζ η)
+compose ∶ (β → γ) → (α → β) → α → γ      ⍝ compose f g x = f (g x)
+compose ξ η ζ ≔ (ξ (η ζ))
+curry ∶ (𝔓 α β → γ) → α → β → γ      ⍝ curry f x y = f (pair x y)
+curry ξ η ζ ≔ (ξ (⊗ η ζ))
+uncurry ∶ (α → β → γ) → 𝔓 α β → γ      ⍝ uncurry f p = f (fst p) (snd p)
+uncurry ξ η ≔ (ξ (◀ η) (▶ η))
+swap ∶ 𝔓 α β → 𝔓 β α      ⍝ swap (a, b) = (b, a)
+swap ξ ≔ (⊗ (▶ ξ) (◀ ξ))
+bimap ∶ (α → γ) → (β → δ) → 𝔓 α β → 𝔓 γ δ      ⍝ bimap f g (a, b) = (f a, g b)
+bimap ξ η ζ ≔ (⊗ (ξ (◀ ζ)) (η (▶ ζ)))
+⍝ the first x, f x, f (f x), … for which p holds
+until ∶ (α → 𝔹) → (α → α) → α → α      ⍝ the first of x, f x, f (f x), … for which p holds
+until ξ η ζ ≔ ((ξ ζ) ζ (until ξ η (η ζ)))
+applyn′ ∶ 𝔇 → (α → α) → α → α
+applyn′ ν ξ η ≔ ((∅ᶻ ν) η (applyn′ (⊟ᶻ ν (◀ 1)) ξ (ξ η)))
+applyn ∶ ℕ → (α → α) → α → α      ⍝ applyn n f x = f (f (… x)) with n applications
+applyn ν ξ η ≔ (applyn′ (↓ᶻ ν) ξ η)
+⍝ ---- taking lists apart
+init ∶ 𝔏 α → 𝔏 α      ⍝ all but the last element
+init ξ ≔ (ξ (θ ι ↦ ((∅ ι) ⊘ (∷ θ (init ι)))) ⊘)
+takewhile ∶ (α → 𝔹) → 𝔏 α → 𝔏 α      ⍝ the longest prefix whose elements satisfy p
+takewhile ξ η ≔ (η (θ ι ↦ ((ξ θ) (∷ θ (takewhile ξ ι)) ⊘)) ⊘)
+dropwhile ∶ (α → 𝔹) → 𝔏 α → 𝔏 α      ⍝ the rest after takewhile
+dropwhile ξ η ≔ (η (θ ι ↦ ((ξ θ) (dropwhile ξ ι) η)) ⊘)
+span ∶ (α → 𝔹) → 𝔏 α → 𝔓 (𝔏 α) (𝔏 α)      ⍝ span p xs = (takewhile p xs, dropwhile p xs)
+span ξ η ≔ (⊗ (takewhile ξ η) (dropwhile ξ η))
+partition ∶ (α → 𝔹) → 𝔏 α → 𝔓 (𝔏 α) (𝔏 α)      ⍝ (the elements that satisfy p, the others), each in order
+partition ξ η ≔ (⊗ (filter ξ η) (filter (θ ↦ (¬ (ξ θ))) η))
+splitat′ ∶ 𝔇 → 𝔏 α → 𝔓 (𝔏 α) (𝔏 α)
+splitat′ ν η ≔ ((∅ᶻ ν) (⊗ ⊘ η) (η (θ ι ↦ ((ρ ↦ (⊗ (∷ θ (◀ ρ)) (▶ ρ))) (splitat′ (⊟ᶻ ν (◀ 1)) ι))) (⊗ ⊘ ⊘)))
+splitat ∶ ℕ → 𝔏 α → 𝔓 (𝔏 α) (𝔏 α)      ⍝ splitat n xs = (take n xs, drop n xs), computed in one pass
+splitat ξ η ≔ (splitat′ (↓ᶻ ξ) η)
+tails ∶ 𝔏 α → 𝔏 (𝔏 α)      ⍝ the suffixes: [1,2] → [[1,2],[2],[]]
+tails ξ ≔ (∷ ξ (ξ (θ ι ↦ (tails ι)) ⊘))
+inits ∶ 𝔏 α → 𝔏 (𝔏 α)      ⍝ the prefixes: [1,2] → [[],[1],[1,2]]
+inits ξ ≔ (∷ ⊘ (ξ (θ ι ↦ (⫶ (∷ θ) (inits ι))) ⊘))
+rotate ∶ ℕ → 𝔏 α → 𝔏 α      ⍝ rotate left by n places (n mod length)
+rotate ξ η ≔ ((ν ↦ ((≐ ν 0) η ((κ′ ↦ (⧺ (drop κ′ η) (take κ′ η))) (mod ξ ν)))) (ℓ η))
+⍝ chunks of n elements (the last one may be shorter); n = 0 gives no chunks
+chunks′ ∶ 𝔇 → 𝔏 α → 𝔏 (𝔏 α)
+chunks′ ν ξ ≔ (ξ (θ ι ↦ ((ρ ↦ (∷ (◀ ρ) (chunks′ ν (▶ ρ)))) (splitat′ ν ξ))) ⊘)
+chunks ∶ ℕ → 𝔏 α → 𝔏 (𝔏 α)      ⍝ consecutive pieces of n elements (the last may be shorter); n = 0 gives []
+chunks ξ η ≔ ((∅ᶻ (↓ᶻ ξ)) ⊘ (chunks′ (↓ᶻ ξ) η))
+⍝ the sublists of n consecutive elements
+windows ∶ ℕ → 𝔏 α → 𝔏 (𝔏 α)      ⍝ the sublists of n consecutive elements
+windows ξ η ≔ (filter (θ ↦ (≐ (ℓ θ) ξ)) (⫶ (take ξ) (tails η)))
+⍝ ---- folds, scans, unfolds
+foldl₁ ∶ (α → α → α) → 𝔏 α → α      ⍝ foldl without a start value (⊥ for the empty list)
+foldl₁ ξ η ≔ (η (θ ι ↦ (foldl ξ θ ι)) ⊥)
+foldr₁ ∶ (α → α → α) → 𝔏 α → α      ⍝ foldr without a start value (⊥ for the empty list)
+foldr₁ ξ η ≔ (η (θ ι ↦ ((∅ ι) θ (ξ θ (foldr₁ ξ ι)))) ⊥)
+scanl ∶ (β → α → β) → β → 𝔏 α → 𝔏 β      ⍝ the running folds from the left: scanl f z [a,b] = [z, f z a, f (f z a) b]
+scanl ξ ζ η ≔ (∷ ζ (η (θ ι ↦ (scanl ξ (ξ ζ θ) ι)) ⊘))
+scanl₁ ∶ (α → α → α) → 𝔏 α → 𝔏 α      ⍝ scanl without a start value
+scanl₁ ξ η ≔ (η (θ ι ↦ (scanl ξ θ ι)) ⊘)
+scanr ∶ (α → β → β) → β → 𝔏 α → 𝔏 β      ⍝ the running folds from the right
+scanr ξ ζ η ≔ (η (θ ι ↦ ((ρ ↦ (∷ (ξ θ (hd ρ)) ρ)) (scanr ξ ζ ι))) (∷ ζ ⊘))
+unfoldr ∶ (β → 𝔏 (𝔓 α β)) → β → 𝔏 α      ⍝ unfoldr f s: f s is [] (stop) or [pair(x, s′)] (emit x, go on from s′)
+unfoldr ξ η ≔ ((ξ η) (θ ι ↦ (∷ (◀ θ) (unfoldr ξ (▶ θ)))) ⊘)
+concatmap ∶ (α → 𝔏 β) → 𝔏 α → 𝔏 β      ⍝ map then concatenate
+concatmap ξ η ≔ (foldr (θ ι ↦ (⧺ (ξ θ) ι)) ⊘ η)
+intersperse ∶ α → 𝔏 α → 𝔏 α      ⍝ put x between the elements
+intersperse ξ η ≔ (η (θ ι ↦ (∷ θ ((∅ ι) ⊘ (∷ ξ (intersperse ξ ι))))) ⊘)
+intercalate ∶ 𝔏 α → 𝔏 (𝔏 α) → 𝔏 α      ⍝ join lists with a separator list
+intercalate ξ η ≔ (concat (intersperse ξ η))
+count ∶ (α → 𝔹) → 𝔏 α → ℕ      ⍝ the number of elements that satisfy p
+count ξ η ≔ (ℓ (filter ξ η))
+⍝ ---- zipping
+zipwith3 ∶ (α → β → γ → δ) → 𝔏 α → 𝔏 β → 𝔏 γ → 𝔏 δ      ⍝ zipwith with three lists
+zipwith3 ξ η ζ θ ≔ (η (ι κ′ ↦ (ζ (μ ν ↦ (θ (ο ρ ↦ (∷ (ξ ι μ ο) (zipwith3 ξ κ′ ν ρ))) ⊘)) ⊘)) ⊘)
+zip3 ∶ 𝔏 α → 𝔏 β → 𝔏 γ → 𝔏 (𝔓 α (𝔓 β γ))      ⍝ zip with three lists: pair(a, pair(b, c))
+zip3 ≔ (zipwith3 (ξ η ζ ↦ (⊗ ξ (⊗ η ζ))))
+unzip ∶ 𝔏 (𝔓 α β) → 𝔓 (𝔏 α) (𝔏 β)      ⍝ a list of pairs as a pair of lists
+unzip ξ ≔ (⊗ (⫶ ◀ ξ) (⫶ ▶ ξ))
+heads′ ∶ 𝔏 (𝔏 α) → 𝔏 α
+heads′ ξ ≔ (ξ (θ ι ↦ (θ (κ′ μ ↦ (∷ κ′ (heads′ ι))) (heads′ ι))) ⊘)
+tails′ ∶ 𝔏 (𝔏 α) → 𝔏 (𝔏 α)
+tails′ ξ ≔ (ξ (θ ι ↦ (θ (κ′ μ ↦ (∷ μ (tails′ ι))) (tails′ ι))) ⊘)
+⍝ the transposed lists of rows; rows may have different lengths (a short row is skipped), as in Haskell
+transposel ∶ 𝔏 (𝔏 α) → 𝔏 (𝔏 α)      ⍝ the transposed rows, rows may differ in length (as in Haskell)
+transposel ξ ≔ ((θ ↦ ((∅ θ) ⊘ (∷ θ (transposel (tails′ ξ))))) (heads′ ξ))
+cartesian ∶ 𝔏 α → 𝔏 β → 𝔏 (𝔓 α β)      ⍝ all pairs (a, b), a from the first list, in order
+cartesian ξ η ≔ (concatmap (θ ↦ (⫶ (ι ↦ (⊗ θ ι)) η)) ξ)
+⍝ ---- searching, with an equality given
+lookupby ∶ (α → α → 𝔹) → α → 𝔏 (𝔓 α β) → 𝔏 β      ⍝ the value of the first pair whose key is equal (the given equality) to x, as a list of at most one element
+lookupby ε ξ η ≔ (η (θ ι ↦ ((ε ξ (◀ θ)) (∷ (▶ θ) ⊘) (lookupby ε ξ ι))) ⊘)
+lookup ∶ ℚ[i] → 𝔏 (𝔓 ℚ[i] β) → 𝔏 β      ⍝ lookup with ≐: the value for the key x as a list of at most one element
+lookup ≔ (lookupby ≐)
+elemby ∶ (α → α → 𝔹) → α → 𝔏 α → 𝔹      ⍝ membership with a given equality
+elemby ε ξ η ≔ (∃ₗ (θ ↦ (ε ξ θ)) η)
+findindex′ ∶ (α → 𝔹) → 𝔏 α → ℕ → 𝔏 ℕ
+findindex′ ξ η ν ≔ (η (θ ι ↦ ((ξ θ) (∷ ν ⊘) (findindex′ ξ ι (⊞ ν 1)))) ⊘)
+findindex ∶ (α → 𝔹) → 𝔏 α → 𝔏 ℕ      ⍝ the index of the first element that satisfies p, as a list of at most one element
+findindex ξ η ≔ (findindex′ ξ η 0)
+find ∶ (α → 𝔹) → 𝔏 α → 𝔏 α      ⍝ the first element that satisfies p, as a list of at most one element
+find ξ η ≔ (η (θ ι ↦ ((ξ θ) (∷ θ ⊘) (find ξ ι))) ⊘)
+nubby ∶ (α → α → 𝔹) → 𝔏 α → 𝔏 α      ⍝ drop repeated elements (the given equality), keeping the first of each
+nubby ε ξ ≔ (ξ (θ ι ↦ (∷ θ (nubby ε (filter (κ′ ↦ (¬ (ε θ κ′))) ι)))) ⊘)
+deleteby ∶ (α → α → 𝔹) → α → 𝔏 α → 𝔏 α      ⍝ delete the first element equal to x
+deleteby ε ξ η ≔ (η (θ ι ↦ ((ε ξ θ) ι (∷ θ (deleteby ε ξ ι)))) ⊘)
+unionby ∶ (α → α → 𝔹) → 𝔏 α → 𝔏 α → 𝔏 α      ⍝ the first list, then what is new in the second
+unionby ε ξ η ≔ (⧺ ξ (filter (θ ↦ (¬ (elemby ε θ ξ))) (nubby ε η)))
+intersectby ∶ (α → α → 𝔹) → 𝔏 α → 𝔏 α → 𝔏 α      ⍝ the elements of the first list that occur in the second
+intersectby ε ξ η ≔ (filter (θ ↦ (elemby ε θ η)) ξ)
+diffby ∶ (α → α → 𝔹) → 𝔏 α → 𝔏 α → 𝔏 α      ⍝ the elements of the first list that do not occur in the second
+diffby ε ξ η ≔ (filter (θ ↦ (¬ (elemby ε θ η))) ξ)
+groupby ∶ (α → α → 𝔹) → 𝔏 α → 𝔏 (𝔏 α)      ⍝ group adjacent elements that are equal to the first of the group
+groupby ε ξ ≔ (ξ (θ ι ↦ ((ρ ↦ (∷ (∷ θ (◀ ρ)) (groupby ε (▶ ρ)))) (span (κ′ ↦ (ε θ κ′)) ι))) ⊘)
+isprefixby ∶ (α → α → 𝔹) → 𝔏 α → 𝔏 α → 𝔹      ⍝ is the first list a prefix of the second (the given equality)
+isprefixby ε ξ η ≔ (ξ (θ ι ↦ (η (κ′ μ ↦ (∧ (ε θ κ′) (isprefixby ε ι μ))) ⊥)) ⊤)
+issuffixby ∶ (α → α → 𝔹) → 𝔏 α → 𝔏 α → 𝔹      ⍝ is the first list a suffix of the second
+issuffixby ε ξ η ≔ (isprefixby ε (reverse ξ) (reverse η))
+isinfixby ∶ (α → α → 𝔹) → 𝔏 α → 𝔏 α → 𝔹      ⍝ is the first list a sublist (contiguous) of the second
+isinfixby ε ξ η ≔ (∃ₗ (θ ↦ (isprefixby ε ξ θ)) (tails η))
+⍝ ---- ordering: merge sort on any order, stable
+mergeby ∶ (α → α → 𝔹) → 𝔏 α → 𝔏 α → 𝔏 α      ⍝ merge two lists that are sorted by le (stable)
+mergeby ξ η ζ ≔ (η (θ ι ↦ (ζ (κ′ μ ↦ ((ξ θ κ′) (∷ θ (mergeby ξ ι ζ)) (∷ κ′ (mergeby ξ η μ)))) η)) ζ)
+sortby ∶ (α → α → 𝔹) → 𝔏 α → 𝔏 α      ⍝ stable merge sort for any order le (le a b: a may stay before b)
+sortby ξ η ≔ ((ν ↦ ((⩽ ν 1) η ((ρ ↦ (mergeby ξ (sortby ξ (◀ ρ)) (sortby ξ (▶ ρ)))) (splitat (div ν 1100) η)))) (ℓ η))
+insertby ∶ (α → α → 𝔹) → α → 𝔏 α → 𝔏 α      ⍝ insert into a list that is sorted by le
+insertby ξ η ζ ≔ (mergeby ξ (∷ η ⊘) ζ)
+maximumby ∶ (α → α → 𝔹) → 𝔏 α → α      ⍝ the greatest element for the order le (the last of equal ones)
+maximumby ξ η ≔ (foldl₁ (θ ι ↦ ((ξ θ ι) ι θ)) η)
+minimumby ∶ (α → α → 𝔹) → 𝔏 α → α      ⍝ the least element for the order le (the first of equal ones)
+minimumby ξ η ≔ (foldl₁ (θ ι ↦ ((ξ θ ι) θ ι)) η)
+maximum ∶ 𝔏 ℕ → ℕ      ⍝ the greatest element of a list of real numbers
+maximum ∶ 𝔏 ℤ → ℤ
+maximum ∶ 𝔏 ℚ → ℚ
+maximum ≔ (maximumby ⩽)
+minimum ∶ 𝔏 ℕ → ℕ      ⍝ the least element of a list of real numbers
+minimum ∶ 𝔏 ℤ → ℤ
+minimum ∶ 𝔏 ℚ → ℚ
+minimum ≔ (minimumby ⩽)
+⍝ ---- combinatorics on lists
+subsequences′ ∶ 𝔏 α → 𝔏 (𝔏 α)
+subsequences′ ξ ≔ (ξ (θ ι ↦ (∷ (∷ θ ⊘) (foldr (κ′ ρ ↦ (∷ κ′ (∷ (∷ θ κ′) ρ))) ⊘ (subsequences′ ι)))) ⊘)
+subsequences ∶ 𝔏 α → 𝔏 (𝔏 α)      ⍝ all 2ⁿ sublists (not necessarily contiguous): [1,2] → [[],[1],[2],[1,2]]
+subsequences ξ ≔ (∷ ⊘ (subsequences′ ξ))
+picks′ ∶ 𝔏 α → 𝔏 (𝔓 α (𝔏 α))
+picks′ ξ ≔ (ξ (θ ι ↦ (∷ (⊗ θ ι) (⫶ (ρ ↦ (⊗ (◀ ρ) (∷ θ (▶ ρ)))) (picks′ ι)))) ⊘)
+permutations ∶ 𝔏 α → 𝔏 (𝔏 α)      ⍝ all n! orderings, in the order of first choice: [1,2,3] → [[1,2,3],[1,3,2],[2,1,3],…]
+permutations ξ ≔ ((∅ ξ) (∷ ⊘ ⊘) (concatmap (θ ↦ (⫶ (∷ (◀ θ)) (permutations (▶ θ)))) (picks′ ξ)))
+combinations′ ∶ 𝔇 → 𝔏 α → 𝔏 (𝔏 α)
+combinations′ ν ξ ≔ ((∅ᶻ ν) (∷ ⊘ ⊘) (ξ (θ ι ↦ (⧺ (⫶ (∷ θ) (combinations′ (⊟ᶻ ν (◀ 1)) ι)) (combinations′ ν ι))) ⊘))
+combinations ∶ ℕ → 𝔏 α → 𝔏 (𝔏 α)      ⍝ the k-element sublists in order: combinations 2 [1,2,3] = [[1,2],[1,3],[2,3]]
+combinations ξ η ≔ (combinations′ (↓ᶻ ξ) η)
+⍝ an endless list: the elements again and again (the empty list stays empty)
+cycle ∶ 𝔏 α → 𝔖 α      ⍝ the list repeated endlessly (a stream); the empty list stays empty
+cycle ξ ≔ ((∅ ξ) ⊘ (⧺ ξ (cycle ξ)))
+⍝ ---- lists of numbers
+sumsq ∶ 𝔏 ℚ[i] → ℚ[i]      ⍝ the sum of squares
+sumsq ξ ≔ (foldl (η θ ↦ (⊞ η (⊠ θ θ))) 0 ξ)
+dotl ∶ 𝔏 ℚ[i] → 𝔏 ℚ[i] → ℚ[i]      ⍝ the dot product of two lists of numbers (the shorter one decides the length)
+dotl ξ η ≔ (sumof (⫴ ⊠ ξ η))
+mean ∶ 𝔏 ℚ[i] → ℚ[i]      ⍝ the arithmetic mean (0 for the empty list)
+mean ξ ≔ (÷ (sumof ξ) (ℓ ξ))
+⍝ ---- the elements of a list, counted:  [(x, number of times x occurs)] in increasing order of x
+tally ∶ 𝔏 ℚ → 𝔏 (𝔓 ℚ ℕ)      ⍝ [(x, how many times x occurs)] in increasing order of x
+tally ξ ≔ (⫶ (θ ↦ (⊗ (hd θ) (ℓ θ))) (groupby ≐ (sortby ⩽ ξ)))
