@@ -14,6 +14,7 @@
 -- Nothing is decided here: this is a spelling of terms as numbers, like the reader's expansion of numerals.
 module I1.Quote (Quoter, QS(..), envName, mkQuoter, hasQuote, quoteReplace, quoteTable) where
 
+import Control.Monad (foldM, when)
 import Control.Monad.State.Strict
 import Data.List (elemIndex, sortOn)
 import qualified Data.Map.Strict as M

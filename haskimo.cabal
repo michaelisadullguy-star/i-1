@@ -42,4 +42,4 @@ executable haskimo
     directory,
     filepath
   default-language: Haskell2010
-  ghc-options:      -O1 -rtsopts "-with-rtsopts=-K2g -A128m"
+  ghc-options:      -O1 -w -rtsopts "-with-rtsopts=-K2g -A128m"

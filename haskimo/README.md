@@ -9,7 +9,7 @@ checks and evaluates i-1 programs each time it runs, and compiles none of them. 
 
 ## Build
 
-Needs GHC 9.x and its boot libraries only (`base`, `containers`, `mtl`, `template-haskell`, `directory`).  Nothing from Hackage.
+Needs GHC 9.x and its boot libraries only (`base`, `containers`, `mtl`, `template-haskell`, `directory`).  Nothing from Hackage.  Built and tested with GHC 9.4.7 (mtl 2.2) and 9.10.3 (mtl 2.3, which no longer re-exports `Control.Monad` from `Control.Monad.State`: every module imports what it uses).
 
 ```sh
 ./haskimo/build.sh                 # plain ghc, from the repository root          -> build/haskimo
