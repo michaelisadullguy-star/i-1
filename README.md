@@ -3728,6 +3728,28 @@ The diagram names the modules of Pymo; Haskimo and Rustimo have the same stages 
 
 ### 16.2 Files
 
+Lines are counted when this README is assembled (`pymo/mkreadme.py`), over every file of the repository that git tracks or has not been told to ignore; `README.md` itself, which is assembled from `readme/part1.md` … `part8.md`, is not counted.  A file column with braces or a star names a *bundle*: its files are counted together and not listed one by one.
+
+**By area**
+
+| area | files | lines |
+|:--|--:|--:|
+| Pymo (Python) | 20 | 3730 |
+| library (`lib/`, `libsrc/`) | 66 | 13652 |
+| Haskimo (Haskell) | 16 | 3322 |
+| Rustimo (Rust) | 19 | 6817 |
+| Compimo, the compiler (Rust and C) | 11 | 3267 |
+| OCamimo (OCaml) | 13 | 4224 |
+| Schimo (Racket) | 12 | 3340 |
+| Cimo (C) | 13 | 4488 |
+| Rimo (R) | 11 | 2778 |
+| tests | 4095 | 59825 |
+| documentation and examples (`docs/`, `readme/`, `examples/`) | 68 | 10429 |
+| top level (dispatcher, installer, Makefile, licence) | 7 | 642 |
+| **total** | **4351** | **116514** |
+
+**By file, and by bundle of files**
+
 | file | lines | role |
 |:--|--:|:--|
 | `pymo/imo_core.py` | 359 | lazy call-by-need evaluator (terms compiled to Python), numeral reader, value decoders |
@@ -3747,7 +3769,9 @@ The diagram names the modules of Pymo; Haskimo and Rustimo have the same stages 
 | `pymo/mkprove.py` | 34 | writes the doc 1 codes the prover of lib/prove.imo dispatches on into that file |
 | `pymo/mkbin.py` | 38 | regenerates the all-binary prelude and example .bin.imo / .sbl files |
 | `pymo/mkref.py` | 136 | regenerates the reference tables |
-| `pymo/mkreadme.py` | 472 | assembles this README |
+| `pymo/mkreadme.py` | 571 | assembles this README |
+| `pymo/mkconformance.py` | 184 | writes the library sweep of the conformance suite and its list of cases |
+| `pymo/setauthor.py` | 26 | puts the author's name and email into LICENSE, COMMERCIAL.md, haskimo.cabal and the README sources |
 | `lib/logic.imo` | 74 | prelude 1: classes, facts, Booleans, pairs, lists, text |
 | `lib/number.imo` | 128 | prelude 2: ℤ[i] digit arithmetic, ℚ[i] with total division, sign automaton, order |
 | `lib/algebra.imo` | 93 | prelude 3: algebras, lazy ℝ[i], series, Cayley–Dickson tower, function spaces |
@@ -3770,7 +3794,60 @@ The diagram names the modules of Pymo; Haskimo and Rustimo have the same stages 
 | `lib/solve.imo` | 515 | prelude 21: simplify′ — the engine that finds the simplest form |
 | `lib/codec.imo` | 61 | prelude 22: types as decoding keys — pairs of integers as a + b·i, strings as numbers, pairs of strings |
 | `lib/prelude.bin.imo` | 5463 | the whole prelude in binary notation (generated) |
-| `tests/harness.py` | 121 | shared helpers of the suites; --core pymo|haskimo|rustimo chooses the core under test |
+| `lib/MANIFEST` | 50 | the prelude files in loading order (every core reads it) |
+| `lib/{lists,strings,dict}.imo` (3 files) | 556 | prelude 23–25: lists, characters and strings, containers (tries over the base i−1 digits) |
+| `lib/{term,parse,rewrite,boolalg}.imo` (4 files) | 340 | prelude 26–29: terms, parser and printer, rewriting, Boolean algebra by decision diagrams |
+| `lib/{theory,theories,polynf,fm,intuit}.imo` (5 files) | 445 | prelude 30–34: the theory engine: packages of axioms, polynomial normal forms, Fourier–Motzkin, intuitionistic logic |
+| `lib/th_{algebra,found,prob}.imo` (3 files) | 206 | prelude 35–37: packages: groups, lattices, sets; ZFC and ETCS; Kolmogorov |
+| `lib/{calendar,combin,encode,geom,graph,prng,psd,regex,stats,th_geom,th_piece,th_topo}.imo` (12 files) | 832 | generated from libsrc/*.hum.imo: calendar, combinatorics, encodings, plane geometry, graphs, pseudo-random numbers, the sign of a quadratic polynomial, regular expressions, statistics, the geometry, piecewise and topology packages |
+| `libsrc/*.hum.imo` (12 files) | 452 | the sources of those files, in the human notation |
+| `libsrc/{build.sh,gen/*}` (4 files) | 200 | libsrc/build.sh translates them to lib/*.imo; gen/ writes the geometry and topology packages |
+| `haskimo/build.sh` | 4 | builds Haskimo, build/haskimo, with plain ghc |
+| `haskimo.cabal` | 45 | cabal package of Haskimo |
+| `haskimo/app/Main.hs` | 246 | Haskell: the command line (run, check, translate, eval, text) |
+| `haskimo/src/I1/Base.hs` | 186 | Haskell: digit arithmetic of base i−1, Python-compatible repr and %g |
+| `haskimo/src/I1/Syntax.hs` | 333 | Haskell: spec lexer and parser, class terms, pretty-printers, erasure |
+| `haskimo/src/I1/Layers.hs` | 212 | Haskell: binary lexer, doc 1, spec ↔ bin translation, file sections |
+| `haskimo/src/I1/Hum.hs` | 367 | Haskell: doc 2, human lexer and Pratt parser |
+| `haskimo/src/I1/Types.hs` | 570 | Haskell: the class checker |
+| `haskimo/src/I1/Quote.hs` | 204 | Haskell: quotation of statements as numeric codes |
+| `haskimo/src/I1/Core.hs` | 182 | Haskell: the lazy evaluator and the value decoders |
+| `haskimo/src/I1/Program.hs` | 254 | Haskell: loader / driver |
+| `haskimo/src/I1/Output.hs` | 450 | Haskell: the printer, the Speller, main and the output notations |
+| `haskimo/src/I1/Serve.hs` | 139 | Haskell: haskimo serve, a loaded program as a service for the shared test suite |
+| `haskimo/src/I1/EmbedTH.hs` | 44 | Haskell: compile-time embedding of lib/*.imo and the two docs |
+| `haskimo/src/I1/Data.hs` | 15 | Haskell: the embedded system files |
+| `haskimo/README.md` | 71 | Haskimo: build, modules and differences |
+| `rustimo/build.sh` | 4 | builds Rustimo, build/rustimo, with plain cargo (no crates) |
+| `rustimo/Cargo.toml` | 26 | cargo package of Rustimo (no dependencies) |
+| `rustimo/src/main.rs` | 410 | Rust: the command line (run, check, translate, eval, text, serve) |
+| `rustimo/src/base.rs` | 270 | Rust: digit arithmetic of base i−1, Python-compatible repr and %g |
+| `rustimo/src/bigint.rs` | 501 | Rust: big integers and rationals for the host side (no crates) |
+| `rustimo/src/syntax.rs` | 688 | Rust: spec lexer and parser, class terms, pretty-printers, erasure |
+| `rustimo/src/layers.rs` | 341 | Rust: binary lexer, doc 1, spec ↔ bin translation, file sections |
+| `rustimo/src/hum.rs` | 630 | Rust: doc 2, human lexer and Pratt parser |
+| `rustimo/src/types.rs` | 1033 | Rust: the class checker |
+| `rustimo/src/quote.rs` | 308 | Rust: quotation of statements as numeric codes |
+| `rustimo/src/core.rs` | 1083 | Rust: the lazy evaluator (flat closures, explicit stack, update frames) and the value decoders |
+| `rustimo/src/program.rs` | 478 | Rust: loader / driver |
+| `rustimo/src/output.rs` | 631 | Rust: the printer, the Speller, main and the output notations |
+| `rustimo/src/serve.rs` | 190 | Rust: rustimo serve, a loaded program as a service for the shared test suite |
+| `rustimo/src/data.rs` | 10 | Rust: the embedded system files |
+| `rustimo/src/alloc.rs` | 88 | Rust: a small-block allocator for the evaluator |
+| `rustimo/{README.md,build.rs,Cargo.lock}` (3 files) | 126 | Rustimo: notes, the script that embeds the prelude, the lock file |
+| `compimo/src/main.rs` | 403 | Compimo: the command line (the commands of the other cores, prelude, selftest) |
+| `compimo/src/core.rs` | 529 | Compimo: the machine: translation, the C compiler, loading, the interface of the printer |
+| `compimo/src/gen.rs` | 1061 | Compimo: de Bruijn terms to C: constructors, pattern matches, inlining, natives |
+| `compimo/src/selftest.rs` | 145 | Compimo: the native arithmetic against the definitions |
+| `compimo/rt/imo_rt.c` | 525 | Compimo (C): the run-time system: objects, laziness, application, packed digit strings, natives |
+| `compimo/rt/imo_rt.h` | 79 | Compimo (C): the header of the run-time system |
+| `compimo/src/program.rs` | 473 | Compimo: loader / driver |
+| `compimo/{build.rs,build.sh,Cargo.toml,Cargo.lock}` (4 files) | 52 | Compimo: the build files |
+| `ocamimo/**` (13 files) | 4224 | OCamimo, the OCaml interpreter: base, bigint, syntax, layers, hum, types, quote, core, program, output, main; build scripts |
+| `schimo/**` (12 files) | 3340 | Schimo, the Racket interpreter: the same modules without bigint; build scripts |
+| `cimo/**` (13 files) | 4488 | Cimo, the C interpreter: one file per module, util.c holds the big integers and the digits; build scripts |
+| `rimo/**` (11 files) | 2778 | Rimo, the R interpreter: one file per module, the package gmp for the exact numbers; build script |
+| `tests/harness.py` | 121 | shared helpers of the suites; --core NAME chooses the core under test |
 | `tests/core_serve.py` | 243 | Haskimo and Rustimo as cores of the shared suites: haskimo serve / rustimo serve behind the API of the harness |
 | `tests/run_suites.py` | 74 | runs every suite on every core it supports |
 | `tests/test_layers.py` | 229 | notations, docs, checker, Char/String, order, quantifiers, analysis |
@@ -3799,48 +3876,28 @@ The diagram names the modules of Pymo; Haskimo and Rustimo have the same stages 
 | `tests/test_readme.py` | 130 | checks the numbers and messages written by hand in the README |
 | `tests/refmath.py` | 52 | independent Python reference for ℚ[i] and the Cayley–Dickson tower |
 | `tests/conformance/run.py` | 210 | the interpreter-neutral test: the same command lines on Pymo, Haskimo and Rustimo, compared byte for byte |
-| `pymo/mkconformance.py` | 184 | writes the library sweep of the conformance suite and its list of cases |
-| `i1` | 228 | dispatcher: runs Pymo, Haskimo or Rustimo (--impl pymo|haskimo|rustimo|all) |
+| `tests/test_theory.py` | 756 | the theories: packages of axioms, verdicts and simplest forms |
+| `tests/test_{calendar,combin,encode,geom,graph,prng,regex,stats}.py` (8 files) | 881 | the small libraries against Python oracles (datetime, math, base64, zlib, fractions, re, statistics) |
+| `tests/{run_imo.sh,conformance/run.sh,conformance/run_case.sh}` (3 files) | 82 | shell runners of the self-checking programs and of the conformance cases: no Python |
+| `tests/conformance/{cases.txt,expected.json}` (2 files) | 11138 | the conformance cases, and the output on which all the cores agree |
+| `tests/imo/full/*` (72 files) | 20210 | self-checking .imo programs, the full set (written by the Python suites with LANGTEST_EMIT) |
+| `tests/imo/small/*` (33 files) | 8266 | self-checking .imo programs, the sample for the slow cores (Pymo, Rimo) |
+| `tests/conformance/programs/**` (1483 files) | 2445 | programs of the conformance cases: the examples, recorded sessions and the library sweep (generated) |
+| `tests/conformance/expected/**` (2418 files) | 5993 | the expected standard output (.out) and exit status (.rc) of every case |
+| `tests/logs/*` (46 files) | 3141 | the output of the last run of the Python suites on each core (quoted in §16.3) |
+| `docs/doc1.sbl` | 2917 | doc 1: spec symbol := bin symbol (append-only; generated by pymo/mkdoc1.py) |
+| `docs/doc2.sbl` | 1073 | doc 2: human symbol := spec / bin symbol(s) ; role |
+| `docs/{authoring,axioms,predicates,prove}.md` (4 files) | 658 | guides and designs: writing prelude code, the audit of the axioms of ℚ[i], predicates, the prover |
+| `docs/{compimo,cimo,ocamimo,schimo,rimo}.md` (5 files) | 278 | one page for the compiler and for each of the other cores |
+| `docs/lib-*.md` (23 files) | 1599 | reference pages of the library modules |
+| `docs/*.generated.md` (2 files) | 2295 | the reference tables, and doc 2 as a table (generated) |
+| `examples/*` (24 files) | 144 | example programs, one notation per file |
+| `readme/*` (8 files) | 1465 | the hand-written parts from which this README is assembled |
+| `i1` | 228 | dispatcher: runs any core by name (--impl pymo\|haskimo\|rustimo\|compimo\|ocamimo\|schimo\|cimo\|rimo); auto, both and all use Pymo, Haskimo and Rustimo |
 | `install.sh` | 166 | installer: any of Pymo, Haskimo and Rustimo (i1, pymo, haskimo, rustimo) |
-| `haskimo/build.sh` | 3 | builds Haskimo, build/haskimo, with plain ghc |
-| `rustimo/build.sh` | 4 | builds Rustimo, build/rustimo, with plain cargo (no crates) |
-| `Makefile` | 74 | make (build Haskell and Rust), install, test, conformance |
-| `haskimo.cabal` | 45 | cabal package of Haskimo |
-| `haskimo/app/Main.hs` | 246 | Haskell: the command line (run, check, translate, eval, text) |
-| `haskimo/src/I1/Base.hs` | 186 | Haskell: digit arithmetic of base i−1, Python-compatible repr and %g |
-| `haskimo/src/I1/Syntax.hs` | 333 | Haskell: spec lexer and parser, class terms, pretty-printers, erasure |
-| `haskimo/src/I1/Layers.hs` | 212 | Haskell: binary lexer, doc 1, spec ↔ bin translation, file sections |
-| `haskimo/src/I1/Hum.hs` | 367 | Haskell: doc 2, human lexer and Pratt parser |
-| `haskimo/src/I1/Types.hs` | 570 | Haskell: the class checker |
-| `haskimo/src/I1/Quote.hs` | 203 | Haskell: quotation of statements as numeric codes |
-| `haskimo/src/I1/Core.hs` | 182 | Haskell: the lazy evaluator and the value decoders |
-| `haskimo/src/I1/Program.hs` | 254 | Haskell: loader / driver |
-| `haskimo/src/I1/Output.hs` | 450 | Haskell: the printer, the Speller, main and the output notations |
-| `haskimo/src/I1/Serve.hs` | 139 | Haskell: haskimo serve, a loaded program as a service for the shared test suite |
-| `haskimo/src/I1/EmbedTH.hs` | 44 | Haskell: compile-time embedding of lib/*.imo and the two docs |
-| `haskimo/src/I1/Data.hs` | 15 | Haskell: the embedded system files |
-| `rustimo/Cargo.toml` | 26 | cargo package of Rustimo (no dependencies) |
-| `rustimo/src/main.rs` | 410 | Rust: the command line (run, check, translate, eval, text, serve) |
-| `rustimo/src/base.rs` | 270 | Rust: digit arithmetic of base i−1, Python-compatible repr and %g |
-| `rustimo/src/bigint.rs` | 501 | Rust: big integers and rationals for the host side (no crates) |
-| `rustimo/src/syntax.rs` | 688 | Rust: spec lexer and parser, class terms, pretty-printers, erasure |
-| `rustimo/src/layers.rs` | 341 | Rust: binary lexer, doc 1, spec ↔ bin translation, file sections |
-| `rustimo/src/hum.rs` | 630 | Rust: doc 2, human lexer and Pratt parser |
-| `rustimo/src/types.rs` | 1033 | Rust: the class checker |
-| `rustimo/src/quote.rs` | 308 | Rust: quotation of statements as numeric codes |
-| `rustimo/src/core.rs` | 1083 | Rust: the lazy evaluator (flat closures, explicit stack, update frames) and the value decoders |
-| `rustimo/src/program.rs` | 478 | Rust: loader / driver |
-| `rustimo/src/output.rs` | 631 | Rust: the printer, the Speller, main and the output notations |
-| `rustimo/src/serve.rs` | 190 | Rust: rustimo serve, a loaded program as a service for the shared test suite |
-| `rustimo/src/data.rs` | 10 | Rust: the embedded system files |
-| `rustimo/src/alloc.rs` | 88 | Rust: a small-block allocator for the evaluator |
-| `compimo/src/main.rs` | 403 | Compimo: the command line (the commands of the other cores, prelude, selftest) |
-| `compimo/src/core.rs` | 529 | Compimo: the machine: translation, the C compiler, loading, the interface of the printer |
-| `compimo/src/gen.rs` | 1061 | Compimo: de Bruijn terms to C: constructors, pattern matches, inlining, natives |
-| `compimo/src/selftest.rs` | 145 | Compimo: the native arithmetic against the definitions |
-| `compimo/rt/imo_rt.c` | 525 | Compimo (C): the run-time system: objects, laziness, application, packed digit strings, natives |
-| `compimo/rt/imo_rt.h` | 79 | Compimo (C): the header of the run-time system |
-| **total** | **34239** | |
+| `Makefile` | 74 | make: build the cores and the compiler, install, test, conformance |
+| `{LICENSE,COMMERCIAL.md,.gitattributes,.gitignore}` (4 files) | 174 | the licence, how to get a commercial licence, git settings |
+| **total** | **116514** | |
 
 ### 16.3 Test-suites
 

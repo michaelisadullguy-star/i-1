@@ -22,6 +22,8 @@ The diagram names the modules of Pymo; Haskimo and Rustimo have the same stages 
 
 ### 16.2 Files
 
+Lines are counted when this README is assembled (`pymo/mkreadme.py`), over every file of the repository that git tracks or has not been told to ignore; `README.md` itself, which is assembled from `readme/part1.md` … `part8.md`, is not counted.  A file column with braces or a star names a *bundle*: its files are counted together and not listed one by one.
+
 {{LOC}}
 
 ### 16.3 Test-suites
